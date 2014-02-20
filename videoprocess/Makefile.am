@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (c) 2014 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -7,11 +7,11 @@
 # distribute, sub license, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice (including the
 # next paragraph) shall be included in all copies or substantial portions
 # of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -20,30 +20,22 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
+bin_PROGRAMS = vavpp
 
-AUTOMAKE_OPTIONS = foreign
+AM_CPPFLAGS = \
+	$(LIBVA_CFLAGS)				\
+	-I$(top_srcdir)/common			\
+	$(NULL)
 
-SUBDIRS = common decode encode vainfo videoprocess
+TEST_LIBS = \
+	$(LIBVA_LIBS)				\
+	$(top_builddir)/common/libva-display.la	\
+	$(NULL)
 
-if USE_X11
-SUBDIRS += putsurface
-else
-if USE_WAYLAND
-SUBDIRS += putsurface
-endif
-endif
+vavpp_SOURCES = vavpp.cpp
+vavpp_LDADD   = $(TEST_LIBS)
 
-if ENABLE_TESTS
-SUBDIRS += test
-endif
-
-# Extra clean files so that maintainer-clean removes *everything*
-MAINTAINERCLEANFILES = \
-	aclocal.m4 compile config.guess config.sub \
-	configure depcomp install-sh ltmain.sh     \
-	Makefile.in missing
-
-EXTRA_DIST = \
-        autogen.sh \
-        $(NULL)
+valgrind:(bin_PROGRAMS)
+	for a in(bin_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done

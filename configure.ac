@@ -215,6 +215,7 @@ AC_OUTPUT([
     encode/Makefile
     decode/Makefile
     putsurface/Makefile
+    videoprocess/Makefile
 ])
 
 
