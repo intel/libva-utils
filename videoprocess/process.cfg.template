@@ -10,19 +10,21 @@
 
 #1.Source YUV(RGB) file information
 #SRC_FILE_NAME:    /root/clips/YUV/bus_cif.yv12
-SRC_FILE_NAME: ./kid1.yuv
-SRC_FRAME_WIDTH:  1024
-SRC_FRAME_HEIGHT: 768
-SRC_FRAME_FORMAT: NV12
+SRC_FILE_NAME: ./bsw_src_1280x1024.yuy2.yuv
+SRC_FRAME_WIDTH:  1280
+SRC_FRAME_HEIGHT: 1024
+SRC_FRAME_FORMAT: YUYV
 
 #Note .yv12 files are in YV12 format and .yuv used above for STDE is in I420 format
-SRC_FILE_FORMAT: I420
+SRC_FILE_FORMAT: YUYV
 
 #2.Destination YUV(RGB) file information
-DST_FILE_NAME:    ./stde_output.yv12
-DST_FRAME_WIDTH:  1024
-DST_FRAME_HEIGHT: 768
-DST_FRAME_FORMAT: NV12
+DST_FILE_NAME:    ./output.yuv
+DST_FRAME_WIDTH:  1920
+DST_FRAME_HEIGHT: 1080
+DST_FRAME_FORMAT: YUYV
+
+DST_FILE_FORMAT: YUYV
 
 #3.How many frames to be processed
 FRAME_SUM: 1
@@ -31,7 +33,7 @@ FRAME_SUM: 1
   #(VAProcFilterNone,VAProcFilterNoiseReduction,VAProcFilterDeinterlacing,
   # VAProcFilterSharpening,VAProcFilterColorBalance,VAProcFilterSkinToneEnhancement
   # defalut VAProcFilterNone)
-FILTER_TYPE: VAProcFilterSkinToneEnhancement
+FILTER_TYPE: VAProcFilterNone
 
 #5.VPP filter specific parameters. If they are not specified here,
 #default value will be applied then.
