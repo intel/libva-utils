@@ -344,6 +344,26 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 v_src += (surface_image.width / 2);
             }
         }
+    } else if ((surface_image.format.fourcc == VA_FOURCC_YUY2 &&
+                g_src_file_fourcc == VA_FOURCC_YUY2) ||
+               (surface_image.format.fourcc == VA_FOURCC_UYVY &&
+                g_src_file_fourcc == VA_FOURCC_UYVY)) {
+        frame_size = surface_image.width * surface_image.height * 2;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+
+        do {
+            n_items = fread(newImageBuffer, frame_size, 1, fp);
+        } while (n_items != 1);
+
+        y_src = newImageBuffer;
+        y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
+
+        /* plane 0, directly copy */
+        for (row = 0; row < surface_image.height; row++) {
+            memcpy(y_dst, y_src, surface_image.width * 2);
+            y_src += surface_image.width * 2;
+            y_dst += surface_image.pitches[0];
+        }
      } else {
          printf("Not supported YUV surface fourcc !!! \n");
          return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -1022,6 +1042,12 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     } else if(!strcmp(str, "NV12")){
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
         tformat = VA_RT_FORMAT_YUV420;
+    } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
+        tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
+        tformat = VA_RT_FORMAT_YUV422;
+    } else if(!strcmp(str, "UYVY")){
+        tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
+        tformat = VA_RT_FORMAT_YUV422;
     } else{
         printf("Not supported format: %s! Currently only support following format: %s\n",
          str, "YV12, I420, NV12");
