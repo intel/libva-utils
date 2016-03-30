@@ -67,7 +67,6 @@ static char g_config_file_name[MAX_LEN];
 static char g_src_file_name[MAX_LEN];
 static char g_dst_file_name[MAX_LEN];
 static char g_filter_type_name[MAX_LEN];
-static char g_src_file_format[10];
 
 static uint32_t g_in_pic_width = 352;
 static uint32_t g_in_pic_height = 288;
@@ -78,6 +77,7 @@ static uint32_t g_in_fourcc  = VA_FOURCC('N', 'V', '1', '2');
 static uint32_t g_in_format  = VA_RT_FORMAT_YUV420;
 static uint32_t g_out_fourcc = VA_FOURCC('N', 'V', '1', '2');
 static uint32_t g_out_format = VA_RT_FORMAT_YUV420;
+static uint32_t g_src_file_fourcc = VA_FOURCC('I', '4', '2', '0');
 
 static uint8_t g_blending_enabled = 0;
 static uint8_t g_blending_min_luma = 1;
@@ -285,7 +285,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         } while (n_items != 1);
 
         y_src = newImageBuffer;
-        if (!strcmp(g_src_file_format, "I420")) {
+        if (g_src_file_fourcc == VA_FOURCC_I420) {
             u_src = newImageBuffer + surface_image.width * surface_image.height;
             v_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 4;
         } else {
@@ -1010,20 +1010,30 @@ vpp_context_destroy()
 static int8_t
 parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
 {
+    uint32_t tfourcc = VA_FOURCC('N', 'V', '1', '2');
+    uint32_t tformat = VA_RT_FORMAT_YUV420;
+
     if (!strcmp(str, "YV12")){
-        *fourcc = VA_FOURCC('Y', 'V', '1', '2');
-        *format = VA_RT_FORMAT_YUV420;
+        tfourcc = VA_FOURCC('Y', 'V', '1', '2');
+        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "I420")){
-        *fourcc = VA_FOURCC('I', '4', '2', '0');
-        *format = VA_RT_FORMAT_YUV420;
+        tfourcc = VA_FOURCC('I', '4', '2', '0');
+        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "NV12")){
-        *fourcc = VA_FOURCC('N', 'V', '1', '2');
-        *format = VA_RT_FORMAT_YUV420;
+        tfourcc = VA_FOURCC('N', 'V', '1', '2');
+        tformat = VA_RT_FORMAT_YUV420;
     } else{
         printf("Not supported format: %s! Currently only support following format: %s\n",
          str, "YV12, I420, NV12");
         assert(0);
     }
+
+    if (fourcc)
+        *fourcc = tfourcc;
+
+    if (format)
+        *format = tformat;
+
     return 0;
 }
 
@@ -1044,8 +1054,10 @@ parse_basic_parameters()
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_out_pic_width);
     read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT",&g_out_pic_height);
     read_value_string(g_config_file_fd, "DST_FRAME_FORMAT", str);
-    read_value_string(g_config_file_fd, "SRC_FILE_FORMAT", g_src_file_format);
     parse_fourcc_and_format(str, &g_out_fourcc, &g_out_format);
+
+    read_value_string(g_config_file_fd, "SRC_FILE_FORMAT", str);
+    parse_fourcc_and_format(str, &g_src_file_fourcc, NULL);
 
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
 
