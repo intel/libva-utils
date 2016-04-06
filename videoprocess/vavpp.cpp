@@ -289,9 +289,15 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         if (g_src_file_fourcc == VA_FOURCC_I420) {
             u_src = newImageBuffer + surface_image.width * surface_image.height;
             v_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 4;
-        } else {
+        } else if (g_src_file_fourcc == VA_FOURCC_YV12) {
             v_src = newImageBuffer + surface_image.width * surface_image.height;
             u_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 4;
+        } else if (g_src_file_fourcc == VA_FOURCC_NV12) {
+            u_src = newImageBuffer + surface_image.width * surface_image.height;
+            v_src = u_src;
+        } else {
+            printf("Not supported YUV fourcc for input file !!!\n");
+            return VA_STATUS_ERROR_INVALID_SURFACE;
         }
 
         y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
@@ -317,13 +323,23 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         /* UV plane */
         if (surface_image.format.fourcc == VA_FOURCC_YV12||
             surface_image.format.fourcc == VA_FOURCC_I420){
-            /* UV plane */
             for (row = 0; row < surface_image.height /2; row ++){
-                memcpy(v_dst, v_src, surface_image.width/2);
-                memcpy(u_dst, u_src, surface_image.width/2);
+                if (g_src_file_fourcc == VA_FOURCC_I420 ||
+                    g_src_file_fourcc == VA_FOURCC_YV12) {
+                    memcpy(v_dst, v_src, surface_image.width/2);
+                    memcpy(u_dst, u_src, surface_image.width/2);
 
-                v_src += surface_image.width/2;
-                u_src += surface_image.width/2;
+                    v_src += surface_image.width/2;
+                    u_src += surface_image.width/2;
+                } else {
+                    for (col = 0; col < surface_image.width / 2; col++) {
+                        u_dst[col] = u_src[col * 2];
+                        v_dst[col] = u_src[col * 2 + 1];
+                    }
+
+                    u_src += surface_image.width;
+                    v_src = u_src;
+                }
 
                 if (surface_image.format.fourcc == VA_FOURCC_YV12){
                     v_dst += surface_image.pitches[1];
@@ -335,14 +351,22 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             }
         } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
             for (row = 0; row < surface_image.height / 2; row++) {
-                for (col = 0; col < surface_image.width / 2; col++) {
-                    u_dst[col * 2] = u_src[col];
-                    u_dst[col * 2 + 1] = v_src[col];
+                if (g_src_file_fourcc == VA_FOURCC_I420 ||
+                    g_src_file_fourcc == VA_FOURCC_YV12) {
+                    for (col = 0; col < surface_image.width / 2; col++) {
+                        u_dst[col * 2] = u_src[col];
+                        u_dst[col * 2 + 1] = v_src[col];
+                    }
+
+                    u_src += (surface_image.width / 2);
+                    v_src += (surface_image.width / 2);
+                } else {
+                    memcpy(u_dst, u_src, surface_image.width);
+                    u_src += surface_image.width;
+                    v_src = u_src;
                 }
 
                 u_dst += surface_image.pitches[1];
-                u_src += (surface_image.width / 2);
-                v_src += (surface_image.width / 2);
             }
         }
     } else if ((surface_image.format.fourcc == VA_FOURCC_YUY2 &&
