@@ -26,6 +26,10 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = common decode encode vainfo
 
+if ENABLE_GTESTS
+SUBDIRS += test
+endif
+
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = \
 	aclocal.m4 compile config.guess config.sub \

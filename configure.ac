@@ -94,6 +94,11 @@ AC_ARG_ENABLE(egl,
                     [build with VA/EGL API support @<:@default=yes@:>@])],
     [], [enable_egl="yes"])
 
+AC_ARG_ENABLE(vpp,
+    [AC_HELP_STRING([--enable-vpp],
+                    [build with VA-VPP support @<:@default=yes@:>@])],
+    [], [enable_vpp="yes"])
+
 AC_ARG_ENABLE([wayland],
     [AC_HELP_STRING([--enable-wayland],
                     [build with VA/Wayland API support @<:@default=yes@:>@])],
