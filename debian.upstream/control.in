@@ -1,0 +1,27 @@
+Source: libva
+Priority: extra
+Maintainer: Daniel Charles <daniel.charles@intel.com>
+Build-Depends: automake,
+               autotools-dev,
+               cdbs,
+               debhelper (>= 5),
+               libdrm-dev (>= @LIBDRM_VERSION@),
+               libva-dev (>= @LIBVA_VERSION@),
+@USE_X11_TRUE@               libx11-dev, libxext-dev, libxfixes-dev,
+@USE_GLX_TRUE@               libgl-dev,
+@USE_WAYLAND_TRUE@           libwayland-dev (>= @WAYLAND_API_VERSION@),
+               libtool,
+               pkg-config
+Standards-Version: 3.7.2
+Section: libs
+
+Package: vainfo
+Architecture: any
+Depends: libva@LIBVA_MAJOR_VERSION@ (= ${Source-Version})
+Description: Video Acceleration (VA) API for Linux -- info program
+ The libva library implements the Video Acceleration (VA) API for Linux.
+ The library loads a hardware dependendent driver.
+
+ The libva-utils project hosts the tests for libva library.
+ .
+ This package contains the `vainfo' program.

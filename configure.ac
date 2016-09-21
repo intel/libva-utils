@@ -1,0 +1,277 @@
+# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sub license, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice (including the
+# next paragraph) shall be included in all copies or substantial portions
+# of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+# IN NO EVENT SHALL PRECISION INSIGHT AND/OR ITS SUPPLIERS BE LIABLE FOR
+# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# libva-utils package version number
+# package version number follows libva package version number to
+# comply with the same version used for released
+#
+# - major version is libva_major_version
+# - minor version is libva_minor_version
+# - micro version is libva_micro_version
+# - pre version is libva_pre_version, usually development version
+m4_define([libva_utils_major_version], [1])
+m4_define([libva_utils_minor_version], [7])
+m4_define([libva_utils_micro_version], [3])
+m4_define([libva_utils_pre_version],   [1])
+
+m4_define([libva_utils_version],
+          [libva_utils_major_version.libva_utils_minor_version.libva_utils_micro_version])
+m4_if(libva_utils_pre_version, [0], [], [
+m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
+])
+
+# libva minimum version requirement, at this released version 
+# libva-utils was created
+m4_define([libva_api_min_version], [0.39.4])
+
+# libdrm minimun version requirement
+m4_define([libdrm_version], [2.4])
+
+# Wayland minimum version number
+m4_define([wayland_api_version], [1.0.0])
+
+AC_PREREQ(2.57)
+AC_INIT([libva_utils],
+        [libva_utils_version],
+        [https://github.com/01org/libva-utils/issues/new],
+        [libyamiutils],
+        [https://github.com/01org/libva-utils])
+AC_CONFIG_SRCDIR([Makefile.am])
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE([dist-bzip2])
+
+AC_CONFIG_HEADERS([config.h])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+TODAY="`LC_ALL=C date +'%a, %d %b %Y %X %z'`"
+AC_SUBST(TODAY)
+
+LIBVA_UTILS_MAJOR_VERSION=libva_utils_major_version
+LIBVA_UTILS_MINOR_VERSION=libva_utils_minor_version
+LIBVA_UTILS_MICRO_VERSION=libva_utils_micro_version
+LIBVA_UTILS_VERSION=libva_utils_version
+AC_SUBST(LIBVA_UTILS_MAJOR_VERSION)
+AC_SUBST(LIBVA_UTILS_MINOR_VERSION)
+AC_SUBST(LIBVA_UTILS_MICRO_VERSION)
+AC_SUBST(LIBVA_UTILS_VERSION)
+
+AC_ARG_ENABLE(drm,
+    [AC_HELP_STRING([--enable-drm],
+                    [build with VA/DRM API support @<:@default=yes@:>@])],
+    [], [enable_drm="yes"])
+
+AC_ARG_ENABLE(x11,
+    [AC_HELP_STRING([--enable-x11],
+                    [build with VA/X11 API support @<:@default=yes@:>@])],
+    [], [enable_x11="yes"])
+
+AC_ARG_ENABLE(glx,
+    [AC_HELP_STRING([--enable-glx],
+                    [build with VA/GLX API support @<:@default=yes@:>@])],
+    [], [enable_glx="yes"])
+
+AC_ARG_ENABLE(egl,
+    [AC_HELP_STRING([--enable-egl],
+                    [build with VA/EGL API support @<:@default=yes@:>@])],
+    [], [enable_egl="yes"])
+
+AC_ARG_ENABLE([wayland],
+    [AC_HELP_STRING([--enable-wayland],
+                    [build with VA/Wayland API support @<:@default=yes@:>@])],
+    [], [enable_wayland="yes"])
+
+AC_ARG_ENABLE([gtests],
+    [AC_HELP_STRING([--enable-gtests],
+                    [build gtests @<:@default=no@:>@])],
+    [], [enable_gtests="no"])
+
+AC_ARG_WITH(drivers-path,
+    [AC_HELP_STRING([--with-drivers-path=[[path]]],
+                    [drivers path])],
+    [], [with_drivers_path="$libdir/dri"])
+
+LIBVA_DRIVERS_PATH="$with_drivers_path"
+AC_SUBST(LIBVA_DRIVERS_PATH)
+
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
+AC_PROG_CC
+AC_PROG_CXX
+AM_PROG_CC_C_O
+PKG_PROG_PKG_CONFIG
+
+AC_HEADER_STDC
+AC_SYS_LARGEFILE
+
+# Check for __attribute__((visibility()))
+AC_CACHE_CHECK([whether __attribute__((visibility())) is supported],
+    ac_cv_have_gnuc_visibility_attribute,
+    [cat > conftest.c <<EOF
+int foo __attribute__ ((visibility ("hidden"))) = 1;
+int bar __attribute__ ((visibility ("protected"))) = 1;
+EOF
+    ac_cv_have_gnuc_visibility_attribute="no"
+    if ${CC-cc} -Werror -S conftest.c -o conftest.s >/dev/null 2>&1; then
+        if grep '\.hidden.*foo' conftest.s >/dev/null; then
+            if grep '\.protected.*bar' conftest.s >/dev/null; then
+                ac_cv_have_gnuc_visibility_attribute="yes"
+            fi
+        fi
+    fi
+    rm -f conftest.[cs]
+])
+if test "$ac_cv_have_gnuc_visibility_attribute" = "yes"; then
+    AC_DEFINE([HAVE_GNUC_VISIBILITY_ATTRIBUTE], [1],
+              [Defined to 1 if GCC visibility attribute is supported])
+fi
+
+# Check for DRM (mandatory)
+LIBDRM_VERSION=libdrm_version
+PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
+PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm])
+AC_SUBST(LIBDRM_VERSION)
+
+# Check for libva (for dynamic linking)
+LIBVA_API_MIN_VERSION=libva_api_min_version
+PKG_CHECK_MODULES([LIBVA], [libva >= $LIBVA_API_MIN_VERSION])
+AC_SUBST(LIBVA_VERSION)
+LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva`
+
+USE_DRM="no"
+if test "$enable_drm" = "yes"; then
+    USE_DRM="yes"
+    AC_DEFINE([HAVE_VA_DRM], [1], [Defined to 1 if VA/DRM API is supported])
+fi
+AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
+
+# Check for X11
+USE_X11="no"
+if test "$enable_x11" = "yes"; then
+    USE_X11="yes"
+    PKG_CHECK_MODULES([X11],    [x11],    [:], [USE_X11="no"])
+    PKG_CHECK_MODULES([XEXT],   [xext],   [:], [USE_X11="no"])
+    PKG_CHECK_MODULES([XFIXES], [xfixes], [:], [USE_X11="no"])
+    if test "$USE_X11" = "yes"; then
+       PKG_CHECK_MODULES([LIBVA_X11], [libva-x11], [:], [USE_X11="no"])
+       AC_DEFINE([HAVE_VA_X11], [1], [Defined to 1 if VA/X11 API is supported])
+    fi
+fi
+AM_CONDITIONAL(USE_X11, test "$USE_X11" = "yes")
+
+# Check for GLX
+USE_GLX="no"
+if test "$USE_X11:$enable_glx" = "yes:yes"; then
+    PKG_CHECK_MODULES([GLX], [gl x11], [USE_GLX="yes"], [:])
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LIBS="$LIBS"
+    CPPFLAGS="$CPPFLAGS $GLX_CFLAGS"
+    LIBS="$LIBS $GLX_LIBS"
+    AC_CHECK_HEADERS([GL/gl.h GL/glx.h], [:], [USE_GLX="no"])
+    AC_CHECK_LIB([GL], [glXCreateContext], [:] [USE_GLX="no"])
+    CPPFLAGS="$saved_CPPFLAGS"
+    LIBS="$saved_LIBS"
+    if test "$USE_GLX" = "yes"; then
+        AC_DEFINE([HAVE_VA_GLX], [1], [Defined to 1 if VA/GLX API is built])
+    fi
+fi
+AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
+
+# Check for EGL
+USE_EGL="no"
+if test "$enable_egl" = "yes"; then
+    PKG_CHECK_MODULES([EGL], [egl], [USE_EGL="yes"], [:])
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LIBS="$LIBS"
+    CPPFLAGS="$CPPFLAGS $EGL_CFLAGS"
+    LIBS="$LIBS $EGL_LIBS"
+    AC_CHECK_HEADERS([EGL/egl.h], [:], [USE_EGL="no"])
+    AC_CHECK_LIB([EGL], [eglGetDisplay], [:], [USE_EGL="no"])
+    CPPFLAGS="$saved_CPPFLAGS"
+    LIBS="$saved_LIBS"
+    if test "$USE_EGL" = "yes"; then
+        AC_DEFINE([HAVE_VA_EGL], [1], [Defined to 1 if VA/EGL API is built])
+    fi
+fi
+AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
+
+dnl Check for Wayland
+WAYLAND_API_VERSION=wayland_api_version
+AC_SUBST(WAYLAND_API_VERSION)
+
+USE_WAYLAND="no"
+if test "$enable_wayland" = "yes"; then
+    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version],
+        [USE_WAYLAND="yes"], [:])
+    if test "$USE_WAYLAND" = "yes"; then
+
+        WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
+        AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
+                     [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
+
+        AC_DEFINE([HAVE_VA_WAYLAND], [1],
+                  [Defined to 1 if VA/Wayland API is supported])
+       PKG_CHECK_MODULES([LIBVA_WAYLAND], [libva-wayland], [:], [USE_WAYLAND="no"])
+    fi
+fi
+
+AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
+
+pkgconfigdir=${libdir}/pkgconfig
+AC_SUBST(pkgconfigdir)
+
+dnl Check for builds without backend
+if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
+    AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
+fi
+
+AM_CONDITIONAL(ENABLE_GTESTS, test "$enable_gtests" = "yes")
+
+AC_OUTPUT([
+    Makefile
+    common/Makefile
+    test/Makefile
+    vainfo/Makefile
+    encode/Makefile
+    decode/Makefile
+    debian.upstream/Makefile
+    debian.upstream/changelog
+    debian.upstream/control
+])
+
+
+# Print a small summary
+BACKENDS=""
+AS_IF([test x$USE_DRM = xyes], [BACKENDS="$BACKENDS drm"])
+AS_IF([test x$USE_X11 = xyes], [BACKENDS="$BACKENDS x11"])
+AS_IF([test x$USE_GLX = xyes], [BACKENDS="$BACKENDS glx"])
+AS_IF([test x$USE_EGL = xyes], [BACKENDS="$BACKENDS egl"])
+AS_IF([test x$USE_WAYLAND = xyes], [BACKENDS="$BACKENDS wayland"])
+
+echo
+echo "libva-utils - ${LIBVA_UTILS_VERSION}"
+echo
+echo Libva VA-API version ............. : $LIBVA_API_VERSION
+echo Installation prefix .............. : $prefix
+echo Default driver path .............. : $LIBVA_DRIVERS_PATH
+echo Extra window systems ............. : $BACKENDS
+echo Enable Gtests .................... : $enable_gtests
+echo
