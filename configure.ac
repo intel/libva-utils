@@ -30,7 +30,7 @@
 # - pre version is libva_pre_version, usually development version
 m4_define([libva_utils_major_version], [1])
 m4_define([libva_utils_minor_version], [7])
-m4_define([libva_utils_micro_version], [3])
+m4_define([libva_utils_micro_version], [4])
 m4_define([libva_utils_pre_version],   [1])
 
 m4_define([libva_utils_version],
@@ -160,6 +160,11 @@ LIBVA_API_MIN_VERSION=libva_api_min_version
 PKG_CHECK_MODULES([LIBVA], [libva >= $LIBVA_API_MIN_VERSION])
 AC_SUBST(LIBVA_VERSION)
 LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva`
+VA_MAJOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f1`
+VA_MINOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f2`
+VA_MICRO_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f3`
+
+
 
 USE_DRM="no"
 if test "$enable_drm" = "yes"; then
@@ -254,6 +259,7 @@ AC_OUTPUT([
     Makefile
     common/Makefile
     test/Makefile
+    test/va_version.h
     vainfo/Makefile
     encode/Makefile
     decode/Makefile

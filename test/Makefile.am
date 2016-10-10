@@ -41,13 +41,36 @@ EXTRA_DIST =							\
 	$(NULL)
 
 # test_va_api
-noinst_PROGRAMS = test_va_api
+bin_PROGRAMS = test_va_api
 noinst_HEADERS =						\
 	test.h							\
+	test_va_api_fixture.h					\
+	test_va_api_get_create_config.h				\
+	test_va_api_config_attribs.h				\
+	test_va_api_createsurfaces.h				\
+	test_va_api_createcontext.h				\
+	test_va_api_createbuffer.h				\
+	test_va_api_display_attribs.h				\
+	test_va_api_get_max_values.h				\
+	test_va_api_init_terminate.h				\
+	test_va_api_query_config.h				\
+	test_va_api_query_vendor.h				\
+	va_version.h						\
 	$(NULL)
 
 test_va_api_SOURCES =						\
 	test_main.cpp						\
+	test_va_api_fixture.cpp					\
+	test_va_api_get_create_config.cpp			\
+	test_va_api_config_attribs.cpp				\
+	test_va_api_createsurfaces.cpp				\
+	test_va_api_createcontext.cpp				\
+	test_va_api_createbuffer.cpp				\
+	test_va_api_display_attribs.cpp				\
+	test_va_api_get_max_values.cpp				\
+	test_va_api_init_terminate.cpp				\
+	test_va_api_query_config.cpp				\
+	test_va_api_query_vendor.cpp				\
 	$(NULL)
 
 test_va_api_LDFLAGS =						\
@@ -71,6 +94,10 @@ test_va_api_CPPFLAGS =						\
 test_va_api_CXXFLAGS =						\
 	-Wall -Werror						\
 	$(AM_CXXFLAGS)						\
+	$(NULL)
+
+EXTRA_DIST =							\
+	va_version.h.in						\
 	$(NULL)
 
 check-local: test_va_api
