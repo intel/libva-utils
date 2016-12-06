@@ -20,32 +20,33 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
+bin_PROGRAMS = putsurface
 
-AUTOMAKE_OPTIONS = foreign
+TEST_CFLAGS = \
+	$(LIBVA_CFLAGS)			\
+	-I$(top_srcdir)/common		\
+	$(NULL)
 
-SUBDIRS = common decode encode putsurface vainfo
+TEST_LIBS = \
+	$(LIBVA_LIBS)		\
+	$(top_builddir)/common/libva-display.la	\
+	-lpthread		\
+	$(NULL)
 
-if ENABLE_GTESTS
-SUBDIRS += test
+putsurface_SOURCES		= putsurface_x11.c
+putsurface_CFLAGS		= $(X11_CFLAGS) $(TEST_CFLAGS)
+putsurface_LDADD		= $(X11_LIBS) $(TEST_LIBS)
+
+if USE_WAYLAND
+bin_PROGRAMS			+= putsurface_wayland
+putsurface_wayland_SOURCES	= putsurface_wayland.c
+putsurface_wayland_CFLAGS	= $(WAYLAND_CFLAGS) $(TEST_CFLAGS)
+putsurface_wayland_LDADD	= $(WAYLAND_LIBS) $(TEST_LIBS)
 endif
 
-# Extra clean files so that maintainer-clean removes *everything*
-MAINTAINERCLEANFILES = \
-	aclocal.m4 compile config.guess config.sub \
-	configure depcomp install-sh ltmain.sh     \
-	Makefile.in missing
+EXTRA_DIST = putsurface_common.c
 
-DEB_BUILDDIR = debian.build
-
-deb:
-	@[ -d debian ] || ln -s debian.upstream debian
-	dpkg-buildpackage -rfakeroot -uc -us
-
-deb.upstream: dist
-	-mkdir -p $(DEB_BUILDDIR)
-	cd $(DEB_BUILDDIR)				&& \
-	rm -rf $(PACKAGE)-$(VERSION)			&& \
-	tar zxvf ../$(PACKAGE)-$(VERSION).tar.gz	&& \
-	cd $(PACKAGE)-$(VERSION)			&& \
-	$(MAKE) deb -f Makefile.am
+valgrind:	$(bin_PROGRAMS)
+	for a in $(bin_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done

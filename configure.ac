@@ -263,6 +263,7 @@ AC_OUTPUT([
     vainfo/Makefile
     encode/Makefile
     decode/Makefile
+    putsurface/Makefile
     debian.upstream/Makefile
     debian.upstream/changelog
     debian.upstream/control
