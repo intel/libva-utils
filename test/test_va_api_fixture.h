@@ -25,6 +25,7 @@
 
 #include "test.h"
 #include "test_data.h"
+#include "test_streamable.h"
 #include "gtest/gtest.h"
 
 namespace VAAPI {

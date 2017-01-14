@@ -44,6 +44,7 @@ EXTRA_DIST =							\
 bin_PROGRAMS = test_va_api
 noinst_HEADERS =						\
 	test.h							\
+	test_streamable.h					\
 	test_va_api_fixture.h					\
 	test_va_api_get_create_config.h				\
 	test_va_api_config_attribs.h				\
