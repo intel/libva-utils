@@ -1,0 +1,104 @@
+[![Stories in Ready](https://badge.waffle.io/01org/libva-utils.png?label=ready&title=Ready)](https://waffle.io/01org/libva-utils)
+  libva-utils
+  Collection of tests to exercise VA-API as provided
+  by the libva project.  VA-API requires a driver implementation
+  to operate.
+
+  Copyright (C) 2009-2016 Intel Corporation
+
+
+License
+-------
+
+Please read the COPYING file available in this package.
+
+
+Overview
+--------
+
+libva-utils is a collection of tests to exercise VA-API in accordance
+with the libva project. A driver implementation is necessary to properly
+operate.
+
+
+Project is hosted on github:
+https://github.com/01org/libva-utils
+
+Codecs
+------
+
+H.264   D   ILK+
+H.264   E   SNB+
+MPEG-2  D   CTG+
+VC-1    D   SNB+
+JPEG    D   IVB+
+JPEG    E   CHV+/BSW+
+VP8     D   BDW+
+VP8     E   CHV+/BSW+
+HEVC    D   CHV+/BSW+
+HEVC    E   SKL+
+VP9     D   BXT+
+HEVC 10bit     D       BXT+
+VP9 10bit      D       KBL+
+
+Requirements
+------------
+
+libva API >= 0.39.4
+
+Google Test Framework Integration
+---------------------------------
+
+Google Test recommends it be custom compiled for each project that uses it.
+Therefore, the libva-utils project tracks a subset copy of the Google
+Test Framework source code at release 1.8.0 (initially) in a test/gtest/
+subdirectory of the project source tree.  The libva-utils copy of gtest
+will only be updated to new upstream releases (or critical upstream fixes) of
+gtest, only if it is necessary.  As of this writing, the last release (1.8.0)
+was August 2016, about three years after its previous release.  Thus, there
+should be minimal need to update or maintain gtest within the libva-utils
+project.
+
+Building Google Test Framework Library
+--------------------------------------
+
+The Google Test Framework is compiled as a convenience library (libgtest.la)
+within the libva-utils source tree.  The rules to build libgtest.la are
+maintained in a custom makefile in the libva-intel-driver project tree
+(see test/Makefile.am).  The libgtest.la library will be automatically compiled
+if the tests are enabled by configuration.
+
+
+Building Driver Tests
+---------------------
+
+The --enable-gtests=[yes|no] configuration option is defined in configure.ac to
+enable or disable compilation of libgtest.la and the test_va_api test executable.
+The default is disabled.  When the tests are enabled during configuration, the
+make command will compile the VA-API gtests and link to libgtest.la and output/install
+a single test/test_va_api or ${prefix}/bin/test_va_api executable.  Hence...
+
+    "./autogen.sh --enable-gtests && make"
+
+...is a minimal example of how one might build the driver and its tests.
+
+Since all this project contains only tests, it is configurable to compile the GTest
+framework and the corresponding tests.  Notice the difference when enabling
+tests on other related projects, e.g. libva-intel-driver.
+
+On the summary section after configuration something like this should be seen
+
+libva-utils - ${LIBVA_UTILS_VERSION}
+
+Libva VA-API version ............. : ${LIBVA_API_VERSION}
+Installation prefix .............. : ${prefix}
+Default driver path .............. : ${exec_prefix}/lib/dri
+Extra window systems ............. : drm x11 glx egl
+Enable Gtests .................... : yes
+
+Reporting Bugs / Submit change patches
+--------------------------------------
+
+Bugs and patches can be submitted to libva mailing list on freedesktop.
+Review process should be followed there and merge will happen on master branch
+in github
