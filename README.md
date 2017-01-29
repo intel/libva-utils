@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/01org/libva-utils.png?label=ready&title=Ready)](https://waffle.io/01org/libva-utils)
   libva-utils
   Collection of tests to exercise VA-API as provided
   by the libva project.  VA-API requires a driver implementation
