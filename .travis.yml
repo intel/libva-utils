@@ -28,7 +28,11 @@ before_install:
   - sudo apt-get install -y libx11-dev
   - sudo apt-get install -y libxext-dev
   - sudo apt-get install -y libxfixes-dev
-  
+
+install:
+  - git clone https://github.com/01org/libva.git
+  - (cd libva && ./autogen.sh && ./configure --prefix=/usr && sudo make install)
+
 script:
         - ./autogen.sh
         - ./configure --prefix=/usr
