@@ -24,7 +24,15 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = common decode encode putsurface vainfo
+SUBDIRS = common decode encode vainfo
+
+if USE_X11
+SUBDIRS += putsurface
+else
+if USE_WAYLAND
+SUBDIRS += putsurface
+endif
+endif
 
 if ENABLE_GTESTS
 SUBDIRS += test
