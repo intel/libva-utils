@@ -264,9 +264,6 @@ AC_OUTPUT([
     encode/Makefile
     decode/Makefile
     putsurface/Makefile
-    debian.upstream/Makefile
-    debian.upstream/changelog
-    debian.upstream/control
 ])
 
 
