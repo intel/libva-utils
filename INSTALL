@@ -93,12 +93,12 @@ libva-utils - ${LIBVA_UTILS_VERSION}
 Libva VA-API version ............. : ${LIBVA_API_VERSION}
 Installation prefix .............. : ${prefix}
 Default driver path .............. : ${exec_prefix}/lib/dri
-Extra window systems ............. : drm x11 glx egl
+Extra window systems ............. : drm x11
 Enable Gtests .................... : yes
 
 Reporting Bugs / Submit change patches
 --------------------------------------
 
-Bugs and patches can be submitted to libva mailing list on freedesktop.
-Review process should be followed there and merge will happen on master branch
-in github
+See the contributing guide:
+
+https://github.com/01org/libva-utils/blob/master/CONTRIBUTING.md
