@@ -39,7 +39,7 @@ m4_if(libva_utils_pre_version, [0], [], [
 m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
 ])
 
-# libva minimum version requirement, at this released version 
+# libva minimum version requirement, at this released version
 # libva-utils was created
 m4_define([libva_api_min_version], [0.39.4])
 
@@ -84,21 +84,6 @@ AC_ARG_ENABLE(x11,
                     [build with VA/X11 API support @<:@default=yes@:>@])],
     [], [enable_x11="yes"])
 
-AC_ARG_ENABLE(glx,
-    [AC_HELP_STRING([--enable-glx],
-                    [build with VA/GLX API support @<:@default=yes@:>@])],
-    [], [enable_glx="yes"])
-
-AC_ARG_ENABLE(egl,
-    [AC_HELP_STRING([--enable-egl],
-                    [build with VA/EGL API support @<:@default=yes@:>@])],
-    [], [enable_egl="yes"])
-
-AC_ARG_ENABLE(vpp,
-    [AC_HELP_STRING([--enable-vpp],
-                    [build with VA-VPP support @<:@default=yes@:>@])],
-    [], [enable_vpp="yes"])
-
 AC_ARG_ENABLE([wayland],
     [AC_HELP_STRING([--enable-wayland],
                     [build with VA/Wayland API support @<:@default=yes@:>@])],
@@ -108,11 +93,6 @@ AC_ARG_ENABLE([gtests],
     [AC_HELP_STRING([--enable-gtests],
                     [build gtests @<:@default=no@:>@])],
     [], [enable_gtests="no"])
-
-AC_ARG_WITH(drivers-path,
-    [AC_HELP_STRING([--with-drivers-path=[[path]]],
-                    [drivers path])],
-    [], [with_drivers_path="$libdir/dri"])
 
 LIBVA_DRIVERS_PATH="$with_drivers_path"
 AC_SUBST(LIBVA_DRIVERS_PATH)
@@ -187,42 +167,6 @@ if test "$enable_x11" = "yes"; then
 fi
 AM_CONDITIONAL(USE_X11, test "$USE_X11" = "yes")
 
-# Check for GLX
-USE_GLX="no"
-if test "$USE_X11:$enable_glx" = "yes:yes"; then
-    PKG_CHECK_MODULES([GLX], [gl x11], [USE_GLX="yes"], [:])
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LIBS="$LIBS"
-    CPPFLAGS="$CPPFLAGS $GLX_CFLAGS"
-    LIBS="$LIBS $GLX_LIBS"
-    AC_CHECK_HEADERS([GL/gl.h GL/glx.h], [:], [USE_GLX="no"])
-    AC_CHECK_LIB([GL], [glXCreateContext], [:] [USE_GLX="no"])
-    CPPFLAGS="$saved_CPPFLAGS"
-    LIBS="$saved_LIBS"
-    if test "$USE_GLX" = "yes"; then
-        AC_DEFINE([HAVE_VA_GLX], [1], [Defined to 1 if VA/GLX API is built])
-    fi
-fi
-AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
-
-# Check for EGL
-USE_EGL="no"
-if test "$enable_egl" = "yes"; then
-    PKG_CHECK_MODULES([EGL], [egl], [USE_EGL="yes"], [:])
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LIBS="$LIBS"
-    CPPFLAGS="$CPPFLAGS $EGL_CFLAGS"
-    LIBS="$LIBS $EGL_LIBS"
-    AC_CHECK_HEADERS([EGL/egl.h], [:], [USE_EGL="no"])
-    AC_CHECK_LIB([EGL], [eglGetDisplay], [:], [USE_EGL="no"])
-    CPPFLAGS="$saved_CPPFLAGS"
-    LIBS="$saved_LIBS"
-    if test "$USE_EGL" = "yes"; then
-        AC_DEFINE([HAVE_VA_EGL], [1], [Defined to 1 if VA/EGL API is built])
-    fi
-fi
-AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
-
 dnl Check for Wayland
 WAYLAND_API_VERSION=wayland_api_version
 AC_SUBST(WAYLAND_API_VERSION)
@@ -269,11 +213,9 @@ AC_OUTPUT([
 
 # Print a small summary
 BACKENDS=""
-AS_IF([test x$USE_DRM = xyes], [BACKENDS="$BACKENDS drm"])
-AS_IF([test x$USE_X11 = xyes], [BACKENDS="$BACKENDS x11"])
-AS_IF([test x$USE_GLX = xyes], [BACKENDS="$BACKENDS glx"])
-AS_IF([test x$USE_EGL = xyes], [BACKENDS="$BACKENDS egl"])
-AS_IF([test x$USE_WAYLAND = xyes], [BACKENDS="$BACKENDS wayland"])
+AS_IF([test $USE_DRM = yes], [BACKENDS="$BACKENDS drm"])
+AS_IF([test $USE_X11 = yes], [BACKENDS="$BACKENDS x11"])
+AS_IF([test $USE_WAYLAND = yes], [BACKENDS="$BACKENDS wayland"])
 
 echo
 echo "libva-utils - ${LIBVA_UTILS_VERSION}"
