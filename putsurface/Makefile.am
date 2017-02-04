@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = putsurface
+bin_PROGRAMS =
 
 TEST_CFLAGS = \
 	$(LIBVA_CFLAGS)			\
@@ -34,16 +34,17 @@ TEST_LIBS = \
 	$(NULL)
 
 if USE_X11
+bin_PROGRAMS 			+= putsurface
 putsurface_SOURCES		= putsurface_x11.c
 putsurface_CFLAGS		= $(X11_CFLAGS) $(TEST_CFLAGS)
-putsurface_LDADD		= $(X11_LIBS) $(TEST_LIBS)
+putsurface_LDADD		= $(X11_LIBS) $(LIBVA_X11_LIBS) $(TEST_LIBS)
 endif
 
 if USE_WAYLAND
 bin_PROGRAMS			+= putsurface_wayland
 putsurface_wayland_SOURCES	= putsurface_wayland.c
 putsurface_wayland_CFLAGS	= $(WAYLAND_CFLAGS) $(TEST_CFLAGS)
-putsurface_wayland_LDADD	= $(WAYLAND_LIBS) $(TEST_LIBS)
+putsurface_wayland_LDADD	= $(WAYLAND_LIBS) $(LIBVA_WAYLAND_LIBS) $(TEST_LIBS)
 endif
 
 EXTRA_DIST = putsurface_common.c
