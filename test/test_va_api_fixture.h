@@ -82,8 +82,7 @@ public:
     void doCreateConfigToFail(VAProfile profile, VAEntrypoint entrypoint, int error);
     void doDestroyConfig();
 
-    std::string vaProfileToString(VAProfile profile);
-    std::string vaEntrypointToString(VAEntrypoint entrypoint);
+    void doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint);
 
 protected:
     // You can remove any or all of the following functions if its body

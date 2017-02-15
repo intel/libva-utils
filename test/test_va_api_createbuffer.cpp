@@ -144,12 +144,7 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
         }
     }
     else {
-        std::cout << "[ SKIPPED ]"
-                  << " " << vaProfileToString(
-                                currentTestInput.inputProfile)
-                  << " / " << vaEntrypointToString(
-                                    currentTestInput.inputEntrypoint)
-                  << " not supported on this hardware" << std::endl;
+        doLogSkipTest(currentTestInput.inputProfile, currentTestInput.inputEntrypoint);
     }
 }
 

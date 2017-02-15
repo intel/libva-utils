@@ -104,6 +104,28 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
     }
 }
 
+TEST_P(VAAPIGetCreateConfig, UnsupportedProfileEntrypoint)
+{
+    VAProfile currentProfile = ::testing::get<0>(GetParam());
+    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
+
+    doGetMaxValues();
+
+    doQueryConfigProfiles();
+
+    if (!doFindProfileInList(currentProfile)) {
+	// non-supported profiles will be skipped from all testing
+	doLogSkipTest(currentProfile, currentEntrypoint);
+    }
+    else {
+	doQueryConfigEntrypoints(currentProfile);
+	if (!doFindEntrypointInList(currentEntrypoint)) {
+	    // non-supported entrypoints will be skipped from all testing
+	    doLogSkipTest(currentProfile, currentEntrypoint);
+	}
+    }
+}
+
 INSTANTIATE_TEST_CASE_P(
     GetCreateConfig, VAAPIGetCreateConfig,
     ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
