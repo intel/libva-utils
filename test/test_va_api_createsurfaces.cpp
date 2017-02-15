@@ -25,6 +25,11 @@
 #include "test_va_api_createsurfaces.h"
 
 namespace VAAPI {
+// The following tests will operate on supported profile/entrypoint
+// combinations that the driver does support, there is no real need
+// to report SKIPPED tests as those cases are considered on the
+// get_create_config use cases and properly handled.
+
 VAAPIQuerySurfaces::VAAPIQuerySurfaces()
 {
     m_vaDisplay = doInitialize();
@@ -51,16 +56,11 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithCofigAttribs)
 
 	    doFillConfigAttribList();
 
-	    doGetConfigAttributes(currentProfile,
-						currentEntrypoint);
+	    doGetConfigAttributes(currentProfile, currentEntrypoint);
 
-	    doQuerySurfacesWithConfigAttribs(currentProfile,
-							   currentEntrypoint);
+	    doQuerySurfacesWithConfigAttribs(currentProfile, currentEntrypoint);
 	}
     }
-    std::cout << " [ SKIPPED ] " << vaProfileToString(currentProfile) << " / "
-              << vaEntrypointToString(currentEntrypoint)
-              << " not supported on this hardware" << std::endl;
 }
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
@@ -82,9 +82,6 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
                                                    currentEntrypoint);
         }
     }
-    std::cout << " [ SKIPPED ] " << vaProfileToString(currentProfile) << " / "
-              << vaEntrypointToString(currentEntrypoint)
-              << " not supported on this hardware" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -126,11 +123,8 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesWithCofigAttribs)
 
             doCreateSurfaces(currentProfile, currentEntrypoint,
                                            currentResolution);
-        }
+	}
     }
-    std::cout << " [ SKIPPED ] " << vaProfileToString(currentProfile) << " / "
-              << vaEntrypointToString(currentEntrypoint)
-              << " not supported on this hardware" << std::endl;
 }
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
@@ -156,9 +150,6 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
                                            currentResolution);
         }
     }
-    std::cout << " [ SKIPPED ] " << vaProfileToString(currentProfile) << " / "
-              << vaEntrypointToString(currentEntrypoint)
-              << " not supported on this hardware" << std::endl;
 }
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
@@ -182,10 +173,6 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
                                            currentResolution);
         }
     }
-
-    std::cout << " [ SKIPPED ] " << vaProfileToString(currentProfile) << " / "
-              << vaEntrypointToString(currentEntrypoint)
-              << " not supported on this hardware" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(
