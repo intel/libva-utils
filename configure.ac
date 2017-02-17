@@ -89,10 +89,10 @@ AC_ARG_ENABLE([wayland],
                     [build with VA/Wayland API support @<:@default=yes@:>@])],
     [], [enable_wayland="yes"])
 
-AC_ARG_ENABLE([gtests],
-    [AC_HELP_STRING([--enable-gtests],
-                    [build gtests @<:@default=no@:>@])],
-    [], [enable_gtests="no"])
+AC_ARG_ENABLE([tests],
+    [AC_HELP_STRING([--enable-tests],
+                    [build unit tests @<:@default=no@:>@])],
+    [], [enable_tests="no"])
 
 LIBVA_DRIVERS_PATH="$with_drivers_path"
 AC_SUBST(LIBVA_DRIVERS_PATH)
@@ -197,7 +197,7 @@ if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
     AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
 
-AM_CONDITIONAL(ENABLE_GTESTS, test "$enable_gtests" = "yes")
+AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" = "yes")
 
 AC_OUTPUT([
     Makefile
@@ -224,5 +224,5 @@ echo Libva VA-API version ............. : $LIBVA_API_VERSION
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
-echo Enable Gtests .................... : $enable_gtests
+echo Enable Unit-tests .................... : $enable_tests
 echo

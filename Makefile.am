@@ -34,7 +34,7 @@ SUBDIRS += putsurface
 endif
 endif
 
-if ENABLE_GTESTS
+if ENABLE_TESTS
 SUBDIRS += test
 endif
 
