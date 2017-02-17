@@ -94,8 +94,6 @@ AC_ARG_ENABLE([tests],
                     [build unit tests @<:@default=no@:>@])],
     [], [enable_tests="no"])
 
-LIBVA_DRIVERS_PATH="$with_drivers_path"
-AC_SUBST(LIBVA_DRIVERS_PATH)
 
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
@@ -222,7 +220,6 @@ echo "libva-utils - ${LIBVA_UTILS_VERSION}"
 echo
 echo Libva VA-API version ............. : $LIBVA_API_VERSION
 echo Installation prefix .............. : $prefix
-echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
 echo Enable Unit-tests .................... : $enable_tests
 echo
