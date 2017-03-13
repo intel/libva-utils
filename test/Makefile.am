@@ -97,7 +97,7 @@ test_va_api_CXXFLAGS =						\
 	$(AM_CXXFLAGS)						\
 	$(NULL)
 
-EXTRA_DIST =							\
+EXTRA_DIST +=							\
 	va_version.h.in						\
 	$(NULL)
 
