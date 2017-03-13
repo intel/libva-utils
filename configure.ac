@@ -53,7 +53,7 @@ AC_PREREQ(2.57)
 AC_INIT([libva_utils],
         [libva_utils_version],
         [https://github.com/01org/libva-utils/issues/new],
-        [libva_utils],
+        [libva-utils],
         [https://github.com/01org/libva-utils])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_MACRO_DIR([m4])
