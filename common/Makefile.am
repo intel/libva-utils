@@ -31,7 +31,7 @@ libva_display_libs = \
 	$(NULL)
 
 source_c		= va_display.c
-source_h		= va_display.h
+source_h		= va_display.h loadsurface.h loadsurface_yuv.h
 
 if USE_X11
 source_c		+= va_display_x11.c
