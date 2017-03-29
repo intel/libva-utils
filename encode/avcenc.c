@@ -111,6 +111,7 @@ static const struct option longopts[] = {
     {"mode", required_argument, 0, 3},
     {"low-power", no_argument, 0, 4},
     {"roi-test", no_argument, 0, 5},
+    {"frames", required_argument, 0, 6},
     { NULL, 0, NULL, 0}
 };
 
@@ -1845,7 +1846,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
 
 static void show_help()
 {
-    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [--qp=qpvalue|--fb=framebitrate] [--mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)] [--low-power] [--roi-test]\n");
+    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [--qp=qpvalue|--fb=framebitrate] [--mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)] [--low-power] [--roi-test] [--frames=0(ignore when < 0)/N(number)] \n");
 }
 
 static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_param,
@@ -2017,6 +2018,7 @@ int main(int argc, char *argv[])
     int mode_value;
     struct timeval tpstart,tpend; 
     float  timeuse;
+    int frame_num_value = 0;
 
     va_init_display_args(&argc, argv);
 
@@ -2087,6 +2089,9 @@ int main(int argc, char *argv[])
                 roi_test_enable = 1;
                 break;
 
+            case 6:     // Frames number
+                frame_num_value = atoi(optarg);
+                break;
             default:
                 show_help();
                 return -1;
@@ -2124,7 +2129,10 @@ int main(int argc, char *argv[])
     alloc_encode_resource(yuv_fp);
 
     enc_frame_number = 0;
-    for ( f = 0; f < frame_number; f++) {		//picture level loop
+    if(frame_num_value <= 0)
+        frame_num_value = frame_number;
+
+    for ( f = 0; f < frame_num_value; f++) {           //picture level loop
         unsigned long long next_frame_display;
         int next_frame_type;
 
