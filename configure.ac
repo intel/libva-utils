@@ -95,8 +95,8 @@ AC_ARG_ENABLE([tests],
     [], [enable_tests="no"])
 
 
+LT_INIT
 AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
 AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_CC_C_O
