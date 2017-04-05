@@ -57,7 +57,9 @@
 #define NAL_IDR                 5
 #define NAL_SPS                 7
 #define NAL_PPS                 8
-#define NAL_SEI			6
+#define NAL_SEI                 6
+#define NAL_DELIMITER           9
+
 
 #define SLICE_TYPE_P            0
 #define SLICE_TYPE_B            1
@@ -92,6 +94,7 @@ static int frame_bit_rate = -1;
 static int frame_rate = 30;
 static int ip_period = 1;
 static int roi_test_enable = 0;
+static int aud_nal_enable = 1;
 
 static VAEntrypoint select_entrypoint = VAEntrypointEncSlice;
 
@@ -116,6 +119,9 @@ build_packed_pic_buffer(unsigned char **header_buffer);
 
 static int
 build_packed_seq_buffer(unsigned char **header_buffer);
+
+static int
+build_nal_delimiter(unsigned char **header_buffer);
 
 static int 
 build_packed_sei_pic_timing(unsigned int cpb_removal_length,
@@ -157,6 +163,8 @@ static struct {
     VABufferID packed_sei_buf_id;
     VABufferID misc_parameter_hrd_buf_id;
     VABufferID misc_parameter_roi_buf_id;
+    VABufferID packed_aud_header_param_buf_id;
+    VABufferID packed_aud_buf_id;
 
     int num_slices;
     int codedbuf_i_size;
@@ -754,6 +762,32 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     else
         avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
 
+    if(aud_nal_enable) {
+        VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+        unsigned int length_in_bits;
+        unsigned char *packed_buffer = NULL;
+
+        length_in_bits = build_nal_delimiter(&packed_buffer);
+        packed_header_param_buffer.type = VAEncPackedHeaderRawData;
+        packed_header_param_buffer.bit_length = length_in_bits;
+        packed_header_param_buffer.has_emulation_bytes = 1;
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncPackedHeaderParameterBufferType,
+                                   sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                                   &avcenc_context.packed_aud_header_param_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncPackedHeaderDataBufferType,
+                                   (length_in_bits + 7) / 8, 1, packed_buffer,
+                                   &avcenc_context.packed_aud_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+        free(packed_buffer);
+    }
+
     if (is_idr) {
         VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
         unsigned int length_in_bits;
@@ -901,6 +935,12 @@ int avcenc_render_picture()
     unsigned int num_va_buffers = 0;
     int i;
 
+    if (avcenc_context.packed_aud_header_param_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] =  avcenc_context.packed_aud_header_param_buf_id;
+
+    if (avcenc_context.packed_aud_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] =  avcenc_context.packed_aud_buf_id;
+
     va_buffers[num_va_buffers++] = avcenc_context.seq_param_buf_id;
     va_buffers[num_va_buffers++] = avcenc_context.pic_param_buf_id;
 
@@ -927,6 +967,7 @@ int avcenc_render_picture()
 
     if (avcenc_context.misc_parameter_roi_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] =  avcenc_context.misc_parameter_roi_buf_id;
+
 
     va_status = vaBeginPicture(va_dpy,
                                avcenc_context.context_id,
@@ -985,6 +1026,8 @@ static void end_picture()
     avcenc_destroy_buffers(&avcenc_context.codedbuf_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.misc_parameter_hrd_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.misc_parameter_roi_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.packed_aud_header_param_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.packed_aud_buf_id, 1);
 
     memset(avcenc_context.slice_param, 0, sizeof(avcenc_context.slice_param));
     avcenc_context.num_slices = 0;
@@ -1319,6 +1362,34 @@ build_header(FILE *avc_fp)
     build_nal_pps(avc_fp);
 }
 #endif
+
+static void nal_delimiter(bitstream *bs,int slice_type)
+{
+    if(slice_type == SLICE_TYPE_I || slice_type == FRAME_IDR)
+        bitstream_put_ui(bs, 0, 3);
+    else if(slice_type == SLICE_TYPE_P)
+        bitstream_put_ui(bs, 1, 3);
+    else if(slice_type == SLICE_TYPE_B)
+        bitstream_put_ui(bs, 2, 3);
+    else
+        assert(0);
+    bitstream_put_ui(bs, 1, 1);
+    bitstream_put_ui(bs, 0, 4);
+}
+
+static int build_nal_delimiter(unsigned char **header_buffer)
+{
+    bitstream bs;
+
+    bitstream_start(&bs);
+    nal_start_code_prefix(&bs);
+    nal_header(&bs, NAL_REF_IDC_NONE, NAL_DELIMITER);
+    nal_delimiter(&bs,current_frame_type);
+    bitstream_end(&bs);
+    *header_buffer = (unsigned char *)bs.buffer;
+    return bs.bit_offset;
+}
+
 
 static int
 build_packed_pic_buffer(unsigned char **header_buffer)
@@ -1915,6 +1986,8 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.packed_sei_header_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_sei_buf_id = VA_INVALID_ID;
     avcenc_context.misc_parameter_roi_buf_id = VA_INVALID_ID;
+    avcenc_context.packed_aud_header_param_buf_id = VA_INVALID_ID;
+    avcenc_context.packed_aud_buf_id = VA_INVALID_ID;
 
     if (qp_value == -1)
         avcenc_context.rate_control_method = VA_RC_CBR;
