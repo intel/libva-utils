@@ -1,5 +1,8 @@
-libva-utils NEWS -- summary of changes.  2017-03-31
+libva-utils NEWS -- summary of changes.  2017-04-xx
 Copyright (C) 2009-2017 Intel Corporation
+
+Version 1.8.1 - DD.Apr.2017
+* Bump version to 1.8.1
 
 Version 1.8.0 - 31.Mar.2017
 * First release of libva-utils as a separate project
