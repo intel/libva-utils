@@ -30,8 +30,8 @@
 # - pre version is libva_pre_version, usually development version
 m4_define([libva_utils_major_version], [1])
 m4_define([libva_utils_minor_version], [8])
-m4_define([libva_utils_micro_version], [0])
-m4_define([libva_utils_pre_version],   [2])
+m4_define([libva_utils_micro_version], [2])
+m4_define([libva_utils_pre_version],   [1])
 
 m4_define([libva_utils_version],
           [libva_utils_major_version.libva_utils_minor_version.libva_utils_micro_version])
@@ -95,8 +95,8 @@ AC_ARG_ENABLE([tests],
     [], [enable_tests="no"])
 
 
+LT_INIT
 AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
 AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_CC_C_O
