@@ -31,7 +31,7 @@
 #else
 # include <va/va_wayland.h>
 #endif
-#include <wayland-server.h>
+#include <wayland-client.h>
 
 static void *open_display(void);
 static void close_display(void *win_display);
