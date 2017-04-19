@@ -1,0 +1,13 @@
+libva-utils NEWS -- summary of changes.  2017-04-10
+Copyright (C) 2009-2017 Intel Corporation
+
+Version 1.8.1 - 10.Apr.2017
+* Bump version to 1.8.1
+
+Version 1.8.0 - 31.Mar.2017
+* First release of libva-utils as a separate project
+* Follows libva release versioning
+* Contains all the utilities and tests for libva API
+* dynamically links to libva
+* building system clean ups
+* test suite included using GoogleTestFramework

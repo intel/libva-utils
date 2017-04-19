@@ -58,3 +58,8 @@ libva_display_la_LIBADD	= $(libva_display_libs)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in
+
+EXTRA_DIST = \
+	loadsurface.h		\
+	loadsurface_yuv.h	\
+	$(NULL)
