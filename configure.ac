@@ -31,7 +31,7 @@
 m4_define([libva_utils_major_version], [1])
 m4_define([libva_utils_minor_version], [8])
 m4_define([libva_utils_micro_version], [2])
-m4_define([libva_utils_pre_version],   [1])
+m4_define([libva_utils_pre_version],   [0])
 
 m4_define([libva_utils_version],
           [libva_utils_major_version.libva_utils_minor_version.libva_utils_micro_version])
