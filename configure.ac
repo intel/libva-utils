@@ -28,9 +28,9 @@
 # - minor version is libva_minor_version
 # - micro version is libva_micro_version
 # - pre version is libva_pre_version, usually development version
-m4_define([libva_utils_major_version], [1])
-m4_define([libva_utils_minor_version], [8])
-m4_define([libva_utils_micro_version], [4])
+m4_define([libva_utils_major_version], [2])
+m4_define([libva_utils_minor_version], [0])
+m4_define([libva_utils_micro_version], [0])
 m4_define([libva_utils_pre_version],   [1])
 
 m4_define([libva_utils_version],
@@ -41,7 +41,7 @@ m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
 
 # libva minimum version requirement, at this released version
 # libva-utils was created
-m4_define([libva_api_min_version], [0.39.4])
+m4_define([libva_api_min_version], [1.0.0])
 
 # libdrm minimun version requirement
 m4_define([libdrm_version], [2.4])
