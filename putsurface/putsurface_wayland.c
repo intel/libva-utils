@@ -277,7 +277,7 @@ create_window(void *win_display, int x, int y, int width, int height)
     drawable2 = malloc(sizeof(*drawable2));
     assert(drawable2);
     drawable2->display          = display;
-    drawable1->surface          = surface2;
+    drawable2->surface          = surface2;
     drawable2->redraw_pending   = 0;
 
     /* global out */
