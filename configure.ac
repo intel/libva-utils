@@ -81,13 +81,15 @@ AC_ARG_ENABLE(drm,
 
 AC_ARG_ENABLE(x11,
     [AC_HELP_STRING([--enable-x11],
-                    [build with VA/X11 API support @<:@default=yes@:>@])],
-    [], [enable_x11="yes"])
+                    [build with VA/X11 API support @<:@default=auto@:>@])],
+    [enable_x11="$enableval"],
+    [enable_x11="auto"])
 
 AC_ARG_ENABLE([wayland],
     [AC_HELP_STRING([--enable-wayland],
-                    [build with VA/Wayland API support @<:@default=yes@:>@])],
-    [], [enable_wayland="yes"])
+                    [build with VA/Wayland API support @<:@default=auto@:>@])],
+    [enable_wayland="$enableval"],
+    [enable_wayland="auto"])
 
 AC_ARG_ENABLE([tests],
     [AC_HELP_STRING([--enable-tests],
@@ -153,13 +155,15 @@ AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 
 # Check for X11
 USE_X11="no"
-if test "$enable_x11" = "yes"; then
-    USE_X11="yes"
-    PKG_CHECK_MODULES([X11],    [x11],    [:], [USE_X11="no"])
-    PKG_CHECK_MODULES([XEXT],   [xext],   [:], [USE_X11="no"])
-    PKG_CHECK_MODULES([XFIXES], [xfixes], [:], [USE_X11="no"])
+if test "x$enable_x11" != "xno"; then
+    PKG_CHECK_MODULES([X11],    [x11 xext xfixes libva-x11],
+        [USE_X11="yes"], [:])
+
+    if test "x$USE_X11" = "xno" -a "x$enable_x11" = "xyes"; then
+       AC_MSG_ERROR([X11 explicitly enabled, but $X11_PKG_ERRORS])
+    fi
+
     if test "$USE_X11" = "yes"; then
-       PKG_CHECK_MODULES([LIBVA_X11], [libva-x11], [:], [USE_X11="no"])
        AC_DEFINE([HAVE_VA_X11], [1], [Defined to 1 if VA/X11 API is supported])
     fi
 fi
@@ -170,9 +174,14 @@ WAYLAND_API_VERSION=wayland_api_version
 AC_SUBST(WAYLAND_API_VERSION)
 
 USE_WAYLAND="no"
-if test "$enable_wayland" = "yes"; then
+if test "x$enable_wayland" != "xno"; then
     PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version libva-wayland],
         [USE_WAYLAND="yes"], [:])
+
+    if test "x$USE_WAYLAND" = "xno" -a "x$enable_wayland" = "xyes"; then
+        AC_MSG_ERROR([wayland explicitly enabled, but $WAYLAND_PKG_ERRORS])
+    fi
+
     if test "$USE_WAYLAND" = "yes"; then
 
         WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
