@@ -171,7 +171,7 @@ AC_SUBST(WAYLAND_API_VERSION)
 
 USE_WAYLAND="no"
 if test "$enable_wayland" = "yes"; then
-    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version],
+    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version libva-wayland],
         [USE_WAYLAND="yes"], [:])
     if test "$USE_WAYLAND" = "yes"; then
 
@@ -181,7 +181,6 @@ if test "$enable_wayland" = "yes"; then
 
         AC_DEFINE([HAVE_VA_WAYLAND], [1],
                   [Defined to 1 if VA/Wayland API is supported])
-       PKG_CHECK_MODULES([LIBVA_WAYLAND], [libva-wayland], [:], [USE_WAYLAND="no"])
     fi
 fi
 
