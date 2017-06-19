@@ -242,7 +242,7 @@ static void create_encode_pipe()
         if (attrib[2].value != VA_ATTRIB_NOT_SUPPORTED) {
             VAConfigAttribValEncROI *roi_config = (VAConfigAttribValEncROI *)&(attrib[2].value);
             if(roi_config->bits.num_roi_regions == 0 ||
-               roi_config->bits.roi_rc_qp_delat_support == 0) {
+               roi_config->bits.roi_rc_qp_delta_support == 0) {
                 roi_test_enable = 0;
                 printf("WARNING: do not support ROI or ROI delta QP ! \n");
             }
