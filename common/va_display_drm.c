@@ -23,6 +23,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #ifdef IN_LIBVA
@@ -33,6 +34,7 @@
 #include "va_display.h"
 
 static int drm_fd = -1;
+extern const char *g_drm_device_name;
 
 static VADisplay
 va_open_display_drm(void)
@@ -45,6 +47,25 @@ va_open_display_drm(void)
         "/dev/dri/card0",
         NULL
     };
+
+    if (g_drm_device_name) {
+        drm_fd = open(g_drm_device_name, O_RDWR);
+        if (drm_fd < 0) {
+            printf("Failed to open the given device!\n");
+            exit(1);
+            return NULL;
+        }
+
+        va_dpy = vaGetDisplayDRM(drm_fd);
+        if (va_dpy)
+            return va_dpy;
+
+        printf("Failed to a DRM display for the given device\n");
+        close(drm_fd);
+        drm_fd = -1;
+        exit(1);
+        return NULL;
+    }
 
     for (i = 0; drm_device_paths[i]; i++) {
         drm_fd = open(drm_device_paths[i], O_RDWR);
