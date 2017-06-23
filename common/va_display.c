@@ -56,6 +56,7 @@ static const VADisplayHooks *g_display_hooks_available[] = {
 };
 
 static const char *g_display_name;
+const char *g_drm_device_name;
 
 static const char *
 get_display_name(int argc, char *argv[])
@@ -74,6 +75,25 @@ get_display_name(int argc, char *argv[])
         }
     }
     return display_name;
+}
+
+static const char *
+get_drm_device_name(int argc, char *argv[])
+{
+    const char *device_name = NULL;
+    int i;
+
+    for (i = 1; i < argc; i++) {
+        if (argv[i] && (strcmp(argv[i], "--device") != 0))
+            continue;
+        argv[i] = NULL;
+
+        if (++i < argc) {
+            device_name = argv[i];
+            argv[i] = NULL;
+        }
+    }
+    return device_name;
 }
 
 static void
@@ -104,6 +124,7 @@ void
 va_init_display_args(int *argc, char *argv[])
 {
     const char *display_name;
+    const char *device_name;
 
     display_name = get_display_name(*argc, argv);
     if (display_name && strcmp(display_name, "help") == 0) {
@@ -111,6 +132,9 @@ va_init_display_args(int *argc, char *argv[])
         exit(0);
     }
     g_display_name = display_name;
+
+    if (g_display_name && strcmp(g_display_name, "drm") == 0)
+        g_drm_device_name = get_drm_device_name(*argc, argv);
 
     sanitize_args(argc, argv);
 }
