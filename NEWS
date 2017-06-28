@@ -1,7 +1,7 @@
-libva-utils NEWS -- summary of changes.  2017-06-xx
+libva-utils NEWS -- summary of changes.  2017-06-28
 Copyright (C) 2009-2017 Intel Corporation
 
-Version 1.8.3 - DD.Jun.2017
+Version 1.8.3 - 28.Jun.2017
 * Bump version to 1.8.3
 * Switch AC_PROG_LIBTOOL to LT_INIT
 * putsurface: include wayland-client.h instead of wayland-server.h
