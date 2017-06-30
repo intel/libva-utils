@@ -74,6 +74,11 @@ AC_SUBST(LIBVA_UTILS_MINOR_VERSION)
 AC_SUBST(LIBVA_UTILS_MICRO_VERSION)
 AC_SUBST(LIBVA_UTILS_VERSION)
 
+LIBVA_LIB_VERSION=2.0
+AC_SUBST([LIBVA_LIB_VERSION])
+AC_DEFINE_UNQUOTED([LIBVA_LIB_VERSION], ["$LIBVA_LIB_VERSION"],
+  [Libva Library Version])
+
 AC_ARG_ENABLE(drm,
     [AC_HELP_STRING([--enable-drm],
                     [build with VA/DRM API support @<:@default=yes@:>@])],
@@ -130,14 +135,14 @@ fi
 # Check for DRM (mandatory)
 LIBDRM_VERSION=libdrm_version
 PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
-PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm])
+PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm-$LIBVA_LIB_VERSION])
 AC_SUBST(LIBDRM_VERSION)
 
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version
-PKG_CHECK_MODULES([LIBVA], [libva >= $LIBVA_API_MIN_VERSION])
+PKG_CHECK_MODULES([LIBVA], [libva-$LIBVA_LIB_VERSION >= $LIBVA_API_MIN_VERSION])
 AC_SUBST(LIBVA_VERSION)
-LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva`
+LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva-$LIBVA_LIB_VERSION`
 VA_MAJOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f1`
 VA_MINOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f2`
 VA_MICRO_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f3`
@@ -159,7 +164,7 @@ if test "$enable_x11" = "yes"; then
     PKG_CHECK_MODULES([XEXT],   [xext],   [:], [USE_X11="no"])
     PKG_CHECK_MODULES([XFIXES], [xfixes], [:], [USE_X11="no"])
     if test "$USE_X11" = "yes"; then
-       PKG_CHECK_MODULES([LIBVA_X11], [libva-x11], [:], [USE_X11="no"])
+       PKG_CHECK_MODULES([LIBVA_X11], [libva-x11-$LIBVA_LIB_VERSION], [:], [USE_X11="no"])
        AC_DEFINE([HAVE_VA_X11], [1], [Defined to 1 if VA/X11 API is supported])
     fi
 fi
@@ -181,7 +186,7 @@ if test "$enable_wayland" = "yes"; then
 
         AC_DEFINE([HAVE_VA_WAYLAND], [1],
                   [Defined to 1 if VA/Wayland API is supported])
-       PKG_CHECK_MODULES([LIBVA_WAYLAND], [libva-wayland], [:], [USE_WAYLAND="no"])
+       PKG_CHECK_MODULES([LIBVA_WAYLAND], [libva-wayland-$LIBVA_LIB_VERSION], [:], [USE_WAYLAND="no"])
     fi
 fi
 
