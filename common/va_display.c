@@ -160,7 +160,7 @@ va_open_display(void)
         if (g_display_name)
             fprintf(stderr, " '%s'", g_display_name);
         fprintf(stderr, "\n");
-        abort();
+        exit(1);
     }
     return va_dpy;
 }
