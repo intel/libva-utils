@@ -26,6 +26,7 @@
 #define VA_DISPLAY_H
 
 #include <va/va.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,6 +57,9 @@ va_put_surface(
     const VARectangle *src_rect,
     const VARectangle *dst_rect
 );
+
+void
+va_print_display_options(FILE *stream);
 
 #ifdef __cplusplus
 }
