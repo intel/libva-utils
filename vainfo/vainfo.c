@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <getopt.h>
+
 #include "va_display.h"
 
 #define CHECK_VASTATUS(va_status,func, ret)                             \
@@ -88,6 +91,45 @@ static char * entrypoint_string(VAEntrypoint entrypoint)
     return "<unknown entrypoint>";
 }
 
+static void
+usage_exit(const char *program)
+{
+    fprintf(stdout, "Show information from VA-API driver\n");
+    fprintf(stdout, "Usage: %s --help\n", program);
+    fprintf(stdout, "\t--help print this message\n\n");
+    fprintf(stdout, "Usage: %s [options]\n", program);
+    va_print_display_options(stdout);
+
+    exit(0);
+}
+
+static void
+parse_args(const char *name, int argc, char **argv)
+{
+    int c, tmp;
+    int option_index = 0;
+    long file_size;
+
+    static struct option long_options[] = {
+        {"help",        no_argument,            0,      'h'},
+        { NULL,         0,                      NULL,   0 }
+    };
+
+    va_init_display_args(&argc, argv);
+
+    while ((c = getopt_long(argc, argv,
+                            "",
+                            long_options,
+                            &option_index)) != -1) {
+        switch(c) {
+        case 'h':
+        default:
+            usage_exit(name);
+            break;
+        }
+    }
+}
+
 int main(int argc, const char* argv[])
 {
   VADisplay va_dpy;
@@ -106,7 +148,7 @@ int main(int argc, const char* argv[])
   else
       name = argv[0];
 
-  va_init_display_args(&argc, (char **)argv);
+  parse_args(name, argc, (char **)argv);
 
   va_dpy = va_open_display();
   if (NULL == va_dpy)

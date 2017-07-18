@@ -190,3 +190,11 @@ va_put_surface(
         return g_display_hooks->put_surface(va_dpy, surface, src_rect, dst_rect);
     return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
+
+void
+va_print_display_options(FILE *stream)
+{
+    fprintf(stream, "Display options:\n");
+    fprintf(stream, "\t--display display | help         Show information for the specified display, or the available display list \n");
+    fprintf(stream, "\t--device device                  Set device name, only available under drm display\n");
+}
