@@ -89,8 +89,9 @@ VADisplay VAAPIFixture::doInitialize()
     vaDisplay = getDisplay();
     EXPECT_TRUE(vaDisplay);
 
-    if (vaDisplay)
+    if (vaDisplay) {
         EXPECT_STATUS(vaInitialize(vaDisplay, &majorVersion, &minorVersion));
+    }
 
     return vaDisplay;
 }
