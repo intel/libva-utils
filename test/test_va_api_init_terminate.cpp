@@ -38,8 +38,9 @@ void VAAPIInitTerminate::doInitTerminate()
     vaDisplay = getDisplay();
     EXPECT_TRUE(vaDisplay);
 
-    if (vaDisplay)
+    if (vaDisplay) {
 	ASSERT_STATUS(vaInitialize(vaDisplay, &majorVersion, &minorVersion));
+    }
 
     EXPECT_EQ(VA_MAJOR_VERSION, majorVersion)
 	<< "Check installed driver version";
