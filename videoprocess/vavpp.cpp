@@ -389,6 +389,71 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             y_src += surface_image.width * 2;
             y_dst += surface_image.pitches[0];
         }
+    } else if ((surface_image.format.fourcc == VA_FOURCC_P010 &&
+                g_src_file_fourcc == VA_FOURCC_P010) ||
+               (surface_image.format.fourcc == VA_FOURCC_I010 &&
+                g_src_file_fourcc == VA_FOURCC_I010)) {
+        frame_size = surface_image.width * surface_image.height * 3;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+
+        do {
+            n_items = fread(newImageBuffer, frame_size, 1, fp);
+        } while (n_items != 1);
+
+        y_src = newImageBuffer;
+
+        if (g_src_file_fourcc == VA_FOURCC_I010) {
+            u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
+            v_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 2;
+        } else if (g_src_file_fourcc == VA_FOURCC_P010) {
+            u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
+            v_src = u_src;
+        }
+
+        y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
+
+        if (surface_image.format.fourcc == VA_FOURCC_I010) {
+            u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
+            v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
+        } else if (surface_image.format.fourcc == VA_FOURCC_P010) {
+            u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
+            v_dst = u_dst;
+        }
+
+        /* plane 0, directly copy */
+        for (row = 0; row < surface_image.height; row++) {
+            memcpy(y_dst, y_src, surface_image.width * 2);
+            y_src += surface_image.width * 2;
+            y_dst += surface_image.pitches[0];
+        }
+
+        /* UV plane */
+        if (surface_image.format.fourcc == VA_FOURCC_I010) {
+            assert(g_src_file_fourcc == VA_FOURCC_I010);
+
+            for (row = 0; row < surface_image.height / 2; row++) {
+                memcpy(u_dst, u_src, surface_image.width);
+                memcpy(v_dst, v_src, surface_image.width);
+
+                u_src += surface_image.width;
+                v_src += surface_image.width;
+
+                u_dst += surface_image.pitches[1];
+                v_dst += surface_image.pitches[2];
+            }
+        } else if (surface_image.format.fourcc == VA_FOURCC_P010){
+            assert(g_src_file_fourcc == VA_FOURCC_P010);
+
+            for (row = 0; row < surface_image.height / 2; row++) {
+                memcpy(u_dst, u_src, surface_image.width * 2);
+
+                u_src += surface_image.width * 2;
+                v_src = u_src;
+
+                u_dst += surface_image.pitches[1];
+                v_dst = u_dst;
+            }
+        }
      } else {
          printf("Not supported YUV surface fourcc !!! \n");
          return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -782,6 +847,91 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
 }
 
 static VAStatus
+store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
+{
+    VAStatus va_status;
+    VAImageFormat image_format;
+    VAImage surface_image;
+    void *surface_p = NULL;
+    unsigned char *y_src, *u_src, *v_src;
+    unsigned char *y_dst, *u_dst, *v_dst;
+    uint32_t frame_size, row, col;
+    int32_t  ret, n_items;
+    unsigned char * newImageBuffer = NULL;
+
+    va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
+
+    va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
+
+    /* store the surface to one 10bit file */
+    uint32_t y_size = surface_image.width * surface_image.height * 2;
+    uint32_t u_size = y_size / 4;
+
+    newImageBuffer = (unsigned char*)malloc(y_size * 3);
+    y_dst = newImageBuffer;
+
+    y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
+
+    /* Y plane copy */
+    for (row = 0; row < surface_image.height; row++) {
+        memcpy(y_dst, y_src, surface_image.width * 2);
+        y_src += surface_image.pitches[0];
+        y_dst += surface_image.width * 2;
+    }
+
+    if (surface_image.format.fourcc == VA_FOURCC_I010) {
+        u_dst = newImageBuffer + y_size;
+        v_dst = newImageBuffer + y_size + u_size;
+
+        u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
+        v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
+
+        for (row = 0; row < surface_image.height / 2; row++){
+            memcpy(u_dst, u_src, surface_image.width);
+            memcpy(v_dst, v_src, surface_image.width);
+
+            u_dst += surface_image.width;
+            v_dst += surface_image.width;
+
+            u_src += surface_image.pitches[1];
+            v_src += surface_image.pitches[2];
+        }
+    } else if (surface_image.format.fourcc == VA_FOURCC_P010) {
+        u_dst = newImageBuffer + y_size;
+        v_dst = u_dst;
+
+        u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
+        v_src = u_src;
+
+        for (row = 0; row < surface_image.height / 2; row++) {
+            memcpy(u_dst, u_src, surface_image.width * 2);
+            u_dst += surface_image.width * 2;
+            u_src += surface_image.pitches[1];
+        }
+    } else {
+        printf("Not supported YUV surface fourcc !!! \n");
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+    }
+
+    /* write frame to file */
+    do {
+        n_items = fwrite(newImageBuffer, y_size * 3 / 2, 1, fp);
+    } while (n_items != 1);
+
+    if (newImageBuffer){
+        free(newImageBuffer);
+        newImageBuffer = NULL;
+    }
+
+    vaUnmapBuffer(va_dpy, surface_image.buf);
+    vaDestroyImage(va_dpy, surface_image.image_id);
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
 store_yuv_surface_to_file(FILE *fp,
                           VASurfaceID surface_id)
 {
@@ -803,6 +953,11 @@ store_yuv_surface_to_file(FILE *fp,
                (g_out_fourcc == VA_FOURCC_UYVY &&
                 g_dst_file_fourcc == VA_FOURCC_UYVY)) {
         store_packed_yuv_surface_to_packed_file(fp, surface_id);
+    } else if ((g_out_fourcc == VA_FOURCC_I010 &&
+                g_dst_file_fourcc == VA_FOURCC_I010) ||
+               (g_out_fourcc == VA_FOURCC_P010 &&
+                g_dst_file_fourcc == VA_FOURCC_P010)) {
+        store_yuv_surface_to_10bit_file(fp, surface_id);
     } else {
         printf("Not supported YUV fourcc for output !!!\n");
         return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -1370,6 +1525,12 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     } else if(!strcmp(str, "UYVY")){
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
         tformat = VA_RT_FORMAT_YUV422;
+    } else if (!strcmp(str, "P010")) {
+        tfourcc = VA_FOURCC('P', '0', '1', '0');
+        tformat = VA_RT_FORMAT_YUV420_10BPP;
+    } else if (!strcmp(str, "I010")) {
+        tfourcc = VA_FOURCC('I', '0', '1', '0');
+        tformat = VA_RT_FORMAT_YUV420_10BPP;
     } else{
         printf("Not supported format: %s! Currently only support following format: %s\n",
          str, "YV12, I420, NV12, YUY2(YUYV), or UYVY");
