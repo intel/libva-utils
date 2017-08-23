@@ -56,7 +56,8 @@ static const std::vector<VAProfile> m_vaProfiles
 static const std::vector<VAEntrypoint> m_vaEntrypoints
     = { VAEntrypointVLD,        VAEntrypointIZZ,        VAEntrypointIDCT,
         VAEntrypointMoComp,     VAEntrypointDeblocking, VAEntrypointEncSlice,
-        VAEntrypointEncPicture, VAEntrypointEncSliceLP, VAEntrypointVideoProc };
+        VAEntrypointEncPicture, VAEntrypointEncSliceLP, VAEntrypointVideoProc,
+        VAEntrypointFEI };
 
 static const std::vector<VAConfigAttribType> m_vaConfigAttribs
     = { VAConfigAttribRTFormat,
@@ -76,7 +77,9 @@ static const std::vector<VAConfigAttribType> m_vaConfigAttribs
         VAConfigAttribEncQualityRange,
         VAConfigAttribEncSkipFrame,
         VAConfigAttribEncROI,
-        VAConfigAttribEncRateControlExt };
+        VAConfigAttribEncRateControlExt,
+        VAConfigAttribFEIFunctionType,
+        VAConfigAttribFEIMVPredictors };
 
 static const std::vector<VASurfaceAttribType> m_vaSurfaceAttribs
     = { VASurfaceAttribNone,       VASurfaceAttribPixelFormat,
@@ -123,6 +126,11 @@ static const std::vector<VABufferType> m_vaBufferTypes
         VAEncMacroblockParameterBufferType,
         VAEncMacroblockMapBufferType,
         VAProcPipelineParameterBufferType,
-        VAProcFilterParameterBufferType };
+        VAProcFilterParameterBufferType,
+        VAEncFEIMVBufferType,
+        VAEncFEIMBCodeBufferType,
+        VAEncFEIDistortionBufferType,
+        VAEncFEIMBControlBufferType,
+        VAEncFEIMVPredictorBufferType };
 }
 #endif

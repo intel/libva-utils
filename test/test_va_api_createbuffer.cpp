@@ -56,7 +56,12 @@ static const std::vector<VABufferType> encoderBufferTypes ={
     VAEncPackedHeaderParameterBufferType,
     VAEncPackedHeaderDataBufferType,
     VAEncMiscParameterBufferType,
-    VAEncMacroblockMapBufferType
+    VAEncMacroblockMapBufferType,
+    VAEncFEIMVBufferType,
+    VAEncFEIMBCodeBufferType,
+    VAEncFEIDistortionBufferType,
+    VAEncFEIMBControlBufferType,
+    VAEncFEIMVPredictorBufferType
 };
 
 static const std::vector<VABufferType> postProcessorBufferTypes
@@ -84,6 +89,9 @@ static const std::vector<testInput> input = {
     { VAProfileH264High, VAEntrypointEncSlice, encoderBufferTypes },
     { VAProfileH264MultiviewHigh, VAEntrypointEncSlice, encoderBufferTypes },
     { VAProfileH264StereoHigh, VAEntrypointEncSlice, encoderBufferTypes },
+    { VAProfileH264Main, VAEntrypointFEI, encoderBufferTypes},
+    { VAProfileH264ConstrainedBaseline, VAEntrypointFEI, encoderBufferTypes },
+    { VAProfileH264High, VAEntrypointFEI, encoderBufferTypes },
     { VAProfileJPEGBaseline, VAEntrypointEncSlice, encoderBufferTypes },
     { VAProfileVP8Version0_3, VAEntrypointEncSlice, encoderBufferTypes },
     { VAProfileHEVCMain, VAEntrypointEncSlice, encoderBufferTypes },
