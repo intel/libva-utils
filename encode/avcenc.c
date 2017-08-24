@@ -410,7 +410,7 @@ static void avcenc_update_sei_param(int is_idr)
 				avcenc_context.i_dpb_output_delay_length,
 				&packed_sei_buffer);
 
-	packed_header_param_buffer.type = VAEncPackedHeaderH264_SEI;
+	packed_header_param_buffer.type = VAEncPackedHeaderRawData;
 	packed_header_param_buffer.bit_length = length_in_bits;
 	packed_header_param_buffer.has_emulation_bytes = 0;
 
@@ -1956,8 +1956,9 @@ static void avcenc_context_init(int width, int height)
 
     memset(&use_slot, 0, sizeof(use_slot));
     switch (avcenc_context.profile) {
-    case VAProfileH264Baseline:
+    case VAProfileH264ConstrainedBaseline:
         avcenc_context.constraint_set_flag |= (1 << 0); /* Annex A.2.1 */
+        avcenc_context.constraint_set_flag |= (1 << 1); /* Annex A.2.2 */
         break;
 
     case VAProfileH264Main:

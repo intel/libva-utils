@@ -958,7 +958,7 @@ static int process_cmdline(int argc, char *argv[])
             break;
         case 18:
             if (strncmp(optarg, "BP", 2) == 0)
-                h264_profile = VAProfileH264Baseline;
+                h264_profile = VAProfileH264ConstrainedBaseline;
             else if (strncmp(optarg, "MP", 2) == 0)
                 h264_profile = VAProfileH264Main;
             else if (strncmp(optarg, "HP", 2) == 0)
@@ -1047,7 +1047,7 @@ static int process_cmdline(int argc, char *argv[])
 
 static int init_va(void)
 {
-    VAProfile profile_list[]={VAProfileH264High,VAProfileH264Main,VAProfileH264Baseline,VAProfileH264ConstrainedBaseline};
+    VAProfile profile_list[]={VAProfileH264High,VAProfileH264Main,VAProfileH264ConstrainedBaseline};
     VAEntrypoint *entrypoints;
     int num_entrypoints, slice_entrypoint;
     int support_encode = 0;    
@@ -1088,12 +1088,6 @@ static int init_va(void)
         exit(1);
     } else {
         switch (h264_profile) {
-            case VAProfileH264Baseline:
-                printf("Use profile VAProfileH264Baseline\n");
-                ip_period = 1;
-                constraint_set_flag |= (1 << 0); /* Annex A.2.1 */
-                h264_entropy_mode = 0;
-                break;
             case VAProfileH264ConstrainedBaseline:
                 printf("Use profile VAProfileH264ConstrainedBaseline\n");
                 constraint_set_flag |= (1 << 0 | 1 << 1); /* Annex A.2.2 */
@@ -1110,10 +1104,10 @@ static int init_va(void)
                 printf("Use profile VAProfileH264High\n");
                 break;
             default:
-                printf("unknow profile. Set to Baseline");
-                h264_profile = VAProfileH264Baseline;
+                printf("unknow profile. Set to Constrained Baseline");
+                h264_profile = VAProfileH264ConstrainedBaseline;
+                constraint_set_flag |= (1 << 0 | 1 << 1); /* Annex A.2.1 & A.2.2 */
                 ip_period = 1;
-                constraint_set_flag |= (1 << 0); /* Annex A.2.1 */
                 break;
         }
     }
@@ -1695,7 +1689,7 @@ static void render_packedsei(void)
         &packed_sei_buffer);
 
     //offset_in_bytes = 0;
-    packed_header_param_buffer.type = VAEncPackedHeaderH264_SEI;
+    packed_header_param_buffer.type = VAEncPackedHeaderRawData;
     packed_header_param_buffer.bit_length = length_in_bits;
     packed_header_param_buffer.has_emulation_bytes = 0;
 

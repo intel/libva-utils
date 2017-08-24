@@ -47,7 +47,6 @@ static char * profile_string(VAProfile profile)
             case VAProfileMPEG4Simple: return "VAProfileMPEG4Simple";
             case VAProfileMPEG4AdvancedSimple: return "VAProfileMPEG4AdvancedSimple";
             case VAProfileMPEG4Main: return "VAProfileMPEG4Main";
-            case VAProfileH264Baseline: return "VAProfileH264Baseline";
             case VAProfileH264Main: return "VAProfileH264Main";
             case VAProfileH264High: return "VAProfileH264High";
             case VAProfileVC1Simple: return "VAProfileVC1Simple";
