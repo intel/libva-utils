@@ -131,7 +131,6 @@ static float frame_rates[4] = {
 
 static VAProfile g_va_profiles[] = {
     VAProfileH264High,
-    VAProfileH264Baseline,
     VAProfileH264ConstrainedBaseline,
 };
 
@@ -2341,7 +2340,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
     if (packed_sei_buffer) {
         assert(length_in_bits);
 
-        packed_header_param_buffer.type = VAEncPackedHeaderH264_SEI;
+        packed_header_param_buffer.type = VAEncPackedHeaderRawData;
         packed_header_param_buffer.bit_length = length_in_bits;
         packed_header_param_buffer.has_emulation_bytes = 0;
         va_status = vaCreateBuffer(ctx->va_dpy,
@@ -2474,7 +2473,6 @@ svcenc_update_profile_idc(struct svcenc_context *ctx,
         break;
 
     case VAProfileH264ConstrainedBaseline:
-    case VAProfileH264Baseline:
         ctx->profile_idc = PROFILE_IDC_BASELINE;
         ctx->constraint_set_flag |= (1 << 0 |
                                      1 << 1 |
@@ -2499,11 +2497,6 @@ svcenc_update_profile_idc(struct svcenc_context *ctx,
     case VAProfileH264ConstrainedBaseline:
         ctx->svc_profile_idc = PROFILE_IDC_SCALABLE_BASELINE;
         ctx->svc_constraint_set_flag |= (1 << 0 | 1 << 1 | 1 << 5);
-        break;
-
-    case VAProfileH264Baseline:
-        ctx->svc_profile_idc = PROFILE_IDC_SCALABLE_BASELINE;
-        ctx->svc_constraint_set_flag |= (1 << 0);
         break;
 
     default:
