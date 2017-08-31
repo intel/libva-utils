@@ -34,7 +34,6 @@ static const std::vector<VAProfile> m_vaProfiles
         VAProfileMPEG4Simple,
         VAProfileMPEG4AdvancedSimple,
         VAProfileMPEG4Main,
-        VAProfileH264Baseline,
         VAProfileH264Main,
         VAProfileH264High,
         VAProfileVC1Simple,
