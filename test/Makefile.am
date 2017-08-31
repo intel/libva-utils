@@ -95,7 +95,6 @@ test_va_api_CPPFLAGS =						\
 
 test_va_api_CXXFLAGS =						\
 	-Wall -Werror						\
-	-Wno-deprecated-declarations				\
 	$(AM_CXXFLAGS)						\
 	$(NULL)
 
