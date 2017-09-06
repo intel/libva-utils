@@ -41,7 +41,7 @@ m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
 
 # libva minimum version requirement, at this released version
 # libva-utils was created
-m4_define([libva_api_min_version], [0.39.4])
+m4_define([libva_api_min_version], [0.40.1])
 
 # libdrm minimun version requirement
 m4_define([libdrm_version], [2.4])
@@ -138,6 +138,7 @@ AC_SUBST(LIBDRM_VERSION)
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version
 PKG_CHECK_MODULES([LIBVA], [libva >= $LIBVA_API_MIN_VERSION])
+LIBVA_VERSION=`$PKG_CONFIG --variable=libva_version libva`
 AC_SUBST(LIBVA_VERSION)
 LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva`
 VA_MAJOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f1`

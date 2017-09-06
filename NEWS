@@ -1,5 +1,16 @@
-libva-utils NEWS -- summary of changes.  2017-04-10
+libva-utils NEWS -- summary of changes.  2017-06-28
 Copyright (C) 2009-2017 Intel Corporation
+
+Version 1.8.3 - 28.Jun.2017
+* Bump version to 1.8.3
+* Switch AC_PROG_LIBTOOL to LT_INIT
+* putsurface: include wayland-client.h instead of wayland-server.h
+* avcenc: add AUD NAL unit at the beginning of pic
+* avcenc: enable direct_spatial_mv_pred_flag for B frame
+* avcenc: add the frame number as the command line input parameter
+
+Version 1.8.2 - 22.May.2017
+* Bump version to 1.8.2
 
 Version 1.8.1 - 10.Apr.2017
 * Bump version to 1.8.1
