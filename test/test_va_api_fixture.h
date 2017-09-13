@@ -45,13 +45,20 @@ public:
     void doGetMaxEntrypoints();
     void doGetMaxNumConfigAttribs();
     void doGetMaxValues();
+    void doGetMaxNumImageFormats();
+
     void doQueryConfigProfiles();
+    void doQueryImageFormats();
     std::vector<VAProfile> getSupportedProfileList();
     bool doFindProfileInList(VAProfile profile);
     void doQueryConfigEntrypoints(VAProfile profile);
     std::vector<VAEntrypoint> getSupportedEntrypointList();
     bool doFindEntrypointInList(VAEntrypoint entrypoint);
-
+    uint32_t doFindImageFormatInList(uint32_t format);
+    uint32_t doFindSubPicImageFormatInList(uint32_t subPicFmt);
+    static bool doFindFormat(VAImageFormat imageformat, uint32_t format);
+    static bool doFindSubPicFormat(VAImageFormat subPicImagefmt,
+						uint32_t subpicfmt);
     void doFillConfigAttribList();
     void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint);
     void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
@@ -116,6 +123,8 @@ private:
     int m_maxProfiles;
     int m_numProfiles;
     int m_maxConfigAttributes;
+    int m_maxImageFormat;
+    int m_numImageFormat;
 
     VAConfigID m_configID;
     VAContextID m_contextID;
@@ -128,6 +137,7 @@ private:
     std::vector<VAConfigAttrib> m_queryConfigAttribList;
     std::vector<VASurfaceAttrib> m_querySurfaceAttribList;
     std::vector<VASurfaceID> m_surfaceID;
+    std::vector<VAImageFormat>m_imageFmtList;
 };
 
 } // namespace
