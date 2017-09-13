@@ -45,7 +45,9 @@ VAAPIFixture::VAAPIFixture()
     , m_maxConfigAttributes(0)
     , m_maxImageFormat(0)
     , m_numImageFormat(0)
-
+    , m_flags(0)
+    , m_maxSubPicImageFormat(0)
+    , m_numSubPicImageFormat(0)
     , m_configID(VA_INVALID_ID)
     , m_contextID(VA_INVALID_ID)
     , m_bufferID(VA_INVALID_ID)
@@ -57,6 +59,7 @@ VAAPIFixture::VAAPIFixture()
     m_querySurfaceAttribList.clear();
     m_surfaceID.clear();
     m_imageFmtList.clear();
+    m_subPicFmtList.clear();
 }
 
 VAAPIFixture::~VAAPIFixture()
@@ -134,6 +137,13 @@ void VAAPIFixture::doGetMaxNumImageFormats()
     EXPECT_EQ(m_maxImageFormat, 10);
 }
 
+void VAAPIFixture::doGetMaxNumSubPicImageFormats()
+{
+    m_maxSubPicImageFormat =  vaMaxNumSubpictureFormats(m_vaDisplay);
+
+    EXPECT_EQ(m_maxSubPicImageFormat, 6);
+}
+
 void VAAPIFixture::doQueryImageFormats()
 {
     m_imageFmtList.resize(m_maxImageFormat);
@@ -147,6 +157,19 @@ void VAAPIFixture::doQueryImageFormats()
     m_imageFmtList.resize(m_numImageFormat);
 }
 
+void VAAPIFixture::doQuerySubPicImageFormats()
+{
+    m_subPicFmtList.resize(m_maxSubPicImageFormat);
+
+    ASSERT_STATUS(
+        vaQuerySubpictureFormats(m_vaDisplay, &m_subPicFmtList[0], &m_flags, reinterpret_cast<unsigned int*>(&m_numSubPicImageFormat)));
+
+    // at least one subpic image format has to be supported for tests to be executed
+    ASSERT_TRUE(m_numSubPicImageFormat > 0);
+
+    m_subPicFmtList.resize(m_numSubPicImageFormat);
+}
+
 void VAAPIFixture::doGetMaxValues()
 {
 
@@ -154,6 +177,7 @@ void VAAPIFixture::doGetMaxValues()
     doGetMaxEntrypoints();
     doGetMaxNumConfigAttribs();
     doGetMaxNumImageFormats();
+    doGetMaxNumSubPicImageFormats();
 }
 
 void VAAPIFixture::doQueryConfigProfiles()
@@ -222,7 +246,7 @@ void VAAPIFixture::doFillConfigAttribList()
 
 bool VAAPIFixture::doFindFormat (VAImageFormat imageFormat, uint32_t current)
 {
-        return (imageFormat.fourcc == current) ;
+        return (imageFormat.fourcc == current);
 }
 
 uint32_t VAAPIFixture::doFindImageFormatInList (uint32_t format)
@@ -231,6 +255,21 @@ uint32_t VAAPIFixture::doFindImageFormatInList (uint32_t format)
         std::bind(doFindFormat,  std::placeholders::_1, format))
     != m_imageFmtList.end() )
         return format;
+    else
+	return 0;
+}
+
+bool VAAPIFixture::doFindSubPicFormat(VAImageFormat subPicImagefmt, uint32_t subpicfmt)
+{
+        return (subPicImagefmt.fourcc == subpicfmt);
+}
+
+uint32_t VAAPIFixture::doFindSubPicImageFormatInList(uint32_t subPicFmt)
+{
+    if(std::find_if(m_subPicFmtList.begin(), m_subPicFmtList.end(),
+        std::bind(doFindSubPicFormat,  std::placeholders::_1, subPicFmt))
+		 != m_subPicFmtList.end() )
+  	return subPicFmt;
     else
 	return 0;
 }
