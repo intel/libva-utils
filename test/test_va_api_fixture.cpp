@@ -149,7 +149,7 @@ void VAAPIFixture::doQueryImageFormats()
     m_imageFmtList.resize(m_maxImageFormat);
 
     ASSERT_STATUS(
-        vaQueryImageFormats(m_vaDisplay, &m_imageFmtList[0], &m_numImageFormat));
+      vaQueryImageFormats(m_vaDisplay, &m_imageFmtList[0], &m_numImageFormat));
 
     // at least one imageformat be supported for tests to be executed
     ASSERT_TRUE(m_numImageFormat > 0);
@@ -162,9 +162,10 @@ void VAAPIFixture::doQuerySubPicImageFormats()
     m_subPicFmtList.resize(m_maxSubPicImageFormat);
 
     ASSERT_STATUS(
-        vaQuerySubpictureFormats(m_vaDisplay, &m_subPicFmtList[0], &m_flags, reinterpret_cast<unsigned int*>(&m_numSubPicImageFormat)));
+        vaQuerySubpictureFormats(m_vaDisplay, &m_subPicFmtList[0],
+          &m_flags, reinterpret_cast<unsigned int*>(&m_numSubPicImageFormat)));
 
-    // at least one subpic image format has to be supported for tests to be executed
+    // atleast one subpic image format be supported for tests to be executed
     ASSERT_TRUE(m_numSubPicImageFormat > 0);
 
     m_subPicFmtList.resize(m_numSubPicImageFormat);
@@ -244,6 +245,24 @@ void VAAPIFixture::doFillConfigAttribList()
     EXPECT_EQ(m_configAttribList.size(), m_vaConfigAttribs.size());
 }
 
+void VAAPIFixture::doTestCreateImage(uint32_t currentFmt,
+		std::pair<uint32_t, uint32_t> currentResolution)
+{
+    VAStatus status;
+    VAImageFormat currentImageFormat;
+
+    currentImageFormat.fourcc = currentFmt;
+
+    status = vaCreateImage(m_vaDisplay, &currentImageFormat,
+		 currentResolution.first, currentResolution.second, &m_image);
+
+    if (status == VA_STATUS_SUCCESS)
+	ASSERT_ID(m_image.image_id);
+    else
+	EXPECT_TRUE(
+		status == VA_STATUS_ERROR_OPERATION_FAILED);
+}
+
 bool VAAPIFixture::doFindFormat (VAImageFormat imageFormat, uint32_t current)
 {
         return (imageFormat.fourcc == current);
@@ -259,7 +278,8 @@ uint32_t VAAPIFixture::doFindImageFormatInList (uint32_t format)
 	return 0;
 }
 
-bool VAAPIFixture::doFindSubPicFormat(VAImageFormat subPicImagefmt, uint32_t subpicfmt)
+bool VAAPIFixture::doFindSubPicFormat(VAImageFormat subPicImagefmt,
+						     uint32_t subpicfmt)
 {
         return (subPicImagefmt.fourcc == subpicfmt);
 }

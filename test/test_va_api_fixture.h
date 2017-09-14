@@ -90,7 +90,8 @@ public:
     void doCreateConfig(VAProfile profile, VAEntrypoint entrypoint);
     void doCreateConfigToFail(VAProfile profile, VAEntrypoint entrypoint, int error);
     void doDestroyConfig();
-
+    void doTestCreateImage(uint32_t currentFmt,
+				std::pair<uint32_t, uint32_t> currentResolution);
     void doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint);
 
 protected:
@@ -134,6 +135,7 @@ private:
     VAConfigID m_configID;
     VAContextID m_contextID;
     VABufferID m_bufferID;
+    VAImage m_image;
 
     std::vector<VAProfile> m_profileList;
     std::vector<VAEntrypoint> m_entrypointList;
