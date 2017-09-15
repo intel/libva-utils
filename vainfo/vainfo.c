@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <va/va_str.h>
 
 #include "va_display.h"
 
@@ -36,59 +37,6 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     fprintf(stderr,"%s failed with error code %d (%s),exit\n",func, va_status, vaErrorStr(va_status)); \
     ret_val = ret;                                                      \
     goto error;                                                         \
-}
-
-static char * profile_string(VAProfile profile)
-{
-    switch (profile) {
-            case VAProfileNone: return "VAProfileNone";
-            case VAProfileMPEG2Simple: return "VAProfileMPEG2Simple";
-            case VAProfileMPEG2Main: return "VAProfileMPEG2Main";
-            case VAProfileMPEG4Simple: return "VAProfileMPEG4Simple";
-            case VAProfileMPEG4AdvancedSimple: return "VAProfileMPEG4AdvancedSimple";
-            case VAProfileMPEG4Main: return "VAProfileMPEG4Main";
-            case VAProfileH264Main: return "VAProfileH264Main";
-            case VAProfileH264High: return "VAProfileH264High";
-            case VAProfileVC1Simple: return "VAProfileVC1Simple";
-            case VAProfileVC1Main: return "VAProfileVC1Main";
-            case VAProfileVC1Advanced: return "VAProfileVC1Advanced";
-            case VAProfileH263Baseline: return "VAProfileH263Baseline";
-            case VAProfileH264ConstrainedBaseline: return "VAProfileH264ConstrainedBaseline";
-            case VAProfileJPEGBaseline: return "VAProfileJPEGBaseline";
-            case VAProfileVP8Version0_3: return "VAProfileVP8Version0_3";
-            case VAProfileH264MultiviewHigh: return "VAProfileH264MultiviewHigh";
-            case VAProfileH264StereoHigh: return "VAProfileH264StereoHigh";
-            case VAProfileHEVCMain: return "VAProfileHEVCMain";
-            case VAProfileHEVCMain10: return "VAProfileHEVCMain10";
-            case VAProfileVP9Profile0: return "VAProfileVP9Profile0";
-            case VAProfileVP9Profile1: return "VAProfileVP9Profile1";
-            case VAProfileVP9Profile2: return "VAProfileVP9Profile2";
-            case VAProfileVP9Profile3: return "VAProfileVP9Profile3";
-
-            default:
-                break;
-    }
-    return "<unknown profile>";
-}
-
-
-static char * entrypoint_string(VAEntrypoint entrypoint)
-{
-    switch (entrypoint) {
-            case VAEntrypointVLD:return "VAEntrypointVLD";
-            case VAEntrypointIZZ:return "VAEntrypointIZZ";
-            case VAEntrypointIDCT:return "VAEntrypointIDCT";
-            case VAEntrypointMoComp:return "VAEntrypointMoComp";
-            case VAEntrypointDeblocking:return "VAEntrypointDeblocking";
-            case VAEntrypointEncSlice:return "VAEntrypointEncSlice";
-            case VAEntrypointEncPicture:return "VAEntrypointEncPicture";
-            case VAEntrypointEncSliceLP:return "VAEntrypointEncSliceLP";
-            case VAEntrypointVideoProc:return "VAEntrypointVideoProc";
-            case VAEntrypointFEI:return "VAEntrypointFEI";
-            default:
-                break;
-    }
-    return "<unknown entrypoint>";
 }
 
 static void
@@ -180,8 +128,6 @@ int main(int argc, const char* argv[])
   CHECK_VASTATUS(va_status, "vaQueryConfigProfiles", 6);
 
   for (i = 0; i < num_profiles; i++) {
-      char *profile_str;
-
       profile = profile_list[i];
       va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
                                            &num_entrypoint);
@@ -190,9 +136,11 @@ int main(int argc, const char* argv[])
 
       CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints", 4);
 
-      profile_str = profile_string(profile);
-      for (entrypoint = 0; entrypoint < num_entrypoint; entrypoint++)
-          printf("      %-32s:	%s\n", profile_str, entrypoint_string(entrypoints[entrypoint]));
+      for (entrypoint = 1; entrypoint < num_entrypoint; entrypoint++) {
+          printf("      %-32s:	%s\n",
+                 vaProfileStr(profile),
+                 vaEntrypointStr(entrypoints[entrypoint]));
+      }
   }
   
 error:
