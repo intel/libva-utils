@@ -136,7 +136,7 @@ int main(int argc, const char* argv[])
 
       CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints", 4);
 
-      for (entrypoint = 1; entrypoint < num_entrypoint; entrypoint++) {
+      for (entrypoint = 0; entrypoint < num_entrypoint; entrypoint++) {
           printf("      %-32s:	%s\n",
                  vaProfileStr(profile),
                  vaEntrypointStr(entrypoints[entrypoint]));
