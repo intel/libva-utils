@@ -77,6 +77,10 @@ public:
                                         VAEntrypoint entrypoint);
     void doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
                           std::pair<uint32_t, uint32_t> resolution);
+    void doDeriveImage();
+    void doMapBuffer();
+    void doUnMapBuffer();
+
     void
     doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
                               std::pair<uint32_t, uint32_t>& maxResolution);
@@ -92,6 +96,7 @@ public:
     void doDestroyConfig();
     void doTestCreateImage(uint32_t currentFmt,
 				std::pair<uint32_t, uint32_t> currentResolution);
+    void doDestroyImage();
     void doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint);
 
 protected:
@@ -131,6 +136,7 @@ private:
     uint32_t m_flags;
     int m_maxSubPicImageFormat;
     int m_numSubPicImageFormat;
+    unsigned char *m_surface_p;
 
     VAConfigID m_configID;
     VAContextID m_contextID;

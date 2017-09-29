@@ -555,6 +555,32 @@ void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
     }
 }
 
+void VAAPIFixture::doDeriveImage()
+{
+
+     ASSERT_STATUS(vaDeriveImage (
+		m_vaDisplay, m_surfaceID[0], &m_image));
+
+     ASSERT_ID(m_image.image_id);
+     ASSERT_ID(m_image.buf);
+}
+
+void VAAPIFixture::doDestroyImage()
+{
+     ASSERT_STATUS(vaDestroyImage(m_vaDisplay, m_image.image_id));
+}
+
+void VAAPIFixture::doMapBuffer()
+{
+     ASSERT_STATUS(vaMapBuffer(m_vaDisplay, m_image.buf, (void **)&m_surface_p));
+}
+
+
+void VAAPIFixture::doUnMapBuffer()
+{
+     ASSERT_STATUS(vaUnmapBuffer(m_vaDisplay, m_image.buf));
+}
+
 void VAAPIFixture::doCreateContext(std::pair<uint32_t, uint32_t> resolution,
                                    VAStatus expectation)
 {

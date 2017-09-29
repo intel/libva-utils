@@ -60,6 +60,7 @@ noinst_HEADERS =						\
 	test_va_api_query_imageformat.h				\
 	test_va_api_query_subpicformat.h			\
 	test_va_api_create_image.h				\
+	test_va_api_deriveimage.h				\
 	va_version.h						\
 	$(NULL)
 
@@ -78,7 +79,8 @@ test_va_api_SOURCES =						\
 	test_va_api_query_vendor.cpp				\
 	test_va_api_query_imageformat.cpp			\
 	test_va_api_create_image.cpp				\
-	test_va_api_query_subpicformat.cpp
+	test_va_api_query_subpicformat.cpp			\
+	test_va_api_deriveimage.cpp				\
 	$(NULL)
 
 test_va_api_LDFLAGS =						\
