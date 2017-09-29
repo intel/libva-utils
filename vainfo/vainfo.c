@@ -32,6 +32,13 @@
 
 #include "va_display.h"
 
+#ifdef ANDROID
+
+/* Macros generated from configure */
+#define LIBVA_VERSION_S "2.0.0"
+
+#endif
+
 #define CHECK_VASTATUS(va_status,func, ret)                             \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
     fprintf(stderr,"%s failed with error code %d (%s),exit\n",func, va_status, vaErrorStr(va_status)); \
