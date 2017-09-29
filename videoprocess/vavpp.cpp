@@ -939,11 +939,11 @@ store_yuv_surface_to_file(FILE *fp,
         g_out_fourcc == VA_FOURCC_I420 ||
         g_out_fourcc == VA_FOURCC_NV12) {
         if (g_dst_file_fourcc == VA_FOURCC_YV12)
-            store_yuv_surface_to_yv12_file(fp, surface_id);
+            return store_yuv_surface_to_yv12_file(fp, surface_id);
         else if (g_dst_file_fourcc == VA_FOURCC_I420)
-            store_yuv_surface_to_i420_file(fp, surface_id);
+            return store_yuv_surface_to_i420_file(fp, surface_id);
         else if (g_dst_file_fourcc == VA_FOURCC_NV12)
-            store_yuv_surface_to_nv12_file(fp, surface_id);
+            return store_yuv_surface_to_nv12_file(fp, surface_id);
         else {
             printf("Not supported YUV fourcc for output !!!\n");
             return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -952,12 +952,12 @@ store_yuv_surface_to_file(FILE *fp,
                 g_dst_file_fourcc == VA_FOURCC_YUY2) ||
                (g_out_fourcc == VA_FOURCC_UYVY &&
                 g_dst_file_fourcc == VA_FOURCC_UYVY)) {
-        store_packed_yuv_surface_to_packed_file(fp, surface_id);
+        return store_packed_yuv_surface_to_packed_file(fp, surface_id);
     } else if ((g_out_fourcc == VA_FOURCC_I010 &&
                 g_dst_file_fourcc == VA_FOURCC_I010) ||
                (g_out_fourcc == VA_FOURCC_P010 &&
                 g_dst_file_fourcc == VA_FOURCC_P010)) {
-        store_yuv_surface_to_10bit_file(fp, surface_id);
+        return store_yuv_surface_to_10bit_file(fp, surface_id);
     } else {
         printf("Not supported YUV fourcc for output !!!\n");
         return VA_STATUS_ERROR_INVALID_SURFACE;
