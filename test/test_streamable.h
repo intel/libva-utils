@@ -27,93 +27,20 @@
 
 #include <iostream>
 #include <va/va.h>
+#include <va/va_str.h>
 
 inline std::ostream&
 operator<<(std::ostream& os, const VAProfile& profile)
 {
-    os << static_cast<int>(profile) << ":";
-
-    switch(profile) {
-    case VAProfileNone:
-        return os << "VAProfileNone";
-    case VAProfileMPEG2Simple:
-        return os << "VAProfileMPEG2Simple";
-    case VAProfileMPEG2Main:
-        return os << "VAProfileMPEG2Main";
-    case VAProfileMPEG4Simple:
-        return os << "VAProfileMPEG4Simple";
-    case VAProfileMPEG4AdvancedSimple:
-        return os << "VAProfileMPEG4AdvancedSimple";
-    case VAProfileMPEG4Main:
-        return os << "VAProfileMPEG4Main";
-    case VAProfileVC1Simple:
-        return os << "VAProfileVC1Simple";
-    case VAProfileVC1Main:
-        return os << "VAProfileVC1Main";
-    case VAProfileVC1Advanced:
-        return os << "VAProfileVC1Advanced";
-    case VAProfileH263Baseline:
-        return os << "VAProfileH263Baseline";
-    case VAProfileJPEGBaseline:
-        return os << "VAProfileJPEGBaseline";
-    case VAProfileVP8Version0_3:
-        return os << "VAProfileVP8Version0_3";
-    case VAProfileHEVCMain:
-        return os << "VAProfileHEVCMain";
-    case VAProfileHEVCMain10:
-        return os << "VAProfileHEVCMain10";
-    case VAProfileVP9Profile0:
-        return os << "VAProfileVP9Profile0";
-    case VAProfileVP9Profile1:
-        return os << "VAProfileVP9Profile1";
-    case VAProfileVP9Profile2:
-        return os << "VAProfileVP9Profile2";
-    case VAProfileVP9Profile3:
-        return os << "VAProfileVP9Profile3";
-    case VAProfileH264ConstrainedBaseline:
-        return os << "VAProfileH264ConstrainedBaseline";
-    case VAProfileH264High:
-        return os << "VAProfileH264High";
-    case VAProfileH264Main:
-        return os << "VAProfileH264Main";
-    case VAProfileH264MultiviewHigh:
-        return os << "VAProfileH264MultiviewHigh";
-    case VAProfileH264StereoHigh:
-        return os << "VAProfileH264StereoHigh";
-    default:
-        return os << "Unknown VAProfile";
-    }
+    return os << static_cast<int>(profile)
+        << ":" << vaProfileStr(profile);
 }
 
 inline std::ostream&
 operator<<(std::ostream& os, const VAEntrypoint& entrypoint)
 {
-    os << static_cast<int>(entrypoint) << ":";
-
-    switch(entrypoint) {
-    case VAEntrypointVLD:
-        return os << "VAEntrypointVLD";
-    case VAEntrypointIZZ:
-        return os << "VAEntrypointIZZ";
-    case VAEntrypointIDCT:
-        return os << "VAEntrypointIDCT";
-    case VAEntrypointMoComp:
-        return os << "VAEntrypointMoComp";
-    case VAEntrypointDeblocking:
-        return os << "VAEntrypointDeblocking";
-    case VAEntrypointVideoProc:
-        return os << "VAEntrypointVideoProc";
-    case VAEntrypointEncSlice:
-        return os << "VAEntrypointEncSlice";
-    case VAEntrypointEncSliceLP:
-        return os << "VAEntrypointEncSliceLP";
-    case VAEntrypointEncPicture:
-        return os << "VAEntrypointEncPicture";
-    case VAEntrypointFEI:
-        return os << "VAEntrypointFEI";
-    default:
-        return os << "Unknown VAEntrypoint";
-    }
+    return os << static_cast<int>(entrypoint)
+        << ":" << vaEntrypointStr(entrypoint);
 }
 
 #endif
