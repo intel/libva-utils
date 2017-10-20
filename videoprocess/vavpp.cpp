@@ -454,7 +454,31 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 v_dst = u_dst;
             }
         }
-     } else {
+     }  else if ((surface_image.format.fourcc == VA_FOURCC_RGBA &&
+                  g_src_file_fourcc == VA_FOURCC_RGBA) ||
+                 (surface_image.format.fourcc == VA_FOURCC_RGBX &&
+                  g_src_file_fourcc == VA_FOURCC_RGBX) ||
+                 (surface_image.format.fourcc == VA_FOURCC_BGRA &&
+                  g_src_file_fourcc == VA_FOURCC_BGRA) ||
+                 (surface_image.format.fourcc == VA_FOURCC_BGRX &&
+                  g_src_file_fourcc == VA_FOURCC_BGRX)) {
+        frame_size = surface_image.width * surface_image.height * 4;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+
+        do {
+            n_items = fread(newImageBuffer, frame_size, 1, fp);
+        } while (n_items != 1);
+
+        y_src = newImageBuffer;
+        y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
+
+        /* plane 0, directly copy */
+        for (row = 0; row < surface_image.height; row++) {
+            memcpy(y_dst, y_src, surface_image.width * 4);
+            y_src += surface_image.width * 4;
+            y_dst += surface_image.pitches[0];
+        }
+    } else {
          printf("Not supported YUV surface fourcc !!! \n");
          return VA_STATUS_ERROR_INVALID_SURFACE;
      }
@@ -932,6 +956,53 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
 }
 
 static VAStatus
+store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
+{
+    VAStatus va_status;
+    VAImageFormat image_format;
+    VAImage surface_image;
+    void *surface_p = NULL;
+    unsigned char *y_src;
+    unsigned char *y_dst;
+    uint32_t frame_size, row, col;
+    int32_t  ret, n_items;
+    unsigned char * newImageBuffer = NULL;
+
+    va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
+
+    va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
+
+    frame_size = surface_image.width * surface_image.height * 4;
+    newImageBuffer = (unsigned char*)malloc(frame_size);
+    y_dst = newImageBuffer;
+
+    y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
+
+    for (row = 0; row < surface_image.height; row++) {
+        memcpy(y_dst, y_src, surface_image.width * 4);
+        y_src += surface_image.pitches[0];
+        y_dst += surface_image.width * 4;
+    }
+
+    /* write frame to file */
+    do {
+        n_items = fwrite(newImageBuffer, frame_size, 1, fp);
+    } while (n_items != 1);
+
+    if (newImageBuffer){
+        free(newImageBuffer);
+        newImageBuffer = NULL;
+    }
+
+    vaUnmapBuffer(va_dpy, surface_image.buf);
+    vaDestroyImage(va_dpy, surface_image.image_id);
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
 store_yuv_surface_to_file(FILE *fp,
                           VASurfaceID surface_id)
 {
@@ -958,6 +1029,15 @@ store_yuv_surface_to_file(FILE *fp,
                (g_out_fourcc == VA_FOURCC_P010 &&
                 g_dst_file_fourcc == VA_FOURCC_P010)) {
         store_yuv_surface_to_10bit_file(fp, surface_id);
+    } else if ((g_out_fourcc == VA_FOURCC_RGBA &&
+                g_dst_file_fourcc == VA_FOURCC_RGBA) ||
+               (g_out_fourcc == VA_FOURCC_RGBX &&
+                g_dst_file_fourcc == VA_FOURCC_RGBX) ||
+               (g_out_fourcc == VA_FOURCC_RGBA &&
+                g_dst_file_fourcc == VA_FOURCC_BGRA) ||
+               (g_out_fourcc == VA_FOURCC_BGRX &&
+                g_dst_file_fourcc == VA_FOURCC_BGRX)) {
+        store_rgb_surface_to_rgb_file(fp, surface_id);
     } else {
         printf("Not supported YUV fourcc for output !!!\n");
         return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -1531,9 +1611,21 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     } else if (!strcmp(str, "I010")) {
         tfourcc = VA_FOURCC('I', '0', '1', '0');
         tformat = VA_RT_FORMAT_YUV420_10BPP;
+    } else if (!strcmp(str, "RGBA")) {
+        tfourcc = VA_FOURCC_RGBA;
+        tformat = VA_RT_FORMAT_RGB32;
+    } else if (!strcmp(str, "RGBX")) {
+        tfourcc = VA_FOURCC_RGBX;
+        tformat = VA_RT_FORMAT_RGB32;
+    } else if (!strcmp(str, "BGRA")) {
+        tfourcc = VA_FOURCC_BGRA;
+        tformat = VA_RT_FORMAT_RGB32;
+    } else if (!strcmp(str, "BGRX")) {
+        tfourcc = VA_FOURCC_BGRX;
+        tformat = VA_RT_FORMAT_RGB32;
     } else{
         printf("Not supported format: %s! Currently only support following format: %s\n",
-         str, "YV12, I420, NV12, YUY2(YUYV), or UYVY");
+               str, "YV12, I420, NV12, YUY2(YUYV), UYVY, P010, I010, RGBA, RGBX, BGRA or BGRX");
         assert(0);
     }
 
