@@ -1,7 +1,7 @@
-libva-utils NEWS -- summary of changes.  2017-10-xx
+libva-utils NEWS -- summary of changes.  2017-10-21
 Copyright (C) 2009-2017 Intel Corporation
 
-Version 2.0.0 - DD.Oct.2017
+Version 2.0.0 - 21.Oct.2017
 * Bump version to 2.0.0
 * Add option '--device <device>' to vainfo
 * Add vp9enc for VP9 encoding
