@@ -93,7 +93,7 @@ int main(int argc, const char* argv[])
   const char *name = strrchr(argv[0], '/'); 
   VAProfile profile, *profile_list = NULL;
   int num_profiles, max_num_profiles, i;
-  VAEntrypoint entrypoint, entrypoints[10];
+  VAEntrypoint entrypoint, entrypoints[11];
   int num_entrypoint;
   int ret_val = 0;
   
