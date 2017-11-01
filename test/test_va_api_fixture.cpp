@@ -1,4 +1,5 @@
 /*
+#include <cstring>
  * Copyright (C) 2016 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,10 +27,11 @@
 
 #include <algorithm>
 #include <functional>
-
 #include <fcntl.h> // for O_RDWR
 #include <unistd.h> // for close()
 #include <va/va_drm.h>
+
+#include "loadsurface.h"
 
 namespace VAAPI {
 
@@ -527,7 +529,7 @@ void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
     // profile and entrypoint.
     unsigned int formats = VA_RT_FORMAT_YUV420;
 
-    m_surfaceID.resize(10);
+    m_surfaceID.resize(SURFACE_NUM);
 
     if (!m_querySurfaceAttribList.empty()) {
         numAttribs = m_querySurfaceAttribList.size();
@@ -549,7 +551,7 @@ void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
 
             ASSERT_STATUS(vaCreateSurfaces(
                 m_vaDisplay, currentFormat, resolution.first, resolution.second,
-                &m_surfaceID[0], 10, attribList, numAttribs));
+                &m_surfaceID[0], SURFACE_NUM, attribList, numAttribs));
             formats &= ~itFormat;
         }
     }
@@ -636,6 +638,50 @@ void VAAPIFixture::doCreateConfigToFail(VAProfile profile,
 
     ASSERT_EQ(vaDestroyConfig(m_vaDisplay, m_configID),
               VA_STATUS_ERROR_INVALID_CONFIG);
+}
+
+void VAAPIFixture::doUploadImage()
+{
+    int box_width_loc=8;
+    int row_shift_loc=0;
+    int i;
+
+    for (i=0; i<SURFACE_NUM; i++) {
+        upload_surface(m_vaDisplay, m_surfaceID[i], box_width_loc, row_shift_loc, 0);
+
+        row_shift_loc++;
+        if (row_shift_loc==(2*box_width_loc)) row_shift_loc= 0;
+    }
+}
+
+void VAAPIFixture::doGetImage(uint32_t currentFmt, VASurfaceID surface_id,
+                                std::pair<uint32_t, uint32_t> currentResolution)
+{
+    doTestCreateImage(currentFmt, currentResolution);
+
+    ASSERT_STATUS(vaGetImage(m_vaDisplay, surface_id, 0, 0,
+                currentResolution.first, currentResolution.second, m_image.image_id));
+}
+
+VASurfaceID VAAPIFixture::doGetNextSurface(int *index)
+{
+    VASurfaceID surface_id = VA_INVALID_SURFACE;
+    int i;
+
+    while (surface_id == VA_INVALID_SURFACE){
+        i = *index;
+        i++;
+        if (i == SURFACE_NUM)
+            i = 0;
+        *index = i;
+        surface_id =  m_surfaceID[i];
+    }
+    return surface_id;
+}
+
+void VAAPIFixture::doDestroySurfaces()
+{
+    ASSERT_STATUS(vaDestroySurfaces(m_vaDisplay, &m_surfaceID[0], SURFACE_NUM));
 }
 
 void VAAPIFixture::doTerminate() { EXPECT_STATUS(vaTerminate(m_vaDisplay)); }

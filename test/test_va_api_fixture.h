@@ -28,6 +28,10 @@
 #include "test_streamable.h"
 #include "gtest/gtest.h"
 
+
+#define UNUSED(x) ((void)(x))
+#define SURFACE_NUM 16
+
 namespace VAAPI {
 
 // The fixture for testing class Foo.
@@ -80,7 +84,10 @@ public:
     void doDeriveImage();
     void doMapBuffer();
     void doUnMapBuffer();
-
+    void doGetImage(uint32_t currentFmt, VASurfaceID surface_id,
+				std::pair<uint32_t, uint32_t> currentResolution);
+    VASurfaceID doGetNextSurface(int *index);
+    void doUploadImage();
     void
     doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
                               std::pair<uint32_t, uint32_t>& maxResolution);
@@ -90,6 +97,7 @@ public:
     void doDestroyContext(VAStatus expectation = VA_STATUS_SUCCESS);
     void doCreateBuffer(VABufferType bufferType);
     void doDestroyBuffer();
+    void doDestroySurfaces();
     void doCreateConfigNoAttrib(VAProfile profile, VAEntrypoint entrypoint);
     void doCreateConfig(VAProfile profile, VAEntrypoint entrypoint);
     void doCreateConfigToFail(VAProfile profile, VAEntrypoint entrypoint, int error);
