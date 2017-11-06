@@ -6,7 +6,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
   ../common/va_display.c \
-  ../common/va_display_android.cpp \
   h264encode.c
 
 LOCAL_CFLAGS += \
@@ -28,7 +27,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	../common/va_display.c			\
-	../common/va_display_android.cpp	\
 	avcenc.c
 
 LOCAL_CFLAGS += \
@@ -50,7 +48,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	../common/va_display.c			\
-	../common/va_display_android.cpp	\
 	vp9enc.c
 
 LOCAL_CFLAGS += \
@@ -72,7 +69,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	../common/va_display.c			\
-	../common/va_display_android.cpp	\
 	jpegenc.c
 
 LOCAL_CFLAGS += \
@@ -94,7 +90,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	../common/va_display.c			\
-	../common/va_display_android.cpp	\
 	mpeg2vaenc.c
 
 LOCAL_CFLAGS += \
@@ -116,7 +111,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	../common/va_display.c			\
-	../common/va_display_android.cpp	\
 	svctenc.c
 
 LOCAL_CFLAGS += \

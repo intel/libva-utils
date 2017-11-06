@@ -8,7 +8,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	vainfo.c		\
 	../common/va_display.c	\
-	../common/va_display_android.cpp
 
 LOCAL_CFLAGS += \
   -DANDROID
