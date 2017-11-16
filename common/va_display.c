@@ -124,7 +124,6 @@ void
 va_init_display_args(int *argc, char *argv[])
 {
     const char *display_name;
-    const char *device_name;
 
     display_name = get_display_name(*argc, argv);
     if (display_name && strcmp(display_name, "help") == 0) {

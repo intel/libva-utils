@@ -61,9 +61,8 @@ usage_exit(const char *program)
 static void
 parse_args(const char *name, int argc, char **argv)
 {
-    int c, tmp;
+    int c;
     int option_index = 0;
-    long file_size;
 
     static struct option long_options[] = {
         {"help",        no_argument,            0,      'h'},
