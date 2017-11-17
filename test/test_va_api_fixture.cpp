@@ -36,6 +36,7 @@ namespace VAAPI {
 VAAPIFixture::VAAPIFixture()
     : ::testing::Test::Test()
     , m_vaDisplay(NULL)
+    , m_restoreDriverName(getenv("LIBVA_DRIVER_NAME"))
     , m_drmHandle(-1)
     , drmDevicePaths({ "/dev/dri/renderD128", "/dev/dri/card0" })
     , m_maxEntrypoints(0)
@@ -45,7 +46,6 @@ VAAPIFixture::VAAPIFixture()
     , m_configID(VA_INVALID_ID)
     , m_contextID(VA_INVALID_ID)
     , m_bufferID(VA_INVALID_ID)
-
 {
     m_profileList.clear();
     m_entrypointList.clear();
@@ -61,6 +61,12 @@ VAAPIFixture::~VAAPIFixture()
     if (m_drmHandle >= 0)
         close(m_drmHandle);
     m_drmHandle = -1;
+
+    // Ensure LIBVA_DRIVER_NAME environment is restored to its original
+    // setting so successive tests use the expected driver.
+    unsetenv("LIBVA_DRIVER_NAME");
+    if (m_restoreDriverName)
+        setenv("LIBVA_DRIVER_NAME", m_restoreDriverName, 1);
 }
 
 VADisplay VAAPIFixture::getDisplay()

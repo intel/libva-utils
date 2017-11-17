@@ -106,7 +106,9 @@ protected:
     // Objects declared here can be used by all tests in the test case for
     // VAAPIFixture.
     VADisplay m_vaDisplay;
+
 private:
+    char *m_restoreDriverName;
     int m_drmHandle;
     const std::string drmDevicePaths[2];
 
@@ -129,3 +131,4 @@ private:
 };
 
 } // namespace
+
