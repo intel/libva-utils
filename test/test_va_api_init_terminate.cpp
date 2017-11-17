@@ -93,7 +93,7 @@ TEST_F(VAAPIInitTerminate, BadDriverName_Macro)
     vaDisplay = getDisplay();
     EXPECT_TRUE(vaDisplay);
 
-    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "bad", 0));
+    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "bad", 1));
 
     if (vaDisplay)
 	vaStatus = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
