@@ -53,16 +53,16 @@ void VAAPIInitTerminate::doInitTerminate()
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate) { doInitTerminate(); }
 
-TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Driver_Macro)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_Environment)
 {
-    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "i965", 0))
+    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "i965", 1))
 	<< "Could not set enviroment variable";
     doInitTerminate();
     EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"))
 	<< "Could not un-set enviroment variable";
 }
 
-TEST_F(VAAPIInitTerminate, vaSetDriverName_vaInitiailize_vaTerminate)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_vaSetDriverName)
 {
     VADisplay vaDisplay;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -84,7 +84,7 @@ TEST_F(VAAPIInitTerminate, vaSetDriverName_vaInitiailize_vaTerminate)
     EXPECT_STATUS(vaStatus);
 }
 
-TEST_F(VAAPIInitTerminate, BadDriverName_Macro)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_Environment)
 {
     VADisplay vaDisplay;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -105,7 +105,7 @@ TEST_F(VAAPIInitTerminate, BadDriverName_Macro)
     EXPECT_STATUS(vaStatus);
 }
 
-TEST_F(VAAPIInitTerminate, vaSetDriverName_BadName)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_vaSetDriverName)
 {
     VADisplay vaDisplay;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
