@@ -120,7 +120,7 @@ void VAAPIFixture::doGetMaxNumConfigAttribs()
 {
     m_maxConfigAttributes = vaMaxNumConfigAttributes(m_vaDisplay);
 
-    EXPECT_EQ(m_maxConfigAttributes, 32);
+    EXPECT_TRUE(m_maxConfigAttributes > 0);
 }
 
 void VAAPIFixture::doGetMaxValues()
