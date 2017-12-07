@@ -30,6 +30,35 @@ namespace VAAPI {
 // VAEntrypoint. vaCreateBuffer doesn't require these itself but its input
 // parameter do care about them.
 
+std::ostream& operator<<(std::ostream& os, const testInput& t)
+{
+    return os << t.inputConfig.first
+              << "," << t.inputConfig.second
+              << "," << t.inputBufferType
+    ;
+}
+
+typedef std::pair<VAProfile, VAEntrypoint> ConfigPair;
+
+static const std::vector<ConfigPair> decoders = {
+    std::make_pair(VAProfileMPEG2Simple, VAEntrypointVLD),
+    std::make_pair(VAProfileMPEG2Main, VAEntrypointVLD),
+    std::make_pair(VAProfileH264Main, VAEntrypointVLD),
+    std::make_pair(VAProfileH264ConstrainedBaseline, VAEntrypointVLD),
+    std::make_pair(VAProfileH264High, VAEntrypointVLD),
+    std::make_pair(VAProfileH264MultiviewHigh, VAEntrypointVLD),
+    std::make_pair(VAProfileH264StereoHigh, VAEntrypointVLD),
+    std::make_pair(VAProfileVC1Simple, VAEntrypointVLD),
+    std::make_pair(VAProfileVC1Main, VAEntrypointVLD),
+    std::make_pair(VAProfileVC1Advanced, VAEntrypointVLD),
+    std::make_pair(VAProfileJPEGBaseline, VAEntrypointVLD),
+    std::make_pair(VAProfileVP8Version0_3, VAEntrypointVLD),
+    std::make_pair(VAProfileHEVCMain, VAEntrypointVLD),
+    std::make_pair(VAProfileHEVCMain10, VAEntrypointVLD),
+    std::make_pair(VAProfileVP9Profile0, VAEntrypointVLD),
+    std::make_pair(VAProfileVP9Profile2, VAEntrypointVLD),
+};
+
 // VAProtectedSliceDataBufferType left out on purpose
 static const std::vector<VABufferType> decoderBufferTypes ={
     VAPictureParameterBufferType,
@@ -47,6 +76,24 @@ static const std::vector<VABufferType> decoderBufferTypes ={
     VAProbabilityBufferType,
 };
 
+static const std::vector<ConfigPair> encoders = {
+    std::make_pair(VAProfileMPEG2Simple, VAEntrypointEncSlice),
+    std::make_pair(VAProfileMPEG2Main, VAEntrypointEncSlice),
+    std::make_pair(VAProfileH264Main, VAEntrypointEncSlice),
+    std::make_pair(VAProfileH264ConstrainedBaseline, VAEntrypointEncSlice),
+    std::make_pair(VAProfileH264High, VAEntrypointEncSlice),
+    std::make_pair(VAProfileH264MultiviewHigh, VAEntrypointEncSlice),
+    std::make_pair(VAProfileH264StereoHigh, VAEntrypointEncSlice),
+    std::make_pair(VAProfileH264Main, VAEntrypointFEI),
+    std::make_pair(VAProfileH264ConstrainedBaseline, VAEntrypointFEI),
+    std::make_pair(VAProfileH264High, VAEntrypointFEI),
+    std::make_pair(VAProfileJPEGBaseline, VAEntrypointEncSlice),
+    std::make_pair(VAProfileVP8Version0_3, VAEntrypointEncSlice),
+    std::make_pair(VAProfileHEVCMain, VAEntrypointEncSlice),
+    std::make_pair(VAProfileHEVCMain10, VAEntrypointEncSlice),
+    std::make_pair(VAProfileVP9Profile0, VAEntrypointEncSlice),
+};
+
 // VAEncMacroblockParameterBufferType left out on purpose
 static const std::vector<VABufferType> encoderBufferTypes ={
     VAEncCodedBufferType,
@@ -61,43 +108,16 @@ static const std::vector<VABufferType> encoderBufferTypes ={
     VAEncFEIMBCodeBufferType,
     VAEncFEIDistortionBufferType,
     VAEncFEIMBControlBufferType,
-    VAEncFEIMVPredictorBufferType
+    VAEncFEIMVPredictorBufferType,
 };
 
-static const std::vector<VABufferType> postProcessorBufferTypes
-    = { VAProcPipelineParameterBufferType, VAProcFilterParameterBufferType };
+static const std::vector<ConfigPair> vpps = {
+    std::make_pair(VAProfileNone, VAEntrypointVideoProc),
+};
 
-static const std::vector<testInput> input = {
-    { VAProfileMPEG2Simple, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileMPEG2Main, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileH264Main, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileH264ConstrainedBaseline, VAEntrypointVLD, decoderBufferTypes},
-    { VAProfileH264High, VAEntrypointVLD, decoderBufferTypes},
-    { VAProfileH264MultiviewHigh, VAEntrypointVLD, decoderBufferTypes},
-    { VAProfileH264StereoHigh, VAEntrypointVLD, decoderBufferTypes},
-    { VAProfileVC1Simple, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileVC1Main, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileVC1Advanced, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileJPEGBaseline, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileVP8Version0_3, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileHEVCMain, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileHEVCMain10, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileVP9Profile0, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileVP9Profile2, VAEntrypointVLD, decoderBufferTypes },
-    { VAProfileH264Main, VAEntrypointEncSlice, encoderBufferTypes},
-    { VAProfileH264ConstrainedBaseline, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileH264High, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileH264MultiviewHigh, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileH264StereoHigh, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileH264Main, VAEntrypointFEI, encoderBufferTypes},
-    { VAProfileH264ConstrainedBaseline, VAEntrypointFEI, encoderBufferTypes },
-    { VAProfileH264High, VAEntrypointFEI, encoderBufferTypes },
-    { VAProfileJPEGBaseline, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileVP8Version0_3, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileHEVCMain, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileHEVCMain10, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileVP9Profile0, VAEntrypointEncSlice, encoderBufferTypes },
-    { VAProfileNone, VAEntrypointVideoProc, postProcessorBufferTypes }
+static const std::vector<VABufferType> postProcessorBufferTypes = {
+    VAProcPipelineParameterBufferType,
+    VAProcFilterParameterBufferType,
 };
 
 VAAPICreateBuffer::VAAPICreateBuffer()
@@ -112,8 +132,6 @@ VAAPICreateBuffer::~VAAPICreateBuffer()
 
 TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
 {
-
-
     // vaCreateBuffer uses a VAContextID as an input.  This VAContextID requires
     // a VAConfigID to be created.  VAConfigID requires VAProfile and
     // VAEntrypoint to be given.  As such, to test vaCreateBuffer these are
@@ -125,38 +143,61 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     doGetMaxValues();
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentTestInput.inputProfile)) {
-
-        doQueryConfigEntrypoints(currentTestInput.inputProfile);
-        if (doFindEntrypointInList(
-                currentTestInput.inputEntrypoint)) {
+    if (doFindProfileInList(currentTestInput.inputConfig.first)) {
+        doQueryConfigEntrypoints(currentTestInput.inputConfig.first);
+        if (doFindEntrypointInList(currentTestInput.inputConfig.second)) {
             // profile and entrypoint are supported, if not supported then do
             // not test for vaCreateBuffer
 
             doCreateConfig(
-                currentTestInput.inputProfile,
-                currentTestInput.inputEntrypoint);
+                currentTestInput.inputConfig.first,
+                currentTestInput.inputConfig.second);
 
             // vaCreateContext input requires resolution, since this test
             // doesn't create surfaces, passing 0x0 resolution should provide
             // the desired result.
             doCreateContext(std::make_pair(0, 0));
 
-            for (auto& bufferTypeIT : currentTestInput.inputBufferType) {
-                doCreateBuffer(bufferTypeIT);
-                doDestroyBuffer();
-            }
+            doCreateBuffer(currentTestInput.inputBufferType);
+            doDestroyBuffer();
 
             doDestroyContext();
             doDestroyConfig();
         }
     }
     else {
-        doLogSkipTest(currentTestInput.inputProfile, currentTestInput.inputEntrypoint);
+        doLogSkipTest(
+            currentTestInput.inputConfig.first,
+            currentTestInput.inputConfig.second);
     }
+}
+
+std::vector<testInput> generateInput()
+{
+    std::vector<testInput> inputs;
+
+    for (auto config : decoders) {
+        for (auto bufferType : decoderBufferTypes) {
+            inputs.push_back(testInput{config, bufferType});
+        }
+    }
+
+    for (auto config : encoders) {
+        for (auto bufferType : encoderBufferTypes) {
+            inputs.push_back(testInput{config, bufferType});
+        }
+    }
+
+    for (auto config : vpps) {
+        for (auto bufferType : postProcessorBufferTypes) {
+            inputs.push_back(testInput{config, bufferType});
+        }
+    }
+
+    return inputs;
 }
 
 INSTANTIATE_TEST_CASE_P(
     CreateBuffer, VAAPICreateBuffer,
-		      ::testing::ValuesIn(input));
+    ::testing::ValuesIn(generateInput()));
 } // VAAPI
