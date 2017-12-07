@@ -69,9 +69,9 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
             << currentProfile << " is supported but no entrypoints are reported";
     }
     else {
-        ASSERT_EQ(vaQueryConfigEntrypoints(m_vaDisplay, currentProfile,
-                                           &entrypointList[0], &numEntrypoints),
-                  VA_STATUS_ERROR_UNSUPPORTED_PROFILE)
+        ASSERT_STATUS_EQ(VA_STATUS_ERROR_UNSUPPORTED_PROFILE,
+                         vaQueryConfigEntrypoints(m_vaDisplay, currentProfile,
+                                           &entrypointList[0], &numEntrypoints))
             << " profile used is " << currentProfile;
 
         EXPECT_FALSE(numEntrypoints > 0) << currentProfile

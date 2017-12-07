@@ -263,7 +263,7 @@ void VAAPIFixture::doCreateConfigWithAttrib(VAProfile profile,
         m_vaDisplay, profile, entrypoint, &m_configAttribToCreateConfig[0],
         m_configAttribToCreateConfig.size(), &m_configID));
 
-    EXPECT_TRUE(m_configID > 0);
+    EXPECT_ID(m_configID);
 
     doQueryConfigAttributes(profile, entrypoint);
 }
@@ -349,7 +349,7 @@ void VAAPIFixture::doCreateConfigNoAttrib(VAProfile profile,
     ASSERT_STATUS(
         vaCreateConfig(m_vaDisplay, profile, entrypoint, NULL, 0, &m_configID));
 
-    EXPECT_TRUE(m_configID > 0);
+    EXPECT_ID(m_configID);
 
     doQueryConfigAttributes(profile, entrypoint);
 }
@@ -364,10 +364,11 @@ void VAAPIFixture::doQueryConfigAttributes(VAProfile profile,
 
     m_queryConfigAttribList.resize(m_maxConfigAttributes); // va-api requirement
 
-    ASSERT_EQ(vaQueryConfigAttributes(
-                  m_vaDisplay, m_configID, &queryProfile, &queryEntrypoint,
-                  &m_queryConfigAttribList[0], &queryNumConfigAttribs),
-              expectation);
+    ASSERT_STATUS_EQ(expectation,
+                     vaQueryConfigAttributes(m_vaDisplay, m_configID,
+                                             &queryProfile, &queryEntrypoint,
+                                             &m_queryConfigAttribList[0],
+                                             &queryNumConfigAttribs));
 
     if (expectation == VA_STATUS_SUCCESS) {
         m_queryConfigAttribList.resize(queryNumConfigAttribs);
@@ -465,16 +466,16 @@ void VAAPIFixture::doCreateContext(std::pair<uint32_t, uint32_t> resolution,
                                    VAStatus expectation)
 {
     m_contextID = 0;
-    ASSERT_EQ(vaCreateContext(m_vaDisplay, m_configID, resolution.first,
-                              resolution.second, VA_PROGRESSIVE,
-                              &m_surfaceID[0], m_surfaceID.size(),
-                              &m_contextID),
-              expectation);
+    ASSERT_STATUS_EQ(expectation,
+                     vaCreateContext(m_vaDisplay, m_configID, resolution.first,
+                                     resolution.second, VA_PROGRESSIVE,
+                                     &m_surfaceID[0], m_surfaceID.size(),
+                                     &m_contextID));
 }
 
 void VAAPIFixture::doDestroyContext(VAStatus expectation)
 {
-    ASSERT_EQ(vaDestroyContext(m_vaDisplay, m_contextID), expectation);
+    ASSERT_STATUS_EQ(expectation, vaDestroyContext(m_vaDisplay, m_contextID));
 }
 
 void VAAPIFixture::doCreateBuffer(VABufferType bufferType)
@@ -490,10 +491,10 @@ void VAAPIFixture::doDestroyBuffer()
 
 void VAAPIFixture::doCreateConfig(VAProfile profile, VAEntrypoint entrypoint)
 {
-    m_configID = 0;
+    m_configID = VA_INVALID_ID;
     ASSERT_STATUS(
         vaCreateConfig(m_vaDisplay, profile, entrypoint, NULL, 0, &m_configID));
-    EXPECT_NE(m_configID, 0u);
+    EXPECT_ID(m_configID);
 }
 
 void VAAPIFixture::doCreateConfigToFail(VAProfile profile,
@@ -501,21 +502,25 @@ void VAAPIFixture::doCreateConfigToFail(VAProfile profile,
 {
     VAStatus vaStatus = VA_STATUS_SUCCESS;
 
-    m_configID = 0;
+    m_configID = VA_INVALID_ID;
 
     vaStatus = vaCreateConfig(m_vaDisplay, profile, entrypoint, NULL, 0,
                               &m_configID);
-    ASSERT_EQ(vaStatus, error);
+    ASSERT_STATUS_EQ(error, vaStatus);
 
-    EXPECT_EQ(m_configID, 0u);
+    if (VA_STATUS_SUCCESS == error) {
+        EXPECT_ID(m_configID);
+    } else {
+        EXPECT_INVALID_ID(m_configID);
+    }
 
     m_queryConfigAttribList.resize(m_maxConfigAttributes); // va-api requirement
 
     doQueryConfigAttributes(profile, entrypoint,
                             VA_STATUS_ERROR_INVALID_CONFIG);
 
-    ASSERT_EQ(vaDestroyConfig(m_vaDisplay, m_configID),
-              VA_STATUS_ERROR_INVALID_CONFIG);
+    ASSERT_STATUS_EQ(VA_STATUS_ERROR_INVALID_CONFIG,
+                     vaDestroyConfig(m_vaDisplay, m_configID));
 }
 
 void VAAPIFixture::doTerminate() { EXPECT_STATUS(vaTerminate(m_vaDisplay)); }
