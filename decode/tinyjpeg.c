@@ -85,14 +85,14 @@ static int next_image_found=0;
 /* Global variable to return the last error found while deconding */
 static char error_string[256];
 static VAHuffmanTableBufferJPEGBaseline default_huffman_table_param={
-    huffman_table:
+    .huffman_table =
     {
         // lumiance component
         {
-            num_dc_codes:{0,1,5,1,1,1,1,1,1,0,0,0}, // 12 bits is ok for baseline profile
-            dc_values:{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b},
-            num_ac_codes:{0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125},
-            ac_values:{
+            .num_dc_codes = {0,1,5,1,1,1,1,1,1,0,0,0}, // 12 bits is ok for baseline profile
+            .dc_values = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b},
+            .num_ac_codes = {0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125},
+            .ac_values = {
               0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
               0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
               0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
@@ -118,10 +118,10 @@ static VAHuffmanTableBufferJPEGBaseline default_huffman_table_param={
         },
         // chrom component
         {
-            num_dc_codes:{0,3,1,1,1,1,1,1,1,1,1,0}, // 12 bits is ok for baseline profile
-            dc_values:{0,1,2,3,4,5,6,7,8,9,0xa,0xb},
-            num_ac_codes:{0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119},
-            ac_values:{
+            .num_dc_codes = {0,3,1,1,1,1,1,1,1,1,1,0}, // 12 bits is ok for baseline profile
+            .dc_values = {0,1,2,3,4,5,6,7,8,9,0xa,0xb},
+            .num_ac_codes = {0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119},
+            .ac_values = {
               0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
               0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
               0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
