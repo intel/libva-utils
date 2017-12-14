@@ -441,7 +441,7 @@ int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentS
             bitstream_put_ui(&bs, acHuffSectionHdr.Vij[j], 8);
         }
 
-        if((yuvComp.fourcc_val == VA_FOURCC_Y800) )
+        if(yuvComp.fourcc_val == VA_FOURCC_Y800)
             break;
     }
     
