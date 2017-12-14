@@ -861,7 +861,6 @@ int tinyjpeg_decode(struct jdec_private *priv)
 const char *tinyjpeg_get_errorstring(struct jdec_private *priv)
 {
   /* FIXME: the error string must be store in the context */
-  priv = priv;
   return error_string;
 }
 void tinyjpeg_get_size(struct jdec_private *priv, unsigned int *width, unsigned int *height)
