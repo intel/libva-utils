@@ -1011,7 +1011,7 @@ static int avcenc_destroy_buffers(VABufferID *va_buffers, unsigned int num_va_bu
     return 0;
 }
 
-static void end_picture()
+static void end_picture(void)
 {
 
     update_ReferenceFrames();
@@ -1841,7 +1841,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         ret = store_coded_buffer(avc_fp, slice_type);
     } while (ret);
 
-    end_picture(slice_type, next_is_bpic);
+    end_picture();
 }
 
 static void show_help()
