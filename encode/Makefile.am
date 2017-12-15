@@ -26,6 +26,7 @@ noinst_PROGRAMS = svctenc
 AM_CPPFLAGS = \
 	-Wall				\
 	$(LIBVA_CFLAGS) 		\
+	-I$(top_srcdir)/common		\
 	$(NULL)
 
 h264encode_SOURCES	= h264encode.c

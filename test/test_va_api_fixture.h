@@ -28,6 +28,10 @@
 #include "test_streamable.h"
 #include "gtest/gtest.h"
 
+
+#define UNUSED(x) ((void)(x))
+#define SURFACE_NUM 16
+
 namespace VAAPI {
 
 // The fixture for testing class Foo.
@@ -45,43 +49,64 @@ public:
     void doGetMaxEntrypoints();
     void doGetMaxNumConfigAttribs();
     void doGetMaxValues();
+    void doGetMaxNumImageFormats();
+    void doGetMaxNumSubPicImageFormats();
+
     void doQueryConfigProfiles();
+    void doQueryImageFormats();
+    void doQuerySubPicImageFormats();
     std::vector<VAProfile> getSupportedProfileList();
     bool doFindProfileInList(VAProfile profile);
     void doQueryConfigEntrypoints(VAProfile profile);
     std::vector<VAEntrypoint> getSupportedEntrypointList();
     bool doFindEntrypointInList(VAEntrypoint entrypoint);
-
+    uint32_t doFindImageFormatInList(uint32_t format);
+    uint32_t doFindSubPicImageFormatInList(uint32_t subPicFmt);
+    static bool
+    doCompareFormat(const VAImageFormat& imageformat, const uint32_t& format);
+    static bool doCompareSubPicFormat(const VAImageFormat& subPicImagefmt,
+        const uint32_t& subpicfmt);
     void doFillConfigAttribList();
     void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint);
     void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
-                               std::vector<VAConfigAttrib>& configAttrib);
+        std::vector<VAConfigAttrib>& configAttrib);
     const std::vector<VAConfigAttrib>& getConfigAttribList() const;
     const std::vector<VAConfigAttrib>& getQueryConfigAttribList() const;
     void doCheckAttribsMatch(std::vector<VAConfigAttrib> configAttrib);
     void doCreateConfigWithAttrib(VAProfile profile, VAEntrypoint entrypoint);
     void doQueryConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
-                                 VAStatus expectation = VA_STATUS_SUCCESS);
+        VAStatus expectation = VA_STATUS_SUCCESS);
     void doQuerySurfacesWithConfigAttribs(VAProfile profile,
-                                          VAEntrypoint entrypoint);
-    void doQuerySurfacesNoConfigAttribs(VAProfile profile,
-                                        VAEntrypoint entrypoint);
-    void doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
-                          std::pair<uint32_t, uint32_t> resolution);
+        VAEntrypoint entrypoint);
     void
-    doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
-                              std::pair<uint32_t, uint32_t>& maxResolution);
+    doQuerySurfacesNoConfigAttribs(VAProfile profile, VAEntrypoint entrypoint);
+    void doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
+        std::pair<uint32_t, uint32_t> resolution);
+    void doDeriveImage();
+    void doMapBuffer();
+    void doUnMapBuffer();
+    void doGetImage(const uint32_t& currentFmt, const VASurfaceID& surface_id,
+        const std::pair<uint32_t, uint32_t>& currentResolution);
+    VASurfaceID doGetNextSurface(int& index);
+    void doUploadImage();
+    void doPutImage(const std::pair<uint32_t, uint32_t>& resolution);
+    void doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
+        std::pair<uint32_t, uint32_t>& maxResolution);
 
     void doCreateContext(std::pair<uint32_t, uint32_t> resolution,
-                         VAStatus expectation = VA_STATUS_SUCCESS);
+        VAStatus expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(VAStatus expectation = VA_STATUS_SUCCESS);
     void doCreateBuffer(VABufferType bufferType);
     void doDestroyBuffer();
+    void doDestroySurfaces();
     void doCreateConfigNoAttrib(VAProfile profile, VAEntrypoint entrypoint);
     void doCreateConfig(VAProfile profile, VAEntrypoint entrypoint);
-    void doCreateConfigToFail(VAProfile profile, VAEntrypoint entrypoint, int error);
+    void
+    doCreateConfigToFail(VAProfile profile, VAEntrypoint entrypoint, int error);
     void doDestroyConfig();
-
+    void doTestCreateImage(const uint32_t& currentFmt,
+        const std::pair<uint32_t, uint32_t>& currentResolution);
+    void doDestroyImage();
     void doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint);
 
 protected:
@@ -93,14 +118,14 @@ protected:
 
     virtual void SetUp()
     {
-	// Code here will be called immediately after the constructor (right
-	// before each test).
+        // Code here will be called immediately after the constructor (right
+        // before each test).
     }
 
     virtual void TearDown()
     {
-	// Code here will be called immediately after each test (right
-	// before the destructor).
+        // Code here will be called immediately after each test (right
+        // before the destructor).
     }
 
     // Objects declared here can be used by all tests in the test case for
@@ -116,10 +141,17 @@ private:
     int m_maxProfiles;
     int m_numProfiles;
     int m_maxConfigAttributes;
+    int m_maxImageFormat;
+    int m_numImageFormat;
+    uint32_t m_flags;
+    int m_maxSubPicImageFormat;
+    int m_numSubPicImageFormat;
+    unsigned char *m_surface_p;
 
     VAConfigID m_configID;
     VAContextID m_contextID;
     VABufferID m_bufferID;
+    VAImage m_image;
 
     std::vector<VAProfile> m_profileList;
     std::vector<VAEntrypoint> m_entrypointList;
@@ -128,7 +160,8 @@ private:
     std::vector<VAConfigAttrib> m_queryConfigAttribList;
     std::vector<VASurfaceAttrib> m_querySurfaceAttribList;
     std::vector<VASurfaceID> m_surfaceID;
+    std::vector<VAImageFormat> m_imageFmtList;
+    std::vector<VAImageFormat> m_subPicFmtList;
 };
-
 } // namespace
 

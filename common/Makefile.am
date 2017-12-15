@@ -30,7 +30,7 @@ libva_display_libs = \
 	$(LIBVA_LDFLAGS) \
 	$(NULL)
 
-source_c		= va_display.c
+source_c		= va_display.c loadsurface.c
 source_h		= va_display.h loadsurface.h loadsurface_yuv.h
 
 if USE_X11

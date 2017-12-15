@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 AM_CXXFLAGS =							\
 	-I$(top_srcdir)/test/gtest/include			\
+	-I$(top_srcdir)/common					\
 	$(NULL)
 
 AM_CPPFLAGS =							\
@@ -57,6 +58,12 @@ noinst_HEADERS =						\
 	test_va_api_init_terminate.h				\
 	test_va_api_query_config.h				\
 	test_va_api_query_vendor.h				\
+	test_va_api_query_imageformat.h				\
+	test_va_api_query_subpicformat.h			\
+	test_va_api_create_image.h				\
+	test_va_api_deriveimage.h				\
+	test_va_api_getimage.h					\
+	test_va_api_putimage.h					\
 	va_version.h						\
 	$(NULL)
 
@@ -73,6 +80,12 @@ test_va_api_SOURCES =						\
 	test_va_api_init_terminate.cpp				\
 	test_va_api_query_config.cpp				\
 	test_va_api_query_vendor.cpp				\
+	test_va_api_query_imageformat.cpp			\
+	test_va_api_create_image.cpp				\
+	test_va_api_query_subpicformat.cpp			\
+	test_va_api_deriveimage.cpp				\
+	test_va_api_getimage.cpp				\
+	test_va_api_putimage.cpp				\
 	$(NULL)
 
 test_va_api_LDFLAGS =						\
@@ -83,6 +96,7 @@ test_va_api_LDFLAGS =						\
 
 test_va_api_LDADD =						\
 	libgtest.la						\
+	$(top_builddir)/common/libva-display.la			\
 	$(LIBVA_DEPS_LIBS)					\
 	$(LIBVA_DRM_LIBS)					\
 	$(NULL)
