@@ -71,7 +71,6 @@ VAAPIFixture::~VAAPIFixture()
 
 VADisplay VAAPIFixture::getDisplay()
 {
-
     uint32_t i;
 
     for (i = 0; i < sizeof(drmDevicePaths) / sizeof(*drmDevicePaths); i++) {
@@ -84,7 +83,7 @@ VADisplay VAAPIFixture::getDisplay()
             return m_vaDisplay;
     }
 
-    return m_vaDisplay;
+    return NULL;
 }
 
 VADisplay VAAPIFixture::doInitialize()
