@@ -112,12 +112,13 @@ TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_vaSetDriverName)
     char driver[4] = "bad";
 
     vaDisplay = getDisplay();
-    EXPECT_TRUE(vaDisplay);
+    ASSERT_TRUE(vaDisplay);
 
-    if (vaDisplay) {
-	vaStatus = vaSetDriverName(vaDisplay, driver);
-	EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER, vaStatus);
-    }
+    vaStatus = vaSetDriverName(vaDisplay, driver);
+    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER, vaStatus);
+
+    vaStatus = vaTerminate(vaDisplay);
+    EXPECT_STATUS(vaStatus);
 }
 
 TEST_F(VAAPIInitTerminate, InitTermWithoutDisplay)
