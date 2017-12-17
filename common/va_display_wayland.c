@@ -127,6 +127,11 @@ va_close_display_wayland(VADisplay va_dpy)
         d->compositor = NULL;
     }
 
+    if (d->registry) {
+        wl_registry_destroy(d->registry);
+        d->registry = NULL;
+    }
+
     if (d->display) {
         wl_display_disconnect(d->display);
         d->display = NULL;
