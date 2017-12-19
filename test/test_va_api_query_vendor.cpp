@@ -29,7 +29,7 @@ namespace VAAPI {
 VAAPIQueryVendor::VAAPIQueryVendor() {}
 VAAPIQueryVendor::~VAAPIQueryVendor() {}
 
-TEST_F(VAAPIQueryVendor, IntelVendor)
+TEST_F(VAAPIQueryVendor, Intel_i965_Vendor)
 {
     const char* vendor = NULL;
     std::string vendorString, findIntel("Intel i965 driver");

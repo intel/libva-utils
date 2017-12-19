@@ -135,12 +135,12 @@ TEST_F(VAAPIDisplayAttribs, SetDisplayAttribs)
             ASSERT_STATUS(vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
             attrib.value = attrib.min_value - 1;
-            ASSERT_EQ(vaSetDisplayAttributes(m_vaDisplay, &attrib, 1),
-                      VA_STATUS_ERROR_INVALID_PARAMETER);
+            ASSERT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER,
+                             vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
             attrib.value = attrib.max_value + 1;
-            ASSERT_EQ(vaSetDisplayAttributes(m_vaDisplay, &attrib, 1),
-                      VA_STATUS_ERROR_INVALID_PARAMETER);
+            ASSERT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER,
+                             vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
         }
     }
 }

@@ -659,7 +659,7 @@ static void avcenc_update_slice_parameter(int slice_type)
 	slice_param->RefPicList0[0] = RefPicList0[0];
     }
 
-    if ((slice_type == SLICE_TYPE_B)) {
+    if (slice_type == SLICE_TYPE_B) {
 	memset(slice_param->RefPicList1, 0xFF, 32 * sizeof(VAPictureH264));
 	slice_param->RefPicList1[0] = RefPicList1[0];
     }
@@ -1011,7 +1011,7 @@ static int avcenc_destroy_buffers(VABufferID *va_buffers, unsigned int num_va_bu
     return 0;
 }
 
-static void end_picture()
+static void end_picture(void)
 {
 
     update_ReferenceFrames();
@@ -1841,7 +1841,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         ret = store_coded_buffer(avc_fp, slice_type);
     } while (ret);
 
-    end_picture(slice_type, next_is_bpic);
+    end_picture();
 }
 
 static void show_help()

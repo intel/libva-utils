@@ -1,5 +1,15 @@
-libva-utils NEWS -- summary of changes.  2017-06-28
+libva-utils NEWS -- summary of changes.  2017-10-21
 Copyright (C) 2009-2017 Intel Corporation
+
+Version 2.0.0 - 21.Oct.2017
+* Bump version to 2.0.0
+* Add option '--device <device>' to vainfo
+* Add vp9enc for VP9 encoding
+* Add vavpp for video processing
+* Add FEI gtest cases
+* Fix segmentation fault in putsurface_wayland
+* Fix GCC 7.1.1 warnings/errors
+* Fix libva version printed out by vainfo
 
 Version 1.8.3 - 28.Jun.2017
 * Bump version to 1.8.3

@@ -43,4 +43,11 @@ operator<<(std::ostream& os, const VAEntrypoint& entrypoint)
         << ":" << vaEntrypointStr(entrypoint);
 }
 
+inline std::ostream&
+operator<<(std::ostream& os, const VABufferType& type)
+{
+    return os << static_cast<int>(type)
+        << ":" << vaBufferTypeStr(type);
+}
+
 #endif

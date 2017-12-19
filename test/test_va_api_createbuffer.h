@@ -27,9 +27,8 @@
 namespace VAAPI {
 
 struct testInput {
-    VAProfile inputProfile;
-    VAEntrypoint inputEntrypoint;
-    std::vector<VABufferType> inputBufferType;
+    std::pair<VAProfile, VAEntrypoint> inputConfig;
+    VABufferType inputBufferType;
 };
 class VAAPICreateBuffer
     : public VAAPIFixture,

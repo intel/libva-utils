@@ -53,16 +53,16 @@ void VAAPIInitTerminate::doInitTerminate()
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate) { doInitTerminate(); }
 
-TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Driver_Macro)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_Environment)
 {
-    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "i965", 0))
+    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "i965", 1))
 	<< "Could not set enviroment variable";
     doInitTerminate();
     EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"))
 	<< "Could not un-set enviroment variable";
 }
 
-TEST_F(VAAPIInitTerminate, vaSetDriverName_vaInitiailize_vaTerminate)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_vaSetDriverName)
 {
     VADisplay vaDisplay;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -84,7 +84,7 @@ TEST_F(VAAPIInitTerminate, vaSetDriverName_vaInitiailize_vaTerminate)
     EXPECT_STATUS(vaStatus);
 }
 
-TEST_F(VAAPIInitTerminate, BadDriverName_Macro)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_Environment)
 {
     VADisplay vaDisplay;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -93,11 +93,11 @@ TEST_F(VAAPIInitTerminate, BadDriverName_Macro)
     vaDisplay = getDisplay();
     EXPECT_TRUE(vaDisplay);
 
-    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "bad", 0));
+    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "bad", 1));
 
     if (vaDisplay)
 	vaStatus = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
-    EXPECT_EQ(VA_STATUS_ERROR_UNKNOWN, (unsigned)vaStatus);
+    EXPECT_STATUS_EQ(VA_STATUS_ERROR_UNKNOWN, (unsigned)vaStatus);
 
     EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
 
@@ -105,7 +105,7 @@ TEST_F(VAAPIInitTerminate, BadDriverName_Macro)
     EXPECT_STATUS(vaStatus);
 }
 
-TEST_F(VAAPIInitTerminate, vaSetDriverName_BadName)
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_vaSetDriverName)
 {
     VADisplay vaDisplay;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -116,7 +116,7 @@ TEST_F(VAAPIInitTerminate, vaSetDriverName_BadName)
 
     if (vaDisplay) {
 	vaStatus = vaSetDriverName(vaDisplay, driver);
-	EXPECT_EQ(VA_STATUS_ERROR_INVALID_PARAMETER, vaStatus);
+	EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER, vaStatus);
     }
 }
 
@@ -127,9 +127,9 @@ TEST_F(VAAPIInitTerminate, InitTermWithoutDisplay)
     int majorVersion, minorVersion;
 
     vaStatus = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
-    EXPECT_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaStatus);
+    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaStatus);
 
     vaStatus = vaTerminate(vaDisplay);
-    EXPECT_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaStatus);
+    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaStatus);
 }
 } // namespace VAAPI

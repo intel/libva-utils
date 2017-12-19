@@ -85,14 +85,14 @@ static int next_image_found=0;
 /* Global variable to return the last error found while deconding */
 static char error_string[256];
 static VAHuffmanTableBufferJPEGBaseline default_huffman_table_param={
-    huffman_table:
+    .huffman_table =
     {
         // lumiance component
         {
-            num_dc_codes:{0,1,5,1,1,1,1,1,1,0,0,0}, // 12 bits is ok for baseline profile
-            dc_values:{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b},
-            num_ac_codes:{0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125},
-            ac_values:{
+            .num_dc_codes = {0,1,5,1,1,1,1,1,1,0,0,0}, // 12 bits is ok for baseline profile
+            .dc_values = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b},
+            .num_ac_codes = {0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125},
+            .ac_values = {
               0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
               0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
               0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
@@ -118,10 +118,10 @@ static VAHuffmanTableBufferJPEGBaseline default_huffman_table_param={
         },
         // chrom component
         {
-            num_dc_codes:{0,3,1,1,1,1,1,1,1,1,1,0}, // 12 bits is ok for baseline profile
-            dc_values:{0,1,2,3,4,5,6,7,8,9,0xa,0xb},
-            num_ac_codes:{0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119},
-            ac_values:{
+            .num_dc_codes = {0,3,1,1,1,1,1,1,1,1,1,0}, // 12 bits is ok for baseline profile
+            .dc_values = {0,1,2,3,4,5,6,7,8,9,0xa,0xb},
+            .num_ac_codes = {0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119},
+            .ac_values = {
               0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
               0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
               0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
@@ -329,10 +329,10 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
      Tc = index & 0xf0; // it is not important to <<4
      Th = index & 0x0f;
      if (Tc) {
-        memcpy(priv->HTAC[index & 0xf].bits, stream, 16);
+        memcpy(priv->HTAC[Th].bits, stream, 16);
      }
      else {
-         memcpy(priv->HTDC[index & 0xf].bits, stream, 16);
+         memcpy(priv->HTDC[Th].bits, stream, 16);
      }
 
      count = 0;
@@ -343,18 +343,18 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
 #if SANITY_CHECK
      if (count >= HUFFMAN_BITS_SIZE)
        error("No more than %d bytes is allowed to describe a huffman table", HUFFMAN_BITS_SIZE);
-     if ( (index &0xf) >= HUFFMAN_TABLES)
-       error("No more than %d Huffman tables is supported (got %d)\n", HUFFMAN_TABLES, index&0xf);
-     trace("Huffman table %s[%d] length=%d\n", (index&0xf0)?"AC":"DC", index&0xf, count);
+     if (Th >= HUFFMAN_TABLES)
+       error("No more than %d Huffman tables is supported (got %d)\n", HUFFMAN_TABLES, Th);
+     trace("Huffman table %s[%d] length=%d\n", Tc ? "AC":"DC", Th, count);
 #endif
 
      if (Tc) {
-        memcpy(priv->HTAC[index & 0xf].values, stream, count);
-        priv->HTAC_valid[index & 0xf] = 1;
+        memcpy(priv->HTAC[Th].values, stream, count);
+        priv->HTAC_valid[Th] = 1;
      }
      else {
-        memcpy(priv->HTDC[index & 0xf].values, stream, count);
-        priv->HTDC_valid[index & 0xf] = 1;
+        memcpy(priv->HTDC[Th].values, stream, count);
+        priv->HTDC_valid[Th] = 1;
      }
 
      length -= 1;
@@ -861,7 +861,6 @@ int tinyjpeg_decode(struct jdec_private *priv)
 const char *tinyjpeg_get_errorstring(struct jdec_private *priv)
 {
   /* FIXME: the error string must be store in the context */
-  priv = priv;
   return error_string;
 }
 void tinyjpeg_get_size(struct jdec_private *priv, unsigned int *width, unsigned int *height)

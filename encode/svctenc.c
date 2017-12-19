@@ -1962,7 +1962,7 @@ svcenc_update_slice_parameter_buffer(struct svcenc_context *ctx,
             num_ref_idx_active_override_flag = 1;
     }
 
-    if ((slice_type == SLICE_TYPE_B)) {
+    if (slice_type == SLICE_TYPE_B) {
 	int j;
         num_ref_l1 = MIN((pic_param->num_ref_idx_l1_active_minus1 + 1), ctx->num_ref_frames);
 
