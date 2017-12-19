@@ -531,6 +531,7 @@ TEST_F(VAAPIFixture, getDisplay)
 
     vaDisplay = getDisplay();
     ASSERT_TRUE(vaDisplay);
+    EXPECT_STATUS(vaTerminate(vaDisplay));
 }
 
 void VAAPIFixture::doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint)
