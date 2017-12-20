@@ -22,19 +22,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_config_attribs.h"
-
-#include <functional>
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
-VAAPIConfigAttribs::VAAPIConfigAttribs()
-    : m_maxNumConfigAttribs(0)
-    , m_actualNumConfigAttribs(0)
-{
-    m_vaDisplay = doInitialize();
-}
 
-VAAPIConfigAttribs::~VAAPIConfigAttribs() { doTerminate(); }
+class VAAPIConfigAttribs
+    : public VAAPIFixture
+{
+public:
+    VAAPIConfigAttribs()
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPIConfigAttribs()
+    {
+        doTerminate();
+    }
+};
 
 TEST_F(VAAPIConfigAttribs, GetConfigAttribs)
 {
