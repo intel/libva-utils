@@ -22,19 +22,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_createcontext.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
-VAAPICreateContext::VAAPICreateContext() { m_vaDisplay = doInitialize(); }
 
-VAAPICreateContext::~VAAPICreateContext() { doTerminate(); }
-
-VAAPICreateContextToFail::VAAPICreateContextToFail()
+class VAAPICreateContextToFail
+    : public VAAPIFixture
 {
-    m_vaDisplay = doInitialize();
-}
+public:
+    VAAPICreateContextToFail()
+    {
+        m_vaDisplay = doInitialize();
+    }
 
-VAAPICreateContextToFail::~VAAPICreateContextToFail() { doTerminate(); }
+    virtual ~VAAPICreateContextToFail()
+    {
+        doTerminate();
+    }
+};
 
 TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
 {
@@ -46,6 +51,23 @@ TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
 
     doCreateContext(currentResolution, VA_STATUS_ERROR_INVALID_CONFIG);
 }
+
+class VAAPICreateContext
+    : public VAAPIFixture
+    , public ::testing::WithParamInterface<
+          std::tuple<VAProfile, VAEntrypoint, std::pair<uint32_t, uint32_t> > >
+{
+public:
+    VAAPICreateContext()
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPICreateContext()
+    {
+        doTerminate();
+    }
+};
 
 TEST_P(VAAPICreateContext, CreateContext)
 {
