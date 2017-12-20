@@ -22,15 +22,25 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_get_create_config.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
-VAAPIGetCreateConfig::VAAPIGetCreateConfig()
-{
-    m_vaDisplay = doInitialize();
-}
 
-VAAPIGetCreateConfig::~VAAPIGetCreateConfig() { doTerminate(); }
+class VAAPIGetCreateConfig
+    : public VAAPIFixture
+    , public ::testing::WithParamInterface<std::tuple<VAProfile, VAEntrypoint> >
+{
+public:
+    VAAPIGetCreateConfig()
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPIGetCreateConfig()
+    {
+        doTerminate();
+    }
+};
 
 TEST_P(VAAPIGetCreateConfig, CreateConfigWithAttributes)
 {
