@@ -22,21 +22,30 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_createsurfaces.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
+
 // The following tests will operate on supported profile/entrypoint
 // combinations that the driver does support, there is no real need
 // to report SKIPPED tests as those cases are considered on the
 // get_create_config use cases and properly handled.
 
-VAAPIQuerySurfaces::VAAPIQuerySurfaces()
+class VAAPIQuerySurfaces
+    : public VAAPIFixture
+    , public ::testing::WithParamInterface<std::tuple<VAProfile, VAEntrypoint> >
 {
-    m_vaDisplay = doInitialize();
-}
+public:
+    VAAPIQuerySurfaces()
+    {
+        m_vaDisplay = doInitialize();
+    }
 
-VAAPIQuerySurfaces::~VAAPIQuerySurfaces() { doTerminate(); }
-
+    virtual ~VAAPIQuerySurfaces()
+    {
+        doTerminate();
+    }
+};
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithCofigAttribs)
 {
@@ -89,12 +98,22 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
                        ::testing::ValuesIn(m_vaEntrypoints)));
 
-VAAPICreateSurfaces::VAAPICreateSurfaces()
+class VAAPICreateSurfaces
+    : public VAAPIFixture
+    , public ::testing::WithParamInterface<
+          std::tuple<VAProfile, VAEntrypoint, std::pair<uint32_t, uint32_t> > >
 {
-    m_vaDisplay = doInitialize();
-}
+public:
+    VAAPICreateSurfaces()
+    {
+        m_vaDisplay = doInitialize();
+    }
 
-VAAPICreateSurfaces::~VAAPICreateSurfaces() { doTerminate(); }
+    virtual ~VAAPICreateSurfaces()
+    {
+        doTerminate();
+    }
+};
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesWithCofigAttribs)
 {
