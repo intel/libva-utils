@@ -22,14 +22,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_get_max_values.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
-VAAPIGetMaxValues::VAAPIGetMaxValues()
+
+class VAAPIGetMaxValues
+    : public VAAPIFixture
 {
-    m_vaDisplay = doInitialize();
-}
-VAAPIGetMaxValues::~VAAPIGetMaxValues() { doTerminate(); }
+public:
+    VAAPIGetMaxValues()
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPIGetMaxValues()
+    {
+        doTerminate();
+    }
+};
 
 TEST_F(VAAPIGetMaxValues, CheckMaxProfile)
 {
