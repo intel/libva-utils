@@ -22,13 +22,21 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_createbuffer.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
 
 // Testing VABufferType in groups that will be associated with VAProfile and
 // VAEntrypoint. vaCreateBuffer doesn't require these itself but its input
 // parameter do care about them.
+
+typedef std::pair<VAProfile, VAEntrypoint> ConfigPair;
+
+struct testInput
+{
+    ConfigPair inputConfig;
+    VABufferType inputBufferType;
+};
 
 std::ostream& operator<<(std::ostream& os, const testInput& t)
 {
@@ -38,7 +46,21 @@ std::ostream& operator<<(std::ostream& os, const testInput& t)
     ;
 }
 
-typedef std::pair<VAProfile, VAEntrypoint> ConfigPair;
+class VAAPICreateBuffer
+    : public VAAPIFixture
+    , public ::testing::WithParamInterface<testInput>
+{
+public:
+    VAAPICreateBuffer()
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPICreateBuffer()
+    {
+        doTerminate();
+    }
+};
 
 static const std::vector<ConfigPair> decoders = {
     std::make_pair(VAProfileMPEG2Simple, VAEntrypointVLD),
@@ -119,16 +141,6 @@ static const std::vector<VABufferType> postProcessorBufferTypes = {
     VAProcPipelineParameterBufferType,
     VAProcFilterParameterBufferType,
 };
-
-VAAPICreateBuffer::VAAPICreateBuffer()
-{
-    m_vaDisplay = doInitialize();
-}
-
-VAAPICreateBuffer::~VAAPICreateBuffer()
-{
-    doTerminate();
-}
 
 TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
 {
