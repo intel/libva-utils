@@ -22,12 +22,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test.h"
-#include "test_va_api_query_vendor.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
-VAAPIQueryVendor::VAAPIQueryVendor() {}
-VAAPIQueryVendor::~VAAPIQueryVendor() {}
+
+// no addtl. fixture functionality needed... just a unique test name
+typedef VAAPIFixture VAAPIQueryVendor;
 
 TEST_F(VAAPIQueryVendor, Intel_i965_Vendor)
 {
