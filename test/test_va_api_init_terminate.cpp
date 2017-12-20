@@ -22,34 +22,37 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test.h"
-#include "test_va_api_init_terminate.h"
+#include "test_va_api_fixture.h"
 #include "va_version.h"
 
 namespace VAAPI {
-VAAPIInitTerminate::VAAPIInitTerminate() {}
-VAAPIInitTerminate::~VAAPIInitTerminate() {}
 
-void VAAPIInitTerminate::doInitTerminate()
+class VAAPIInitTerminate
+    : public VAAPIFixture
 {
-    VADisplay vaDisplay;
-    int majorVersion, minorVersion;
+protected:
+    // call vaInitialize and vaTerminate expecting success
+    void doInitTerminate()
+    {
+        VADisplay vaDisplay;
+        int majorVersion, minorVersion;
 
-    vaDisplay = getDisplay();
-    EXPECT_TRUE(vaDisplay);
+        vaDisplay = getDisplay();
+        EXPECT_TRUE(vaDisplay);
 
-    if (vaDisplay) {
-	ASSERT_STATUS(vaInitialize(vaDisplay, &majorVersion, &minorVersion));
+        if (vaDisplay) {
+            ASSERT_STATUS(vaInitialize(vaDisplay, &majorVersion, &minorVersion));
+        }
+
+        EXPECT_EQ(VA_MAJOR_VERSION, majorVersion)
+            << "Check installed driver version";
+
+        EXPECT_EQ(VA_MINOR_VERSION, minorVersion)
+            << "Check installed driver version";
+
+        ASSERT_STATUS(vaTerminate(vaDisplay));
     }
-
-    EXPECT_EQ(VA_MAJOR_VERSION, majorVersion)
-	<< "Check installed driver version";
-
-    EXPECT_EQ(VA_MINOR_VERSION, minorVersion)
-	<< "Check installed driver version";
-
-    ASSERT_STATUS(vaTerminate(vaDisplay));
-}
+};
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate) { doInitTerminate(); }
 
