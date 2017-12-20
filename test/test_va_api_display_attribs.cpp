@@ -22,42 +22,54 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_display_attribs.h"
+#include "test_va_api_fixture.h"
 
 #include <functional>
 
 namespace VAAPI {
-VAAPIDisplayAttribs::VAAPIDisplayAttribs()
-    : m_maxNumDisplayAttribs(0)
-    , m_actualNumDisplayAttribs(0)
+
+bool IsAttribType(VADisplayAttribute displayAttribute,
+              VADisplayAttribType displayAttribType)
 {
-    m_vaDisplay = doInitialize();
-    m_vaQueryDisplayAttribList.clear();
+    return displayAttribute.type == displayAttribType;
 }
 
-VAAPIDisplayAttribs::~VAAPIDisplayAttribs() { doTerminate(); }
+class VAAPIDisplayAttribs
+    : public VAAPIFixture
+{
+public:
+    VAAPIDisplayAttribs()
+        : m_maxNumDisplayAttribs(0)
+        , m_actualNumDisplayAttribs(0)
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPIDisplayAttribs()
+    {
+        doTerminate();
+    }
+
+    bool findDisplayAttribInQueryList(VADisplayAttribType displayAttribType)
+    {
+        return std::find_if(m_vaQueryDisplayAttribList.begin(),
+                            m_vaQueryDisplayAttribList.end(),
+                            std::bind(IsAttribType, std::placeholders::_1,
+                                      displayAttribType))
+              != m_vaQueryDisplayAttribList.end();
+    }
+
+protected:
+    int m_maxNumDisplayAttribs;
+    int m_actualNumDisplayAttribs;
+    std::vector<VADisplayAttribute> m_vaQueryDisplayAttribList;
+};
 
 TEST_F(VAAPIDisplayAttribs, MaxNumDisplayAttribs)
 {
     m_maxNumDisplayAttribs = vaMaxNumDisplayAttributes(m_vaDisplay);
 
     EXPECT_NE(m_maxNumDisplayAttribs, 0);
-}
-
-bool IsAttribType(VADisplayAttribute displayAttribute,
-                  VADisplayAttribType displayAttribType)
-{
-    return displayAttribute.type == displayAttribType;
-}
-
-bool VAAPIDisplayAttribs::findDisplayAttribInQueryList(
-    VADisplayAttribType displayAttribType)
-{
-    return std::find_if(m_vaQueryDisplayAttribList.begin(),
-                        m_vaQueryDisplayAttribList.end(),
-                        std::bind(IsAttribType, std::placeholders::_1,
-                                  displayAttribType))
-           != m_vaQueryDisplayAttribList.end();
 }
 
 static const std::vector<VADisplayAttribType> inputTest

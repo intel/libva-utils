@@ -47,7 +47,6 @@ noinst_HEADERS =						\
 	test_data.h						\
 	test_streamable.h					\
 	test_va_api_fixture.h					\
-	test_va_api_display_attribs.h				\
 	test_va_api_get_max_values.h				\
 	test_va_api_init_terminate.h				\
 	test_va_api_query_config.h				\
