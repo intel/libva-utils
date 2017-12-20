@@ -21,6 +21,10 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+#ifndef TESTVAAPI_test_va_api_fixture_h
+#define TESTVAAPI_test_va_api_fixture_h
+
 #include <va/va.h>
 
 #include "test.h"
@@ -132,3 +136,4 @@ private:
 
 } // namespace
 
+#endif

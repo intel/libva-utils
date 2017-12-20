@@ -22,8 +22,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef test_streamable_h
-#define test_streamable_h
+#ifndef TESTVAAPI_test_streamable_h
+#define TESTVAAPI_test_streamable_h
 
 #include <iostream>
 #include <va/va.h>
