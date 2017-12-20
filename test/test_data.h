@@ -22,8 +22,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef test_data_h
-#define test_data_h
+#ifndef TESTVAAPI_test_data_h
+#define TESTVAAPI_test_data_h
+
 #include <va/va.h>
 
 namespace VAAPI {

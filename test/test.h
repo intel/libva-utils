@@ -22,8 +22,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef TEST_H
-#define TEST_H
+#ifndef TESTVAAPI_test_h
+#define TESTVAAPI_test_h
 
 #include <gtest/gtest.h>
 #include <iostream>
