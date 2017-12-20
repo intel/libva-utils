@@ -47,7 +47,6 @@ noinst_HEADERS =						\
 	test_data.h						\
 	test_streamable.h					\
 	test_va_api_fixture.h					\
-	test_va_api_get_create_config.h				\
 	test_va_api_config_attribs.h				\
 	test_va_api_createsurfaces.h				\
 	test_va_api_createcontext.h				\
