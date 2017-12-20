@@ -22,18 +22,25 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_query_config.h"
+#include "test_va_api_fixture.h"
 
 namespace VAAPI {
-VAAPIQueryConfig::VAAPIQueryConfig()
-{
-    m_vaDisplay = doInitialize();
-}
 
-VAAPIQueryConfig::~VAAPIQueryConfig()
+class VAAPIQueryConfig
+    : public VAAPIFixture
+    , public ::testing::WithParamInterface<VAProfile>
 {
-    doTerminate();
-}
+public:
+    VAAPIQueryConfig()
+    {
+        m_vaDisplay = doInitialize();
+    }
+
+    virtual ~VAAPIQueryConfig()
+    {
+        doTerminate();
+    }
+};
 
 TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
 {
