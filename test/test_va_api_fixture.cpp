@@ -277,7 +277,6 @@ void VAAPIFixture::doDestroyConfig()
 void VAAPIFixture::doQuerySurfacesWithConfigAttribs(VAProfile profile,
                                                     VAEntrypoint entrypoint)
 {
-    std::vector<VASurfaceAttrib> m_querySurfaceAttribList;
     uint32_t queryNumSurfaceAttribs;
 
     doCreateConfigWithAttrib(profile, entrypoint);
