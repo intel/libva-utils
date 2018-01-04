@@ -48,45 +48,42 @@ public:
     void doGetMaxNumConfigAttribs();
     void doGetMaxValues();
     void doQueryConfigProfiles();
-    Profiles getSupportedProfileList();
-    bool doFindProfileInList(VAProfile profile);
-    void doQueryConfigEntrypoints(VAProfile profile);
-    Entrypoints getSupportedEntrypointList();
-    bool doFindEntrypointInList(VAEntrypoint entrypoint);
+    const Profiles& getSupportedProfileList() const;
+    bool doFindProfileInList(const VAProfile&) const;
+    void doQueryConfigEntrypoints(const VAProfile&);
+    const Entrypoints& getSupportedEntrypointList() const;
+    bool doFindEntrypointInList(const VAEntrypoint&) const;
 
     void doFillConfigAttribList();
-    void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint);
-    void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
-                               ConfigAttributes& configAttrib);
+    void doGetConfigAttributes(const VAProfile&, const VAEntrypoint&);
+    void doGetConfigAttributes(const VAProfile&, const VAEntrypoint&,
+        ConfigAttributes& configAttrib);
     const ConfigAttributes& getConfigAttribList() const;
     const ConfigAttributes& getQueryConfigAttribList() const;
-    void doCheckAttribsMatch(ConfigAttributes configAttrib);
-    void doCreateConfigWithAttrib(VAProfile profile, VAEntrypoint entrypoint);
-    void doQueryConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
-                                 VAStatus expectation = VA_STATUS_SUCCESS);
-    void doQuerySurfacesWithConfigAttribs(VAProfile profile,
-                                          VAEntrypoint entrypoint);
-    void doQuerySurfacesNoConfigAttribs(VAProfile profile,
-                                        VAEntrypoint entrypoint);
-    void doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
-                          const Resolution&);
-    void
-    doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
-                              Resolution&);
-    void
-    doGetMinSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
-                              Resolution& minResolution);
+    void doCheckAttribsMatch(const ConfigAttributes&) const;
+    void doCreateConfigWithAttrib(const VAProfile&, const VAEntrypoint&);
+    void doQueryConfigAttributes(const VAProfile&, const VAEntrypoint&,
+        const VAStatus& expectation = VA_STATUS_SUCCESS);
+    void doQuerySurfacesWithConfigAttribs(const VAProfile&,
+        const VAEntrypoint&);
+    void doQuerySurfacesNoConfigAttribs(const VAProfile&, const VAEntrypoint&);
+    void doCreateSurfaces(const VAProfile&, const VAEntrypoint&,
+        const Resolution&);
+    void doGetMaxSurfaceResolution(const VAProfile&, const VAEntrypoint&,
+        Resolution&);
+    void doGetMinSurfaceResolution(const VAProfile&, const VAEntrypoint&,
+        Resolution&);
     void doCreateContext(const Resolution&,
-                         VAStatus expectation = VA_STATUS_SUCCESS);
-    void doDestroyContext(VAStatus expectation = VA_STATUS_SUCCESS);
-    void doCreateBuffer(VABufferType bufferType);
+        const VAStatus& expectation = VA_STATUS_SUCCESS);
+    void doDestroyContext(const VAStatus& expectation = VA_STATUS_SUCCESS);
+    void doCreateBuffer(const VABufferType&);
     void doDestroyBuffer();
-    void doCreateConfigNoAttrib(VAProfile profile, VAEntrypoint entrypoint);
-    void doCreateConfig(VAProfile profile, VAEntrypoint entrypoint);
-    void doCreateConfigToFail(VAProfile profile, VAEntrypoint entrypoint, int error);
+    void doCreateConfigNoAttrib(const VAProfile&, const VAEntrypoint&);
+    void doCreateConfig(const VAProfile&, const VAEntrypoint&);
+    void doCreateConfigToFail(const VAProfile&, const VAEntrypoint&, int error);
     void doDestroyConfig();
 
-    void doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint);
+    void doLogSkipTest(const VAProfile&, const VAEntrypoint&) const;
 
 protected:
     // You can remove any or all of the following functions if its body

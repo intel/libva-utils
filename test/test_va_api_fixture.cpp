@@ -131,7 +131,6 @@ void VAAPIFixture::doGetMaxNumConfigAttribs()
 
 void VAAPIFixture::doGetMaxValues()
 {
-
     doGetMaxProfiles();
     doGetMaxEntrypoints();
     doGetMaxNumConfigAttribs();
@@ -150,23 +149,23 @@ void VAAPIFixture::doQueryConfigProfiles()
     m_profileList.resize(m_numProfiles);
 }
 
-Profiles VAAPIFixture::getSupportedProfileList()
+const Profiles& VAAPIFixture::getSupportedProfileList() const
 {
     return m_profileList;
 }
 
-Entrypoints VAAPIFixture::getSupportedEntrypointList()
+const Entrypoints& VAAPIFixture::getSupportedEntrypointList() const
 {
     return m_entrypointList;
 }
 
-bool VAAPIFixture::doFindProfileInList(VAProfile profile)
+bool VAAPIFixture::doFindProfileInList(const VAProfile& profile) const
 {
     return std::find(m_profileList.begin(), m_profileList.end(), profile)
            != m_profileList.end();
 }
 
-void VAAPIFixture::doQueryConfigEntrypoints(VAProfile profile)
+void VAAPIFixture::doQueryConfigEntrypoints(const VAProfile& profile)
 {
     int numEntrypoints = 0;
 
@@ -179,7 +178,7 @@ void VAAPIFixture::doQueryConfigEntrypoints(VAProfile profile)
     m_entrypointList.resize(numEntrypoints);
 }
 
-bool VAAPIFixture::doFindEntrypointInList(VAEntrypoint entrypoint)
+bool VAAPIFixture::doFindEntrypointInList(const VAEntrypoint& entrypoint) const
 {
     return std::find(m_entrypointList.begin(), m_entrypointList.end(),
                      entrypoint)
@@ -201,16 +200,16 @@ void VAAPIFixture::doFillConfigAttribList()
     EXPECT_EQ(m_configAttribList.size(), m_vaConfigAttribs.size());
 }
 
-void VAAPIFixture::doGetConfigAttributes(VAProfile profile,
-                                         VAEntrypoint entrypoint)
+void VAAPIFixture::doGetConfigAttributes(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
 {
     int numAttributes = m_configAttribList.size();
     ASSERT_STATUS(vaGetConfigAttributes(m_vaDisplay, profile, entrypoint,
                                         &m_configAttribList[0], numAttributes));
 }
 
-void VAAPIFixture::doGetConfigAttributes(
-    VAProfile profile, VAEntrypoint entrypoint, ConfigAttributes& configAttrib)
+void VAAPIFixture::doGetConfigAttributes(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, ConfigAttributes& configAttrib)
 {
     int numAttributes = configAttrib.size();
     ASSERT_STATUS(vaGetConfigAttributes(m_vaDisplay, profile, entrypoint,
@@ -227,7 +226,8 @@ const ConfigAttributes& VAAPIFixture::getQueryConfigAttribList() const
     return m_queryConfigAttribList;
 }
 
-void VAAPIFixture::doCheckAttribsMatch(ConfigAttributes configAttrib)
+void VAAPIFixture::doCheckAttribsMatch(
+    const ConfigAttributes& configAttrib) const
 {
     auto itOne = m_queryConfigAttribList.begin();
     auto itTwo = configAttrib.begin();
@@ -247,13 +247,11 @@ void VAAPIFixture::doCheckAttribsMatch(ConfigAttributes configAttrib)
     EXPECT_TRUE(diff == 0);
 }
 
-void VAAPIFixture::doCreateConfigWithAttrib(VAProfile profile,
-                                            VAEntrypoint entrypoint)
+void VAAPIFixture::doCreateConfigWithAttrib(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
 {
-
     m_configAttribToCreateConfig.clear();
     for (auto& it : m_configAttribList) {
-
         if (it.value != VA_ATTRIB_NOT_SUPPORTED)
             m_configAttribToCreateConfig.push_back(it);
     }
@@ -272,8 +270,8 @@ void VAAPIFixture::doDestroyConfig()
     ASSERT_STATUS(vaDestroyConfig(m_vaDisplay, m_configID));
 }
 
-void VAAPIFixture::doQuerySurfacesWithConfigAttribs(VAProfile profile,
-                                                    VAEntrypoint entrypoint)
+void VAAPIFixture::doQuerySurfacesWithConfigAttribs(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
 {
     uint32_t queryNumSurfaceAttribs;
 
@@ -305,15 +303,14 @@ void VAAPIFixture::doQuerySurfacesWithConfigAttribs(VAProfile profile,
     }
 }
 
-inline bool isSurfaceAttribInList(VASurfaceAttrib surfaceAttrib,
-                                  VASurfaceAttribType surfaceAttribType)
+inline bool isSurfaceAttribInList(const VASurfaceAttrib& surfaceAttrib,
+    const VASurfaceAttribType& surfaceAttribType)
 {
     return surfaceAttrib.type == surfaceAttribType;
 }
 
-void VAAPIFixture::doGetMaxSurfaceResolution(
-    VAProfile profile, VAEntrypoint entrypoint,
-    Resolution& maxResolution)
+void VAAPIFixture::doGetMaxSurfaceResolution(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, Resolution& maxResolution)
 {
     SurfaceAttributes::iterator it;
     doQuerySurfacesNoConfigAttribs(profile, entrypoint);
@@ -346,9 +343,8 @@ void VAAPIFixture::doGetMaxSurfaceResolution(
     }
 }
 
-void VAAPIFixture::doGetMinSurfaceResolution(
-    VAProfile profile, VAEntrypoint entrypoint,
-    Resolution& minResolution)
+void VAAPIFixture::doGetMinSurfaceResolution(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, Resolution& minResolution)
 {
     SurfaceAttributes::iterator it;
     doQuerySurfacesNoConfigAttribs(profile, entrypoint);
@@ -379,8 +375,8 @@ void VAAPIFixture::doGetMinSurfaceResolution(
     }
 }
 
-void VAAPIFixture::doCreateConfigNoAttrib(VAProfile profile,
-                                          VAEntrypoint entrypoint)
+void VAAPIFixture::doCreateConfigNoAttrib(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
 {
 
     ASSERT_STATUS(
@@ -391,9 +387,8 @@ void VAAPIFixture::doCreateConfigNoAttrib(VAProfile profile,
     doQueryConfigAttributes(profile, entrypoint);
 }
 
-void VAAPIFixture::doQueryConfigAttributes(VAProfile profile,
-                                           VAEntrypoint entrypoint,
-                                           VAStatus expectation)
+void VAAPIFixture::doQueryConfigAttributes(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, const VAStatus& expectation)
 {
     VAProfile queryProfile;
     VAEntrypoint queryEntrypoint;
@@ -422,8 +417,8 @@ void VAAPIFixture::doQueryConfigAttributes(VAProfile profile,
     }
 }
 
-void VAAPIFixture::doQuerySurfacesNoConfigAttribs(VAProfile profile,
-                                                  VAEntrypoint entrypoint)
+void VAAPIFixture::doQuerySurfacesNoConfigAttribs(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
 {
     uint32_t queryNumSurfaceAttribs;
 
@@ -455,14 +450,14 @@ void VAAPIFixture::doQuerySurfacesNoConfigAttribs(VAProfile profile,
     }
 }
 
-inline bool isConfigAttribInList(VAConfigAttrib configAttrib,
-                                 VAConfigAttribType type)
+inline bool isConfigAttribInList(const VAConfigAttrib& configAttrib,
+    const VAConfigAttribType& type)
 {
     return configAttrib.type == type;
 }
 
-void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
-                                    const Resolution& resolution)
+void VAAPIFixture::doCreateSurfaces(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, const Resolution& resolution)
 {
     VASurfaceAttrib* attribList = NULL;
     uint32_t numAttribs = 0;
@@ -500,7 +495,7 @@ void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
 }
 
 void VAAPIFixture::doCreateContext(const Resolution& resolution,
-                                   VAStatus expectation)
+    const VAStatus& expectation)
 {
     m_contextID = 0;
     ASSERT_STATUS_EQ(expectation,
@@ -510,12 +505,12 @@ void VAAPIFixture::doCreateContext(const Resolution& resolution,
                                      &m_contextID));
 }
 
-void VAAPIFixture::doDestroyContext(VAStatus expectation)
+void VAAPIFixture::doDestroyContext(const VAStatus& expectation)
 {
     ASSERT_STATUS_EQ(expectation, vaDestroyContext(m_vaDisplay, m_contextID));
 }
 
-void VAAPIFixture::doCreateBuffer(VABufferType bufferType)
+void VAAPIFixture::doCreateBuffer(const VABufferType& bufferType)
 {
     ASSERT_STATUS(vaCreateBuffer(m_vaDisplay, m_contextID, bufferType,
                                  sizeof(bufferType), 1, NULL, &m_bufferID));
@@ -526,7 +521,8 @@ void VAAPIFixture::doDestroyBuffer()
     ASSERT_STATUS(vaDestroyBuffer(m_vaDisplay, m_bufferID));
 }
 
-void VAAPIFixture::doCreateConfig(VAProfile profile, VAEntrypoint entrypoint)
+void VAAPIFixture::doCreateConfig(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
 {
     m_configID = VA_INVALID_ID;
     ASSERT_STATUS(
@@ -534,8 +530,8 @@ void VAAPIFixture::doCreateConfig(VAProfile profile, VAEntrypoint entrypoint)
     EXPECT_ID(m_configID);
 }
 
-void VAAPIFixture::doCreateConfigToFail(VAProfile profile,
-                                        VAEntrypoint entrypoint, int error)
+void VAAPIFixture::doCreateConfigToFail(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, int error)
 {
     VAStatus vaStatus = VA_STATUS_SUCCESS;
 
@@ -560,7 +556,19 @@ void VAAPIFixture::doCreateConfigToFail(VAProfile profile,
                      vaDestroyConfig(m_vaDisplay, m_configID));
 }
 
-void VAAPIFixture::doTerminate() { EXPECT_STATUS(vaTerminate(m_vaDisplay)); }
+void VAAPIFixture::doTerminate()
+{
+    EXPECT_STATUS(vaTerminate(m_vaDisplay));
+}
+
+void VAAPIFixture::doLogSkipTest(const VAProfile& profile,
+    const VAEntrypoint& entrypoint) const
+{
+    RecordProperty("skipped", true);
+    std::cout << "[ SKIPPED ]"
+              << " " << profile << " / " << entrypoint
+              << " not supported on this hardware" << std::endl;
+}
 
 TEST_F(VAAPIFixture, getDisplay)
 {
@@ -571,11 +579,4 @@ TEST_F(VAAPIFixture, getDisplay)
     EXPECT_STATUS(vaTerminate(vaDisplay));
 }
 
-void VAAPIFixture::doLogSkipTest(VAProfile profile, VAEntrypoint entrypoint)
-{
-    RecordProperty("skipped", true);
-    std::cout << "[ SKIPPED ]"
-	      << " " << profile << " / " << entrypoint
-	      << " not supported on this hardware" << std::endl;
-}
 } // namespace VAAPI
