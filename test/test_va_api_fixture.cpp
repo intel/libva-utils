@@ -349,6 +349,39 @@ void VAAPIFixture::doGetMaxSurfaceResolution(
     }
 }
 
+void VAAPIFixture::doGetMinSurfaceResolution(
+    VAProfile profile, VAEntrypoint entrypoint,
+    Resolution& minResolution)
+{
+    std::vector<VASurfaceAttrib>::iterator it;
+    doQuerySurfacesNoConfigAttribs(profile, entrypoint);
+    it = std::find_if(m_querySurfaceAttribList.begin(),
+                      m_querySurfaceAttribList.end(),
+                      std::bind(isSurfaceAttribInList, std::placeholders::_1,
+                                VASurfaceAttribMinWidth));
+
+    if (it != m_querySurfaceAttribList.end()) {
+        EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
+        ASSERT_GE(it->value.type, 1);
+        minResolution.width = it->value.value.i;
+    } else {
+        minResolution.width = 1;
+    }
+
+    it = std::find_if(m_querySurfaceAttribList.begin(),
+                      m_querySurfaceAttribList.end(),
+                      std::bind(isSurfaceAttribInList, std::placeholders::_1,
+                                VASurfaceAttribMinHeight));
+
+    if (it != m_querySurfaceAttribList.end()) {
+        EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
+        ASSERT_GE(it->value.type, 1);
+        minResolution.height = it->value.value.i;
+    } else {
+        minResolution.height = 1;
+    }
+}
+
 void VAAPIFixture::doCreateConfigNoAttrib(VAProfile profile,
                                           VAEntrypoint entrypoint)
 {
