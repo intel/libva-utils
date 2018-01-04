@@ -53,6 +53,7 @@ noinst_HEADERS =						\
 
 test_va_api_SOURCES =						\
 	test_main.cpp						\
+	test_internal.cpp					\
 	test_va_api_fixture.cpp					\
 	test_va_api_get_create_config.cpp			\
 	test_va_api_config_attribs.cpp				\
