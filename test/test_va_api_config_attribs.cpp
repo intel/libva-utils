@@ -43,46 +43,36 @@ public:
 
 TEST_F(VAAPIConfigAttribs, GetConfigAttribs)
 {
-    Profiles profileList;
-    Entrypoints entrypointList;
-    ConfigAttributes configAttribList;
-    VAConfigAttrib configAttrib;
     doGetMaxValues();
 
     doQueryConfigProfiles();
+    const Profiles& profiles = getSupportedProfileList();
+    ASSERT_FALSE(profiles.empty());
 
-    profileList = getSupportedProfileList();
+    for (const auto& profile : profiles) {
+        doQueryConfigEntrypoints(profile);
+        const Entrypoints& entrypoints = getSupportedEntrypointList();
+        ASSERT_FALSE(entrypoints.empty());
 
-    ASSERT_FALSE(profileList.empty());
-
-    for(auto& itProfile: profileList)
-    {
-        doQueryConfigEntrypoints(itProfile);
-        entrypointList = getSupportedEntrypointList();
-        ASSERT_FALSE(entrypointList.empty());
-
-        for (auto& itEntrypoint : entrypointList) {
-
-            configAttribList.clear();
+        for (const auto& entrypoint : entrypoints) {
             doGetMaxNumConfigAttribs();
-            doCreateConfigNoAttrib(itProfile, itEntrypoint);
+            doCreateConfigNoAttrib(profile, entrypoint);
 
-            // once ConfigID is obtained, then the attrib list is populated as
+            // Once ConfigID is obtained, then the attrib list is populated as
             // well.  This will confirm that the values returned by calling
             // vaGetConfigAttributes do match
-            for (auto& itList: getQueryConfigAttribList())
-            {
-                configAttrib=itList;
-                configAttrib.value = 0;
-                configAttribList.push_back(configAttrib);
+
+            // make a copy since we want to set .value = 0
+            ConfigAttributes attribs = getQueryConfigAttribList();
+            for (auto& attrib : attribs) {
+                attrib.value = 0;
             }
 
-            doGetConfigAttributes(itProfile, itEntrypoint, configAttribList);
-
-            doCheckAttribsMatch(configAttribList);
-
+            doGetConfigAttributes(profile, entrypoint, attribs);
+            doCheckAttribsMatch(attribs);
             doDestroyConfig();
         }
     }
 }
-} // VAAPI
+
+} // namespace VAAPI
