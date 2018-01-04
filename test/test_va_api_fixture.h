@@ -75,6 +75,9 @@ public:
     void
     doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
                               Resolution&);
+    void
+    doGetMinSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
+                              Resolution& minResolution);
     void doCreateContext(const Resolution&,
                          VAStatus expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(VAStatus expectation = VA_STATUS_SUCCESS);
