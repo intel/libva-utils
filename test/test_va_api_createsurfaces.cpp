@@ -47,56 +47,58 @@ public:
     }
 };
 
-TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithCofigAttribs)
+TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
 {
-
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-	doQueryConfigEntrypoints(currentProfile);
-	if (doFindEntrypointInList(currentEntrypoint)) {
-	    // profile and entrypoint are supported
-
-	    doFillConfigAttribList();
-
-	    doGetConfigAttributes(currentProfile, currentEntrypoint);
-
-	    doQuerySurfacesWithConfigAttribs(currentProfile, currentEntrypoint);
-	}
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
+            // profile and entrypoint are supported
+            doFillConfigAttribList();
+            doGetConfigAttributes(profile, entrypoint);
+            doQuerySurfacesWithConfigAttribs(profile, entrypoint);
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(profile, entrypoint);
+        }
+    } else {
+        // profile not supported
+        doLogSkipTest(profile, entrypoint);
     }
 }
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
 {
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-        doQueryConfigEntrypoints(currentProfile);
-        if (doFindEntrypointInList(currentEntrypoint)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-
-            doQuerySurfacesNoConfigAttribs(currentProfile,
-                                                   currentEntrypoint);
+            doQuerySurfacesNoConfigAttribs(profile, entrypoint);
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(profile, entrypoint);
         }
+    } else {
+        // profile not supported
+        doLogSkipTest(profile, entrypoint);
     }
 }
 
 INSTANTIATE_TEST_CASE_P(
     QuerySurfaces, VAAPIQuerySurfaces,
     ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
-                       ::testing::ValuesIn(m_vaEntrypoints)));
+        ::testing::ValuesIn(m_vaEntrypoints)));
 
 class VAAPICreateSurfaces
     : public VAAPIFixture
@@ -115,88 +117,86 @@ public:
     }
 };
 
-TEST_P(VAAPICreateSurfaces, CreateSurfacesWithCofigAttribs)
+TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
 {
-
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    const Resolution& currentResolution = ::testing::get<2>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
+    const Resolution& resolution    = ::testing::get<2>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-        doQueryConfigEntrypoints(currentProfile);
-        if (doFindEntrypointInList(currentEntrypoint)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-
             doFillConfigAttribList();
-
-	    doGetConfigAttributes(currentProfile,
-						currentEntrypoint);
-
-	    doQuerySurfacesWithConfigAttribs(currentProfile,
-                                                   currentEntrypoint);
-
-            doCreateSurfaces(currentProfile, currentEntrypoint,
-                                           currentResolution);
-	}
+            doGetConfigAttributes(profile, entrypoint);
+            doQuerySurfacesWithConfigAttribs(profile, entrypoint);
+            doCreateSurfaces(profile, entrypoint, resolution);
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(profile, entrypoint);
+        }
+    } else {
+        // profile not supported
+        doLogSkipTest(profile, entrypoint);
     }
 }
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 {
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    const Resolution& currentResolution = ::testing::get<2>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
+    const Resolution& resolution    = ::testing::get<2>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-        doQueryConfigEntrypoints(currentProfile);
-        if (doFindEntrypointInList(currentEntrypoint)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-
-            doQuerySurfacesNoConfigAttribs(currentProfile,
-                                                   currentEntrypoint);
-
-            doCreateSurfaces(currentProfile, currentEntrypoint,
-                                           currentResolution);
+            doQuerySurfacesNoConfigAttribs(profile, entrypoint);
+            doCreateSurfaces(profile, entrypoint, resolution);
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(profile, entrypoint);
         }
+    } else {
+        // profile not supported
+        doLogSkipTest(profile, entrypoint);
     }
 }
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 {
-
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    const Resolution& currentResolution = ::testing::get<2>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
+    const Resolution& resolution    = ::testing::get<2>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-        doQueryConfigEntrypoints(currentProfile);
-        if (doFindEntrypointInList(currentEntrypoint)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-
-            doCreateSurfaces(currentProfile, currentEntrypoint,
-                                           currentResolution);
+            doCreateSurfaces(profile, entrypoint, resolution);
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(profile, entrypoint);
         }
+    } else {
+        // profile not supported
+        doLogSkipTest(profile, entrypoint);
     }
 }
 
 INSTANTIATE_TEST_CASE_P(
     CreateSurfaces, VAAPICreateSurfaces,
     ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
-                       ::testing::ValuesIn(m_vaEntrypoints),
-                       ::testing::ValuesIn(m_vaResolutions)));
-} // VAAPI
+        ::testing::ValuesIn(m_vaEntrypoints),
+        ::testing::ValuesIn(m_vaResolutions)));
+
+} // namespace VAAPI
