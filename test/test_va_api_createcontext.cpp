@@ -75,6 +75,7 @@ TEST_P(VAAPICreateContext, CreateContext)
     VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
     const Resolution& currentResolution = ::testing::get<2>(GetParam());
     Resolution maxResolution;
+    Resolution minResolution;
 
     // vaCreateContext requires a valida VAConfigID, vaCreateConfig requires a
     // supported profile and entrypoint
@@ -90,9 +91,9 @@ TEST_P(VAAPICreateContext, CreateContext)
             // profile and entrypoint are supported
 
             doCreateConfig(currentProfile, currentEntrypoint);
+            doGetMinSurfaceResolution(currentProfile, currentEntrypoint, minResolution);
             doGetMaxSurfaceResolution(currentProfile, currentEntrypoint, maxResolution);
-            if (currentResolution.width > maxResolution.width
-                || currentResolution.height > maxResolution.height) {
+            if (not currentResolution.isWithin(minResolution, maxResolution)) {
                 doCreateContext(currentResolution,
                                 VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED);
                 doDestroyContext(VA_STATUS_ERROR_INVALID_CONTEXT);
