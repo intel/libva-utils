@@ -28,6 +28,7 @@
 #include <functional>
 
 #include <fcntl.h> // for O_RDWR
+#include <limits>
 #include <unistd.h> // for close()
 #include <va/va_drm.h>
 
@@ -324,22 +325,28 @@ void VAAPIFixture::doGetMaxSurfaceResolution(
                       std::bind(isSurfaceAttribInList, std::placeholders::_1,
                                 VASurfaceAttribMaxWidth));
 
-    EXPECT_TRUE(it != m_querySurfaceAttribList.end());
-
-    EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
-
-    maxResolution.width = it->value.value.i;
+    if (it != m_querySurfaceAttribList.end()) {
+        EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
+        ASSERT_LE(
+            it->value.type, std::numeric_limits<Resolution::DataType>::max());
+        maxResolution.width = it->value.value.i;
+    } else {
+        maxResolution.width = std::numeric_limits<Resolution::DataType>::max();
+    }
 
     it = std::find_if(m_querySurfaceAttribList.begin(),
                       m_querySurfaceAttribList.end(),
                       std::bind(isSurfaceAttribInList, std::placeholders::_1,
                                 VASurfaceAttribMaxHeight));
 
-    EXPECT_TRUE(it != m_querySurfaceAttribList.end());
-
-    EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
-
-    maxResolution.height = it->value.value.i;
+    if (it != m_querySurfaceAttribList.end()) {
+        EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
+        ASSERT_LE(
+            it->value.type, std::numeric_limits<Resolution::DataType>::max());
+        maxResolution.height = it->value.value.i;
+    } else {
+        maxResolution.height = std::numeric_limits<Resolution::DataType>::max();
+    }
 }
 
 void VAAPIFixture::doCreateConfigNoAttrib(VAProfile profile,
