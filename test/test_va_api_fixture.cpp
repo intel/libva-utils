@@ -150,12 +150,12 @@ void VAAPIFixture::doQueryConfigProfiles()
     m_profileList.resize(m_numProfiles);
 }
 
-std::vector<VAProfile> VAAPIFixture::getSupportedProfileList()
+Profiles VAAPIFixture::getSupportedProfileList()
 {
     return m_profileList;
 }
 
-std::vector<VAEntrypoint> VAAPIFixture::getSupportedEntrypointList()
+Entrypoints VAAPIFixture::getSupportedEntrypointList()
 {
     return m_entrypointList;
 }
@@ -210,26 +210,24 @@ void VAAPIFixture::doGetConfigAttributes(VAProfile profile,
 }
 
 void VAAPIFixture::doGetConfigAttributes(
-    VAProfile profile, VAEntrypoint entrypoint,
-    std::vector<VAConfigAttrib>& configAttrib)
+    VAProfile profile, VAEntrypoint entrypoint, ConfigAttributes& configAttrib)
 {
     int numAttributes = configAttrib.size();
     ASSERT_STATUS(vaGetConfigAttributes(m_vaDisplay, profile, entrypoint,
                                         &configAttrib[0], numAttributes));
 }
 
-const std::vector<VAConfigAttrib>& VAAPIFixture::getConfigAttribList() const
+const ConfigAttributes& VAAPIFixture::getConfigAttribList() const
 {
     return m_configAttribList;
 }
 
-const std::vector<VAConfigAttrib>&
-VAAPIFixture::getQueryConfigAttribList() const
+const ConfigAttributes& VAAPIFixture::getQueryConfigAttribList() const
 {
     return m_queryConfigAttribList;
 }
 
-void VAAPIFixture::doCheckAttribsMatch(std::vector<VAConfigAttrib> configAttrib)
+void VAAPIFixture::doCheckAttribsMatch(ConfigAttributes configAttrib)
 {
     auto itOne = m_queryConfigAttribList.begin();
     auto itTwo = configAttrib.begin();
@@ -317,7 +315,7 @@ void VAAPIFixture::doGetMaxSurfaceResolution(
     VAProfile profile, VAEntrypoint entrypoint,
     Resolution& maxResolution)
 {
-    std::vector<VASurfaceAttrib>::iterator it;
+    SurfaceAttributes::iterator it;
     doQuerySurfacesNoConfigAttribs(profile, entrypoint);
     it = std::find_if(m_querySurfaceAttribList.begin(),
                       m_querySurfaceAttribList.end(),
@@ -352,7 +350,7 @@ void VAAPIFixture::doGetMinSurfaceResolution(
     VAProfile profile, VAEntrypoint entrypoint,
     Resolution& minResolution)
 {
-    std::vector<VASurfaceAttrib>::iterator it;
+    SurfaceAttributes::iterator it;
     doQuerySurfacesNoConfigAttribs(profile, entrypoint);
     it = std::find_if(m_querySurfaceAttribList.begin(),
                       m_querySurfaceAttribList.end(),
@@ -481,7 +479,7 @@ void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
     }
 
     if (!m_queryConfigAttribList.empty()) {
-        std::vector<VAConfigAttrib>::iterator it = std::find_if(
+        ConfigAttributes::iterator it = std::find_if(
             m_queryConfigAttribList.begin(), m_queryConfigAttribList.end(),
             std::bind(isConfigAttribInList, std::placeholders::_1,
                       VAConfigAttribRTFormat));

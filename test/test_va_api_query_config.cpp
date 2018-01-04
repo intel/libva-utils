@@ -52,7 +52,7 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
     EXPECT_TRUE(maxProfiles > 0) << maxProfiles
                                  << " profiles are reported, check setup";
 
-    std::vector<VAProfile> profileList(maxProfiles);
+    Profiles profileList(maxProfiles);
 
     ASSERT_STATUS(
         vaQueryConfigProfiles(m_vaDisplay, &profileList[0], &numProfiles));
@@ -63,7 +63,7 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
     EXPECT_TRUE(maxEntrypoints > 0) << maxEntrypoints
                                     << " entrypoints are reported, check setup";
 
-    std::vector<VAEntrypoint> entrypointList(maxEntrypoints);
+    Entrypoints entrypointList(maxEntrypoints);
 
     if (std::find(profileList.begin(), profileList.end(), currentProfile)
         != profileList.end()) {

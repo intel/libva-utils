@@ -82,7 +82,7 @@ static const std::vector<ConfigPair> decoders = {
 };
 
 // VAProtectedSliceDataBufferType left out on purpose
-static const std::vector<VABufferType> decoderBufferTypes ={
+static const BufferTypes decoderBufferTypes ={
     VAPictureParameterBufferType,
     VAIQMatrixBufferType,
     VABitPlaneBufferType,
@@ -117,7 +117,7 @@ static const std::vector<ConfigPair> encoders = {
 };
 
 // VAEncMacroblockParameterBufferType left out on purpose
-static const std::vector<VABufferType> encoderBufferTypes ={
+static const BufferTypes encoderBufferTypes ={
     VAEncCodedBufferType,
     VAEncSequenceParameterBufferType,
     VAEncPictureParameterBufferType,
@@ -137,7 +137,7 @@ static const std::vector<ConfigPair> vpps = {
     std::make_pair(VAProfileNone, VAEntrypointVideoProc),
 };
 
-static const std::vector<VABufferType> postProcessorBufferTypes = {
+static const BufferTypes postProcessorBufferTypes = {
     VAProcPipelineParameterBufferType,
     VAProcFilterParameterBufferType,
 };

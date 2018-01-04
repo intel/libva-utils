@@ -62,7 +62,7 @@ public:
 protected:
     int m_maxNumDisplayAttribs;
     int m_actualNumDisplayAttribs;
-    std::vector<VADisplayAttribute> m_vaQueryDisplayAttribList;
+    DisplayAttributes m_vaQueryDisplayAttribList;
 };
 
 TEST_F(VAAPIDisplayAttribs, MaxNumDisplayAttribs)
@@ -72,7 +72,7 @@ TEST_F(VAAPIDisplayAttribs, MaxNumDisplayAttribs)
     EXPECT_NE(m_maxNumDisplayAttribs, 0);
 }
 
-static const std::vector<VADisplayAttribType> inputTest
+static const DisplayAttribTypes inputTest
     = { VADisplayAttribBrightness,
         VADisplayAttribContrast,
         VADisplayAttribHue,

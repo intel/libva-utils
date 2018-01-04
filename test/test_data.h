@@ -25,12 +25,13 @@
 #ifndef TESTVAAPI_test_data_h
 #define TESTVAAPI_test_data_h
 
+#include "test_defs.h"
 #include "test_utils.h"
 
 #include <va/va.h>
 
 namespace VAAPI {
-static const std::vector<VAProfile> m_vaProfiles
+static const Profiles m_vaProfiles
     = { VAProfileNone,
         VAProfileMPEG2Simple,
         VAProfileMPEG2Main,
@@ -55,13 +56,13 @@ static const std::vector<VAProfile> m_vaProfiles
         VAProfileVP9Profile2,
         VAProfileVP9Profile3 };
 
-static const std::vector<VAEntrypoint> m_vaEntrypoints
+static const Entrypoints m_vaEntrypoints
     = { VAEntrypointVLD,        VAEntrypointIZZ,        VAEntrypointIDCT,
         VAEntrypointMoComp,     VAEntrypointDeblocking, VAEntrypointEncSlice,
         VAEntrypointEncPicture, VAEntrypointEncSliceLP, VAEntrypointVideoProc,
         VAEntrypointFEI };
 
-static const std::vector<VAConfigAttribType> m_vaConfigAttribs
+static const ConfigAttribTypes m_vaConfigAttribs
     = { VAConfigAttribRTFormat,
         VAConfigAttribSpatialResidual,
         VAConfigAttribSpatialClipping,
@@ -83,14 +84,14 @@ static const std::vector<VAConfigAttribType> m_vaConfigAttribs
         VAConfigAttribFEIFunctionType,
         VAConfigAttribFEIMVPredictors };
 
-static const std::vector<VASurfaceAttribType> m_vaSurfaceAttribs
+static const SurfaceAttribTypes m_vaSurfaceAttribs
     = { VASurfaceAttribNone,       VASurfaceAttribPixelFormat,
         VASurfaceAttribMinWidth,   VASurfaceAttribMaxWidth,
         VASurfaceAttribMinHeight,  VASurfaceAttribMaxHeight,
         VASurfaceAttribMemoryType, VASurfaceAttribExternalBufferDescriptor,
         VASurfaceAttribUsageHint,  VASurfaceAttribCount };
 
-static const std::vector<Resolution> m_vaResolutions
+static const Resolutions m_vaResolutions
     = { { 16, 16 },      { 32, 32 },     { 176, 120 },   { 352, 240 },
         { 352, 288 },    { 480, 320 },   { 720, 480 },   { 720, 576 },
         { 768, 576 },    { 800, 480 },   { 854, 480 },   { 1280, 720 },
@@ -103,7 +104,7 @@ static const std::vector<uint32_t> m_vaRTFormats
         VA_RT_FORMAT_RGB16,    VA_RT_FORMAT_RGB32,  VA_RT_FORMAT_RGBP,
         VA_RT_FORMAT_PROTECTED };
 
-static const std::vector<VABufferType> m_vaBufferTypes
+static const BufferTypes m_vaBufferTypes
     = { VAPictureParameterBufferType,
         VAIQMatrixBufferType,
         VABitPlaneBufferType,

@@ -43,9 +43,9 @@ public:
 
 TEST_F(VAAPIConfigAttribs, GetConfigAttribs)
 {
-    std::vector<VAProfile> profileList;
-    std::vector<VAEntrypoint> entrypointList;
-    std::vector<VAConfigAttrib> configAttribList;
+    Profiles profileList;
+    Entrypoints entrypointList;
+    ConfigAttributes configAttribList;
     VAConfigAttrib configAttrib;
     doGetMaxValues();
 

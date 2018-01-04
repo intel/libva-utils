@@ -25,12 +25,10 @@
 #ifndef TESTVAAPI_test_va_api_fixture_h
 #define TESTVAAPI_test_va_api_fixture_h
 
-#include <va/va.h>
-
 #include "test.h"
 #include "test_data.h"
+#include "test_defs.h"
 #include "test_streamable.h"
-#include "gtest/gtest.h"
 
 namespace VAAPI {
 
@@ -50,19 +48,19 @@ public:
     void doGetMaxNumConfigAttribs();
     void doGetMaxValues();
     void doQueryConfigProfiles();
-    std::vector<VAProfile> getSupportedProfileList();
+    Profiles getSupportedProfileList();
     bool doFindProfileInList(VAProfile profile);
     void doQueryConfigEntrypoints(VAProfile profile);
-    std::vector<VAEntrypoint> getSupportedEntrypointList();
+    Entrypoints getSupportedEntrypointList();
     bool doFindEntrypointInList(VAEntrypoint entrypoint);
 
     void doFillConfigAttribList();
     void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint);
     void doGetConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
-                               std::vector<VAConfigAttrib>& configAttrib);
-    const std::vector<VAConfigAttrib>& getConfigAttribList() const;
-    const std::vector<VAConfigAttrib>& getQueryConfigAttribList() const;
-    void doCheckAttribsMatch(std::vector<VAConfigAttrib> configAttrib);
+                               ConfigAttributes& configAttrib);
+    const ConfigAttributes& getConfigAttribList() const;
+    const ConfigAttributes& getQueryConfigAttribList() const;
+    void doCheckAttribsMatch(ConfigAttributes configAttrib);
     void doCreateConfigWithAttrib(VAProfile profile, VAEntrypoint entrypoint);
     void doQueryConfigAttributes(VAProfile profile, VAEntrypoint entrypoint,
                                  VAStatus expectation = VA_STATUS_SUCCESS);
@@ -127,13 +125,13 @@ private:
     VAContextID m_contextID;
     VABufferID m_bufferID;
 
-    std::vector<VAProfile> m_profileList;
-    std::vector<VAEntrypoint> m_entrypointList;
-    std::vector<VAConfigAttrib> m_configAttribList;
-    std::vector<VAConfigAttrib> m_configAttribToCreateConfig;
-    std::vector<VAConfigAttrib> m_queryConfigAttribList;
-    std::vector<VASurfaceAttrib> m_querySurfaceAttribList;
-    std::vector<VASurfaceID> m_surfaceID;
+    Profiles m_profileList;
+    Entrypoints m_entrypointList;
+    ConfigAttributes m_configAttribList;
+    ConfigAttributes m_configAttribToCreateConfig;
+    ConfigAttributes m_queryConfigAttribList;
+    SurfaceAttributes m_querySurfaceAttribList;
+    Surfaces m_surfaceID;
 };
 
 } // namespace
