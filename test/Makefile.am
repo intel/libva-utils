@@ -46,6 +46,7 @@ noinst_HEADERS =						\
 	test.h							\
 	test_data.h						\
 	test_streamable.h					\
+	test_utils.h						\
 	test_va_api_fixture.h					\
 	va_version.h						\
 	$(NULL)
