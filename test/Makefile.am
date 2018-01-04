@@ -45,6 +45,7 @@ bin_PROGRAMS = test_va_api
 noinst_HEADERS =						\
 	test.h							\
 	test_data.h						\
+	test_defs.h						\
 	test_streamable.h					\
 	test_utils.h						\
 	test_va_api_fixture.h					\
