@@ -43,8 +43,7 @@ public:
 
 TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
 {
-    std::pair<uint32_t, uint32_t> currentResolution
-        = std::make_pair(1920, 1080);
+    const Resolution currentResolution(1920, 1080);
     // There's no need to test all inputs for this to be a good test
     // as long as there's no config the expected error should be
     // returned
@@ -55,7 +54,7 @@ TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
 class VAAPICreateContext
     : public VAAPIFixture
     , public ::testing::WithParamInterface<
-          std::tuple<VAProfile, VAEntrypoint, std::pair<uint32_t, uint32_t> > >
+          std::tuple<VAProfile, VAEntrypoint, Resolution> >
 {
 public:
     VAAPICreateContext()
@@ -74,9 +73,8 @@ TEST_P(VAAPICreateContext, CreateContext)
 
     VAProfile currentProfile = ::testing::get<0>(GetParam());
     VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    std::pair<uint32_t, uint32_t> currentResolution
-        = ::testing::get<2>(GetParam());
-    std::pair<uint32_t, uint32_t> maxResolution;
+    const Resolution& currentResolution = ::testing::get<2>(GetParam());
+    Resolution maxResolution;
 
     // vaCreateContext requires a valida VAConfigID, vaCreateConfig requires a
     // supported profile and entrypoint
@@ -93,8 +91,8 @@ TEST_P(VAAPICreateContext, CreateContext)
 
             doCreateConfig(currentProfile, currentEntrypoint);
             doGetMaxSurfaceResolution(currentProfile, currentEntrypoint, maxResolution);
-            if (currentResolution.first > maxResolution.first
-                || currentResolution.second > maxResolution.second) {
+            if (currentResolution.width > maxResolution.width
+                || currentResolution.height > maxResolution.height) {
                 doCreateContext(currentResolution,
                                 VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED);
                 doDestroyContext(VA_STATUS_ERROR_INVALID_CONTEXT);

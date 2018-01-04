@@ -315,7 +315,7 @@ inline bool isSurfaceAttribInList(VASurfaceAttrib surfaceAttrib,
 
 void VAAPIFixture::doGetMaxSurfaceResolution(
     VAProfile profile, VAEntrypoint entrypoint,
-    std::pair<uint32_t, uint32_t>& maxResolution)
+    Resolution& maxResolution)
 {
     std::vector<VASurfaceAttrib>::iterator it;
     doQuerySurfacesNoConfigAttribs(profile, entrypoint);
@@ -328,7 +328,7 @@ void VAAPIFixture::doGetMaxSurfaceResolution(
 
     EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
 
-    maxResolution.first = it->value.value.i;
+    maxResolution.width = it->value.value.i;
 
     it = std::find_if(m_querySurfaceAttribList.begin(),
                       m_querySurfaceAttribList.end(),
@@ -339,7 +339,7 @@ void VAAPIFixture::doGetMaxSurfaceResolution(
 
     EXPECT_EQ(it->value.type, VAGenericValueTypeInteger);
 
-    maxResolution.second = it->value.value.i;
+    maxResolution.height = it->value.value.i;
 }
 
 void VAAPIFixture::doCreateConfigNoAttrib(VAProfile profile,
@@ -425,7 +425,7 @@ inline bool isConfigAttribInList(VAConfigAttrib configAttrib,
 }
 
 void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
-                                    std::pair<uint32_t, uint32_t> resolution)
+                                    const Resolution& resolution)
 {
     VASurfaceAttrib* attribList = NULL;
     uint32_t numAttribs = 0;
@@ -455,20 +455,20 @@ void VAAPIFixture::doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
         if (currentFormat) {
 
             ASSERT_STATUS(vaCreateSurfaces(
-                m_vaDisplay, currentFormat, resolution.first, resolution.second,
+                m_vaDisplay, currentFormat, resolution.width, resolution.height,
                 &m_surfaceID[0], 10, attribList, numAttribs));
             formats &= ~itFormat;
         }
     }
 }
 
-void VAAPIFixture::doCreateContext(std::pair<uint32_t, uint32_t> resolution,
+void VAAPIFixture::doCreateContext(const Resolution& resolution,
                                    VAStatus expectation)
 {
     m_contextID = 0;
     ASSERT_STATUS_EQ(expectation,
-                     vaCreateContext(m_vaDisplay, m_configID, resolution.first,
-                                     resolution.second, VA_PROGRESSIVE,
+                     vaCreateContext(m_vaDisplay, m_configID, resolution.width,
+                                     resolution.height, VA_PROGRESSIVE,
                                      &m_surfaceID[0], m_surfaceID.size(),
                                      &m_contextID));
 }

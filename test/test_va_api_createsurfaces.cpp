@@ -101,7 +101,7 @@ INSTANTIATE_TEST_CASE_P(
 class VAAPICreateSurfaces
     : public VAAPIFixture
     , public ::testing::WithParamInterface<
-          std::tuple<VAProfile, VAEntrypoint, std::pair<uint32_t, uint32_t> > >
+          std::tuple<VAProfile, VAEntrypoint, Resolution> >
 {
 public:
     VAAPICreateSurfaces()
@@ -120,7 +120,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesWithCofigAttribs)
 
     VAProfile currentProfile = ::testing::get<0>(GetParam());
     VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    std::pair<uint32_t, uint32_t> currentResolution = ::testing::get<2>(GetParam());
+    const Resolution& currentResolution = ::testing::get<2>(GetParam());
 
     doGetMaxValues();
 
@@ -150,7 +150,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 {
     VAProfile currentProfile = ::testing::get<0>(GetParam());
     VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    std::pair<uint32_t, uint32_t> currentResolution = ::testing::get<2>(GetParam());
+    const Resolution& currentResolution = ::testing::get<2>(GetParam());
 
     doGetMaxValues();
 
@@ -176,7 +176,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 
     VAProfile currentProfile = ::testing::get<0>(GetParam());
     VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-    std::pair<uint32_t, uint32_t> currentResolution = ::testing::get<2>(GetParam());
+    const Resolution& currentResolution = ::testing::get<2>(GetParam());
 
     doGetMaxValues();
 
