@@ -32,23 +32,23 @@ namespace VAAPI {
 
 typedef std::pair<VAProfile, VAEntrypoint> ConfigPair;
 
-struct testInput
+struct TestInput
 {
-    ConfigPair inputConfig;
-    VABufferType inputBufferType;
+    ConfigPair config;
+    VABufferType bufferType;
 };
 
-std::ostream& operator<<(std::ostream& os, const testInput& t)
+std::ostream& operator<<(std::ostream& os, const TestInput& t)
 {
-    return os << t.inputConfig.first
-              << "," << t.inputConfig.second
-              << "," << t.inputBufferType
+    return os << t.config.first
+              << "," << t.config.second
+              << "," << t.bufferType
     ;
 }
 
 class VAAPICreateBuffer
     : public VAAPIFixture
-    , public ::testing::WithParamInterface<testInput>
+    , public ::testing::WithParamInterface<TestInput>
 {
 public:
     VAAPICreateBuffer()
@@ -82,7 +82,7 @@ static const std::vector<ConfigPair> decoders = {
 };
 
 // VAProtectedSliceDataBufferType left out on purpose
-static const BufferTypes decoderBufferTypes ={
+static const BufferTypes decoderBufferTypes = {
     VAPictureParameterBufferType,
     VAIQMatrixBufferType,
     VABitPlaneBufferType,
@@ -117,7 +117,7 @@ static const std::vector<ConfigPair> encoders = {
 };
 
 // VAEncMacroblockParameterBufferType left out on purpose
-static const BufferTypes encoderBufferTypes ={
+static const BufferTypes encoderBufferTypes = {
     VAEncCodedBufferType,
     VAEncSequenceParameterBufferType,
     VAEncPictureParameterBufferType,
@@ -150,59 +150,56 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     // the minimum requirements.  There's no need to create surfaces or attach
     // them to a VAConfigID.
 
-    testInput currentTestInput = GetParam();
+    const TestInput& input = GetParam();
 
     doGetMaxValues();
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentTestInput.inputConfig.first)) {
-        doQueryConfigEntrypoints(currentTestInput.inputConfig.first);
-        if (doFindEntrypointInList(currentTestInput.inputConfig.second)) {
-            // profile and entrypoint are supported, if not supported then do
-            // not test for vaCreateBuffer
-
-            doCreateConfig(
-                currentTestInput.inputConfig.first,
-                currentTestInput.inputConfig.second);
+    if (doFindProfileInList(input.config.first)) {
+        doQueryConfigEntrypoints(input.config.first);
+        if (doFindEntrypointInList(input.config.second)) {
+            // profile and entrypoint are supported
+            doCreateConfig(input.config.first, input.config.second);
 
             // vaCreateContext input requires resolution, since this test
             // doesn't create surfaces, passing 1x1 resolution should provide
             // the desired result.
             doCreateContext(Resolution(1, 1));
 
-            doCreateBuffer(currentTestInput.inputBufferType);
+            doCreateBuffer(input.bufferType);
             doDestroyBuffer();
 
             doDestroyContext();
             doDestroyConfig();
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(input.config.first, input.config.second);
         }
-    }
-    else {
-        doLogSkipTest(
-            currentTestInput.inputConfig.first,
-            currentTestInput.inputConfig.second);
+    } else {
+        // profile not supported
+        doLogSkipTest(input.config.first, input.config.second);
     }
 }
 
-std::vector<testInput> generateInput()
+std::vector<TestInput> generateInput()
 {
-    std::vector<testInput> inputs;
+    std::vector<TestInput> inputs;
 
     for (auto config : decoders) {
         for (auto bufferType : decoderBufferTypes) {
-            inputs.push_back(testInput{config, bufferType});
+            inputs.push_back(TestInput{config, bufferType});
         }
     }
 
     for (auto config : encoders) {
         for (auto bufferType : encoderBufferTypes) {
-            inputs.push_back(testInput{config, bufferType});
+            inputs.push_back(TestInput{config, bufferType});
         }
     }
 
     for (auto config : vpps) {
         for (auto bufferType : postProcessorBufferTypes) {
-            inputs.push_back(testInput{config, bufferType});
+            inputs.push_back(TestInput{config, bufferType});
         }
     }
 
@@ -212,4 +209,5 @@ std::vector<testInput> generateInput()
 INSTANTIATE_TEST_CASE_P(
     CreateBuffer, VAAPICreateBuffer,
     ::testing::ValuesIn(generateInput()));
-} // VAAPI
+
+} // namespace VAAPI
