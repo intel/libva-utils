@@ -25,6 +25,8 @@
 #ifndef TESTVAAPI_test_data_h
 #define TESTVAAPI_test_data_h
 
+#include "test_utils.h"
+
 #include <va/va.h>
 
 namespace VAAPI {
@@ -88,7 +90,7 @@ static const std::vector<VASurfaceAttribType> m_vaSurfaceAttribs
         VASurfaceAttribMemoryType, VASurfaceAttribExternalBufferDescriptor,
         VASurfaceAttribUsageHint,  VASurfaceAttribCount };
 
-static const std::vector<std::pair<uint32_t, uint32_t> > m_vaResolutions
+static const std::vector<Resolution> m_vaResolutions
     = { { 16, 16 },      { 32, 32 },     { 176, 120 },   { 352, 240 },
         { 352, 288 },    { 480, 320 },   { 720, 480 },   { 720, 576 },
         { 768, 576 },    { 800, 480 },   { 854, 480 },   { 1280, 720 },

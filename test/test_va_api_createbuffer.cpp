@@ -166,9 +166,9 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
                 currentTestInput.inputConfig.second);
 
             // vaCreateContext input requires resolution, since this test
-            // doesn't create surfaces, passing 0x0 resolution should provide
+            // doesn't create surfaces, passing 1x1 resolution should provide
             // the desired result.
-            doCreateContext(std::make_pair(0, 0));
+            doCreateContext(Resolution(1, 1));
 
             doCreateBuffer(currentTestInput.inputBufferType);
             doDestroyBuffer();

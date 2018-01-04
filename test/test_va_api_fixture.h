@@ -71,12 +71,11 @@ public:
     void doQuerySurfacesNoConfigAttribs(VAProfile profile,
                                         VAEntrypoint entrypoint);
     void doCreateSurfaces(VAProfile profile, VAEntrypoint entrypoint,
-                          std::pair<uint32_t, uint32_t> resolution);
+                          const Resolution&);
     void
     doGetMaxSurfaceResolution(VAProfile profile, VAEntrypoint entrypoint,
-                              std::pair<uint32_t, uint32_t>& maxResolution);
-
-    void doCreateContext(std::pair<uint32_t, uint32_t> resolution,
+                              Resolution&);
+    void doCreateContext(const Resolution&,
                          VAStatus expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(VAStatus expectation = VA_STATUS_SUCCESS);
     void doCreateBuffer(VABufferType bufferType);
