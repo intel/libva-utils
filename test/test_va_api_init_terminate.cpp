@@ -23,7 +23,6 @@
  */
 
 #include "test_va_api_fixture.h"
-#include "va_version.h"
 
 namespace VAAPI {
 
