@@ -28,19 +28,11 @@
 
 namespace VAAPI {
 
-bool IsAttribType(VADisplayAttribute displayAttribute,
-              VADisplayAttribType displayAttribType)
-{
-    return displayAttribute.type == displayAttribType;
-}
-
 class VAAPIDisplayAttribs
     : public VAAPIFixture
 {
 public:
     VAAPIDisplayAttribs()
-        : m_maxNumDisplayAttribs(0)
-        , m_actualNumDisplayAttribs(0)
     {
         m_vaDisplay = doInitialize();
     }
@@ -50,73 +42,66 @@ public:
         doTerminate();
     }
 
-    bool findDisplayAttribInQueryList(VADisplayAttribType displayAttribType)
+    bool findDisplayAttribInQueryList(const VADisplayAttribType& type)
     {
-        return std::find_if(m_vaQueryDisplayAttribList.begin(),
-                            m_vaQueryDisplayAttribList.end(),
-                            std::bind(IsAttribType, std::placeholders::_1,
-                                      displayAttribType))
-              != m_vaQueryDisplayAttribList.end();
+        const DisplayAttributes::const_iterator begin = m_attribs.begin();
+        const DisplayAttributes::const_iterator end = m_attribs.end();
+        auto predicate = [&](const VADisplayAttribute& a) {
+            return a.type == type;
+        };
+
+        return std::find_if(begin, end, predicate) != end;
     }
 
 protected:
-    int m_maxNumDisplayAttribs;
-    int m_actualNumDisplayAttribs;
-    DisplayAttributes m_vaQueryDisplayAttribList;
+    DisplayAttributes m_attribs;
 };
 
 TEST_F(VAAPIDisplayAttribs, MaxNumDisplayAttribs)
 {
-    m_maxNumDisplayAttribs = vaMaxNumDisplayAttributes(m_vaDisplay);
-
-    EXPECT_NE(m_maxNumDisplayAttribs, 0);
+    EXPECT_NE(vaMaxNumDisplayAttributes(m_vaDisplay), 0);
 }
 
-static const DisplayAttribTypes inputTest
-    = { VADisplayAttribBrightness,
-        VADisplayAttribContrast,
-        VADisplayAttribHue,
-        VADisplayAttribSaturation,
-        VADisplayAttribBackgroundColor,
-        VADisplayAttribDirectSurface,
-        VADisplayAttribRotation,
-        VADisplayAttribOutofLoopDeblock,
-        VADisplayAttribBLEBlackMode,
-        VADisplayAttribBLEWhiteMode,
-        VADisplayAttribBlueStretch,
-        VADisplayAttribSkinColorCorrection,
-        VADisplayAttribCSCMatrix,
-        VADisplayAttribBlendColor,
-        VADisplayAttribOverlayAutoPaintColorKey,
-        VADisplayAttribOverlayColorKey,
-        VADisplayAttribRenderMode,
-        VADisplayAttribRenderDevice,
-        VADisplayAttribRenderRect };
+static const DisplayAttribTypes types = {
+    VADisplayAttribBrightness,
+    VADisplayAttribContrast,
+    VADisplayAttribHue,
+    VADisplayAttribSaturation,
+    VADisplayAttribBackgroundColor,
+    VADisplayAttribDirectSurface,
+    VADisplayAttribRotation,
+    VADisplayAttribOutofLoopDeblock,
+    VADisplayAttribBLEBlackMode,
+    VADisplayAttribBLEWhiteMode,
+    VADisplayAttribBlueStretch,
+    VADisplayAttribSkinColorCorrection,
+    VADisplayAttribCSCMatrix,
+    VADisplayAttribBlendColor,
+    VADisplayAttribOverlayAutoPaintColorKey,
+    VADisplayAttribOverlayColorKey,
+    VADisplayAttribRenderMode,
+    VADisplayAttribRenderDevice,
+    VADisplayAttribRenderRect
+};
 
 TEST_F(VAAPIDisplayAttribs, GetDisplayAttribs)
 {
+    m_attribs.resize(vaMaxNumDisplayAttributes(m_vaDisplay));
 
-    m_maxNumDisplayAttribs = vaMaxNumDisplayAttributes(m_vaDisplay);
+    int numAttribs(0);
+    ASSERT_STATUS(vaQueryDisplayAttributes(m_vaDisplay, m_attribs.data(),
+        &numAttribs));
 
-    m_vaQueryDisplayAttribList.resize(m_maxNumDisplayAttribs);
+    EXPECT_LE((size_t)numAttribs, m_attribs.size());
 
-    ASSERT_STATUS(vaQueryDisplayAttributes(m_vaDisplay,
-                                           &m_vaQueryDisplayAttribList[0],
-                                           &m_actualNumDisplayAttribs));
-
-    EXPECT_TRUE((unsigned int)m_actualNumDisplayAttribs
-                <= m_vaQueryDisplayAttribList.size());
-
-    for (auto& it : inputTest) {
-        VADisplayAttribute attrib;
-        attrib.type = it;
+    for (const auto& type : types) {
+        VADisplayAttribute attrib{type: type};
         ASSERT_STATUS(vaGetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
         if (findDisplayAttribInQueryList(attrib.type)) {
             ASSERT_TRUE((attrib.flags & VA_DISPLAY_ATTRIB_GETTABLE)
-                        || (attrib.flags & VA_DISPLAY_ATTRIB_SETTABLE));
-        }
-        else {
+                || (attrib.flags & VA_DISPLAY_ATTRIB_SETTABLE));
+        } else {
             ASSERT_FALSE(attrib.flags & VA_DISPLAY_ATTRIB_NOT_SUPPORTED);
         }
     }
@@ -124,36 +109,31 @@ TEST_F(VAAPIDisplayAttribs, GetDisplayAttribs)
 
 TEST_F(VAAPIDisplayAttribs, SetDisplayAttribs)
 {
+    m_attribs.resize(vaMaxNumDisplayAttributes(m_vaDisplay));
 
-    m_maxNumDisplayAttribs = vaMaxNumDisplayAttributes(m_vaDisplay);
-
-    m_vaQueryDisplayAttribList.resize(m_maxNumDisplayAttribs);
-
+    int numAttribs(0);
     ASSERT_STATUS(vaQueryDisplayAttributes(m_vaDisplay,
-                                           &m_vaQueryDisplayAttribList[0],
-                                           &m_actualNumDisplayAttribs));
+        m_attribs.data(), &numAttribs));
 
-    m_vaQueryDisplayAttribList.resize(m_actualNumDisplayAttribs);
+    m_attribs.resize(numAttribs);
 
-    ASSERT_STATUS(vaGetDisplayAttributes(m_vaDisplay,
-                                         &m_vaQueryDisplayAttribList[0],
-                                         m_vaQueryDisplayAttribList.size()));
+    ASSERT_STATUS(vaGetDisplayAttributes(m_vaDisplay, m_attribs.data(),
+        m_attribs.size()));
 
-    for (auto& it : m_vaQueryDisplayAttribList) {
-        VADisplayAttribute attrib;
-        attrib = it;
-        if (it.flags & VA_DISPLAY_ATTRIB_SETTABLE) {
+    for (auto attrib : m_attribs) {
+        if (attrib.flags & VA_DISPLAY_ATTRIB_SETTABLE) {
             attrib.value = (attrib.min_value + attrib.max_value) / 2;
             ASSERT_STATUS(vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
             attrib.value = attrib.min_value - 1;
             ASSERT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER,
-                             vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
+                vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
             attrib.value = attrib.max_value + 1;
             ASSERT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER,
-                             vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
+                vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
         }
     }
 }
-} // VAAPI
+
+} // namespace VAAPI
