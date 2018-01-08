@@ -43,29 +43,17 @@ public:
 
 TEST_F(VAAPIGetMaxValues, CheckMaxProfile)
 {
-    int profiles = 0;
-
-    profiles = vaMaxNumProfiles(m_vaDisplay);
-    EXPECT_TRUE(profiles > 0) << profiles
-                              << " profiles are reported check setup";
+    EXPECT_GT(vaMaxNumProfiles(m_vaDisplay), 0);
 }
 
 TEST_F(VAAPIGetMaxValues, CheckMaxEntrypoints)
 {
-    int entryPoints = 0;
-
-    entryPoints = vaMaxNumEntrypoints(m_vaDisplay);
-    EXPECT_TRUE(entryPoints > 0) << entryPoints
-                                 << " entrypoints are reported check setup";
+    EXPECT_GT(vaMaxNumEntrypoints(m_vaDisplay), 0);
 }
 
 TEST_F(VAAPIGetMaxValues, CheckMaxConfigAttributes)
 {
-    int configAttributes = 0;
-
-    configAttributes = vaMaxNumConfigAttributes(m_vaDisplay);
-    EXPECT_TRUE(configAttributes > 0)
-        << configAttributes << " entrypoints are reported check setup";
+    EXPECT_GT(vaMaxNumConfigAttributes(m_vaDisplay), 0);
 }
 
-} // VAAPI
+} // namespace VAAPI
