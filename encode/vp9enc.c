@@ -118,6 +118,13 @@ static int rc_default_mode[4] = {
     VA_RC_NONE
 };
 
+static int vp9enc_entrypoint_lists[2] = {
+    VAEntrypointEncSlice,
+    VAEntrypointEncSliceLP
+};
+
+static int select_entrypoint = -1;
+
 static const struct option long_opts[] = {
     {"help", no_argument, NULL, 0 },
     {"rcmode", required_argument, NULL, 1 },
@@ -650,6 +657,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     VAConfigAttrib attrib[2];
     int major_ver, minor_ver;
     VAStatus va_status;
+    int i;
 
     va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
@@ -658,9 +666,21 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     vaQueryConfigEntrypoints(va_dpy, vp9enc_context.profile, entrypoints,
                              &num_entrypoints);
 
-    for	(slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++)
-        if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice)
-            break;
+    for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
+        if (select_entrypoint == -1) {
+            for (i = 0; i < 2; i++) {
+                if (entrypoints[slice_entrypoint] == vp9enc_entrypoint_lists[i])
+                    break;
+            }
+
+            if (i < 2) {
+                select_entrypoint = i;
+                break;
+            }
+        } else {
+            /* TODO for others */
+        }
+    }
 
     if (slice_entrypoint == num_entrypoints) {
         /* not find Slice entry point */
@@ -670,7 +690,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     /* find out the format for the render target, and rate control mode */
     attrib[0].type = VAConfigAttribRTFormat;
     attrib[1].type = VAConfigAttribRateControl;
-    vaGetConfigAttributes(va_dpy, vp9enc_context.profile, VAEntrypointEncSlice,
+    vaGetConfigAttributes(va_dpy, vp9enc_context.profile, vp9enc_entrypoint_lists[select_entrypoint],
                           &attrib[0], 2);
 
     if ((attrib[0].value & VA_RT_FORMAT_YUV420) == 0) {
@@ -687,7 +707,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = vp9enc_context.rate_control_method; /* set to desired RC mode */
 
-    va_status = vaCreateConfig(va_dpy, vp9enc_context.profile, VAEntrypointEncSlice,
+    va_status = vaCreateConfig(va_dpy, vp9enc_context.profile, vp9enc_entrypoint_lists[select_entrypoint],
                                &attrib[0], 2,&vp9enc_context.config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
