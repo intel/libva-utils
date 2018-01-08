@@ -1503,8 +1503,10 @@ main(int argc, char *argv[])
     }
 
     if (rc_mode == VA_RC_VBR) {
-        if (vbr_max < 0)
+        if (vbr_max < 0) {
             vbr_max = frame_bit_rate;
+            frame_bit_rate = (vbr_max * 95 / 100);
+        }
 
         if (vbr_max < frame_bit_rate) {
              printf("Under VBR, the max bit rate should be greater than or equal to fb\n");
