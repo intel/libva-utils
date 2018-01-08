@@ -33,106 +33,89 @@ protected:
     // call vaInitialize and vaTerminate expecting success
     void doInitTerminate()
     {
-        VADisplay vaDisplay;
-        int majorVersion, minorVersion;
+        int major, minor;
 
-        vaDisplay = getDisplay();
-        EXPECT_TRUE(vaDisplay);
+        VADisplay display = getDisplay();
+        ASSERT_TRUE(display);
 
-        if (vaDisplay) {
-            ASSERT_STATUS(vaInitialize(vaDisplay, &majorVersion, &minorVersion));
-        }
+        ASSERT_STATUS(vaInitialize(display, &major, &minor));
 
-        EXPECT_EQ(VA_MAJOR_VERSION, majorVersion)
+        EXPECT_EQ(VA_MAJOR_VERSION, major)
             << "Check installed driver version";
 
-        EXPECT_EQ(VA_MINOR_VERSION, minorVersion)
+        EXPECT_EQ(VA_MINOR_VERSION, minor)
             << "Check installed driver version";
 
-        ASSERT_STATUS(vaTerminate(vaDisplay));
+        ASSERT_STATUS(vaTerminate(display));
     }
 };
 
-TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate) { doInitTerminate(); }
+TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate)
+{
+    doInitTerminate();
+}
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_Environment)
 {
     EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "i965", 1))
-	<< "Could not set enviroment variable";
+        << "Could not set enviroment variable";
     doInitTerminate();
     EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"))
-	<< "Could not un-set enviroment variable";
+        << "Could not un-set enviroment variable";
 }
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_vaSetDriverName)
 {
-    VADisplay vaDisplay;
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    int majorVersion, minorVersion;
+    int major, minor;
     char driver[5] = "i965";
 
-    vaDisplay = getDisplay();
-    EXPECT_TRUE(vaDisplay);
+    VADisplay display = getDisplay();
+    ASSERT_TRUE(display);
 
-    if (vaDisplay) {
-	vaStatus = vaSetDriverName(vaDisplay, driver);
-	EXPECT_STATUS(vaStatus);
+    ASSERT_STATUS(vaSetDriverName(display, driver));
 
-	vaStatus = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
-	EXPECT_STATUS(vaStatus);
-    }
-
-    vaStatus = vaTerminate(vaDisplay);
-    EXPECT_STATUS(vaStatus);
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+    EXPECT_STATUS(vaTerminate(display));
 }
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_Environment)
 {
-    VADisplay vaDisplay;
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    int majorVersion, minorVersion;
+    int major, minor;
 
-    vaDisplay = getDisplay();
-    EXPECT_TRUE(vaDisplay);
+    VADisplay display = getDisplay();
+    ASSERT_TRUE(display);
 
-    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "bad", 1));
+    ASSERT_EQ(0, setenv("LIBVA_DRIVER_NAME", "bad", 1));
 
-    if (vaDisplay)
-	vaStatus = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
-    EXPECT_STATUS_EQ(VA_STATUS_ERROR_UNKNOWN, (unsigned)vaStatus);
+    EXPECT_STATUS_EQ(
+        VA_STATUS_ERROR_UNKNOWN, vaInitialize(display, &major, &minor));
 
     EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"));
 
-    vaStatus = vaTerminate(vaDisplay);
-    EXPECT_STATUS(vaStatus);
+    EXPECT_STATUS(vaTerminate(display));
 }
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_vaSetDriverName)
 {
-    VADisplay vaDisplay;
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
     char driver[4] = "bad";
+    VADisplay display = getDisplay();
+    ASSERT_TRUE(display);
 
-    vaDisplay = getDisplay();
-    ASSERT_TRUE(vaDisplay);
+    EXPECT_STATUS_EQ(
+        VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
 
-    vaStatus = vaSetDriverName(vaDisplay, driver);
-    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER, vaStatus);
-
-    vaStatus = vaTerminate(vaDisplay);
-    EXPECT_STATUS(vaStatus);
+    EXPECT_STATUS(vaTerminate(display));
 }
 
 TEST_F(VAAPIInitTerminate, InitTermWithoutDisplay)
 {
-    VADisplay vaDisplay = 0; // no display
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    int majorVersion, minorVersion;
+    VADisplay display = 0; // no display
+    int major, minor;
 
-    vaStatus = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
-    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaStatus);
+    EXPECT_STATUS_EQ(
+        VA_STATUS_ERROR_INVALID_DISPLAY, vaInitialize(display, &major, &minor));
 
-    vaStatus = vaTerminate(vaDisplay);
-    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaStatus);
+    EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_DISPLAY, vaTerminate(display));
 }
+
 } // namespace VAAPI
