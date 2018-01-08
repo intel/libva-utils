@@ -136,6 +136,7 @@ static const struct option long_opts[] = {
     {"hrd_win", required_argument, NULL, 8},
     {"vbr_max", required_argument, NULL, 9},
     {"fn_num", required_argument, NULL, 10},
+    {"low_power", required_argument, NULL, 11},
     {NULL, no_argument, NULL, 0 }
 };
 
@@ -678,7 +679,10 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
                 break;
             }
         } else {
-            /* TODO for others */
+            assert(select_entrypoint == 0 || select_entrypoint == 1);
+
+            if (entrypoints[slice_entrypoint] == vp9enc_entrypoint_lists[select_entrypoint])
+                break;
         }
     }
 
@@ -1355,6 +1359,7 @@ vp9enc_show_help()
     printf("--vbr_max <num> (kbps unit. It should be greater than fb)\n");
     printf("--opt_header \n  write the uncompressed header manually. without this, the driver will add those headers by itself\n");
     printf("--fn_num <num>\n  how many frames to be encoded\n");
+    printf("--low_power <num> 0: Normal mode, 1: Low power mode, others: auto mode\n");
 }
 
 int
@@ -1473,6 +1478,16 @@ main(int argc, char *argv[])
                 tmp_input = atoi(optarg);
                 fn_num = tmp_input;
                 break;
+            case 11:
+                tmp_input = atoi(optarg);
+
+                if (tmp_input == 0 || tmp_input == 1)
+                    select_entrypoint = tmp_input;
+                else
+                    select_entrypoint = -1;
+
+                break;
+
             default:
                 vp9enc_show_help();
                 exit(0);
