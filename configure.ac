@@ -210,7 +210,6 @@ AC_OUTPUT([
     Makefile
     common/Makefile
     test/Makefile
-    test/va_version.h
     vainfo/Makefile
     encode/Makefile
     decode/Makefile

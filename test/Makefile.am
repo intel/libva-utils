@@ -48,7 +48,6 @@ noinst_HEADERS =						\
 	test_streamable.h					\
 	test_utils.h						\
 	test_va_api_fixture.h					\
-	va_version.h						\
 	$(NULL)
 
 test_va_api_SOURCES =						\
@@ -88,10 +87,6 @@ test_va_api_CPPFLAGS =						\
 test_va_api_CXXFLAGS =						\
 	-Wall -Werror						\
 	$(AM_CXXFLAGS)						\
-	$(NULL)
-
-EXTRA_DIST +=							\
-	va_version.h.in						\
 	$(NULL)
 
 check-local: test_va_api
