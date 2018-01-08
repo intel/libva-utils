@@ -44,95 +44,55 @@ public:
 
 TEST_P(VAAPIGetCreateConfig, CreateConfigWithAttributes)
 {
-
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-        doQueryConfigEntrypoints(currentProfile);
-        if (doFindEntrypointInList(currentEntrypoint)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-
             doFillConfigAttribList();
-
-            doGetConfigAttributes(currentProfile,
-                                                currentEntrypoint);
-
-            doCreateConfigWithAttrib(currentProfile,
-                                                   currentEntrypoint);
+            doGetConfigAttributes(profile, entrypoint);
+            doCreateConfigWithAttrib(profile, entrypoint);
             doDestroyConfig();
-        }
-        else {
+        } else {
             // entrypoint is not supported by driver
-            doCreateConfigToFail(
-                currentProfile, currentEntrypoint,
+            doCreateConfigToFail(profile, entrypoint,
                 VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT);
         }
-    }
-    else {
+    } else {
         // profile is not supported by this driver
-        doCreateConfigToFail(currentProfile, currentEntrypoint,
-                                           VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
+        doCreateConfigToFail(profile, entrypoint,
+            VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
     }
 }
 
 TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
 {
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
 
     doGetMaxValues();
-
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(currentProfile)) {
-
-        doQueryConfigEntrypoints(currentProfile);
-        if (doFindEntrypointInList(currentEntrypoint)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-
-            doCreateConfigNoAttrib(currentProfile,
-                                                 currentEntrypoint);
+            doCreateConfigNoAttrib(profile, entrypoint);
             doDestroyConfig();
-        }
-        else {
+        } else {
             // entrypoint is not supported by driver
-            doCreateConfigToFail(
-                currentProfile, currentEntrypoint,
+            doCreateConfigToFail(profile, entrypoint,
                 VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT);
         }
-    }
-    else {
+    } else {
         // profile is not supported by this driver
-        doCreateConfigToFail(currentProfile, currentEntrypoint,
-                                           VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
-    }
-}
-
-TEST_P(VAAPIGetCreateConfig, UnsupportedProfileEntrypoint)
-{
-    VAProfile currentProfile = ::testing::get<0>(GetParam());
-    VAEntrypoint currentEntrypoint = ::testing::get<1>(GetParam());
-
-    doGetMaxValues();
-
-    doQueryConfigProfiles();
-
-    if (!doFindProfileInList(currentProfile)) {
-	// non-supported profiles will be skipped from all testing
-	doLogSkipTest(currentProfile, currentEntrypoint);
-    }
-    else {
-	doQueryConfigEntrypoints(currentProfile);
-	if (!doFindEntrypointInList(currentEntrypoint)) {
-	    // non-supported entrypoints will be skipped from all testing
-	    doLogSkipTest(currentProfile, currentEntrypoint);
-	}
+        doCreateConfigToFail(profile, entrypoint,
+            VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
     }
 }
 
@@ -141,4 +101,4 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
                        ::testing::ValuesIn(m_vaEntrypoints)));
 
-} // VAAPI
+} // namespace VAAPI
