@@ -65,6 +65,7 @@ int convert_one_image(const char *infilename)
   unsigned int width, height;
   unsigned char *buf;
   struct jdec_private *jdec;
+  size_t n_items;
 
   /* Load the Jpeg into memory */
   fp = fopen(infilename, "rb");
@@ -74,8 +75,12 @@ int convert_one_image(const char *infilename)
   buf = (unsigned char *)malloc(length_of_file + 4);
   if (buf == NULL)
     exitmessage("Not enough memory for loading file\n");
-  fread(buf, length_of_file, 1, fp);
+  n_items = fread(buf, length_of_file, 1, fp);
   fclose(fp);
+  if (n_items != 1) {
+      free(buf);
+      exitmessage("Reading file fail\n");
+  }
 
   /* Decompress it */
   jdec = tinyjpeg_init();
