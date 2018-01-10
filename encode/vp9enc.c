@@ -118,6 +118,13 @@ static int rc_default_mode[4] = {
     VA_RC_NONE
 };
 
+static int vp9enc_entrypoint_lists[2] = {
+    VAEntrypointEncSlice,
+    VAEntrypointEncSliceLP
+};
+
+static int select_entrypoint = -1;
+
 static const struct option long_opts[] = {
     {"help", no_argument, NULL, 0 },
     {"rcmode", required_argument, NULL, 1 },
@@ -129,6 +136,7 @@ static const struct option long_opts[] = {
     {"hrd_win", required_argument, NULL, 8},
     {"vbr_max", required_argument, NULL, 9},
     {"fn_num", required_argument, NULL, 10},
+    {"low_power", required_argument, NULL, 11},
     {NULL, no_argument, NULL, 0 }
 };
 
@@ -650,6 +658,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     VAConfigAttrib attrib[2];
     int major_ver, minor_ver;
     VAStatus va_status;
+    int i;
 
     va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
@@ -658,9 +667,24 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     vaQueryConfigEntrypoints(va_dpy, vp9enc_context.profile, entrypoints,
                              &num_entrypoints);
 
-    for	(slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++)
-        if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice)
-            break;
+    for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
+        if (select_entrypoint == -1) {
+            for (i = 0; i < 2; i++) {
+                if (entrypoints[slice_entrypoint] == vp9enc_entrypoint_lists[i])
+                    break;
+            }
+
+            if (i < 2) {
+                select_entrypoint = i;
+                break;
+            }
+        } else {
+            assert(select_entrypoint == 0 || select_entrypoint == 1);
+
+            if (entrypoints[slice_entrypoint] == vp9enc_entrypoint_lists[select_entrypoint])
+                break;
+        }
+    }
 
     if (slice_entrypoint == num_entrypoints) {
         /* not find Slice entry point */
@@ -670,7 +694,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     /* find out the format for the render target, and rate control mode */
     attrib[0].type = VAConfigAttribRTFormat;
     attrib[1].type = VAConfigAttribRateControl;
-    vaGetConfigAttributes(va_dpy, vp9enc_context.profile, VAEntrypointEncSlice,
+    vaGetConfigAttributes(va_dpy, vp9enc_context.profile, vp9enc_entrypoint_lists[select_entrypoint],
                           &attrib[0], 2);
 
     if ((attrib[0].value & VA_RT_FORMAT_YUV420) == 0) {
@@ -687,7 +711,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = vp9enc_context.rate_control_method; /* set to desired RC mode */
 
-    va_status = vaCreateConfig(va_dpy, vp9enc_context.profile, VAEntrypointEncSlice,
+    va_status = vaCreateConfig(va_dpy, vp9enc_context.profile, vp9enc_entrypoint_lists[select_entrypoint],
                                &attrib[0], 2,&vp9enc_context.config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
@@ -1335,6 +1359,7 @@ vp9enc_show_help()
     printf("--vbr_max <num> (kbps unit. It should be greater than fb)\n");
     printf("--opt_header \n  write the uncompressed header manually. without this, the driver will add those headers by itself\n");
     printf("--fn_num <num>\n  how many frames to be encoded\n");
+    printf("--low_power <num> 0: Normal mode, 1: Low power mode, others: auto mode\n");
 }
 
 int
@@ -1453,6 +1478,16 @@ main(int argc, char *argv[])
                 tmp_input = atoi(optarg);
                 fn_num = tmp_input;
                 break;
+            case 11:
+                tmp_input = atoi(optarg);
+
+                if (tmp_input == 0 || tmp_input == 1)
+                    select_entrypoint = tmp_input;
+                else
+                    select_entrypoint = -1;
+
+                break;
+
             default:
                 vp9enc_show_help();
                 exit(0);
@@ -1468,8 +1503,10 @@ main(int argc, char *argv[])
     }
 
     if (rc_mode == VA_RC_VBR) {
-        if (vbr_max < 0)
+        if (vbr_max < 0) {
             vbr_max = frame_bit_rate;
+            frame_bit_rate = (vbr_max * 95 / 100);
+        }
 
         if (vbr_max < frame_bit_rate) {
              printf("Under VBR, the max bit rate should be greater than or equal to fb\n");
