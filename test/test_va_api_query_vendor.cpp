@@ -26,28 +26,25 @@
 
 namespace VAAPI {
 
-// no addtl. fixture functionality needed... just a unique test name
+// Inheriting from VAAPIFixture is not necessary as this test is not
+// overriding or extending any functionality defined in fixture.
+// Thus, a typedef is sufficient for getting a unique test name for gtest.
+
 typedef VAAPIFixture VAAPIQueryVendor;
 
 TEST_F(VAAPIQueryVendor, Intel_i965_Vendor)
 {
-    const char* vendor = NULL;
-    std::string vendorString, findIntel("Intel i965 driver");
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    int majorVersion, minorVersion;
+    int major, minor;
 
-    m_vaDisplay = getDisplay();
-    ASSERT_TRUE(m_vaDisplay);
+    VADisplay display = getDisplay();
+    ASSERT_TRUE(display);
 
-    vaStatus = vaInitialize(m_vaDisplay, &majorVersion, &minorVersion);
-    ASSERT_STATUS(vaStatus);
-    vendor = vaQueryVendorString(m_vaDisplay);
-    vendorString.assign(vendor);
-    EXPECT_NE(std::string::npos, vendorString.find(findIntel))
-        << "couldn't find vendor in " << vendorString << std::endl;
+    ASSERT_STATUS(vaInitialize(display, &major, &minor));
+    const std::string vendor(vaQueryVendorString(display));
+    EXPECT_NE(std::string::npos, vendor.find("Intel i965 driver"))
+        << "Couldn't find Vendor Name in " << vendor << std::endl;
 
-    vaStatus = vaTerminate(m_vaDisplay);
-    ASSERT_STATUS(vaStatus);
+    ASSERT_STATUS(vaTerminate(display));
 }
 
-} // VAAPI
+} // namespace VAAPI
