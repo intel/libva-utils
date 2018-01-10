@@ -44,52 +44,50 @@ public:
 
 TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
 {
-    int maxEntrypoints = 0, maxProfiles = 0;
     int numEntrypoints = 0, numProfiles = 0;
-    VAProfile currentProfile = GetParam();
+    const VAProfile& profile = GetParam();
 
-    maxProfiles = vaMaxNumProfiles(m_vaDisplay);
-    EXPECT_TRUE(maxProfiles > 0) << maxProfiles
-                                 << " profiles are reported, check setup";
+    const int maxProfiles = vaMaxNumProfiles(m_vaDisplay);
+    EXPECT_TRUE(maxProfiles > 0)
+        << maxProfiles << " profiles are reported";
 
-    Profiles profileList(maxProfiles);
+    Profiles profiles(maxProfiles);
 
-    ASSERT_STATUS(
-        vaQueryConfigProfiles(m_vaDisplay, &profileList[0], &numProfiles));
+    EXPECT_STATUS(
+        vaQueryConfigProfiles(m_vaDisplay, profiles.data(), &numProfiles));
 
-    EXPECT_TRUE(numProfiles > 0) << numProfiles << " are supported by driver";
+    EXPECT_TRUE(numProfiles > 0)
+        << numProfiles << " profiles are supported by driver";
 
-    maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
-    EXPECT_TRUE(maxEntrypoints > 0) << maxEntrypoints
-                                    << " entrypoints are reported, check setup";
+    const int maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
+    EXPECT_TRUE(maxEntrypoints > 0)
+        << maxEntrypoints << " entrypoints are reported";
 
-    Entrypoints entrypointList(maxEntrypoints);
+    Entrypoints entrypoints(maxEntrypoints);
 
-    if (std::find(profileList.begin(), profileList.end(), currentProfile)
-        != profileList.end()) {
+    const Profiles::const_iterator begin = profiles.begin();
+    const Profiles::const_iterator end = profiles.end();
 
-        ASSERT_STATUS(vaQueryConfigEntrypoints(
-            m_vaDisplay, currentProfile, &entrypointList[0], &numEntrypoints))
-            << " profile used is " << currentProfile;
+    if (std::find(begin, end, profile) != end) {
+        EXPECT_STATUS(vaQueryConfigEntrypoints(m_vaDisplay,
+                profile, entrypoints.data(), &numEntrypoints))
+                << " profile used is " << profile;
 
         EXPECT_TRUE(numEntrypoints > 0)
-            << currentProfile << " is supported but no entrypoints are reported";
-    }
-    else {
-        ASSERT_STATUS_EQ(VA_STATUS_ERROR_UNSUPPORTED_PROFILE,
-                         vaQueryConfigEntrypoints(m_vaDisplay, currentProfile,
-                                           &entrypointList[0], &numEntrypoints))
-            << " profile used is " << currentProfile;
+            << profile << " is supported but no entrypoints are reported";
+    } else {
+        EXPECT_STATUS_EQ(
+            VA_STATUS_ERROR_UNSUPPORTED_PROFILE, vaQueryConfigEntrypoints(
+                m_vaDisplay, profile, entrypoints.data(), &numEntrypoints))
+            << " profile used is " << profile;
 
-        EXPECT_FALSE(numEntrypoints > 0) << currentProfile
-                                         << " profile is not "
-                                            "supported but reported "
-                                            "valid entrypoints";
+        EXPECT_FALSE(numEntrypoints > 0)
+            << profile << " profile is not supported but \
+            valid entrypoints are reported ";
     }
 }
 
-INSTANTIATE_TEST_CASE_P(QueryConfig,
-                        VAAPIQueryConfig,
-                        ::testing::ValuesIn(m_vaProfiles));
+INSTANTIATE_TEST_CASE_P(
+    QueryConfig, VAAPIQueryConfig, ::testing::ValuesIn(m_vaProfiles));
 
-} // VAAPI
+} // namespace VAAPI
