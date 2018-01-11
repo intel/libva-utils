@@ -185,6 +185,103 @@ bool VAAPIFixture::doFindEntrypointInList(const VAEntrypoint& entrypoint) const
            != m_entrypointList.end();
 }
 
+void VAAPIFixture::getConfigAttributes(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, ConfigAttributes& attribs,
+    const VAStatus& expectation) const
+{
+    const bool defaults(attribs.empty());
+
+    if (defaults) {
+        // fill config attributes with default config attributes
+        const auto op = [](const VAConfigAttribType& t) {
+            return VAConfigAttrib{type: t, value: VA_ATTRIB_NOT_SUPPORTED};
+        };
+        std::transform(g_vaConfigAttribTypes.begin(),
+            g_vaConfigAttribTypes.end(), std::back_inserter(attribs), op);
+    }
+
+    ASSERT_FALSE(attribs.empty());
+
+    EXPECT_STATUS_EQ(
+        expectation,
+        vaGetConfigAttributes(
+            m_vaDisplay, profile, entrypoint, attribs.data(), attribs.size()));
+
+    if (defaults) {
+        // remove unsupported config attributes
+        const auto begin(attribs.begin());
+        const auto end(attribs.end());
+        const auto predicate = [](const VAConfigAttrib& a) {
+            return a.value == VA_ATTRIB_NOT_SUPPORTED;
+        };
+        attribs.erase(std::remove_if(begin, end, predicate), end);
+    }
+}
+
+void VAAPIFixture::createConfig(const VAProfile& profile,
+    const VAEntrypoint& entrypoint, const ConfigAttributes& attribs,
+    const VAStatus& expectation)
+{
+    ASSERT_INVALID_ID(m_configID)
+        << "test logic error: did you forget to call destroyConfig?";
+
+    EXPECT_STATUS_EQ(
+        expectation,
+        vaCreateConfig(m_vaDisplay, profile, entrypoint,
+            (attribs.size() != 0 ?
+                const_cast<VAConfigAttrib*>(attribs.data()) : NULL),
+            attribs.size(), &m_configID))
+        << "profile    = " << profile << std::endl
+        << "entrypoint = " << entrypoint << std::endl
+        << "numAttribs = " << attribs.size();
+
+    if (expectation == VA_STATUS_SUCCESS) {
+        EXPECT_ID(m_configID);
+    } else {
+        EXPECT_INVALID_ID(m_configID);
+    }
+}
+
+void VAAPIFixture::queryConfigAttributes(
+    const VAProfile& expectedProfile, const VAEntrypoint& expectedEntrypoint,
+    ConfigAttributes& attributes, const VAStatus& expectedStatus) const
+{
+    VAProfile actualProfile;
+    VAEntrypoint actualEntrypoint;
+    int numAttributes(0);
+
+    ASSERT_TRUE(attributes.empty())
+        << "test logic error: attributes must be empty";
+
+    attributes.resize(m_maxConfigAttributes);
+
+    EXPECT_STATUS_EQ(
+        expectedStatus,
+        vaQueryConfigAttributes(m_vaDisplay, m_configID, &actualProfile,
+            &actualEntrypoint, attributes.data(), &numAttributes));
+
+    if (expectedStatus == VA_STATUS_SUCCESS) {
+        EXPECT_EQ(expectedProfile, actualProfile);
+        EXPECT_EQ(expectedEntrypoint, actualEntrypoint);
+        ASSERT_GT(numAttributes, 0);
+
+        attributes.resize(numAttributes);
+
+        // reported config attributes should be supported
+        for (const auto& attribute : attributes) {
+            EXPECT_NE(VA_ATTRIB_NOT_SUPPORTED, attribute.value);
+        }
+    } else {
+        attributes.clear();
+    }
+}
+
+void VAAPIFixture::destroyConfig(const VAStatus& expectation)
+{
+    EXPECT_STATUS_EQ(expectation, vaDestroyConfig(m_vaDisplay, m_configID));
+    m_configID = VA_INVALID_ID;
+}
+
 void VAAPIFixture::doFillConfigAttribList()
 {
     m_configAttribList.clear();
