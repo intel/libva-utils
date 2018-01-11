@@ -85,6 +85,15 @@ public:
 
     void doLogSkipTest(const VAProfile&, const VAEntrypoint&) const;
 
+    void getConfigAttributes(const VAProfile&, const VAEntrypoint&,
+        ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
+    void createConfig(const VAProfile&, const VAEntrypoint&,
+        const ConfigAttributes& = ConfigAttributes(),
+        const VAStatus& = VA_STATUS_SUCCESS);
+    void queryConfigAttributes(const VAProfile&, const VAEntrypoint&,
+        ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
+    void destroyConfig(const VAStatus& = VA_STATUS_SUCCESS);
+
 protected:
     // You can remove any or all of the following functions if its body
     // is empty.
