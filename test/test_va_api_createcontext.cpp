@@ -82,7 +82,7 @@ TEST_P(VAAPICreateContext, CreateContext)
         doQueryConfigEntrypoints(profile);
         if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-            doCreateConfig(profile, entrypoint);
+            createConfig(profile, entrypoint);
 
             Resolution minRes;
             doGetMinSurfaceResolution(profile, entrypoint, minRes);
@@ -98,7 +98,7 @@ TEST_P(VAAPICreateContext, CreateContext)
                 doDestroyContext();
             }
 
-            doDestroyConfig();
+            destroyConfig();
         } else {
             // entrypoint not supported
             doLogSkipTest(profile, entrypoint);
