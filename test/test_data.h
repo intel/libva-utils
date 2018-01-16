@@ -102,7 +102,7 @@ static const std::vector<uint32_t> m_vaRTFormats
     = { VA_RT_FORMAT_YUV420,   VA_RT_FORMAT_YUV422, VA_RT_FORMAT_YUV444,
         VA_RT_FORMAT_YUV411,   VA_RT_FORMAT_YUV400, VA_RT_FORMAT_YUV420_10BPP,
         VA_RT_FORMAT_RGB16,    VA_RT_FORMAT_RGB32,  VA_RT_FORMAT_RGBP,
-        VA_RT_FORMAT_PROTECTED };
+        VA_RT_FORMAT_RGB32_10BPP, VA_RT_FORMAT_PROTECTED };
 
 static const BufferTypes m_vaBufferTypes
     = { VAPictureParameterBufferType,
