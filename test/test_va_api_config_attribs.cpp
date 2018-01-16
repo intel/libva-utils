@@ -28,6 +28,7 @@ namespace VAAPI {
 
 class VAAPIConfigAttribs
     : public VAAPIFixture
+    , public ::testing::WithParamInterface<std::tuple<VAProfile, VAEntrypoint> >
 {
 public:
     VAAPIConfigAttribs()
@@ -39,40 +40,104 @@ public:
     {
         doTerminate();
     }
-};
 
-TEST_F(VAAPIConfigAttribs, GetConfigAttribs)
-{
-    doGetMaxValues();
+    void validateConfigAttributes(const ConfigAttributes& actual,
+        const ConfigAttributes& supported) const
+    {
+        const size_t size(actual.size());
+        ASSERT_EQ(size, supported.size());
 
-    doQueryConfigProfiles();
-    const Profiles& profiles = getSupportedProfileList();
-    ASSERT_FALSE(profiles.empty());
+        // Require that actual and supported are in the same order, by type
+        for (size_t i(0); i < size; ++i) {
+            const VAConfigAttrib& aAttrib = actual[i];
+            const VAConfigAttrib& sAttrib = supported[i];
 
-    for (const auto& profile : profiles) {
-        doQueryConfigEntrypoints(profile);
-        const Entrypoints& entrypoints = getSupportedEntrypointList();
-        ASSERT_FALSE(entrypoints.empty());
+            ASSERT_EQ(aAttrib.type, sAttrib.type);
 
-        for (const auto& entrypoint : entrypoints) {
-            doGetMaxNumConfigAttribs();
-            doCreateConfigNoAttrib(profile, entrypoint);
+            // NOTE: If an attribute was not explicitly set by user/app during
+            // createConfig (as is the case for GetConfigAttribs test), then
+            // all known drivers currently return the same value from
+            // vaQueryConfigAttributes as returned from vaGetConfigAttributes.
+            // However, there are several bitfield-type attributes that can
+            // only take on "one" choice from the supported value relayed in the
+            // bitfield from vaGetConfigAttributes.  It still remains to be
+            // clarified whether drivers should actually return the "default"
+            // chosen value from vaQueryConfigAttributes when it is not
+            // specified by user/app during createConfig.  Hence, for now, for
+            // bitfield-type attributes we only require that the actual value
+            // is equal-to or a "subset" of the supported value.
 
-            // Once ConfigID is obtained, then the attrib list is populated as
-            // well.  This will confirm that the values returned by calling
-            // vaGetConfigAttributes do match
+            switch (aAttrib.type) {
+            // Read/write bitfield attribute can be a subset of supported values
+            case VAConfigAttribRTFormat:
+            case VAConfigAttribRateControl:
+            case VAConfigAttribDecSliceMode:
+            case VAConfigAttribEncPackedHeaders:
+            case VAConfigAttribEncInterlaced:
+            case VAConfigAttribFEIFunctionType:
+                EXPECT_EQ(sAttrib.value & aAttrib.value, aAttrib.value);
+                break;
 
-            // make a copy since we want to set .value = 0
-            ConfigAttributes attribs = getQueryConfigAttribList();
-            for (auto& attrib : attribs) {
-                attrib.value = 0;
+            // read-only and/or non-bitfield attributes
+            default:
+                EXPECT_EQ(sAttrib.value, aAttrib.value);
             }
-
-            doGetConfigAttributes(profile, entrypoint, attribs);
-            doCheckAttribsMatch(attribs);
-            doDestroyConfig();
         }
     }
+};
+
+TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
+{
+    // The driver must support creating a config without any user specified
+    // attributes, in which case the driver will use it's own defaults.  The
+    // app should be able to query those default attributes for such created
+    // config via vaQueryConfigAttributes.  Those default attribute values
+    // should be consistent with supported attribute values returned by
+    // vaGetConfigAttributes.
+
+    const VAProfile& profile        = ::testing::get<0>(GetParam());
+    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
+
+    doGetMaxValues();
+    doQueryConfigProfiles();
+
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
+            // create config without attributes (i.e. use driver defaults)
+            createConfig(profile, entrypoint);
+
+            // query default attributes from the config we just created
+            ConfigAttributes actual;
+            queryConfigAttributes(profile, entrypoint, actual);
+
+            // we're done with the config
+            destroyConfig();
+
+            // copy the actual attributes and reset their values so we
+            // can get the supported values for them.
+            ConfigAttributes supported = actual;
+            std::for_each(supported.begin(), supported.end(),
+                [](VAConfigAttrib& s) { s.value = 0; });
+
+            // get supported config attribute values
+            getConfigAttributes(profile, entrypoint, supported);
+
+            // verify actual config attribute values are supported values
+            validateConfigAttributes(actual, supported);
+        } else {
+            // entrypoint not supported
+            doLogSkipTest(profile, entrypoint);
+        }
+    } else {
+        // profile not supported
+        doLogSkipTest(profile, entrypoint);
+    }
 }
+
+INSTANTIATE_TEST_CASE_P(
+    Attributes, VAAPIConfigAttribs,
+    ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
+        ::testing::ValuesIn(g_vaEntrypoints)));
 
 } // namespace VAAPI
