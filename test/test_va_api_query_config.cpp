@@ -88,6 +88,6 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
 }
 
 INSTANTIATE_TEST_CASE_P(
-    QueryConfig, VAAPIQueryConfig, ::testing::ValuesIn(m_vaProfiles));
+    QueryConfig, VAAPIQueryConfig, ::testing::ValuesIn(g_vaProfiles));
 
 } // namespace VAAPI

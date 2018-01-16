@@ -97,8 +97,8 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
 
 INSTANTIATE_TEST_CASE_P(
     QuerySurfaces, VAAPIQuerySurfaces,
-    ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
-        ::testing::ValuesIn(m_vaEntrypoints)));
+    ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
+        ::testing::ValuesIn(g_vaEntrypoints)));
 
 class VAAPICreateSurfaces
     : public VAAPIFixture
@@ -195,8 +195,8 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 
 INSTANTIATE_TEST_CASE_P(
     CreateSurfaces, VAAPICreateSurfaces,
-    ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
-        ::testing::ValuesIn(m_vaEntrypoints),
-        ::testing::ValuesIn(m_vaResolutions)));
+    ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
+        ::testing::ValuesIn(g_vaEntrypoints),
+        ::testing::ValuesIn(g_vaResolutions)));
 
 } // namespace VAAPI
