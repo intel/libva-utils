@@ -111,8 +111,8 @@ TEST_P(VAAPICreateContext, CreateContext)
 
 INSTANTIATE_TEST_CASE_P(
     CreateContext, VAAPICreateContext,
-    ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
-        ::testing::ValuesIn(m_vaEntrypoints),
-        ::testing::ValuesIn(m_vaResolutions)));
+    ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
+        ::testing::ValuesIn(g_vaEntrypoints),
+        ::testing::ValuesIn(g_vaResolutions)));
 
 } // namespace VAAPI

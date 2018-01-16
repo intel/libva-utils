@@ -98,7 +98,7 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
 
 INSTANTIATE_TEST_CASE_P(
     GetCreateConfig, VAAPIGetCreateConfig,
-    ::testing::Combine(::testing::ValuesIn(m_vaProfiles),
-                       ::testing::ValuesIn(m_vaEntrypoints)));
+    ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
+                       ::testing::ValuesIn(g_vaEntrypoints)));
 
 } // namespace VAAPI

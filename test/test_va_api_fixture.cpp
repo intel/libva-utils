@@ -189,7 +189,7 @@ void VAAPIFixture::doFillConfigAttribList()
 {
     m_configAttribList.clear();
     // fill it with all the VAConfigAttribs known
-    for (auto& it : m_vaConfigAttribs) {
+    for (auto& it : g_vaConfigAttribTypes) {
         VAConfigAttrib configAttrib;
 
         configAttrib.type = it;
@@ -197,7 +197,7 @@ void VAAPIFixture::doFillConfigAttribList()
         m_configAttribList.push_back(configAttrib);
     }
 
-    EXPECT_EQ(m_configAttribList.size(), m_vaConfigAttribs.size());
+    EXPECT_EQ(m_configAttribList.size(), g_vaConfigAttribTypes.size());
 }
 
 void VAAPIFixture::doGetConfigAttributes(const VAProfile& profile,
@@ -481,7 +481,7 @@ void VAAPIFixture::doCreateSurfaces(const VAProfile& profile,
         formats = it->value;
     }
 
-    for (auto& itFormat : m_vaRTFormats) {
+    for (auto& itFormat : g_vaRTFormats) {
         unsigned int currentFormat = formats & itFormat;
 
         if (currentFormat) {
