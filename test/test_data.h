@@ -154,5 +154,14 @@ static const BufferTypes g_vaBufferTypes = {
     VAEncFEIMVPredictorBufferType,
 };
 
+static const std::vector<uint32_t> g_vaRateControls = {
+    VA_RC_NONE, VA_RC_CBR, VA_RC_VBR, VA_RC_VCM, VA_RC_CQP,
+    VA_RC_VBR_CONSTRAINED, VA_RC_ICQ, VA_RC_MB, VA_RC_CFS, VA_RC_PARALLEL,
+};
+
+static const std::vector<uint32_t> g_vaDecSliceModes = {
+    VA_DEC_SLICE_MODE_NORMAL, VA_DEC_SLICE_MODE_BASE,
+};
+
 } // namespace VAAPI
 #endif
