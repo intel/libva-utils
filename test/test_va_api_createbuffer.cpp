@@ -151,33 +151,36 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     // them to a VAConfigID.
 
     const TestInput& input = GetParam();
+    const VAProfile& profile = input.config.first;
+    const VAEntrypoint& entrypoint = input.config.second;
+    const VABufferType bufferType = input.bufferType;
 
     doGetMaxValues();
     doQueryConfigProfiles();
 
-    if (doFindProfileInList(input.config.first)) {
-        doQueryConfigEntrypoints(input.config.first);
-        if (doFindEntrypointInList(input.config.second)) {
+    if (doFindProfileInList(profile)) {
+        doQueryConfigEntrypoints(profile);
+        if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-            doCreateConfig(input.config.first, input.config.second);
+            createConfig(profile, entrypoint);
 
             // vaCreateContext input requires resolution, since this test
             // doesn't create surfaces, passing 1x1 resolution should provide
             // the desired result.
             doCreateContext(Resolution(1, 1));
 
-            doCreateBuffer(input.bufferType);
+            doCreateBuffer(bufferType);
             doDestroyBuffer();
 
             doDestroyContext();
-            doDestroyConfig();
+            destroyConfig();
         } else {
             // entrypoint not supported
-            doLogSkipTest(input.config.first, input.config.second);
+            doLogSkipTest(profile, entrypoint);
         }
     } else {
         // profile not supported
-        doLogSkipTest(input.config.first, input.config.second);
+        doLogSkipTest(profile, entrypoint);
     }
 }
 
