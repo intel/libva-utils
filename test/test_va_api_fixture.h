@@ -54,34 +54,11 @@ public:
     const Entrypoints& getSupportedEntrypointList() const;
     bool doFindEntrypointInList(const VAEntrypoint&) const;
 
-    void doFillConfigAttribList();
-    void doGetConfigAttributes(const VAProfile&, const VAEntrypoint&);
-    void doGetConfigAttributes(const VAProfile&, const VAEntrypoint&,
-        ConfigAttributes& configAttrib);
-    const ConfigAttributes& getConfigAttribList() const;
-    const ConfigAttributes& getQueryConfigAttribList() const;
-    void doCheckAttribsMatch(const ConfigAttributes&) const;
-    void doCreateConfigWithAttrib(const VAProfile&, const VAEntrypoint&);
-    void doQueryConfigAttributes(const VAProfile&, const VAEntrypoint&,
-        const VAStatus& expectation = VA_STATUS_SUCCESS);
-    void doQuerySurfacesWithConfigAttribs(const VAProfile&,
-        const VAEntrypoint&);
-    void doQuerySurfacesNoConfigAttribs(const VAProfile&, const VAEntrypoint&);
-    void doCreateSurfaces(const VAProfile&, const VAEntrypoint&,
-        const Resolution&);
-    void doGetMaxSurfaceResolution(const VAProfile&, const VAEntrypoint&,
-        Resolution&);
-    void doGetMinSurfaceResolution(const VAProfile&, const VAEntrypoint&,
-        Resolution&);
     void doCreateContext(const Resolution&,
         const VAStatus& expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(const VAStatus& expectation = VA_STATUS_SUCCESS);
     void doCreateBuffer(const VABufferType&);
     void doDestroyBuffer();
-    void doCreateConfigNoAttrib(const VAProfile&, const VAEntrypoint&);
-    void doCreateConfig(const VAProfile&, const VAEntrypoint&);
-    void doCreateConfigToFail(const VAProfile&, const VAEntrypoint&, int error);
-    void doDestroyConfig();
 
     void doLogSkipTest(const VAProfile&, const VAEntrypoint&) const;
 
@@ -140,13 +117,8 @@ private:
 
     Profiles m_profileList;
     Entrypoints m_entrypointList;
-    ConfigAttributes m_configAttribList;
-    ConfigAttributes m_configAttribToCreateConfig;
-    ConfigAttributes m_queryConfigAttribList;
-    SurfaceAttributes m_querySurfaceAttribList;
-    Surfaces m_surfaceID;
 };
 
-} // namespace
+} // namespace VAAPI
 
 #endif
