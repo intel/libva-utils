@@ -30,6 +30,7 @@
 
 #include <map>
 #include <va/va.h>
+#include <va/va_drmcommon.h>
 
 namespace VAAPI {
 
@@ -169,6 +170,18 @@ static const std::map<VAConfigAttribType, const BitMasks&>
         {VAConfigAttribRTFormat, g_vaRTFormats},
         {VAConfigAttribRateControl, g_vaRateControls},
         {VAConfigAttribDecSliceMode, g_vaDecSliceModes},
+    };
+
+static const BitMasks g_vaSurfaceMemTypes = {
+    VA_SURFACE_ATTRIB_MEM_TYPE_VA, VA_SURFACE_ATTRIB_MEM_TYPE_V4L2,
+    VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR, VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM,
+    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME,
+    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+};
+
+static const std::map<VASurfaceAttribType, const BitMasks&>
+    g_vaSurfaceAttribBitMasks = {
+        {VASurfaceAttribMemoryType, g_vaSurfaceMemTypes},
     };
 
 } // namespace VAAPI
