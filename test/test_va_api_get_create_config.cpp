@@ -24,6 +24,8 @@
 
 #include "test_va_api_fixture.h"
 
+#include <sstream>
+
 namespace VAAPI {
 
 class VAAPIGetCreateConfig
@@ -54,19 +56,70 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigWithAttributes)
         doQueryConfigEntrypoints(profile);
         if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-            doFillConfigAttribList();
-            doGetConfigAttributes(profile, entrypoint);
-            doCreateConfigWithAttrib(profile, entrypoint);
-            doDestroyConfig();
+            ConfigAttributes attribs;
+            getConfigAttributes(profile, entrypoint, attribs);
+
+            // create config with each individual supported attribute
+            for (const auto& attrib : attribs) {
+                const auto match = g_vaConfigAttribBitMasks.find(attrib.type);
+                if (match != g_vaConfigAttribBitMasks.end()) {
+                    // it's a bitfield attribute
+                    uint32_t bitfield(0);
+                    const BitMasks& masks = match->second;
+                    for (const auto mask : masks) { // for all bitmasks
+                        const bool isSet((attrib.value & mask) == mask);
+
+                        std::ostringstream oss;
+                        oss << std::hex << "0x" << attrib.type
+                            << ":0x" << attrib.value
+                            << ":0x" << mask << ":" << isSet;
+                        SCOPED_TRACE(oss.str());
+
+                        if (isSet) {
+                            // supported value
+                            bitfield |= mask;
+                            createConfig(profile, entrypoint,
+                                ConfigAttributes(
+                                    1, {type : attrib.type, value : mask }));
+                            destroyConfig();
+                        } else {
+                            // unsupported value
+                            const VAStatus expectation(
+                              (attrib.type == VAConfigAttribRTFormat) ?
+                                  VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT :
+                                  VA_STATUS_ERROR_INVALID_VALUE);
+                            createConfig(profile, entrypoint,
+                                ConfigAttributes(
+                                    1, {type : attrib.type, value : mask}),
+                                expectation);
+                            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
+                        }
+                    }
+                    // ensure we processed all supported values
+                    EXPECT_EQ(bitfield, attrib.value);
+                } else {
+                    // it's a standard attribute
+                    std::ostringstream oss;
+                    oss << std::hex << "0x" << attrib.type
+                        << ":0x" << attrib.value;
+                    SCOPED_TRACE(oss.str());
+
+                    createConfig(profile, entrypoint,
+                        ConfigAttributes(1, attrib));
+                    destroyConfig();
+                }
+            }
         } else {
             // entrypoint is not supported by driver
-            doCreateConfigToFail(profile, entrypoint,
+            createConfig(profile, entrypoint, ConfigAttributes(),
                 VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT);
+            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
         }
     } else {
         // profile is not supported by this driver
-        doCreateConfigToFail(profile, entrypoint,
+        createConfig(profile, entrypoint, ConfigAttributes(),
             VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
+        destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
     }
 }
 
@@ -82,17 +135,19 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
         doQueryConfigEntrypoints(profile);
         if (doFindEntrypointInList(entrypoint)) {
             // profile and entrypoint are supported
-            doCreateConfigNoAttrib(profile, entrypoint);
-            doDestroyConfig();
+            createConfig(profile, entrypoint);
+            destroyConfig();
         } else {
             // entrypoint is not supported by driver
-            doCreateConfigToFail(profile, entrypoint,
+            createConfig(profile, entrypoint, ConfigAttributes(),
                 VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT);
+            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
         }
     } else {
         // profile is not supported by this driver
-        doCreateConfigToFail(profile, entrypoint,
+        createConfig(profile, entrypoint, ConfigAttributes(),
             VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
+        destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
     }
 }
 
