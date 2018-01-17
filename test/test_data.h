@@ -28,6 +28,7 @@
 #include "test_defs.h"
 #include "test_utils.h"
 
+#include <map>
 #include <va/va.h>
 
 namespace VAAPI {
@@ -114,7 +115,7 @@ static const Resolutions g_vaResolutions = {
     { 1920, 1080 },  { 2048, 1080 }, { 4096, 2160 }, { 8192, 8192 },
     { 10240, 10240 } };
 
-static const std::vector<uint32_t> g_vaRTFormats = {
+static const BitMasks g_vaRTFormats = {
     VA_RT_FORMAT_YUV420, VA_RT_FORMAT_YUV422, VA_RT_FORMAT_YUV444,
     VA_RT_FORMAT_YUV411, VA_RT_FORMAT_YUV400, VA_RT_FORMAT_YUV420_10BPP,
     VA_RT_FORMAT_RGB16, VA_RT_FORMAT_RGB32, VA_RT_FORMAT_RGBP,
@@ -154,14 +155,21 @@ static const BufferTypes g_vaBufferTypes = {
     VAEncFEIMVPredictorBufferType,
 };
 
-static const std::vector<uint32_t> g_vaRateControls = {
+static const BitMasks g_vaRateControls = {
     VA_RC_NONE, VA_RC_CBR, VA_RC_VBR, VA_RC_VCM, VA_RC_CQP,
     VA_RC_VBR_CONSTRAINED, VA_RC_ICQ, VA_RC_MB, VA_RC_CFS, VA_RC_PARALLEL,
 };
 
-static const std::vector<uint32_t> g_vaDecSliceModes = {
+static const BitMasks g_vaDecSliceModes = {
     VA_DEC_SLICE_MODE_NORMAL, VA_DEC_SLICE_MODE_BASE,
 };
+
+static const std::map<VAConfigAttribType, const BitMasks&>
+    g_vaConfigAttribBitMasks = {
+        {VAConfigAttribRTFormat, g_vaRTFormats},
+        {VAConfigAttribRateControl, g_vaRateControls},
+        {VAConfigAttribDecSliceMode, g_vaDecSliceModes},
+    };
 
 } // namespace VAAPI
 #endif

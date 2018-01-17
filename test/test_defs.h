@@ -44,6 +44,7 @@ typedef std::vector<VABufferID>           Buffers;
 typedef std::vector<VADisplayAttribType>  DisplayAttribTypes;
 typedef std::vector<VADisplayAttribute>   DisplayAttributes;
 typedef std::vector<Resolution>           Resolutions;
+typedef std::vector<uint32_t>             BitMasks;
 
 } // namespace VAAPI
 
