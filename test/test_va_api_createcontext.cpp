@@ -84,11 +84,8 @@ TEST_P(VAAPICreateContext, CreateContext)
             // profile and entrypoint are supported
             createConfig(profile, entrypoint);
 
-            Resolution minRes;
-            doGetMinSurfaceResolution(profile, entrypoint, minRes);
-
-            Resolution maxRes;
-            doGetMaxSurfaceResolution(profile, entrypoint, maxRes);
+            Resolution minRes, maxRes;
+            getMinMaxSurfaceResolution(minRes, maxRes);
 
             if (not res.isWithin(minRes, maxRes)) {
                 doCreateContext(res, VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED);
