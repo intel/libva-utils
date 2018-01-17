@@ -367,6 +367,135 @@ void VAAPIFixture::doDestroyConfig()
     ASSERT_STATUS(vaDestroyConfig(m_vaDisplay, m_configID));
 }
 
+void VAAPIFixture::querySurfaceAttributes(SurfaceAttributes& attribs) const
+{
+    ASSERT_TRUE(attribs.empty())
+        << "test logic error: surface attributes must be empty";
+
+    unsigned numAttribs(0);
+
+    ASSERT_STATUS(vaQuerySurfaceAttributes(m_vaDisplay, m_configID, NULL,
+        &numAttribs));
+
+    ASSERT_GT(numAttribs, 0u);
+
+    attribs.resize(numAttribs);
+
+    ASSERT_STATUS(vaQuerySurfaceAttributes(m_vaDisplay, m_configID,
+        attribs.data(), &numAttribs));
+
+    ASSERT_GT(numAttribs, 0u);
+    EXPECT_GE(attribs.size(), numAttribs);
+
+    attribs.resize(numAttribs);
+
+    const uint32_t flags = 0x0 | VA_SURFACE_ATTRIB_GETTABLE
+        | VA_SURFACE_ATTRIB_SETTABLE;
+
+    for (const auto& attrib : attribs) {
+        EXPECT_NE(attrib.flags & flags,
+            (uint32_t)VA_SURFACE_ATTRIB_NOT_SUPPORTED);
+        EXPECT_GE(attrib.value.type, VAGenericValueTypeInteger);
+        EXPECT_LE(attrib.value.type, VAGenericValueTypeFunc);
+    }
+}
+
+void VAAPIFixture::getMinMaxSurfaceResolution(
+    Resolution& minRes, Resolution& maxRes) const
+{
+    const Resolution::DataType maxVal =
+        std::numeric_limits<Resolution::DataType>::max();
+
+    // set default resolutions
+    minRes.width = 1;
+    minRes.height = 1;
+    maxRes.width = maxVal;
+    maxRes.height = maxVal;
+
+    SurfaceAttributes attribs;
+    querySurfaceAttributes(attribs);
+
+    SurfaceAttributes::const_iterator match;
+    const SurfaceAttributes::const_iterator begin(attribs.begin());
+    const SurfaceAttributes::const_iterator end(attribs.end());
+
+    // minimum surface width
+    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
+        {return a.type == VASurfaceAttribMinWidth;});
+    if (match != end) {
+        EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
+        ASSERT_GE(match->value.value.i, 1);
+        ASSERT_LE((Resolution::DataType)match->value.value.i, maxVal);
+        minRes.width = match->value.value.i;
+    }
+
+    // minimum surface height
+    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
+        {return a.type == VASurfaceAttribMinHeight;});
+    if (match != end) {
+        EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
+        ASSERT_GE(match->value.value.i, 1);
+        ASSERT_LE((Resolution::DataType)match->value.value.i, maxVal);
+        minRes.height = match->value.value.i;
+    }
+
+    // maximum surface width
+    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
+        {return a.type == VASurfaceAttribMaxWidth;});
+    if (match != end) {
+        EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
+        ASSERT_GE(match->value.value.i, 1);
+        ASSERT_LE((Resolution::DataType)match->value.value.i, maxVal);
+        maxRes.width = match->value.value.i;
+    }
+
+    // maximum surface height
+    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
+        {return a.type == VASurfaceAttribMaxHeight;});
+    if (match != end) {
+        EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
+        ASSERT_GE(match->value.value.i, 1);
+        ASSERT_LE((Resolution::DataType)match->value.value.i, maxVal);
+        maxRes.height = match->value.value.i;
+    }
+
+    EXPECT_LE(minRes, maxRes);
+}
+
+void VAAPIFixture::createSurfaces(Surfaces& surfaces, const unsigned format,
+    const Resolution& resolution, const SurfaceAttributes& attribs,
+    const VAStatus& expectation) const
+{
+    ASSERT_GT(surfaces.size(), 0u)
+        << "test logic error: surfaces must not be emtpy";
+    for (const auto& surface : surfaces) {
+        ASSERT_INVALID_ID(surface)
+            << "test logic error: surfaces must all be VA_INVALID_SURFACE";
+    }
+
+    ASSERT_STATUS_EQ(
+        expectation,
+        vaCreateSurfaces(m_vaDisplay, format, resolution.width,
+            resolution.height, surfaces.data(), surfaces.size(),
+            (attribs.size() != 0 ?
+                const_cast<VASurfaceAttrib*>(attribs.data()) : NULL),
+            attribs.size()));
+
+    if (expectation == VA_STATUS_SUCCESS) {
+        for (const auto& surface : surfaces) {
+            ASSERT_ID(surface);
+        }
+    }
+}
+
+void VAAPIFixture::destroySurfaces(Surfaces& surfaces) const
+{
+    if (surfaces.size() != 0) {
+        EXPECT_STATUS(vaDestroySurfaces(m_vaDisplay, surfaces.data(),
+            surfaces.size()));
+    }
+}
+
 void VAAPIFixture::doQuerySurfacesWithConfigAttribs(const VAProfile& profile,
     const VAEntrypoint& entrypoint)
 {

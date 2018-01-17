@@ -94,6 +94,13 @@ public:
         ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
     void destroyConfig(const VAStatus& = VA_STATUS_SUCCESS);
 
+    void querySurfaceAttributes(SurfaceAttributes&) const;
+    void getMinMaxSurfaceResolution(Resolution&, Resolution&) const;
+    void createSurfaces(Surfaces&, const unsigned format, const Resolution&,
+        const SurfaceAttributes& = SurfaceAttributes(),
+        const VAStatus& = VA_STATUS_SUCCESS) const;
+    void destroySurfaces(Surfaces&) const;
+
 protected:
     // You can remove any or all of the following functions if its body
     // is empty.
