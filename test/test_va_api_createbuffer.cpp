@@ -52,13 +52,26 @@ class VAAPICreateBuffer
 {
 public:
     VAAPICreateBuffer()
+        : profile(GetParam().config.first)
+        , entrypoint(GetParam().config.second)
+        , bufferType(GetParam().bufferType)
+    { }
+
+protected:
+    const VAProfile& profile;
+    const VAEntrypoint& entrypoint;
+    const VABufferType& bufferType;
+
+    virtual void SetUp()
     {
-        m_vaDisplay = doInitialize();
+        VAAPIFixture::SetUp();
+        doInitialize();
     }
 
-    virtual ~VAAPICreateBuffer()
+    virtual void TearDown()
     {
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 };
 
@@ -150,40 +163,27 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     // the minimum requirements.  There's no need to create surfaces or attach
     // them to a VAConfigID.
 
-    const TestInput& input = GetParam();
-    const VAProfile& profile = input.config.first;
-    const VAEntrypoint& entrypoint = input.config.second;
-    const VABufferType bufferType = input.bufferType;
+    if (not isSupported(profile, entrypoint)) {
+        doLogSkipTest(profile, entrypoint);
+        return;
+    }
+
     Resolution minRes, maxRes;
 
-    doGetMaxValues();
-    doQueryConfigProfiles();
+    // profile and entrypoint are supported
+    createConfig(profile, entrypoint);
 
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            createConfig(profile, entrypoint);
+    // vaCreateContext input requires resolution, since this test
+    // doesn't create surfaces, passing min resolution should provide
+    // the desired result.
+    getMinMaxSurfaceResolution(minRes,maxRes);
+    doCreateContext(minRes);
 
-            // vaCreateContext input requires resolution, since this test
-            // doesn't create surfaces, passing min resolution should provide
-            // the desired result.
-            getMinMaxSurfaceResolution(minRes,maxRes);
-            doCreateContext(minRes);
+    doCreateBuffer(bufferType);
+    doDestroyBuffer();
 
-            doCreateBuffer(bufferType);
-            doDestroyBuffer();
-
-            doDestroyContext();
-            destroyConfig();
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
-        doLogSkipTest(profile, entrypoint);
-    }
+    doDestroyContext();
+    destroyConfig();
 }
 
 std::vector<TestInput> generateInput()
