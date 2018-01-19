@@ -32,13 +32,24 @@ class VAAPIConfigAttribs
 {
 public:
     VAAPIConfigAttribs()
+        : profile(::testing::get<0>(GetParam()))
+        , entrypoint(::testing::get<1>(GetParam()))
+    { }
+
+protected:
+    const VAProfile& profile;
+    const VAEntrypoint& entrypoint;
+
+    virtual void SetUp()
     {
-        m_vaDisplay = doInitialize();
+        VAAPIFixture::SetUp();
+        doInitialize();
     }
 
-    virtual ~VAAPIConfigAttribs()
+    virtual void TearDown()
     {
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 
     void validateConfigAttributes(const ConfigAttributes& actual,
@@ -95,44 +106,32 @@ TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
     // should be consistent with supported attribute values returned by
     // vaGetConfigAttributes.
 
-    const VAProfile& profile        = ::testing::get<0>(GetParam());
-    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
-
-    doGetMaxValues();
-    doQueryConfigProfiles();
-
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // create config without attributes (i.e. use driver defaults)
-            createConfig(profile, entrypoint);
-
-            // query default attributes from the config we just created
-            ConfigAttributes actual;
-            queryConfigAttributes(profile, entrypoint, actual);
-
-            // we're done with the config
-            destroyConfig();
-
-            // copy the actual attributes and reset their values so we
-            // can get the supported values for them.
-            ConfigAttributes supported = actual;
-            std::for_each(supported.begin(), supported.end(),
-                [](VAConfigAttrib& s) { s.value = 0; });
-
-            // get supported config attribute values
-            getConfigAttributes(profile, entrypoint, supported);
-
-            // verify actual config attribute values are supported values
-            validateConfigAttributes(actual, supported);
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
+    if (not isSupported(profile, entrypoint)) {
         doLogSkipTest(profile, entrypoint);
+        return;
     }
+
+    // create config without attributes (i.e. use driver defaults)
+    createConfig(profile, entrypoint);
+
+    // query default attributes from the config we just created
+    ConfigAttributes actual;
+    queryConfigAttributes(profile, entrypoint, actual);
+
+    // we're done with the config
+    destroyConfig();
+
+    // copy the actual attributes and reset their values so we
+    // can get the supported values for them.
+    ConfigAttributes supported = actual;
+    std::for_each(supported.begin(), supported.end(),
+        [](VAConfigAttrib& s) { s.value = 0; });
+
+    // get supported config attribute values
+    getConfigAttributes(profile, entrypoint, supported);
+
+    // verify actual config attribute values are supported values
+    validateConfigAttributes(actual, supported);
 }
 
 INSTANTIATE_TEST_CASE_P(
