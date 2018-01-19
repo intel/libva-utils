@@ -34,121 +34,105 @@ class VAAPIGetCreateConfig
 {
 public:
     VAAPIGetCreateConfig()
+        : profile(::testing::get<0>(GetParam()))
+        , entrypoint(::testing::get<1>(GetParam()))
+    { }
+
+protected:
+    const VAProfile& profile;
+    const VAEntrypoint& entrypoint;
+
+    virtual void SetUp()
     {
-        m_vaDisplay = doInitialize();
+        VAAPIFixture::SetUp();
+        doInitialize();
     }
 
-    virtual ~VAAPIGetCreateConfig()
+    virtual void TearDown()
     {
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 };
 
 TEST_P(VAAPIGetCreateConfig, CreateConfigWithAttributes)
 {
-    const VAProfile& profile        = ::testing::get<0>(GetParam());
-    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
+    const VAStatus expectedStatus = getSupportStatus(profile, entrypoint);
 
-    doGetMaxValues();
-    doQueryConfigProfiles();
+    if (VA_STATUS_SUCCESS != expectedStatus) {
+        createConfig(profile, entrypoint, ConfigAttributes(), expectedStatus);
+        destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
+        return;
+    }
 
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            ConfigAttributes attribs;
-            getConfigAttributes(profile, entrypoint, attribs);
+    // profile and entrypoint are supported
+    ConfigAttributes attribs;
+    getConfigAttributes(profile, entrypoint, attribs);
 
-            // create config with each individual supported attribute
-            for (const auto& attrib : attribs) {
-                const auto match = g_vaConfigAttribBitMasks.find(attrib.type);
-                if (match != g_vaConfigAttribBitMasks.end()) {
-                    // it's a bitfield attribute
-                    uint32_t bitfield(0);
-                    const BitMasks& masks = match->second;
-                    for (const auto mask : masks) { // for all bitmasks
-                        const bool isSet((attrib.value & mask) == mask);
+    // create config with each individual supported attribute
+    for (const auto& attrib : attribs) {
+        const auto match = g_vaConfigAttribBitMasks.find(attrib.type);
+        if (match != g_vaConfigAttribBitMasks.end()) {
+            // it's a bitfield attribute
+            uint32_t bitfield(0);
+            const BitMasks& masks = match->second;
+            for (const auto mask : masks) { // for all bitmasks
+                const bool isSet((attrib.value & mask) == mask);
 
-                        std::ostringstream oss;
-                        oss << std::hex << "0x" << attrib.type
-                            << ":0x" << attrib.value
-                            << ":0x" << mask << ":" << isSet;
-                        SCOPED_TRACE(oss.str());
+                std::ostringstream oss;
+                oss << std::hex << "0x" << attrib.type
+                    << ":0x" << attrib.value
+                    << ":0x" << mask << ":" << isSet;
+                SCOPED_TRACE(oss.str());
 
-                        if (isSet) {
-                            // supported value
-                            bitfield |= mask;
-                            createConfig(profile, entrypoint,
-                                ConfigAttributes(
-                                    1, {type : attrib.type, value : mask }));
-                            destroyConfig();
-                        } else {
-                            // unsupported value
-                            const VAStatus expectation(
-                              (attrib.type == VAConfigAttribRTFormat) ?
-                                  VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT :
-                                  VA_STATUS_ERROR_INVALID_VALUE);
-                            createConfig(profile, entrypoint,
-                                ConfigAttributes(
-                                    1, {type : attrib.type, value : mask}),
-                                expectation);
-                            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
-                        }
-                    }
-                    // ensure we processed all supported values
-                    EXPECT_EQ(bitfield, attrib.value);
-                } else {
-                    // it's a standard attribute
-                    std::ostringstream oss;
-                    oss << std::hex << "0x" << attrib.type
-                        << ":0x" << attrib.value;
-                    SCOPED_TRACE(oss.str());
-
+                if (isSet) {
+                    // supported value
+                    bitfield |= mask;
                     createConfig(profile, entrypoint,
-                        ConfigAttributes(1, attrib));
+                        ConfigAttributes(
+                            1, {type : attrib.type, value : mask }));
                     destroyConfig();
+                } else {
+                    // unsupported value
+                    const VAStatus expectation(
+                      (attrib.type == VAConfigAttribRTFormat) ?
+                          VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT :
+                          VA_STATUS_ERROR_INVALID_VALUE);
+                    createConfig(profile, entrypoint,
+                        ConfigAttributes(
+                            1, {type : attrib.type, value : mask}),
+                        expectation);
+                    destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
                 }
             }
+            // ensure we processed all supported values
+            EXPECT_EQ(bitfield, attrib.value);
         } else {
-            // entrypoint is not supported by driver
-            createConfig(profile, entrypoint, ConfigAttributes(),
-                VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT);
-            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
+            // it's a standard attribute
+            std::ostringstream oss;
+            oss << std::hex << "0x" << attrib.type
+                << ":0x" << attrib.value;
+            SCOPED_TRACE(oss.str());
+
+            createConfig(profile, entrypoint, ConfigAttributes(1, attrib));
+            destroyConfig();
         }
-    } else {
-        // profile is not supported by this driver
-        createConfig(profile, entrypoint, ConfigAttributes(),
-            VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
-        destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
     }
 }
 
 TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
 {
-    const VAProfile& profile        = ::testing::get<0>(GetParam());
-    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
+    const VAStatus expectedStatus = getSupportStatus(profile, entrypoint);
 
-    doGetMaxValues();
-    doQueryConfigProfiles();
-
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            createConfig(profile, entrypoint);
-            destroyConfig();
-        } else {
-            // entrypoint is not supported by driver
-            createConfig(profile, entrypoint, ConfigAttributes(),
-                VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT);
-            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
-        }
-    } else {
-        // profile is not supported by this driver
-        createConfig(profile, entrypoint, ConfigAttributes(),
-            VA_STATUS_ERROR_UNSUPPORTED_PROFILE);
+    if (VA_STATUS_SUCCESS != expectedStatus) {
+        createConfig(profile, entrypoint, ConfigAttributes(), expectedStatus);
         destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
+        return;
     }
+
+    // profile and entrypoint are supported
+    createConfig(profile, entrypoint);
+    destroyConfig();
 }
 
 INSTANTIATE_TEST_CASE_P(
