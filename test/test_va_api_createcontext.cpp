@@ -24,29 +24,20 @@
 
 #include "test_va_api_fixture.h"
 
+#include <sstream>
+
 namespace VAAPI {
 
-class VAAPICreateContextToFail
-    : public VAAPIFixture
-{
-public:
-    VAAPICreateContextToFail()
-    {
-        m_vaDisplay = doInitialize();
-    }
-
-    virtual ~VAAPICreateContextToFail()
-    {
-        doTerminate();
-    }
-};
+typedef VAAPIFixture VAAPICreateContextToFail;
 
 TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
 {
     // There's no need to test all inputs for this to be a good test
     // as long as there's no config the expected error should be
     // returned
+    doInitialize();
     doCreateContext({1920, 1080}, VA_STATUS_ERROR_INVALID_CONFIG);
+    doTerminate();
 }
 
 class VAAPICreateContext
@@ -56,54 +47,59 @@ class VAAPICreateContext
 {
 public:
     VAAPICreateContext()
+        : profile(::testing::get<0>(GetParam()))
+        , entrypoint(::testing::get<1>(GetParam()))
+        , resolution(::testing::get<2>(GetParam()))
+    { }
+
+protected:
+    const VAProfile& profile;
+    const VAEntrypoint& entrypoint;
+    const Resolution& resolution;
+
+    virtual void SetUp()
     {
-        m_vaDisplay = doInitialize();
+        VAAPIFixture::SetUp();
+        doInitialize();
     }
 
-    virtual ~VAAPICreateContext()
+    virtual void TearDown()
     {
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 };
 
 TEST_P(VAAPICreateContext, CreateContext)
 {
-    const VAProfile& profile        = ::testing::get<0>(GetParam());
-    const VAEntrypoint& entrypoint  = ::testing::get<1>(GetParam());
-    const Resolution& res           = ::testing::get<2>(GetParam());
-
     // vaCreateContext requires a valid VAConfigID, vaCreateConfig requires a
     // supported profile and entrypoint
 
-    doGetMaxValues();
-    doQueryConfigProfiles();
-
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            createConfig(profile, entrypoint);
-
-            Resolution minRes, maxRes;
-            getMinMaxSurfaceResolution(minRes, maxRes);
-
-            if (not res.isWithin(minRes, maxRes)) {
-                doCreateContext(res, VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED);
-                doDestroyContext(VA_STATUS_ERROR_INVALID_CONTEXT);
-            } else {
-                doCreateContext(res);
-                doDestroyContext();
-            }
-
-            destroyConfig();
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
+    if (not isSupported(profile, entrypoint)) {
         doLogSkipTest(profile, entrypoint);
+        return;
     }
+
+    // profile and entrypoint are supported
+    createConfig(profile, entrypoint);
+
+    Resolution minRes, maxRes;
+    getMinMaxSurfaceResolution(minRes, maxRes);
+
+    std::ostringstream oss;
+    oss << "resolution: min=" << minRes << "; max=" << maxRes
+        << "; current=" << resolution;
+    SCOPED_TRACE(oss.str());
+
+    if (not resolution.isWithin(minRes, maxRes)) {
+        doCreateContext(resolution, VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED);
+        doDestroyContext(VA_STATUS_ERROR_INVALID_CONTEXT);
+    } else {
+        doCreateContext(resolution);
+        doDestroyContext();
+    }
+
+    destroyConfig();
 }
 
 INSTANTIATE_TEST_CASE_P(
