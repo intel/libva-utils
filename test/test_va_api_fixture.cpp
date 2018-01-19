@@ -43,7 +43,6 @@ VAAPIFixture::VAAPIFixture()
     , m_maxEntrypoints(0)
     , m_maxProfiles(0)
     , m_numProfiles(0)
-    , m_maxConfigAttributes(0)
     , m_configID(VA_INVALID_ID)
     , m_contextID(VA_INVALID_ID)
     , m_bufferID(VA_INVALID_ID)
@@ -117,18 +116,10 @@ void VAAPIFixture::doGetMaxEntrypoints()
         << m_maxEntrypoints << " entrypoints are reported, check setup";
 }
 
-void VAAPIFixture::doGetMaxNumConfigAttribs()
-{
-    m_maxConfigAttributes = vaMaxNumConfigAttributes(m_vaDisplay);
-
-    EXPECT_TRUE(m_maxConfigAttributes > 0);
-}
-
 void VAAPIFixture::doGetMaxValues()
 {
     doGetMaxProfiles();
     doGetMaxEntrypoints();
-    doGetMaxNumConfigAttribs();
 }
 
 void VAAPIFixture::doQueryConfigProfiles()
@@ -316,7 +307,11 @@ void VAAPIFixture::queryConfigAttributes(
     ASSERT_TRUE(attributes.empty())
         << "test logic error: attributes must be empty";
 
-    attributes.resize(m_maxConfigAttributes);
+    const int maxAttributes = vaMaxNumConfigAttributes(m_vaDisplay);
+
+    ASSERT_GT(maxAttributes, 0);
+
+    attributes.resize(maxAttributes);
 
     EXPECT_STATUS_EQ(
         expectedStatus,
@@ -326,6 +321,7 @@ void VAAPIFixture::queryConfigAttributes(
     if (expectedStatus == VA_STATUS_SUCCESS) {
         EXPECT_EQ(expectedProfile, actualProfile);
         EXPECT_EQ(expectedEntrypoint, actualEntrypoint);
+        ASSERT_LE(numAttributes, maxAttributes);
         ASSERT_GT(numAttributes, 0);
 
         attributes.resize(numAttributes);
