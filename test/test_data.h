@@ -165,11 +165,29 @@ static const BitMasks g_vaDecSliceModes = {
     VA_DEC_SLICE_MODE_NORMAL, VA_DEC_SLICE_MODE_BASE,
 };
 
+static const BitMasks g_vaEncPackedHeaders = {
+    VA_ENC_PACKED_HEADER_SEQUENCE, VA_ENC_PACKED_HEADER_PICTURE,
+    VA_ENC_PACKED_HEADER_SLICE, VA_ENC_PACKED_HEADER_MISC,
+    VA_ENC_PACKED_HEADER_RAW_DATA,
+};
+
+static const BitMasks g_vaEncInterlaced = {
+    VA_ENC_INTERLACED_FRAME, VA_ENC_INTERLACED_FIELD, VA_ENC_INTERLACED_MBAFF,
+    VA_ENC_INTERLACED_PAFF,
+};
+
+static const BitMasks g_vaFEIFunctionTypes = {
+    VA_FEI_FUNCTION_ENC, VA_FEI_FUNCTION_PAK, VA_FEI_FUNCTION_ENC_PAK,
+};
+
 static const std::map<VAConfigAttribType, const BitMasks&>
     g_vaConfigAttribBitMasks = {
         {VAConfigAttribRTFormat, g_vaRTFormats},
         {VAConfigAttribRateControl, g_vaRateControls},
         {VAConfigAttribDecSliceMode, g_vaDecSliceModes},
+        {VAConfigAttribEncPackedHeaders, g_vaEncPackedHeaders},
+        {VAConfigAttribEncInterlaced, g_vaEncInterlaced},
+        {VAConfigAttribFEIFunctionType, g_vaFEIFunctionTypes},
     };
 
 static const BitMasks g_vaSurfaceMemTypes = {
