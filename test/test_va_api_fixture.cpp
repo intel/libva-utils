@@ -40,9 +40,6 @@ VAAPIFixture::VAAPIFixture()
     , m_restoreDriverName(getenv("LIBVA_DRIVER_NAME"))
     , m_drmHandle(-1)
     , drmDevicePaths({ "/dev/dri/renderD128", "/dev/dri/card0" })
-    , m_maxEntrypoints(0)
-    , m_maxProfiles(0)
-    , m_numProfiles(0)
     , m_configID(VA_INVALID_ID)
     , m_contextID(VA_INVALID_ID)
     , m_bufferID(VA_INVALID_ID)
@@ -100,75 +97,6 @@ VADisplay VAAPIFixture::doInitialize()
     }
 
     return vaDisplay;
-}
-
-void VAAPIFixture::doGetMaxProfiles()
-{
-    m_maxProfiles = vaMaxNumProfiles(m_vaDisplay);
-    EXPECT_TRUE(m_maxProfiles > 0) << m_maxProfiles
-                                   << " profiles are reported, check setup";
-}
-
-void VAAPIFixture::doGetMaxEntrypoints()
-{
-    m_maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
-    EXPECT_TRUE(m_maxEntrypoints > 0)
-        << m_maxEntrypoints << " entrypoints are reported, check setup";
-}
-
-void VAAPIFixture::doGetMaxValues()
-{
-    doGetMaxProfiles();
-    doGetMaxEntrypoints();
-}
-
-void VAAPIFixture::doQueryConfigProfiles()
-{
-    m_profileList.resize(m_maxProfiles);
-
-    ASSERT_STATUS(
-        vaQueryConfigProfiles(m_vaDisplay, &m_profileList[0], &m_numProfiles));
-
-    // at least one profile should be supported for tests to be executed
-    ASSERT_TRUE(m_numProfiles > 0);
-
-    m_profileList.resize(m_numProfiles);
-}
-
-const Profiles& VAAPIFixture::getSupportedProfileList() const
-{
-    return m_profileList;
-}
-
-const Entrypoints& VAAPIFixture::getSupportedEntrypointList() const
-{
-    return m_entrypointList;
-}
-
-bool VAAPIFixture::doFindProfileInList(const VAProfile& profile) const
-{
-    return std::find(m_profileList.begin(), m_profileList.end(), profile)
-           != m_profileList.end();
-}
-
-void VAAPIFixture::doQueryConfigEntrypoints(const VAProfile& profile)
-{
-    int numEntrypoints = 0;
-
-    m_entrypointList.resize(m_maxEntrypoints);
-    ASSERT_STATUS(vaQueryConfigEntrypoints(
-        m_vaDisplay, profile, &m_entrypointList[0], &numEntrypoints));
-
-    EXPECT_TRUE(numEntrypoints > 0);
-
-    m_entrypointList.resize(numEntrypoints);
-}
-
-bool VAAPIFixture::doFindEntrypointInList(const VAEntrypoint& entrypoint) const
-{
-    return std::find(m_entrypointList.begin(), m_entrypointList.end(),
-                     entrypoint)
-           != m_entrypointList.end();
 }
 
 void VAAPIFixture::queryConfigProfiles(Profiles& profiles) const
