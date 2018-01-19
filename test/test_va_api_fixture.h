@@ -62,6 +62,12 @@ public:
 
     void doLogSkipTest(const VAProfile&, const VAEntrypoint&) const;
 
+    void queryConfigProfiles(Profiles&) const;
+    void queryConfigEntrypoints(const VAProfile&, Entrypoints&,
+        const VAStatus& = VA_STATUS_SUCCESS) const;
+    VAStatus getSupportStatus(const VAProfile&, const VAEntrypoint&) const;
+    bool isSupported(const VAProfile&, const VAEntrypoint&) const;
+
     void getConfigAttributes(const VAProfile&, const VAEntrypoint&,
         ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
     void createConfig(const VAProfile&, const VAEntrypoint&,
