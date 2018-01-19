@@ -45,7 +45,6 @@ public:
 
     void doGetMaxProfiles();
     void doGetMaxEntrypoints();
-    void doGetMaxNumConfigAttribs();
     void doGetMaxValues();
     void doQueryConfigProfiles();
     const Profiles& getSupportedProfileList() const;
@@ -115,7 +114,6 @@ private:
     int m_maxEntrypoints;
     int m_maxProfiles;
     int m_numProfiles;
-    int m_maxConfigAttributes;
 
     VAConfigID m_configID;
     VAContextID m_contextID;
