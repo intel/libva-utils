@@ -180,6 +180,74 @@ bool VAAPIFixture::doFindEntrypointInList(const VAEntrypoint& entrypoint) const
            != m_entrypointList.end();
 }
 
+void VAAPIFixture::queryConfigProfiles(Profiles& profiles) const
+{
+    const int maxProfiles = vaMaxNumProfiles(m_vaDisplay);
+    ASSERT_GT(maxProfiles, 0);
+    profiles.resize(maxProfiles);
+
+    int numProfiles(0);
+    EXPECT_STATUS(
+        vaQueryConfigProfiles(m_vaDisplay, profiles.data(), &numProfiles));
+
+    if (not HasFailure()) {
+        ASSERT_LE(numProfiles, maxProfiles);
+        ASSERT_GT(numProfiles, 0);
+        profiles.resize(numProfiles);
+    } else {
+        profiles.clear();
+    }
+}
+
+void VAAPIFixture::queryConfigEntrypoints(const VAProfile& profile,
+    Entrypoints& entrypoints, const VAStatus& expectation) const
+{
+    const int maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
+    ASSERT_GT(maxEntrypoints, 0);
+    entrypoints.resize(maxEntrypoints);
+
+    int numEntrypoints(0);
+    EXPECT_STATUS_EQ(
+        expectation,
+        vaQueryConfigEntrypoints(m_vaDisplay, profile, entrypoints.data(),
+            &numEntrypoints));
+
+    if ((VA_STATUS_SUCCESS == expectation) and not HasFailure()) {
+        ASSERT_LE(numEntrypoints, maxEntrypoints);
+        ASSERT_GT(numEntrypoints, 0);
+        entrypoints.resize(numEntrypoints);
+    } else {
+        entrypoints.clear();
+    }
+}
+
+VAStatus VAAPIFixture::getSupportStatus(const VAProfile& profile,
+    const VAEntrypoint& entrypoint) const
+{
+    Profiles profiles;
+    queryConfigProfiles(profiles);
+
+    const auto pBegin(profiles.begin());
+    const auto pEnd(profiles.end());
+    if (std::find(pBegin, pEnd, profile) != pEnd) {
+        Entrypoints entrypoints;
+        queryConfigEntrypoints(profile, entrypoints);
+
+        const auto eBegin(entrypoints.begin());
+        const auto eEnd(entrypoints.end());
+        return (std::find(eBegin, eEnd, entrypoint) != eEnd) ?
+            VA_STATUS_SUCCESS : VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+    }
+
+    return VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
+}
+
+bool VAAPIFixture::isSupported(const VAProfile& profile,
+    const VAEntrypoint& entrypoint) const
+{
+    return VA_STATUS_SUCCESS == getSupportStatus(profile, entrypoint);
+}
+
 void VAAPIFixture::getConfigAttributes(const VAProfile& profile,
     const VAEntrypoint& entrypoint, ConfigAttributes& attribs,
     const VAStatus& expectation) const
