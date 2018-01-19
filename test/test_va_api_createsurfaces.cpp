@@ -49,16 +49,13 @@ protected:
     virtual void SetUp()
     {
         VAAPIFixture::SetUp();
-
         doInitialize();
-        doGetMaxValues();
     }
 
     virtual void TearDown()
     {
-        VAAPIFixture::TearDown();
-
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 
     void testWithSupportedConfigAttributes(
@@ -157,45 +154,30 @@ public:
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
 {
+    if (not isSupported(profile, entrypoint)) {
+        doLogSkipTest(profile, entrypoint);
+        return;
+    }
+
     const auto test = [&](const ConfigAttributes& ca) {
         SurfaceAttributes attribs;
         querySurfaceAttributes(attribs);
     };
 
-    doQueryConfigProfiles();
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            testWithSupportedConfigAttributes(test);
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
-        doLogSkipTest(profile, entrypoint);
-    }
+    testWithSupportedConfigAttributes(test);
 }
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
 {
-    doQueryConfigProfiles();
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            createConfig(profile, entrypoint);
-            SurfaceAttributes attribs;
-            querySurfaceAttributes(attribs);
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
+    if (not isSupported(profile, entrypoint)) {
         doLogSkipTest(profile, entrypoint);
+        return;
     }
+
+    createConfig(profile, entrypoint);
+    SurfaceAttributes attribs;
+    querySurfaceAttributes(attribs);
+    destroyConfig();
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -225,6 +207,11 @@ protected:
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
 {
+    if (not isSupported(profile, entrypoint)) {
+        doLogSkipTest(profile, entrypoint);
+        return;
+    }
+
     // VA_RT_FORMAT_YUV420 is considered the universal supported format by
     // drivers
     unsigned format = VA_RT_FORMAT_YUV420;
@@ -248,76 +235,39 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
         format = VA_RT_FORMAT_YUV420;
     };
 
-    doQueryConfigProfiles();
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            testWithSupportedConfigAttributes(test);
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
-        doLogSkipTest(profile, entrypoint);
-    }
+    testWithSupportedConfigAttributes(test);
 }
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 {
+    if (not isSupported(profile, entrypoint)) {
+        doLogSkipTest(profile, entrypoint);
+        return;
+    }
+
     const auto test = [&](const SurfaceAttributes& attribs) {
         Surfaces surfaces(10, VA_INVALID_SURFACE);
         createSurfaces(surfaces, VA_RT_FORMAT_YUV420, resolution, attribs);
         destroySurfaces(surfaces);
     };
 
-    doQueryConfigProfiles();
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            createConfig(profile, entrypoint);
-            testWithSupportedSurfaceAttributes(test);
-            destroyConfig();
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
-        doLogSkipTest(profile, entrypoint);
-    }
+    createConfig(profile, entrypoint);
+    testWithSupportedSurfaceAttributes(test);
+    destroyConfig();
 }
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 {
-    doQueryConfigProfiles();
-    if (doFindProfileInList(profile)) {
-        doQueryConfigEntrypoints(profile);
-        if (doFindEntrypointInList(entrypoint)) {
-            // profile and entrypoint are supported
-            createConfig(profile, entrypoint);
-
-            Surfaces surfaces(10, VA_INVALID_SURFACE);
-            Resolution minRes, maxRes;
-            getMinMaxSurfaceResolution(minRes, maxRes);
-            if (resolution.isWithin(minRes, maxRes)) {
-                createSurfaces(surfaces, VA_RT_FORMAT_YUV420, resolution);
-                destroySurfaces(surfaces);
-            } else {
-                // TODO: test createsurfaces with invalid resolution
-            }
-
-            destroyConfig();
-        } else {
-            // entrypoint not supported
-            doLogSkipTest(profile, entrypoint);
-        }
-    } else {
-        // profile not supported
+    if (not isSupported(profile, entrypoint)) {
         doLogSkipTest(profile, entrypoint);
+        return;
     }
+
+    createConfig(profile, entrypoint);
+    Surfaces surfaces(10, VA_INVALID_SURFACE);
+    createSurfaces(surfaces, VA_RT_FORMAT_YUV420, resolution);
+    destroySurfaces(surfaces);
+    destroyConfig();
 }
 
 INSTANTIATE_TEST_CASE_P(
