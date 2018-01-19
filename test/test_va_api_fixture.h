@@ -43,16 +43,6 @@ public:
     VADisplay doInitialize();
     void doTerminate();
 
-    void doGetMaxProfiles();
-    void doGetMaxEntrypoints();
-    void doGetMaxValues();
-    void doQueryConfigProfiles();
-    const Profiles& getSupportedProfileList() const;
-    bool doFindProfileInList(const VAProfile&) const;
-    void doQueryConfigEntrypoints(const VAProfile&);
-    const Entrypoints& getSupportedEntrypointList() const;
-    bool doFindEntrypointInList(const VAEntrypoint&) const;
-
     void doCreateContext(const Resolution&,
         const VAStatus& expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(const VAStatus& expectation = VA_STATUS_SUCCESS);
@@ -111,16 +101,9 @@ private:
     int m_drmHandle;
     const std::string drmDevicePaths[2];
 
-    int m_maxEntrypoints;
-    int m_maxProfiles;
-    int m_numProfiles;
-
     VAConfigID m_configID;
     VAContextID m_contextID;
     VABufferID m_bufferID;
-
-    Profiles m_profileList;
-    Entrypoints m_entrypointList;
 };
 
 } // namespace VAAPI
