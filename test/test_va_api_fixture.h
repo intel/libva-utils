@@ -46,8 +46,6 @@ public:
     void doCreateContext(const Resolution&,
         const VAStatus& expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(const VAStatus& expectation = VA_STATUS_SUCCESS);
-    void doCreateBuffer(const VABufferType&);
-    void doDestroyBuffer();
 
     void doLogSkipTest(const VAProfile&, const VAEntrypoint&) const;
 
@@ -72,6 +70,10 @@ public:
         const SurfaceAttributes& = SurfaceAttributes(),
         const VAStatus& = VA_STATUS_SUCCESS) const;
     void destroySurfaces(Surfaces&) const;
+
+    void createBuffer(const VABufferType&, const size_t,
+        const VAStatus& = VA_STATUS_SUCCESS);
+    void destroyBuffer(const VAStatus& = VA_STATUS_SUCCESS);
 
 protected:
     // You can remove any or all of the following functions if its body
