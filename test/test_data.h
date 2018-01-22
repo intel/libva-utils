@@ -60,6 +60,49 @@ static const Profiles g_vaProfiles = {
     VAProfileVP9Profile3,
 };
 
+static const Profiles g_vaNoneProfiles = {
+    VAProfileNone,
+};
+
+static const Profiles g_vaMPEG2Profiles = {
+    VAProfileMPEG2Main, VAProfileMPEG2Simple,
+};
+
+static const Profiles g_vaMPEG4Profiles = {
+    VAProfileMPEG4Simple, VAProfileMPEG4Simple, VAProfileMPEG4AdvancedSimple,
+    VAProfileMPEG4Main,
+};
+
+static const Profiles g_vaH263Profiles = {
+    VAProfileH263Baseline,
+};
+
+static const Profiles g_vaH264Profiles = {
+    VAProfileH264Main, VAProfileH264High, VAProfileH264ConstrainedBaseline,
+    VAProfileH264MultiviewHigh, VAProfileH264StereoHigh,
+};
+
+static const Profiles g_vaVC1Profiles = {
+    VAProfileVC1Simple, VAProfileVC1Main, VAProfileVC1Advanced,
+};
+
+static const Profiles g_vaJPEGProfiles = {
+    VAProfileJPEGBaseline,
+};
+
+static const Profiles g_vaVP8Profiles = {
+    VAProfileVP8Version0_3,
+};
+
+static const Profiles g_vaHEVCProfiles = {
+    VAProfileHEVCMain, VAProfileHEVCMain10,
+};
+
+static const Profiles g_vaVP9Profiles = {
+    VAProfileVP9Profile0, VAProfileVP9Profile1, VAProfileVP9Profile2,
+    VAProfileVP9Profile3,
+};
+
 static const Entrypoints g_vaEntrypoints = {
     VAEntrypointVLD,
     VAEntrypointIZZ,
