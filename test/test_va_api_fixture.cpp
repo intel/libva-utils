@@ -398,6 +398,24 @@ void VAAPIFixture::destroySurfaces(Surfaces& surfaces) const
     }
 }
 
+void VAAPIFixture::createBuffer(const VABufferType& bufferType,
+    const size_t bufferSize, const VAStatus& expectation)
+{
+    ASSERT_INVALID_ID(m_bufferID)
+        << "test logic error: did you forget to call destroyBuffer?";
+
+    EXPECT_STATUS_EQ(
+        expectation,
+        vaCreateBuffer(m_vaDisplay, m_contextID, bufferType, bufferSize,
+            1, NULL, &m_bufferID));
+}
+
+void VAAPIFixture::destroyBuffer(const VAStatus& expectation)
+{
+    EXPECT_STATUS_EQ(expectation, vaDestroyBuffer(m_vaDisplay, m_bufferID));
+    m_bufferID = VA_INVALID_ID;
+}
+
 void VAAPIFixture::doCreateContext(const Resolution& resolution,
     const VAStatus& expectation)
 {
@@ -411,17 +429,6 @@ void VAAPIFixture::doCreateContext(const Resolution& resolution,
 void VAAPIFixture::doDestroyContext(const VAStatus& expectation)
 {
     ASSERT_STATUS_EQ(expectation, vaDestroyContext(m_vaDisplay, m_contextID));
-}
-
-void VAAPIFixture::doCreateBuffer(const VABufferType& bufferType)
-{
-    ASSERT_STATUS(vaCreateBuffer(m_vaDisplay, m_contextID, bufferType,
-                                 sizeof(bufferType), 1, NULL, &m_bufferID));
-}
-
-void VAAPIFixture::doDestroyBuffer()
-{
-    ASSERT_STATUS(vaDestroyBuffer(m_vaDisplay, m_bufferID));
 }
 
 void VAAPIFixture::doTerminate()
