@@ -47,8 +47,6 @@ public:
         const VAStatus& expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(const VAStatus& expectation = VA_STATUS_SUCCESS);
 
-    void doLogSkipTest(const VAProfile&, const VAEntrypoint&) const;
-
     void queryConfigProfiles(Profiles&) const;
     void queryConfigEntrypoints(const VAProfile&, Entrypoints&,
         const VAStatus& = VA_STATUS_SUCCESS) const;
@@ -74,6 +72,9 @@ public:
     void createBuffer(const VABufferType&, const size_t,
         const VAStatus& = VA_STATUS_SUCCESS);
     void destroyBuffer(const VAStatus& = VA_STATUS_SUCCESS);
+
+    void skipTest(const std::string& message);
+    void skipTest(const VAProfile&, const VAEntrypoint&);
 
 protected:
     // You can remove any or all of the following functions if its body
@@ -106,6 +107,8 @@ private:
     VAConfigID m_configID;
     VAContextID m_contextID;
     VABufferID m_bufferID;
+
+    std::string m_skip;
 };
 
 } // namespace VAAPI

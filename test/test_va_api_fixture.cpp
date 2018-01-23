@@ -43,6 +43,7 @@ VAAPIFixture::VAAPIFixture()
     , m_configID(VA_INVALID_ID)
     , m_contextID(VA_INVALID_ID)
     , m_bufferID(VA_INVALID_ID)
+    , m_skip("")
 {
     return;
 }
@@ -59,6 +60,15 @@ VAAPIFixture::~VAAPIFixture()
     unsetenv("LIBVA_DRIVER_NAME");
     if (m_restoreDriverName)
         setenv("LIBVA_DRIVER_NAME", m_restoreDriverName, 1);
+
+    if (not m_skip.empty()) {
+        EXPECT_FALSE(HasFailure())
+            << "skip message is set, but something failed";
+        if (not HasFailure()) {
+            RecordProperty("skipped", true);
+            std::cout << "[ SKIPPED ] " << m_skip << std::endl;
+        }
+    }
 }
 
 VADisplay VAAPIFixture::getDisplay()
@@ -436,13 +446,22 @@ void VAAPIFixture::doTerminate()
     EXPECT_STATUS(vaTerminate(m_vaDisplay));
 }
 
-void VAAPIFixture::doLogSkipTest(const VAProfile& profile,
-    const VAEntrypoint& entrypoint) const
+void VAAPIFixture::skipTest(const std::string& message)
 {
-    RecordProperty("skipped", true);
-    std::cout << "[ SKIPPED ]"
-              << " " << profile << " / " << entrypoint
-              << " not supported on this hardware" << std::endl;
+    ASSERT_FALSE(message.empty())
+        << "test logic error: skip message cannot be empty";
+    ASSERT_TRUE(m_skip.empty())
+        << "test logic error: test already marked as skipped";
+
+    m_skip = message;
+}
+
+void VAAPIFixture::skipTest(const VAProfile& profile,
+    const VAEntrypoint& entrypoint)
+{
+    std::ostringstream oss;
+    oss << profile << " / " << entrypoint << " not supported on this hardware";
+    skipTest(oss.str());
 }
 
 TEST_F(VAAPIFixture, getDisplay)

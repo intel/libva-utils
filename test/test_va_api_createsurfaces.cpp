@@ -155,7 +155,7 @@ public:
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
 {
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 
@@ -170,7 +170,7 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
 {
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 
@@ -208,7 +208,7 @@ protected:
 TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
 {
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 
@@ -241,7 +241,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 {
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 
@@ -259,7 +259,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 {
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 

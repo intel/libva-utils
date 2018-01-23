@@ -107,7 +107,7 @@ TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
     // vaGetConfigAttributes.
 
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 

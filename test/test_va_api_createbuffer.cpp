@@ -177,7 +177,7 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     // them to a VAConfigID.
 
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 
