@@ -76,7 +76,7 @@ TEST_P(VAAPICreateContext, CreateContext)
     // supported profile and entrypoint
 
     if (not isSupported(profile, entrypoint)) {
-        doLogSkipTest(profile, entrypoint);
+        skipTest(profile, entrypoint);
         return;
     }
 
