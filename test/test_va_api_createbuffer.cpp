@@ -154,6 +154,7 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     const VAProfile& profile = input.config.first;
     const VAEntrypoint& entrypoint = input.config.second;
     const VABufferType bufferType = input.bufferType;
+    Resolution minRes, maxRes;
 
     doGetMaxValues();
     doQueryConfigProfiles();
@@ -165,9 +166,10 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
             createConfig(profile, entrypoint);
 
             // vaCreateContext input requires resolution, since this test
-            // doesn't create surfaces, passing 1x1 resolution should provide
+            // doesn't create surfaces, passing min resolution should provide
             // the desired result.
-            doCreateContext(Resolution(1, 1));
+            getMinMaxSurfaceResolution(minRes,maxRes);
+            doCreateContext(minRes);
 
             doCreateBuffer(bufferType);
             doDestroyBuffer();
