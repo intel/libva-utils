@@ -93,8 +93,8 @@ int main(int argc, const char* argv[])
   const char *name = strrchr(argv[0], '/'); 
   VAProfile profile, *profile_list = NULL;
   int num_profiles, max_num_profiles, i;
-  VAEntrypoint entrypoint, entrypoints[10];
-  int num_entrypoint;
+  VAEntrypoint entrypoint, *entrypoints = NULL;
+  int num_entrypoint = 0;
   int ret_val = 0;
   
   if (name)
@@ -119,6 +119,14 @@ int main(int argc, const char* argv[])
 
   driver = vaQueryVendorString(va_dpy);
   printf("%s: Driver version: %s\n", name, driver ? driver : "<unknown>");
+
+  num_entrypoint = vaMaxNumEntrypoints (va_dpy);
+  entrypoints = malloc (num_entrypoint * sizeof (VAEntrypoint));
+  if (!entrypoints) {
+      printf ("Failed to allocate memory for entrypoint list\n");
+      ret_val = -1;
+      goto error;
+  }
 
   printf("%s: Supported profile and entrypoints\n", name);
   max_num_profiles = vaMaxNumProfiles(va_dpy);
@@ -150,6 +158,7 @@ int main(int argc, const char* argv[])
   }
   
 error:
+  free(entrypoints);
   free(profile_list);
   vaTerminate(va_dpy);
   va_close_display(va_dpy);
