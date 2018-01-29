@@ -29,15 +29,18 @@ namespace VAAPI {
 class VAAPIGetMaxValues
     : public VAAPIFixture
 {
-public:
-    VAAPIGetMaxValues()
+protected:
+    virtual void SetUp()
     {
-        m_vaDisplay = doInitialize();
+        VAAPIFixture::SetUp();
+        doInitialize();
+        ASSERT_FALSE(HasFailure());
     }
 
-    virtual ~VAAPIGetMaxValues()
+    virtual void TearDown()
     {
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 };
 

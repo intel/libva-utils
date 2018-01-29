@@ -30,15 +30,18 @@ class VAAPIQueryConfig
     : public VAAPIFixture
     , public ::testing::WithParamInterface<VAProfile>
 {
-public:
-    VAAPIQueryConfig()
+protected:
+    virtual void SetUp()
     {
-        m_vaDisplay = doInitialize();
+        VAAPIFixture::SetUp();
+        doInitialize();
+        ASSERT_FALSE(HasFailure());
     }
 
-    virtual ~VAAPIQueryConfig()
+    virtual void TearDown()
     {
         doTerminate();
+        VAAPIFixture::TearDown();
     }
 };
 

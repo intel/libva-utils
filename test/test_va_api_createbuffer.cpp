@@ -55,6 +55,7 @@ protected:
     {
         VAAPIFixture::SetUp();
         doInitialize();
+        ASSERT_FALSE(HasFailure());
     }
 
     virtual void TearDown()
