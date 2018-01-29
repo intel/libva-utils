@@ -101,7 +101,7 @@ VADisplay VAAPIFixture::doInitialize()
     }
 
     status = vaInitialize(vaDisplay, &majorVersion, &minorVersion);
-    EXPECT_STATUS(status);
+    EXPECT_STATUS(status) << "failed to initialize vaapi";
     if (status != VA_STATUS_SUCCESS) {
         return NULL;
     }

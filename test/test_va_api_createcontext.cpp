@@ -36,6 +36,7 @@ TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
     // as long as there's no config the expected error should be
     // returned
     doInitialize();
+    ASSERT_FALSE(HasFailure());
     doCreateContext({1920, 1080}, VA_STATUS_ERROR_INVALID_CONFIG);
     doTerminate();
 }
@@ -61,6 +62,7 @@ protected:
     {
         VAAPIFixture::SetUp();
         doInitialize();
+        ASSERT_FALSE(HasFailure());
     }
 
     virtual void TearDown()
