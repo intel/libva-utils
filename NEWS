@@ -1,5 +1,12 @@
-libva-utils NEWS -- summary of changes.  2017-10-21
-Copyright (C) 2009-2017 Intel Corporation
+libva-utils NEWS -- summary of changes.  2018-02-xx
+Copyright (C) 2009-2018 Intel Corporation
+
+Version 2.1.0 - DD.Feb.2018
+* Bump version to 2.1.0
+* Refine gtest conformance cases
+* vp9enc: add support low power mode
+* vavpp: add support for RGBA/RGBX surface
+* vainfo: add support new profile/entrypoint pairs
 
 Version 2.0.0 - 21.Oct.2017
 * Bump version to 2.0.0
