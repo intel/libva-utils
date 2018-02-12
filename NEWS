@@ -1,7 +1,7 @@
-libva-utils NEWS -- summary of changes.  2018-02-xx
+libva-utils NEWS -- summary of changes.  2018-02-12
 Copyright (C) 2009-2018 Intel Corporation
 
-Version 2.1.0 - DD.Feb.2018
+Version 2.1.0 - 12.Feb.2018
 * Bump version to 2.1.0
 * Refine gtest conformance cases
 * vp9enc: add support low power mode
