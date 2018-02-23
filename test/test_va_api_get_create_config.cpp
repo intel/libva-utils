@@ -136,6 +136,37 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
     destroyConfig();
 }
 
+TEST_P(VAAPIGetCreateConfig, CreateConfigPackedHeaders)
+{
+    if (not isSupported(profile, entrypoint)) {
+        skipTest(profile, entrypoint);
+        return;
+    }
+
+    ConfigAttributes packedHeaders{{.type = VAConfigAttribEncPackedHeaders}};
+    getConfigAttributes(profile, entrypoint, packedHeaders);
+
+    for (uint32_t v(0x00); v < 0xff; ++v) {
+        ConfigAttributes attribs = {{
+            .type = VAConfigAttribEncPackedHeaders,
+            .value = v
+        }};
+        if ((VA_ATTRIB_NOT_SUPPORTED == packedHeaders.front().value)
+            || (v & ~packedHeaders.front().value)) {
+            // Creating a config should fail if attribute is not supported
+            // or for values that are not in the set of supported values.
+            createConfig(
+                profile, entrypoint, attribs, VA_STATUS_ERROR_INVALID_VALUE);
+            destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
+        } else {
+            // Creating a config should succeed for any value within the set of
+            // supported values, including 0x0 (i.e. VA_ENC_PACKED_HEADER_NONE).
+            createConfig(profile, entrypoint, attribs, VA_STATUS_SUCCESS);
+            destroyConfig(VA_STATUS_SUCCESS);
+        }
+    }
+}
+
 INSTANTIATE_TEST_CASE_P(
     GetCreateConfig, VAAPIGetCreateConfig,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
