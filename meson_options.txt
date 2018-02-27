@@ -1,0 +1,15 @@
+option('drm',
+       type : 'combo',
+       value : 'auto',
+       choices: [ 'auto', 'true', 'false' ])
+option('x11',
+       type : 'combo',
+       value : 'auto',
+       choices: [ 'auto', 'true', 'false' ])
+option('wayland',
+       type : 'combo',
+       value : 'auto',
+       choices: [ 'auto', 'true', 'false' ])
+option('tests',
+       type : 'boolean',
+       value : false)
