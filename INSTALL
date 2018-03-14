@@ -1,4 +1,4 @@
-[![Stories in Ready](https://badge.waffle.io/01org/libva-utils.png?label=ready&title=Ready)](https://waffle.io/01org/libva-utils)
+[![Stories in Ready](https://badge.waffle.io/intel/libva-utils.png?label=ready&title=Ready)](https://waffle.io/intel/libva-utils)
   libva-utils
   Collection of tests to exercise VA-API as provided
   by the libva project.  VA-API requires a driver implementation
@@ -22,7 +22,7 @@ operate.
 
 
 Project is hosted on github:
-https://github.com/01org/libva-utils
+https://github.com/intel/libva-utils
 
 Codecs
 ------
@@ -101,4 +101,4 @@ Reporting Bugs / Submit change patches
 
 See the contributing guide:
 
-https://github.com/01org/libva-utils/blob/master/CONTRIBUTING.md
+https://github.com/intel/libva-utils/blob/master/CONTRIBUTING.md
