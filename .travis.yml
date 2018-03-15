@@ -42,14 +42,14 @@ before_install:
   - sudo apt-get install -y libxfixes-dev
 
 install:
-  - git clone https://github.com/01org/libva.git
+  - git clone https://github.com/intel/libva.git
   - (cd libva && ./autogen.sh && ./configure --prefix=/usr && sudo make install)
 
 
 addons:
   coverity_scan:
     project:
-      name: "01org/libva-utils"
+      name: "intel/libva-utils"
       description: "Build submitted via Travis CI"
     notification_email: intel-media-security@lists.01.org 
     build_command_prepend: "./autogen.sh; ./configure --prefix=/usr"
