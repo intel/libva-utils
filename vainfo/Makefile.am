@@ -26,6 +26,8 @@ vainfo_cflags = \
 	-I$(top_srcdir)/common \
 	$(LIBVA_CFLAGS) \
 	-DLIBVA_VERSION_S="\"$(LIBVA_VERSION)\"" \
+	-Wall \
+	-fstack-protector \
 	$(NULL)
 
 vainfo_libs = \

@@ -215,7 +215,7 @@ construct_nv12_mask_surface(VASurfaceID surface_id,
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_dst, *u_dst;
     uint32_t row, col;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -226,7 +226,6 @@ construct_nv12_mask_surface(VASurfaceID surface_id,
 
     y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
     u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
-    v_dst = u_dst;
 
     /* fill Y plane, the luma values of some pixels is in the range of min_luma~max_luma,
      * and others are out side of it, in luma key blending case, the pixels with Y value
@@ -265,7 +264,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
     unsigned char *y_src, *u_src, *v_src;
     unsigned char *y_dst, *u_dst, *v_dst;
     void *surface_p = NULL;
-    uint32_t frame_size, i, row, col;
+    uint32_t frame_size, row, col;
     size_t n_items;
     unsigned char * newImageBuffer = NULL;
 
@@ -406,24 +405,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         } while (n_items != 1);
 
         y_src = newImageBuffer;
-
-        if (g_src_file_fourcc == VA_FOURCC_I010) {
-            u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
-            v_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 2;
-        } else if (g_src_file_fourcc == VA_FOURCC_P010) {
-            u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
-            v_src = u_src;
-        }
-
         y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
-
-        if (surface_image.format.fourcc == VA_FOURCC_I010) {
-            u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
-            v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if (surface_image.format.fourcc == VA_FOURCC_P010) {
-            u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
-            v_dst = u_dst;
-        }
 
         /* plane 0, directly copy */
         for (row = 0; row < surface_image.height; row++) {
@@ -435,6 +417,12 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         /* UV plane */
         if (surface_image.format.fourcc == VA_FOURCC_I010) {
             assert(g_src_file_fourcc == VA_FOURCC_I010);
+
+            u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
+            v_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 2;
+
+            u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
+            v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
 
             for (row = 0; row < surface_image.height / 2; row++) {
                 memcpy(u_dst, u_src, surface_image.width);
@@ -448,6 +436,12 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             }
         } else if (surface_image.format.fourcc == VA_FOURCC_P010){
             assert(g_src_file_fourcc == VA_FOURCC_P010);
+
+            u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
+            v_src = u_src;
+
+            u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
+            v_dst = u_dst;
 
             for (row = 0; row < surface_image.height / 2; row++) {
                 memcpy(u_dst, u_src, surface_image.width * 2);
@@ -506,13 +500,12 @@ store_yuv_surface_to_yv12_file(FILE *fp,
                                VASurfaceID surface_id)
 {
     VAStatus va_status;
-    VAImageFormat image_format;
     VAImage surface_image;
     void *surface_p = NULL;
     unsigned char *y_src, *u_src, *v_src;
     unsigned char *y_dst, *u_dst, *v_dst;
-    uint32_t frame_size, row, col;
-    int32_t  ret, n_items;
+    uint32_t row, col;
+    int32_t n_items;
     unsigned char * newImageBuffer = NULL;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -613,13 +606,12 @@ store_yuv_surface_to_i420_file(FILE *fp,
                                VASurfaceID surface_id)
 {
     VAStatus va_status;
-    VAImageFormat image_format;
     VAImage surface_image;
     void *surface_p = NULL;
     unsigned char *y_src, *u_src, *v_src;
     unsigned char *y_dst, *u_dst, *v_dst;
-    uint32_t frame_size, row, col;
-    int32_t  ret, n_items;
+    uint32_t row, col;
+    int32_t n_items;
     unsigned char * newImageBuffer = NULL;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -720,13 +712,12 @@ store_yuv_surface_to_nv12_file(FILE *fp,
                                VASurfaceID surface_id)
 {
     VAStatus va_status;
-    VAImageFormat image_format;
     VAImage surface_image;
     void *surface_p = NULL;
     unsigned char *y_src, *u_src, *v_src;
     unsigned char *y_dst, *u_dst, *v_dst;
-    uint32_t frame_size, row, col;
-    int32_t  ret, n_items;
+    uint32_t row, col;
+    int32_t n_items;
     unsigned char * newImageBuffer = NULL;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -741,7 +732,6 @@ store_yuv_surface_to_nv12_file(FILE *fp,
         surface_image.format.fourcc == VA_FOURCC_NV12){
 
         uint32_t y_size = surface_image.width * surface_image.height;
-        uint32_t u_size = y_size/4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
         assert(newImageBuffer);
@@ -823,13 +813,12 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
                                         VASurfaceID surface_id)
 {
     VAStatus va_status;
-    VAImageFormat image_format;
     VAImage surface_image;
     void *surface_p = NULL;
     unsigned char *y_src;
     unsigned char *y_dst;
-    uint32_t frame_size, row, col;
-    int32_t  ret, n_items;
+    uint32_t row;
+    int32_t n_items;
     unsigned char * newImageBuffer = NULL;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -884,13 +873,12 @@ static VAStatus
 store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
 {
     VAStatus va_status;
-    VAImageFormat image_format;
     VAImage surface_image;
     void *surface_p = NULL;
     unsigned char *y_src, *u_src, *v_src;
     unsigned char *y_dst, *u_dst, *v_dst;
-    uint32_t frame_size, row, col;
-    int32_t  ret, n_items;
+    uint32_t row;
+    int32_t n_items;
     unsigned char * newImageBuffer = NULL;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -971,13 +959,12 @@ static VAStatus
 store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
 {
     VAStatus va_status;
-    VAImageFormat image_format;
     VAImage surface_image;
     void *surface_p = NULL;
     unsigned char *y_src;
     unsigned char *y_dst;
-    uint32_t frame_size, row, col;
-    int32_t  ret, n_items;
+    uint32_t frame_size, row;
+    int32_t n_items;
     unsigned char * newImageBuffer = NULL;
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -1453,6 +1440,7 @@ vpp_context_create()
 {
     VAStatus va_status = VA_STATUS_SUCCESS;
     uint32_t i;
+    int32_t j;
 
     /* VA driver initialization */
     va_dpy = va_open_display();
@@ -1470,12 +1458,12 @@ vpp_context_create()
                                          &num_entrypoints);
     CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
-    for	(i = 0; i < num_entrypoints; i++) {
-        if (entrypoints[i] == VAEntrypointVideoProc)
+    for (j = 0; j < num_entrypoints; j++) {
+        if (entrypoints[j] == VAEntrypointVideoProc)
             break;
     }
 
-    if (i == num_entrypoints) {
+    if (j == num_entrypoints) {
         printf("VPP is not supported by driver\n");
         assert(0);
     }
@@ -1537,7 +1525,7 @@ vpp_context_create()
 
     for (i = 0; i < num_surf_attribs; i++) {
         if (surf_attribs[i].type == VASurfaceAttribPixelFormat &&
-            surf_attribs[i].value.value.i == g_in_fourcc)
+            surf_attribs[i].value.value.i == (int)g_in_fourcc)
             break;
     }
     free(surf_attribs);

@@ -25,6 +25,7 @@ noinst_PROGRAMS = svctenc
 
 AM_CPPFLAGS = \
 	-Wall				\
+	-fstack-protector		\
 	$(LIBVA_CFLAGS) 		\
 	$(NULL)
 

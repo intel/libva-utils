@@ -306,6 +306,8 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
     return 0;
 }
 
+#ifdef LIBVA_UTILS_UPLOAD_DOWNLOAD_YUV_SURFACE
+
 /*
  * Upload YUV data from memory into a surface
  * if src_fourcc == NV12, assume the buffer pointed by src_U
@@ -487,3 +489,5 @@ static int download_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
 
     return 0;
 }
+
+#endif /* LIBVA_UTILS_UPLOAD_DOWNLOAD_YUV_SURFACE */
