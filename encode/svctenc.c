@@ -1848,6 +1848,8 @@ avc_temporal_find_surface(VAPictureH264 *curr_pic,
         }
     }
 
+    assert(found != -1);
+
     return found;
 }
 
