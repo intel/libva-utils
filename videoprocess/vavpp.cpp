@@ -105,10 +105,10 @@ read_value_string(FILE *fp, const char* field_name, char* value)
         if (!fgets(strLine, MAX_LEN, fp))
             continue;
 
-        for (i = 0; strLine[i] && i < MAX_LEN; i++)
+        for (i = 0; i < MAX_LEN && strLine[i]; i++)
             if (strLine[i] != ' ') break;
 
-        if (strLine[i] == '#' || strLine[i] == '\n' || i == 1024)
+        if (i == MAX_LEN || strLine[i] == '#' || strLine[i] == '\n')
             continue;
 
         field = strtok(&strLine[i], ":");
@@ -1730,7 +1730,9 @@ int32_t main(int32_t argc, char *argv[])
     }
 
     /* Parse the configure file for video process*/
-    strcpy(g_config_file_name, argv[1]);
+    strncpy(g_config_file_name, argv[1], MAX_LEN);
+    g_config_file_name[MAX_LEN - 1] = '\0';
+
     if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))){
         printf("Open configure file %s failed!\n",g_config_file_name);
         assert(0);

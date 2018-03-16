@@ -1814,7 +1814,7 @@ static int render_slice(void)
             ++slice_param.idr_pic_id;
     } else if (current_frame_type == FRAME_P) {
         int refpiclist0_max = h264_maxref & 0xffff;
-        memcpy(slice_param.RefPicList0, RefPicList0_P, refpiclist0_max*sizeof(VAPictureH264));
+        memcpy(slice_param.RefPicList0, RefPicList0_P, ((refpiclist0_max > 32) ? 32 : refpiclist0_max)*sizeof(VAPictureH264));
 
         for (i = refpiclist0_max; i < 32; i++) {
             slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
@@ -1824,13 +1824,13 @@ static int render_slice(void)
         int refpiclist0_max = h264_maxref & 0xffff;
         int refpiclist1_max = (h264_maxref >> 16) & 0xffff;
 
-        memcpy(slice_param.RefPicList0, RefPicList0_B, refpiclist0_max*sizeof(VAPictureH264));
+        memcpy(slice_param.RefPicList0, RefPicList0_B, ((refpiclist0_max > 32) ? 32 : refpiclist0_max)*sizeof(VAPictureH264));
         for (i = refpiclist0_max; i < 32; i++) {
             slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
             slice_param.RefPicList0[i].flags = VA_PICTURE_H264_INVALID;
         }
 
-        memcpy(slice_param.RefPicList1, RefPicList1_B, refpiclist1_max*sizeof(VAPictureH264));
+        memcpy(slice_param.RefPicList1, RefPicList1_B, ((refpiclist1_max > 32) ? 32 : refpiclist1_max)*sizeof(VAPictureH264));
         for (i = refpiclist1_max; i < 32; i++) {
             slice_param.RefPicList1[i].picture_id = VA_INVALID_SURFACE;
             slice_param.RefPicList1[i].flags = VA_PICTURE_H264_INVALID;

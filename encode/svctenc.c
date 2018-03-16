@@ -1697,7 +1697,7 @@ svcenc_update_picture_parameter_buffer(struct svcenc_context *ctx,
 
         pic_param->ReferenceFrames[i].picture_id = ref_frames[i].rec_surface;
         pic_param->ReferenceFrames[i].TopFieldOrderCnt = ref_frames[i].poc * 2;
-        pic_param->ReferenceFrames[i].BottomFieldOrderCnt = pic_param[i].ReferenceFrames[i].TopFieldOrderCnt;
+        pic_param->ReferenceFrames[i].BottomFieldOrderCnt = pic_param->ReferenceFrames[i].TopFieldOrderCnt;
         pic_param->ReferenceFrames[i].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
     }
 
