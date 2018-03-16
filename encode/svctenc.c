@@ -1895,6 +1895,9 @@ svcenc_update_slice_parameter_buffer(struct svcenc_context *ctx,
     VAPictureH264 *curr_pic;
     int ref_idx;
 
+    memset(RefPicList0, 0, sizeof(RefPicList0));
+    memset(RefPicList1, 0, sizeof(RefPicList1));
+
     svcenc_update_ref_lists(ctx, current_surface);
 
     switch (current_surface->picture_type) {

@@ -581,7 +581,8 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
 
 void init_yuv_component(YUVComponentSpecs *yuvComponent, int yuv_type, int *surface_type, VASurfaceAttrib *fourcc)
 {
-    
+    yuvComponent->yuv_type = yuv_type;
+
     //<fourcc value 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)>
     switch(yuv_type)
     {
