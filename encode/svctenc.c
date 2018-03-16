@@ -324,6 +324,7 @@ bitstream_put_ui(bitstream *bs, unsigned int val, int size_in_bits)
         if (pos + 1 == bs->max_size_in_dword) {
             bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
             bs->buffer = realloc(bs->buffer, bs->max_size_in_dword * sizeof(unsigned int));
+            assert(bs->buffer);
         }
 
         bs->buffer[pos + 1] = val;
@@ -1125,6 +1126,7 @@ upload_task_queue(struct svcenc_context *ctx, unsigned int display_order, int su
     struct upload_task_t *task;
 
     task = calloc(1, sizeof(struct upload_task_t));
+    assert(task);
     task->display_order = display_order;
     task->surface = surface;
     task->next = NULL;
@@ -2748,6 +2750,7 @@ svcenc_va_init(struct svcenc_context *ctx)
 
     max_profiles = vaMaxNumProfiles(ctx->va_dpy);
     profile_list = malloc(max_profiles * sizeof(VAProfile));
+    assert(profile_list);
     vaQueryConfigProfiles(ctx->va_dpy,
                           profile_list,
                           &num_profiles);
@@ -2775,6 +2778,7 @@ svcenc_va_init(struct svcenc_context *ctx)
 
     max_entrypoints = vaMaxNumEntrypoints(ctx->va_dpy);
     entrypoint_list = malloc(max_entrypoints * sizeof(VAEntrypoint));
+    assert(entrypoint_list);
     vaQueryConfigEntrypoints(ctx->va_dpy,
                              ctx->profile,
                              entrypoint_list,

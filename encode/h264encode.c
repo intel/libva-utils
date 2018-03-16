@@ -899,6 +899,7 @@ static int process_cmdline(int argc, char *argv[])
             break;
         case 'o':
             coded_fn = strdup(optarg);
+            assert(coded_fn);
             break;
         case 0:
             print_help();
@@ -930,9 +931,11 @@ static int process_cmdline(int argc, char *argv[])
             break;
         case 9:
             srcyuv_fn = strdup(optarg);
+            assert(srcyuv_fn);
             break;
         case 10:
             recyuv_fn = strdup(optarg);
+            assert(recyuv_fn);
             break;
         case 11:
             srcyuv_fourcc = string_to_fourcc(optarg);
@@ -1023,6 +1026,8 @@ static int process_cmdline(int argc, char *argv[])
             coded_fn = strdup("/sdcard/test.264");
         else
             coded_fn = strdup("./test.264");
+
+        assert(coded_fn);
     }
     
     /* store coded data into a file */
@@ -1279,6 +1284,7 @@ static int setup_encode()
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     tmp_surfaceid = calloc(2 * SURFACE_NUM, sizeof(VASurfaceID));
+    assert(tmp_surfaceid);
     memcpy(tmp_surfaceid, src_surface, SURFACE_NUM * sizeof(VASurfaceID));
     memcpy(tmp_surfaceid + SURFACE_NUM, ref_surface, SURFACE_NUM * sizeof(VASurfaceID));
     
@@ -2080,6 +2086,7 @@ static int storage_task_queue(unsigned long long display_order, unsigned long lo
     struct storage_task_t *tmp;
 
     tmp = calloc(1, sizeof(struct storage_task_t));
+    assert(tmp);
     tmp->display_order = display_order;
     tmp->encode_order = encode_order;
 

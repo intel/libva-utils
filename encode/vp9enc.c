@@ -1395,6 +1395,8 @@ main(int argc, char *argv[])
     }
 
     tmp_vp9 = strdup(argv[4]);
+    assert(tmp_vp9);
+
     if (!strstr(tmp_vp9, ".ivf")) {
         free(tmp_vp9);
         vp9enc_show_help();

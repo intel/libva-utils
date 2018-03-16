@@ -281,6 +281,8 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 
         frame_size = surface_image.width * surface_image.height * 3 / 2;
         newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
+
         do {
             n_items = fread(newImageBuffer, frame_size, 1, fp);
         } while (n_items != 1);
@@ -375,6 +377,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 g_src_file_fourcc == VA_FOURCC_UYVY)) {
         frame_size = surface_image.width * surface_image.height * 2;
         newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
 
         do {
             n_items = fread(newImageBuffer, frame_size, 1, fp);
@@ -395,6 +398,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 g_src_file_fourcc == VA_FOURCC_I010)) {
         frame_size = surface_image.width * surface_image.height * 3;
         newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
 
         do {
             n_items = fread(newImageBuffer, frame_size, 1, fp);
@@ -464,6 +468,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                   g_src_file_fourcc == VA_FOURCC_BGRX)) {
         frame_size = surface_image.width * surface_image.height * 4;
         newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
 
         do {
             n_items = fread(newImageBuffer, frame_size, 1, fp);
@@ -524,6 +529,7 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         uint32_t u_size = y_size/4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
+        assert(newImageBuffer);
 
         /* stored as YV12 format */
         y_dst = newImageBuffer;
@@ -630,6 +636,7 @@ store_yuv_surface_to_i420_file(FILE *fp,
         uint32_t u_size = y_size/4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
+        assert(newImageBuffer);
 
         /* stored as YV12 format */
         y_dst = newImageBuffer;
@@ -736,6 +743,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
         uint32_t u_size = y_size/4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
+        assert(newImageBuffer);
 
         /* stored as YV12 format */
         y_dst = newImageBuffer;
@@ -835,6 +843,7 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
         uint32_t frame_size = surface_image.width * surface_image.height * 2;
 
         newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
         memset(newImageBuffer, 0, frame_size);
 
         /* stored as YUY2 or UYVY format */
@@ -894,6 +903,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
     uint32_t u_size = y_size / 4;
 
     newImageBuffer = (unsigned char*)malloc(y_size * 3);
+    assert(newImageBuffer);
     y_dst = newImageBuffer;
 
     y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
@@ -976,6 +986,7 @@ store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
 
     frame_size = surface_image.width * surface_image.height * 4;
     newImageBuffer = (unsigned char*)malloc(frame_size);
+    assert(newImageBuffer);
     y_dst = newImageBuffer;
 
     y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
