@@ -23,6 +23,8 @@
 bin_PROGRAMS = mpeg2vldemo loadjpeg
 
 AM_CPPFLAGS = \
+	-Wall					\
+	-fstack-protector			\
 	$(LIBVA_CFLAGS)				\
 	-I$(top_srcdir)/common			\
 	$(NULL)

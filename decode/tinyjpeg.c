@@ -176,8 +176,8 @@ static int build_default_huffman_tables(struct jdec_private *priv)
 
 static void print_SOF(const unsigned char *stream)
 {
-  int width, height, nr_components, precision;
 #if DEBUG
+  int width, height, nr_components, precision;
   const char *nr_components_to_string[] = {
      "????",
      "Grayscale",
@@ -185,12 +185,12 @@ static void print_SOF(const unsigned char *stream)
      "YCbCr",
      "CYMK"
   };
-#endif
 
   precision = stream[2];
   height = be16_to_cpu(stream+3);
   width  = be16_to_cpu(stream+5);
   nr_components = stream[7];
+#endif
 
   trace("> SOF marker\n");
   trace("Size:%dx%d nr_components:%d (%s)  precision:%d\n", 
@@ -578,8 +578,6 @@ int tinyjpeg_decode(struct jdec_private *priv)
     unsigned int i, j;
 
     int surface_type;
-    char *type;
-    int ChromaTypeIndex;
 
     VASurfaceAttrib forcc;
     forcc.type =VASurfaceAttribPixelFormat;
@@ -644,62 +642,46 @@ int tinyjpeg_decode(struct jdec_private *priv)
            //surface_type = VA_RT_FORMAT_IMC3;
            surface_type = VA_RT_FORMAT_YUV420;
            forcc.value.value.i = VA_FOURCC_IMC3;
-           ChromaTypeIndex = 1;
-           type = "VA_FOURCC_IMC3";
        }
        else if (h1 == 2 && h2 == 1 && h3 == 1 &&
                v1 == 1 && v2 == 1 && v3 == 1) {
            //surface_type = VA_RT_FORMAT_YUV422H;
            surface_type = VA_RT_FORMAT_YUV422;
            forcc.value.value.i = VA_FOURCC_422H;
-           ChromaTypeIndex = 2;
-           type = "VA_FOURCC_422H";
        }
        else if (h1 == 1 && h2 == 1 && h3 == 1 &&
                v1 == 1 && v2 == 1 && v3 == 1) {
            surface_type = VA_RT_FORMAT_YUV444;
            forcc.value.value.i = VA_FOURCC_444P;
            //forcc.value.value.i = VA_FOURCC_RGBP;
-           ChromaTypeIndex = 3;
-           type = "VA_FOURCC_444P";
        }
        else if (h1 == 4 && h2 == 1 && h3 == 1 &&
                v1 == 1 && v2 == 1 && v3 == 1) {
            surface_type = VA_RT_FORMAT_YUV411;
            forcc.value.value.i = VA_FOURCC_411P;
-           ChromaTypeIndex = 4;
-           type = "VA_FOURCC_411P";
        }
        else if (h1 == 1 && h2 == 1 && h3 == 1 &&
                v1 == 2 && v2 == 1 && v3 == 1) {
            //surface_type = VA_RT_FORMAT_YUV422V;
            surface_type = VA_RT_FORMAT_YUV422;
            forcc.value.value.i = VA_FOURCC_422V;
-           ChromaTypeIndex = 5;
-           type = "VA_FOURCC_422V";
        }
        else if (h1 == 2 && h2 == 1 && h3 == 1 &&
                v1 == 2 && v2 == 2 && v3 == 2) {
            //surface_type = VA_RT_FORMAT_YUV422H;
            surface_type = VA_RT_FORMAT_YUV422;
            forcc.value.value.i = VA_FOURCC_422H;
-           ChromaTypeIndex = 6;
-           type = "VA_FOURCC_422H";
        }
        else if (h2 == 2 && h2 == 2 && h3 == 2 &&
                v1 == 2 && v2 == 1 && v3 == 1) {
            //surface_type = VA_RT_FORMAT_YUV422V;
            surface_type = VA_RT_FORMAT_YUV422;
            forcc.value.value.i = VA_FOURCC_422V;
-           ChromaTypeIndex = 7;
-           type = "VA_FOURCC_422V";
        }
        else
        {
            surface_type = VA_RT_FORMAT_YUV400;
            forcc.value.value.i = VA_FOURCC('Y','8','0','0');
-           ChromaTypeIndex = 0;
-           type = "Format_400P";
        }
 
        va_status = vaCreateSurfaces(va_dpy,surface_type,
