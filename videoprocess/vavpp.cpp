@@ -299,6 +299,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             v_src = u_src;
         } else {
             printf("Not supported YUV fourcc for input file !!!\n");
+            free(newImageBuffer);
             return VA_STATUS_ERROR_INVALID_SURFACE;
         }
 
@@ -946,6 +947,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
         }
     } else {
         printf("Not supported YUV surface fourcc !!! \n");
+        free(newImageBuffer);
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 

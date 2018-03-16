@@ -898,7 +898,8 @@ static int process_cmdline(int argc, char *argv[])
             frame_rate = atoi(optarg);
             break;
         case 'o':
-            coded_fn = strdup(optarg);
+            if (!coded_fn)
+                coded_fn = strdup(optarg);
             assert(coded_fn);
             break;
         case 0:
@@ -930,11 +931,13 @@ static int process_cmdline(int argc, char *argv[])
             }
             break;
         case 9:
-            srcyuv_fn = strdup(optarg);
+            if (!srcyuv_fn)
+                srcyuv_fn = strdup(optarg);
             assert(srcyuv_fn);
             break;
         case 10:
-            recyuv_fn = strdup(optarg);
+            if (!recyuv_fn)
+                recyuv_fn = strdup(optarg);
             assert(recyuv_fn);
             break;
         case 11:
@@ -1916,6 +1919,8 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
         } 
     } else {
         printf("Unsupported source YUV format\n");
+        if (mmap_ptr)
+            munmap(mmap_ptr, mmap_size);
         exit(1);
     }
     
@@ -2328,6 +2333,12 @@ static int calc_PSNR(double *psnr)
             recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
                 printf("Failed to mmap YUV files\n");
+
+                if (srcyuv_ptr != MAP_FAILED )
+                    munmap(srcyuv_ptr, fourM);
+                if (recyuv_ptr != MAP_FAILED)
+                    munmap(recyuv_ptr, fourM);
+
                 return 1;
             }
         }
@@ -2416,5 +2427,18 @@ int main(int argc,char **argv)
     TotalTicks += GetTickCount() - start;
     print_performance(frame_count);
     
+    free(srcyuv_fn);
+    free(recyuv_fn);
+    free(coded_fn);
+
+    if (srcyuv_fp)
+        fclose(srcyuv_fp);
+
+    if (recyuv_fp)
+        fclose(recyuv_fp);
+
+    if (coded_fp)
+        fclose(coded_fp);
+
     return 0;
 }
