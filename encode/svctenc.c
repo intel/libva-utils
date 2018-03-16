@@ -933,7 +933,7 @@ slice_header(bitstream *bs,
             bitstream_put_ue(bs, (reordering_info[0] >> 24) & 0xFF);        /* num_ref_idx_l0_active_minus1 */
 
         /* ref_pic_list_reordering */
-        if (!reordering_info || !(reordering_info[0] & 0x0F))
+        if (!(reordering_info[0] & 0x0F))
             bitstream_put_ui(bs, 0, 1);             /* ref_pic_list_reordering_flag_l0: 0 */
         else {
             bitstream_put_ui(bs, 1, 1);             /* ref_pic_list_reordering_flag_l0: 1 */
@@ -954,7 +954,7 @@ slice_header(bitstream *bs,
         /* ref_pic_list_reordering */
 
         for (i = 0; i < 2; i++) {
-            if (!reordering_info || !(reordering_info[i] & 0x0F))
+            if (!(reordering_info[i] & 0x0F))
                 bitstream_put_ui(bs, 0, 1);             /* ref_pic_list_reordering_flag_l0/l1: 0 */
             else {
                 bitstream_put_ui(bs, 1, 1);             /* ref_pic_list_reordering_flag_l0/l1: 1 */
