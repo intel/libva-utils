@@ -214,7 +214,7 @@ static int parse_DQT(struct jdec_private *priv, const unsigned char *stream)
 #if SANITY_CHECK
      if (qi>>4)
        error("16 bits quantization table is not supported\n");
-     if (qi>4)
+     if (qi>=4)
        error("No more 4 quantization table is supported (got %d)\n", qi);
 #endif
      memcpy(priv->Q_tables[qi&0x0F], stream, 64);
