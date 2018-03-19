@@ -1,6 +1,6 @@
-[![Stories in Ready](https://badge.waffle.io/01org/libva-utils.png?label=ready&title=Ready)](http://waffle.io/01org/libva-utils)
-[![Build Status](https://travis-ci.org/01org/libva-utils.svg?branch=master)](https://travis-ci.org/01org/libva-utils)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/11613/badge.svg)](https://scan.coverity.com/projects/01org-libva-utils)
+[![Stories in Ready](https://badge.waffle.io/intel/libva-utils.png?label=ready&title=Ready)](http://waffle.io/intel/libva-utils)
+[![Build Status](https://travis-ci.org/intel/libva-utils.svg?branch=master)](https://travis-ci.org/intel/libva-utils)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/11613/badge.svg)](https://scan.coverity.com/projects/intel-libva-utils)
 
 #Libva-utils Project
 
@@ -16,10 +16,10 @@ driver-specific acceleration backends for each supported hardware
 vendor.
 
 If you would like to contribute to libva, check our [Contributing
-guide](https://github.com/01org/libva-utils/blob/master/CONTRIBUTING.md).
+guide](https://github.com/intel/libva-utils/blob/master/CONTRIBUTING.md).
 
 We also recommend taking a look at the ['janitorial'
-bugs](https://github.com/01org/libva-utils/issues?q=is%3Aopen+is%3Aissue+label%3AJanitorial)
+bugs](https://github.com/intel/libva-utils/issues?q=is%3Aopen+is%3Aissue+label%3AJanitorial)
 in our list of open issues as these bugs can be solved without an
 extensive knowledge of libva-utils.
 
