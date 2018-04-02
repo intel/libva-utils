@@ -32,12 +32,16 @@
 #include <va/va.h>
 #include "va_display.h"
 
+extern const VADisplayHooks va_display_hooks_android;
 extern const VADisplayHooks va_display_hooks_wayland;
 extern const VADisplayHooks va_display_hooks_x11;
 extern const VADisplayHooks va_display_hooks_drm;
 
 static const VADisplayHooks *g_display_hooks;
 static const VADisplayHooks *g_display_hooks_available[] = {
+#ifdef ANDROID
+    &va_display_hooks_android,
+#else
 #ifdef HAVE_VA_WAYLAND
     &va_display_hooks_wayland,
 #endif
@@ -46,6 +50,7 @@ static const VADisplayHooks *g_display_hooks_available[] = {
 #endif
 #ifdef HAVE_VA_DRM
     &va_display_hooks_drm,
+#endif
 #endif
     NULL
 };
