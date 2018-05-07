@@ -32,7 +32,7 @@ namespace VAAPI {
 
 typedef VAAPIFixture VAAPIQueryVendor;
 
-TEST_F(VAAPIQueryVendor, Intel_i965_Vendor)
+TEST_F(VAAPIQueryVendor, NotEmpty)
 {
     int major, minor;
 
@@ -41,9 +41,7 @@ TEST_F(VAAPIQueryVendor, Intel_i965_Vendor)
 
     ASSERT_STATUS(vaInitialize(display, &major, &minor));
     const std::string vendor(vaQueryVendorString(display));
-    EXPECT_NE(std::string::npos, vendor.find("Intel i965 driver"))
-        << "Couldn't find Vendor Name in " << vendor << std::endl;
-
+    EXPECT_GT(vendor.size(), 0u);
     ASSERT_STATUS(vaTerminate(display));
 }
 
