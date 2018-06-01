@@ -19,3 +19,6 @@ executable('svctenc', [ 'svctenc.c' ],
 executable('vp9enc', [ 'vp9enc.c' ],
            dependencies: [libva_display_dep, threads, m ],
            install: true)
+executable('vp8enc', [ 'vp8enc.c' ],
+           dependencies: [libva_display_dep, threads, m ],
+           install: true)
