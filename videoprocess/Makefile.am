@@ -23,6 +23,8 @@
 bin_PROGRAMS = vavpp
 
 AM_CPPFLAGS = \
+	-Wall					\
+	-fstack-protector			\
 	$(LIBVA_CFLAGS)				\
 	-I$(top_srcdir)/common			\
 	$(NULL)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2018 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -22,27 +22,37 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "test_va_api_fixture.h"
+#include <va/va_android.h>
+#include "va_display.h"
 
-namespace VAAPI {
+static unsigned int fake_display = 0xdeada01d;
 
-// Inheriting from VAAPIFixture is not necessary as this test is not
-// overriding or extending any functionality defined in fixture.
-// Thus, a typedef is sufficient for getting a unique test name for gtest.
-
-typedef VAAPIFixture VAAPIQueryVendor;
-
-TEST_F(VAAPIQueryVendor, NotEmpty)
+static VADisplay
+va_open_display_android(void)
 {
-    int major, minor;
-
-    VADisplay display = getDisplay();
-    ASSERT_TRUE(display);
-
-    ASSERT_STATUS(vaInitialize(display, &major, &minor));
-    const std::string vendor(vaQueryVendorString(display));
-    EXPECT_GT(vendor.size(), 0u);
-    ASSERT_STATUS(vaTerminate(display));
+    return vaGetDisplay(&fake_display);
 }
 
-} // namespace VAAPI
+static void
+va_close_display_android(VADisplay va_dpy)
+{
+}
+
+static VAStatus
+va_put_surface_android(
+    VADisplay          va_dpy,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
+{
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
+}
+
+extern "C"
+const VADisplayHooks va_display_hooks_android = {
+    "android",
+    va_open_display_android,
+    va_close_display_android,
+    va_put_surface_android
+};

@@ -55,29 +55,6 @@ TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate)
     doInitTerminate();
 }
 
-TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_Environment)
-{
-    EXPECT_EQ(0, setenv("LIBVA_DRIVER_NAME", "i965", 1))
-        << "Could not set enviroment variable";
-    doInitTerminate();
-    EXPECT_EQ(0, unsetenv("LIBVA_DRIVER_NAME"))
-        << "Could not un-set enviroment variable";
-}
-
-TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_i965_vaSetDriverName)
-{
-    int major, minor;
-    char driver[5] = "i965";
-
-    VADisplay display = getDisplay();
-    ASSERT_TRUE(display);
-
-    ASSERT_STATUS(vaSetDriverName(display, driver));
-
-    ASSERT_STATUS(vaInitialize(display, &major, &minor));
-    EXPECT_STATUS(vaTerminate(display));
-}
-
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_Environment)
 {
     int major, minor;

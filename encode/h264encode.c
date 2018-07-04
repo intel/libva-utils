@@ -21,6 +21,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#define LIBVA_UTILS_UPLOAD_DOWNLOAD_YUV_SURFACE 1
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -564,6 +566,8 @@ build_packed_seq_buffer(unsigned char **header_buffer)
     return bs.bit_offset;
 }
 
+#if 0
+
 static int 
 build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
 				unsigned int init_cpb_removal_delay,
@@ -629,6 +633,8 @@ build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
    
     return nal_bs.bit_offset;
 }
+
+#endif
 
 static int build_packed_slice_buffer(unsigned char **header_buffer)
 {
@@ -1666,6 +1672,8 @@ static int render_packedpicture(void)
     return 0;
 }
 
+#if 0
+
 static void render_packedsei(void)
 {
     VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
@@ -1728,7 +1736,6 @@ static void render_packedsei(void)
     return;
 }
 
-
 static int render_hrd(void)
 {
     VABufferID misc_parameter_hrd_buf_id;
@@ -1764,6 +1771,8 @@ static int render_hrd(void)
 
     return 0;
 }
+
+#endif
 
 static void render_packedslice()
 {

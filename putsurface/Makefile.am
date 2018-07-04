@@ -25,6 +25,8 @@ bin_PROGRAMS =
 TEST_CFLAGS = \
 	$(LIBVA_CFLAGS)			\
 	-I$(top_srcdir)/common		\
+	-Wall				\
+	-fstack-protector		\
 	$(NULL)
 
 TEST_LIBS = \
