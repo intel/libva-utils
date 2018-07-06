@@ -1,5 +1,11 @@
-libva-utils NEWS -- summary of changes.  2018-02-12
+libva-utils NEWS -- summary of changes.  2018-07-xx
 Copyright (C) 2009-2018 Intel Corporation
+
+Version 2.2.0 - DD.Jul.2018
+* Bump version to 2.2.0
+* Add meson build
+* Add vainfo support in Android
+* Remove driver specific test cases
 
 Version 2.1.0 - 12.Feb.2018
 * Bump version to 2.1.0
