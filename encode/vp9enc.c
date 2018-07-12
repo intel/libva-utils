@@ -204,6 +204,22 @@ vp9enc_write_dword(char *ptr, uint32_t value)
 }
 
 static void
+vp9enc_write_qword(char *ptr, uint64_t value)
+{
+    uint8_t *tmp;
+
+    tmp = (uint8_t *)ptr;
+    *(tmp) = (value >> 0) & 0XFF;
+    *(tmp + 1) = (value >> 8) & 0XFF;
+    *(tmp + 2) = (value >> 16) & 0XFF;
+    *(tmp + 3) = (value >> 24) & 0XFF;
+    *(tmp + 4) = (value >> 32) & 0XFF;
+    *(tmp + 5) = (value >> 40) & 0XFF;
+    *(tmp + 6) = (value >> 48) & 0XFF;
+    *(tmp + 7) = (value >> 56) & 0XFF;
+}
+
+static void
 vp9enc_wb_write_bit(struct vp9enc_bit_buffer *wb, int bit)
 {
     const int off = wb->bit_offset;
@@ -1032,19 +1048,18 @@ vp9enc_destroy_buffers(VABufferID *va_buffers, uint32_t num_va_buffers)
 }
 
 static void
-vp9enc_write_frame_header(FILE *vp9_output, int frame_size)
+vp9enc_write_frame_header(FILE *vp9_output, int frame_size, uint64_t timestamp)
 {
     char header[12];
 
     vp9enc_write_dword(header, (uint32_t)frame_size);
-    vp9enc_write_dword(header + 4, 0);
-    vp9enc_write_dword(header + 8, 0);
+    vp9enc_write_qword(header + 4, timestamp);
 
     fwrite(header, 1, 12, vp9_output);
 }
 
 static int
-vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type)
+vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type, uint64_t timestamp)
 {
     VACodedBufferSegment *coded_buffer_segment;
     uint8_t *coded_mem;
@@ -1076,7 +1091,7 @@ vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type)
 
     data_length = coded_buffer_segment->size;
 
-    vp9enc_write_frame_header(vp9_fp, data_length);
+    vp9enc_write_frame_header(vp9_fp, data_length, timestamp);
 
     do {
         w_items = fwrite(coded_mem, data_length, 1, vp9_fp);
@@ -1108,8 +1123,8 @@ vp9enc_write_ivf_header(FILE *vp9_file,
     vp9enc_write_dword(header + 8, VP9_FOURCC);
     vp9enc_write_word(header + 12, width);
     vp9enc_write_word(header + 14, height);
-    vp9enc_write_dword(header + 16, 1);
-    vp9enc_write_dword(header + 20, frame_rate);
+    vp9enc_write_dword(header + 16, frame_rate);
+    vp9enc_write_dword(header + 20, 1);
     vp9enc_write_dword(header + 24, frame_num);
     vp9enc_write_dword(header + 28, 0);
 
@@ -1231,7 +1246,7 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
 
         vp9enc_render_picture();
 
-        ret = vp9enc_store_coded_buffer(vp9_fp, current_frame_type);
+        ret = vp9enc_store_coded_buffer(vp9_fp, current_frame_type, next_enc_frame - 1);
     } while (ret);
 
     vp9enc_update_reference_list();
