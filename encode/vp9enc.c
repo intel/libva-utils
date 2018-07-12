@@ -89,6 +89,8 @@ static int frame_rate = 30;
 static int lf_level = 10;
 static int opt_header = 0;
 
+static int temp_layers = 1;
+
 static int current_slot;
 
 static int frame_number;
@@ -136,6 +138,7 @@ static const struct option long_opts[] = {
     {"vbr_max", required_argument, NULL, 8},
     {"fn_num", required_argument, NULL, 9},
     {"low_power", required_argument, NULL, 10},
+    {"temp_svc", required_argument, NULL, 11},
     {NULL, no_argument, NULL, 0 }
 };
 
@@ -177,6 +180,8 @@ struct vp9encode_context {
     struct upload_thread_param upload_thread_param;
     pthread_t upload_thread_id;
     int upload_thread_value;
+
+    int is_golden_refreshed;
 };
 
 static struct vp9encode_context vp9enc_context;
@@ -814,8 +819,62 @@ vp9enc_update_reference_list()
    }
 }
 
+static
+void vp9enc_set_refreshparameter_for_svct_2layers(VAEncPictureParameterBufferVP9 *pic_param, int current_frame, int *is_golden_refreshed)
+{
+  /* Pattern taken from libyami */
+
+  pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 1;
+  if(*is_golden_refreshed && (current_frame % 2) != 0)
+    pic_param->ref_flags.bits.ref_frame_ctrl_l0 |= 0x2;
+
+
+  switch(current_frame % 2) {
+    case 0:
+      /* Layer 0 */
+      pic_param->refresh_frame_flags = 0x01;
+      break;
+    case 1:
+      /* Layer 1 */
+      pic_param->refresh_frame_flags = 0x02;
+      *is_golden_refreshed = 1;
+      break;
+  }
+
+}
+
+static
+void vp9enc_set_refreshparameter_for_svct_3layers(VAEncPictureParameterBufferVP9 *pic_param, int current_frame,int *is_golden_refreshed)
+{
+  /* Pattern taken from libyami - Note that the alternate frame is never referenced,
+     this is because, libyami implementation suggests to be able to drop individual
+     frames from Layer 2 on bad network connections */
+
+  pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0x1;
+  if(*is_golden_refreshed && (current_frame % 4) != 0)
+    pic_param->ref_flags.bits.ref_frame_ctrl_l0 |= 0x2;
+
+  switch(current_frame % 4) {
+    case 0:
+      /* Layer 0 */
+      pic_param->refresh_frame_flags = 0x01;
+      break;
+    case 1:
+    case 3:
+      /* Layer 2 */
+      pic_param->refresh_frame_flags = 0x00;
+      break;
+    case 2:
+      /* Layer 1 */
+      pic_param->refresh_frame_flags = 0x02;
+      *is_golden_refreshed = 1;
+      break;
+  }
+
+}
+
 static void
-vp9enc_update_picture_parameter(int frame_type)
+vp9enc_update_picture_parameter(int frame_type, int current_frame)
 {
     VAEncPictureParameterBufferVP9 *pic_param;
     int recon_index;
@@ -834,7 +893,9 @@ vp9enc_update_picture_parameter(int frame_type)
 
     ref_num = sizeof(pic_param->reference_frames) / sizeof(VASurfaceID);
 
+
     if (frame_type == KEY_FRAME) {
+        vp9enc_context.is_golden_refreshed = 0;
         pic_param->pic_flags.bits.frame_type = KEY_FRAME;
         pic_param->pic_flags.bits.frame_context_idx = 0;
         pic_param->ref_flags.bits.ref_last_idx = 0;
@@ -846,14 +907,22 @@ vp9enc_update_picture_parameter(int frame_type)
         for (i = 0;i < ref_num;i++)
             pic_param->reference_frames[i] = VA_INVALID_ID;
     } else {
-        pic_param->refresh_frame_flags = 0x01;
         pic_param->pic_flags.bits.frame_type = INTER_FRAME;
-        pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0x7;
-
         pic_param->ref_flags.bits.ref_last_idx = 0;
         pic_param->ref_flags.bits.ref_gf_idx = 1;
         pic_param->ref_flags.bits.ref_arf_idx = 2;
         pic_param->pic_flags.bits.frame_context_idx = 0;
+
+        if (temp_layers == 1) {
+            pic_param->refresh_frame_flags = 0x01;
+            pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0x7;
+        } else if (temp_layers == 2) {
+            pic_param->pic_flags.bits.error_resilient_mode = 1;
+            vp9enc_set_refreshparameter_for_svct_2layers(pic_param,current_frame,&vp9enc_context.is_golden_refreshed);
+        } else if (temp_layers == 3) {
+            pic_param->pic_flags.bits.error_resilient_mode = 1;
+            vp9enc_set_refreshparameter_for_svct_3layers(pic_param,current_frame,&vp9enc_context.is_golden_refreshed);
+        }
 
         memcpy(&pic_param->reference_frames, vp9_ref_list, sizeof(vp9_ref_list));
     }
@@ -1213,7 +1282,7 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
         CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
         /* picture parameter set */
-        vp9enc_update_picture_parameter(current_frame_type);
+        vp9enc_update_picture_parameter(current_frame_type, next_enc_frame - 1);
 
         if (opt_header) {
             char raw_data[64];
@@ -1359,6 +1428,7 @@ vp9enc_show_help()
     printf("--opt_header \n  write the uncompressed header manually. without this, the driver will add those headers by itself\n");
     printf("--fn_num <num>\n  how many frames to be encoded\n");
     printf("--low_power <num> 0: Normal mode, 1: Low power mode, others: auto mode\n");
+    printf("--temp_svc <num> number of temporal layers 2 or 3\n");
 }
 
 int
@@ -1487,6 +1557,11 @@ main(int argc, char *argv[])
                 else
                     select_entrypoint = -1;
 
+                break;
+            case 11:
+                tmp_input = atoi(optarg);
+                if(tmp_input == 2 || tmp_input == 3)
+                    temp_layers = tmp_input;
                 break;
 
             default:
