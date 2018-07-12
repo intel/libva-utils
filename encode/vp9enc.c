@@ -131,12 +131,12 @@ static const struct option long_opts[] = {
     {"qp", required_argument, NULL, 2 },
     {"intra_period", required_argument, NULL, 3 },
     {"fb", required_argument, NULL, 4 },
-    {"lf_level", required_argument, NULL, 6 },
-    {"opt_header", required_argument, NULL, 7},
-    {"hrd_win", required_argument, NULL, 8},
-    {"vbr_max", required_argument, NULL, 9},
-    {"fn_num", required_argument, NULL, 10},
-    {"low_power", required_argument, NULL, 11},
+    {"lf_level", required_argument, NULL, 5 },
+    {"opt_header", required_argument, NULL, 6},
+    {"hrd_win", required_argument, NULL, 7},
+    {"vbr_max", required_argument, NULL, 8},
+    {"fn_num", required_argument, NULL, 9},
+    {"low_power", required_argument, NULL, 10},
     {NULL, no_argument, NULL, 0 }
 };
 
@@ -1450,25 +1450,25 @@ main(int argc, char *argv[])
                 tmp_input = atoi(optarg);
                 frame_bit_rate = tmp_input;
                 break;
-            case 6:
+            case 5:
                 tmp_input = atoi(optarg);
                 if (tmp_input < 0 || tmp_input > 63)
                     tmp_input = 10;
                 lf_level = tmp_input;
                 break;
-            case 7:
+            case 6:
                 tmp_input = atoi(optarg);
                 if (tmp_input)
                     tmp_input = 1;
                 opt_header = tmp_input;
                 break;
-            case 8:
+            case 7:
                 tmp_input = atoi(optarg);
                 if (tmp_input > 8000 || tmp_input < 1000)
                     tmp_input = 1500;
                 hrd_window = tmp_input;
                 break;
-            case 9:
+            case 8:
                 tmp_input = atoi(optarg);
                 if (tmp_input < 0)
                     tmp_input = 20000;
@@ -1476,11 +1476,11 @@ main(int argc, char *argv[])
                     tmp_input = 100000;
                 vbr_max = tmp_input;
                 break;
-            case 10:
+            case 9:
                 tmp_input = atoi(optarg);
                 fn_num = tmp_input;
                 break;
-            case 11:
+            case 10:
                 tmp_input = atoi(optarg);
 
                 if (tmp_input == 0 || tmp_input == 1)
