@@ -105,7 +105,6 @@ static  VASurfaceID vp9_ref_list[8];
 
 static  VASurfaceID surface_ids[SID_NUMBER];
 static  VASurfaceID ref_surfaces[SURFACE_NUM + SID_NUMBER];
-static  int use_slot[SURFACE_NUM];
 
 #ifndef VA_FOURCC_I420
 #define VA_FOURCC_I420          0x30323449
@@ -749,12 +748,20 @@ vp9enc_release_encode_resource()
 static int
 vp9enc_get_free_slot()
 {
-    int i, index = -1;
+    int i, j, index = -1;
+    int used;
 
     for (i = 0; i < SURFACE_NUM; i++) {
-        if (use_slot[i] == 0) {
-            index = i;
-            break;
+        used = 0;
+        for( j = 0; j < 8;j++) {
+            if( vp9_ref_list[j] == ref_surfaces[i]) {
+              used = 1;
+              break;
+            }
+        }
+        if(!used) {
+          index = i;
+          break;
         }
     }
 
@@ -767,49 +774,28 @@ vp9enc_get_free_slot()
 }
 
 static void
-vp9enc_update_reference_list(void)
+vp9enc_update_reference_list()
 {
-    VASurfaceID last_surf;
-    int last_slot;
     int i;
+    unsigned char refresh_frame;
 
-    /* Todo: Add the full support of reference frames */
+    refresh_frame = vp9enc_context.pic_param.refresh_frame_flags;
 
     if (current_frame_type == KEY_FRAME) {
-        memset(use_slot, 0, sizeof(use_slot));
-        use_slot[current_slot] = 1;
-        for (i = 0; i < SURFACE_NUM; i++)
-            vp9_ref_list[i] = ref_surfaces[current_slot];
+        vp9_ref_list[0] = ref_surfaces[current_slot];
+        for (i = 1; i < 8; i++)
+            vp9_ref_list[i] = 0;
 
         return;
-    }
+   } else {
 
-    last_slot = -1;
-    use_slot[current_slot] = 1;
-    last_surf = vp9_ref_list[0];
+     for(i = 0; i < 8; i++) {
+       if( refresh_frame & (1<<i)) {
+         vp9_ref_list[i] = ref_surfaces[current_slot];
+       }
+     }
 
-    vp9_ref_list[0] = ref_surfaces[current_slot];
-
-    for (i = 0; i < SURFACE_NUM; i++) {
-        if (ref_surfaces[i] == last_surf) {
-            last_slot = i;
-            break;
-        }
-    }
-
-    if (last_slot != -1) {
-        int used_flag = 0;
-
-        for (i = 1; i < SURFACE_NUM;i++) {
-            if (vp9_ref_list[i] == last_surf) {
-                used_flag = 1;
-                break;
-            }
-        }
-
-        if (!used_flag)
-            use_slot[last_slot] = 0;
-    }
+   }
 }
 
 static void
@@ -1318,8 +1304,6 @@ vp9enc_context_init(int width, int height)
 {
     memset(&vp9enc_context, 0, sizeof(vp9enc_context));
     vp9enc_context.profile = VAProfileVP9Profile0;
-
-    memset(&use_slot, 0, sizeof(use_slot));
 
     vp9enc_context.seq_param_buf_id = VA_INVALID_ID;
     vp9enc_context.pic_param_buf_id = VA_INVALID_ID;
