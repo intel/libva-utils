@@ -27,8 +27,11 @@ vainfo_cflags = \
 	$(LIBVA_CFLAGS) \
 	-DLIBVA_VERSION_S="\"$(LIBVA_VERSION)\"" \
 	-Wall \
-	-fstack-protector \
 	$(NULL)
+
+if USE_SSP
+vainfo_cflags += -fstack-protector
+endif
 
 vainfo_libs = \
        	$(LIBVA_LIBS) \
