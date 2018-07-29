@@ -25,9 +25,12 @@ noinst_PROGRAMS = svctenc
 
 AM_CPPFLAGS = \
 	-Wall				\
-	-fstack-protector		\
 	$(LIBVA_CFLAGS) 		\
 	$(NULL)
+
+if USE_SSP
+AM_CPPFLAGS += -fstack-protector
+endif
 
 h264encode_SOURCES	= h264encode.c
 h264encode_CFLAGS	= -I$(top_srcdir)/common -g
