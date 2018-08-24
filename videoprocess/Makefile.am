@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = vavpp
+bin_PROGRAMS = vavpp vppchromasitting
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -37,6 +37,8 @@ TEST_LIBS = \
 vavpp_SOURCES = vavpp.cpp
 vavpp_LDADD   = $(TEST_LIBS)
 
+vppchromasitting_SOURCES = vppchromasitting.c
+vppchromasitting_LDADD = $(TEST_LIBS)
 valgrind:(bin_PROGRAMS)
 	for a in(bin_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
