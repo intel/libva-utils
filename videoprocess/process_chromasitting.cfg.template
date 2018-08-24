@@ -1,0 +1,33 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420)
+#  you require. After video processing, the processed content (NV12/YV12/I420 surface)
+#  will be stored to frames(yv12 format in file).
+#    Supported features include: chromasitting implicit format conversion(NV12<->YV12<->I420). Each
+# time only one kind of processing will be executed in test application. Although libva supports
+# multiple filters execution in one time. you can modify this configuration file to set the
+# filter and the corresponding parameters.
+
+#1.Source YUV(RGB) file information
+SRC_FILE_NAME: ./ChromaSittingTest_720x516.nv12
+SRC_FRAME_WIDTH: 720
+SRC_FRAME_HEIGHT: 516
+SRC_FRAME_FORMAT: NV12
+
+#Note .nv12 files are in NV12 format
+SRC_FILE_FORMAT: NV12
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ./ChromaSittingTest_720x516_golden176x144.xrgb
+DST_FRAME_WIDTH:  176
+DST_FRAME_HEIGHT: 144
+DST_FRAME_FORMAT: XRGB
+
+DST_FILE_FORMAT: XRGB
+
+#3.How many frames to be processed
+FRAME_SUM: 5
+
+#4.chromasitting mode  parameters set, the following modes are supported:
+# UNKNOWN, CHROMA_SITING_TOP_LEFT, CHROMA_SITING_TOP_CENTER,CHROMA_SITING_CENTER_LEFT
+# CHROMA_SITING_CENTER_CENTER, CHROMA_SITING_BOTTOM_LEFT,CHROMA_SITING_BOTTOM_CENTER
+CHROMA_SITTING_MODE: CHROMA_SITING_TOP_LEFT
