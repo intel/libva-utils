@@ -1,0 +1,27 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420)
+#  you require. After video processing, the processed content (NV12/YV12/I420 surface)
+#  will be stored to frames(yv12 format in file).
+#    Supported features include scaling and implicit format conversion(NV12<->YV12<->I420). 
+#  you can modify this configuration file to set the corresponding parameters.
+
+#1.Source YUV(RGB) file information
+SRC_FILE_NAME: ./foreman_10f_640x480.nv12
+SRC_FRAME_WIDTH:  640
+SRC_FRAME_HEIGHT: 480
+SRC_FRAME_FORMAT: NV12
+
+#Note .nv12 files are in NV12 format
+SRC_FILE_FORMAT: NV12
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ./scaling_out_720x480.yv12
+DST_FRAME_WIDTH:  720
+DST_FRAME_HEIGHT: 480
+DST_FRAME_FORMAT: YV12
+
+DST_FILE_FORMAT: YV12
+
+#3.How many frames to be processed
+FRAME_SUM: 5
+

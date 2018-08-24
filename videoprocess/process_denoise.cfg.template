@@ -1,0 +1,36 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420)
+#  you require. After video processing, the processed content (NV12/YV12/I420 surface)
+#  will be stored to frames(yv12 format in file).
+#    Supported features include: denoise,implicit format conversion(NV12<->YV12<->I420). Each
+# time only one kind of processing will be executed in test application. Although libva supports
+# multiple filters execution in one time. you can modify this configuration file to set the
+# filter and the corresponding parameters.
+
+#1.Source YUV(RGB) file information
+SRC_FILE_NAME: ./foreman_10f_640x480.nv12
+SRC_FRAME_WIDTH:  640
+SRC_FRAME_HEIGHT: 480
+SRC_FRAME_FORMAT: NV12
+
+#Note .nv12 files are in NV12 format
+SRC_FILE_FORMAT: NV12
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ./output_1920x1080.nv12
+DST_FRAME_WIDTH:  1920
+DST_FRAME_HEIGHT: 1080
+DST_FRAME_FORMAT: NV12
+
+DST_FILE_FORMAT: NV12
+
+#3.How many frames to be processed
+FRAME_SUM: 5
+
+#4.VPP filter specific parameters. If they are not specified here,
+#default value will be applied then.
+FILTER_TYPE: VAProcFilterNoiseReduction
+#4.1 Denoise filter paramters
+ #(0--64, default:0 )
+DENOISE_INTENSITY: 44
+
