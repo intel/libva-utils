@@ -86,7 +86,7 @@ VPP_FormatMap sFomatMap[] = {{"nv12",VA_FOURCC_NV12},
                              {"y216", VA_FOURCC_Y216},
                              {"y416", VA_FOURCC_Y416}};
 
-Display        *x11_display;
+Display        *x11_display = NULL;
 VADisplay      _va_dpy;
 VAConfigID     _cfg_id;
 VAContextID    _context_id;
@@ -101,10 +101,14 @@ bool copyToVaSurface( VASurfaceID surface_id )
     VAImage       va_image;
     VAStatus      va_status;
     void          *surface_p = NULL;
-    unsigned char *src_buffer;
-    unsigned char *y_src, *u_src,*v_src;
+    unsigned char *src_buffer = NULL;
+    unsigned char *y_src = NULL;
+    unsigned char *u_src = NULL;
+    unsigned char *v_src = NULL;
+    unsigned char *y_dst = NULL;
+    unsigned char *u_dst = NULL;
+    unsigned char *v_dst = NULL;
 
-    unsigned char *y_dst, *u_dst,*v_dst;
     int           y_size = vpp_Imageinfo.src_width * vpp_Imageinfo.src_height;
     int           u_size = (vpp_Imageinfo.src_width >> 1) * (vpp_Imageinfo.src_height >> 1); //default, for special, will update
     int           i, rgb_shift_factor = 2;
@@ -116,213 +120,213 @@ bool copyToVaSurface( VASurfaceID surface_id )
 
     switch (va_image.format.fourcc)
     {
-    case VA_FOURCC_NV12:
-        y_src = src_buffer;
-        u_src = src_buffer + y_size; // UV offset for NV12
+        case VA_FOURCC_NV12:
+            y_src = src_buffer;
+            u_src = src_buffer + y_size; // UV offset for NV12
 
-        y_dst = (unsigned char*)surface_p + va_image.offsets[0];
-        u_dst = (unsigned char*)surface_p + va_image.offsets[1]; // U offset for NV12
+            y_dst = (unsigned char*)surface_p + va_image.offsets[0];
+            u_dst = (unsigned char*)surface_p + va_image.offsets[1]; // U offset for NV12
 
-        // Y plane
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(y_dst+va_image.pitches[0]*i, y_src, vpp_Imageinfo.src_width);
-            y_src += vpp_Imageinfo.src_width;
-        }
-        // UV offset for NV12
-        for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
-        {
-            memcpy(u_dst+va_image.pitches[0]*i, u_src, vpp_Imageinfo.src_width);
-            u_src += vpp_Imageinfo.src_width;
-        }
-        break;
-    case VA_FOURCC_P010:
-       y_src = src_buffer;
-       u_src = src_buffer + 2*y_size; // UV offset for P010
+            // Y plane
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(y_dst+va_image.pitches[0]*i, y_src, vpp_Imageinfo.src_width);
+                y_src += vpp_Imageinfo.src_width;
+            }
+            // UV offset for NV12
+            for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
+            {
+                memcpy(u_dst+va_image.pitches[0]*i, u_src, vpp_Imageinfo.src_width);
+                u_src += vpp_Imageinfo.src_width;
+            }
+            break;
+        case VA_FOURCC_P010:
+           y_src = src_buffer;
+           u_src = src_buffer + 2*y_size; // UV offset for P010
 
-       y_dst = (char*)surface_p + va_image.offsets[0];
-       u_dst = (char*)surface_p + va_image.offsets[1]; // U offset for P010
-       // Y plane
+           y_dst = (char*)surface_p + va_image.offsets[0];
+           u_dst = (char*)surface_p + va_image.offsets[1]; // U offset for P010
+           // Y plane
 
-       for (i = 0; i < vpp_Imageinfo.src_height; i++)
-       {
-           memcpy(y_dst, y_src, vpp_Imageinfo.src_width*2);
-           y_dst += va_image.pitches[0];
-           y_src += vpp_Imageinfo.src_width*2;
-       }
+           for (i = 0; i < vpp_Imageinfo.src_height; i++)
+           {
+               memcpy(y_dst, y_src, vpp_Imageinfo.src_width*2);
+               y_dst += va_image.pitches[0];
+               y_src += vpp_Imageinfo.src_width*2;
+           }
 
-       for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
-       {
-           memcpy(u_dst, u_src, vpp_Imageinfo.src_width*2);
-           u_dst += va_image.pitches[1];
-           u_src += vpp_Imageinfo.src_width*2;
-       }
-       break;
+           for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
+           {
+               memcpy(u_dst, u_src, vpp_Imageinfo.src_width*2);
+               u_dst += va_image.pitches[1];
+               u_src += vpp_Imageinfo.src_width*2;
+           }
+           break;
 
-    case VA_FOURCC_YV12:
-    case VA_FOURCC_I420:
-        y_src = src_buffer;
-        if (VA_FOURCC_YV12 == vpp_Imageinfo.src_format)   // VU offset for YV12 source
-        {
-            v_src = src_buffer + y_size;
-            u_src = src_buffer + y_size + u_size;
-        }
-        else   // UV offset for I420 source
-        {
+        case VA_FOURCC_YV12:
+        case VA_FOURCC_I420:
+            y_src = src_buffer;
+            if (VA_FOURCC_YV12 == vpp_Imageinfo.src_format)   // VU offset for YV12 source
+            {
+                v_src = src_buffer + y_size;
+                u_src = src_buffer + y_size + u_size;
+            }
+            else   // UV offset for I420 source
+            {
+                u_src = src_buffer + y_size;
+                v_src = src_buffer + y_size + u_size;
+            }
+            y_dst = (char*)surface_p + va_image.offsets[0];
+            v_dst = (char*)surface_p + va_image.offsets[1]; // V offset for YV12
+            u_dst = (char*)surface_p + va_image.offsets[2]; // U offset for YV12
+
+            // Y plane
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(y_dst, y_src, vpp_Imageinfo.src_width);
+                y_dst += va_image.pitches[0];
+                y_src += vpp_Imageinfo.src_width;
+            }
+
+            v_dst = (char*)surface_p + va_image.offsets[1];
+            u_dst = (char*)surface_p + va_image.offsets[2];
+
+            for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
+            {
+                memcpy(v_dst, v_src, vpp_Imageinfo.src_width >> 1);
+                memcpy(u_dst, u_src, vpp_Imageinfo.src_width >> 1);
+
+                u_dst += va_image.pitches[1];
+                v_dst += va_image.pitches[2];
+                u_src += vpp_Imageinfo.src_width >> 1;
+                v_src += vpp_Imageinfo.src_width >> 1;
+            }
+            break;
+        case VA_FOURCC_Y210:
+        case VA_FOURCC_Y216:
+            y_src = src_buffer;
+            y_dst = (char*)surface_p + va_image.offsets[0];
+
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(y_dst, y_src, vpp_Imageinfo.src_width << 2);
+                y_dst += va_image.pitches[0];
+                y_src += vpp_Imageinfo.src_width << 2;
+            }
+            break;
+        case VA_FOURCC_UYVY:
+        case VA_FOURCC_YUY2:
+            y_src = src_buffer;
+            y_dst = (char*)surface_p + va_image.offsets[0];
+
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(y_dst, y_src, vpp_Imageinfo.src_width << 1);
+                y_dst += va_image.pitches[0];
+                y_src += vpp_Imageinfo.src_width << 1;
+            }
+            break;
+
+        case VA_FOURCC_RGB565: //RGBP => rgb565
+            rgb_shift_factor = 1; //Default is 2 for 4-byte RGB formats (which includes alpha), but should be 1 for 2 byte formats
+        case VA_FOURCC_ARGB:
+        case VA_FOURCC_ABGR:
+        case VA_FOURCC_XRGB:
+        case VA_FOURCC_XBGR:
+        case VA_FOURCC_RGBA:
+        case VA_FOURCC_BGRA:
+        case VA_FOURCC_RGBX:
+        case VA_FOURCC_BGRX:
+        case VA_FOURCC_AYUV:
+        case VA_FOURCC_Y410:
+            y_src = src_buffer;
+            y_dst = (char*)surface_p + va_image.offsets[0];
+
+            for (i = 0; i < vpp_Imageinfo.src_height; i++) {
+                memcpy(y_dst, y_src, (vpp_Imageinfo.src_width << rgb_shift_factor));
+                y_src += vpp_Imageinfo.src_width << rgb_shift_factor;
+                y_dst += va_image.pitches[0];
+             }
+            break;
+        case VA_FOURCC_Y416:
+            y_src = src_buffer;
+            y_dst = (char*)surface_p + va_image.offsets[0];
+
+            for (i = 0; i < vpp_Imageinfo.src_height; i++) {
+                memcpy(y_dst, y_src, vpp_Imageinfo.src_width << 3);
+                y_src += vpp_Imageinfo.src_width << 3;
+                y_dst += va_image.pitches[0];
+            }
+            break;
+
+        case VA_FOURCC_422V:
+        case VA_FOURCC_IMC3:
+            u_size = (vpp_Imageinfo.src_width) * (vpp_Imageinfo.src_height >> 1); //4:2:2
+            y_src = src_buffer;
             u_src = src_buffer + y_size;
             v_src = src_buffer + y_size + u_size;
-        }
-        y_dst = (char*)surface_p + va_image.offsets[0];
-        v_dst = (char*)surface_p + va_image.offsets[1]; // V offset for YV12
-        u_dst = (char*)surface_p + va_image.offsets[2]; // U offset for YV12
 
-        // Y plane
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(y_dst, y_src, vpp_Imageinfo.src_width);
-            y_dst += va_image.pitches[0];
-            y_src += vpp_Imageinfo.src_width;
-        }
+            y_dst = (char*)surface_p + va_image.offsets[0];
+            u_dst = (char*)surface_p + va_image.offsets[1];
+            v_dst = (char*)surface_p + va_image.offsets[2];
 
-        v_dst = (char*)surface_p + va_image.offsets[1];
-        u_dst = (char*)surface_p + va_image.offsets[2];
+            /* Y plane */
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(y_dst, y_src, vpp_Imageinfo.src_width);
+                y_dst += va_image.pitches[0];
+                y_src += vpp_Imageinfo.src_width;
+            }
 
-        for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
-        {
-            memcpy(v_dst, v_src, vpp_Imageinfo.src_width >> 1);
-            memcpy(u_dst, u_src, vpp_Imageinfo.src_width >> 1);
+            /* U V plane */
+            for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
+            {
+                memcpy(u_dst, u_src, vpp_Imageinfo.src_width);
+                memcpy(v_dst, v_src, vpp_Imageinfo.src_width);
 
-            u_dst += va_image.pitches[1];
-            v_dst += va_image.pitches[2];
-            u_src += vpp_Imageinfo.src_width >> 1;
-            v_src += vpp_Imageinfo.src_width >> 1;
-        }
-        break;
-    case VA_FOURCC_Y210:
-    case VA_FOURCC_Y216:
-        y_src = src_buffer;
-        y_dst = (char*)surface_p + va_image.offsets[0];
+                u_dst += va_image.pitches[1];
+                v_dst += va_image.pitches[2];
+                u_src += vpp_Imageinfo.src_width;
+                v_src += vpp_Imageinfo.src_width;
+            }
+            break;
 
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(y_dst, y_src, vpp_Imageinfo.src_width << 2);
-            y_dst += va_image.pitches[0];
-            y_src += vpp_Imageinfo.src_width << 2;
-        }
-        break;
-    case VA_FOURCC_UYVY:
-    case VA_FOURCC_YUY2:
-        y_src = src_buffer;
-        y_dst = (char*)surface_p + va_image.offsets[0];
+        case VA_FOURCC_411P:        //U, V plane are 1/4 width+paddings and full height
+        case VA_FOURCC_444P:        //4:4:4
+        case VA_FOURCC_422H:
+            u_size = (vpp_Imageinfo.src_width) * (vpp_Imageinfo.src_height); //4:2:2 + padding
+            y_src = src_buffer;
+            u_src = src_buffer + y_size;
+            v_src = src_buffer + y_size + u_size;
 
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(y_dst, y_src, vpp_Imageinfo.src_width << 1);
-            y_dst += va_image.pitches[0];
-            y_src += vpp_Imageinfo.src_width << 1;
-        }
-        break;
+            y_dst = (char*)surface_p + va_image.offsets[0];
+            u_dst = (char*)surface_p + va_image.offsets[1];
+            v_dst = (char*)surface_p + va_image.offsets[2];
 
-    case VA_FOURCC_RGB565: //RGBP => rgb565
-        rgb_shift_factor = 1; //Default is 2 for 4-byte RGB formats (which includes alpha), but should be 1 for 2 byte formats
-    case VA_FOURCC_ARGB:
-    case VA_FOURCC_ABGR:
-    case VA_FOURCC_XRGB:
-    case VA_FOURCC_XBGR:
-    case VA_FOURCC_RGBA:
-    case VA_FOURCC_BGRA:
-    case VA_FOURCC_RGBX:
-    case VA_FOURCC_BGRX:
-    case VA_FOURCC_AYUV:
-    case VA_FOURCC_Y410:
-        y_src = src_buffer;
-        y_dst = (char*)surface_p + va_image.offsets[0];
+            /* Y plane */
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(y_dst, y_src, vpp_Imageinfo.src_width);
+                y_dst += va_image.pitches[0];
+                y_src += vpp_Imageinfo.src_width;
+            }
 
-        for (i = 0; i < vpp_Imageinfo.src_height; i++) {
-            memcpy(y_dst, y_src, (vpp_Imageinfo.src_width << rgb_shift_factor));
-            y_src += vpp_Imageinfo.src_width << rgb_shift_factor;
-            y_dst += va_image.pitches[0];
-         }
-        break;
-    case VA_FOURCC_Y416:
-        y_src = src_buffer;
-        y_dst = (char*)surface_p + va_image.offsets[0];
+            /* U V plane */
+            for (i = 0; i < vpp_Imageinfo.src_height; i++)
+            {
+                memcpy(u_dst, u_src, vpp_Imageinfo.src_width);
+                memcpy(v_dst, v_src, vpp_Imageinfo.src_width);
 
-        for (i = 0; i < vpp_Imageinfo.src_height; i++) {
-            memcpy(y_dst, y_src, vpp_Imageinfo.src_width << 3);
-            y_src += vpp_Imageinfo.src_width << 3;
-            y_dst += va_image.pitches[0];
-        }
-        break;
-
-    case VA_FOURCC_422V:
-    case VA_FOURCC_IMC3:
-        u_size = (vpp_Imageinfo.src_width) * (vpp_Imageinfo.src_height >> 1); //4:2:2
-        y_src = src_buffer;
-        u_src = src_buffer + y_size;
-        v_src = src_buffer + y_size + u_size;
-
-        y_dst = (char*)surface_p + va_image.offsets[0];
-        u_dst = (char*)surface_p + va_image.offsets[1];
-        v_dst = (char*)surface_p + va_image.offsets[2];
-
-        /* Y plane */
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(y_dst, y_src, vpp_Imageinfo.src_width);
-            y_dst += va_image.pitches[0];
-            y_src += vpp_Imageinfo.src_width;
-        }
-
-        /* U V plane */
-        for (i = 0; i < vpp_Imageinfo.src_height >> 1; i++)
-        {
-            memcpy(u_dst, u_src, vpp_Imageinfo.src_width);
-            memcpy(v_dst, v_src, vpp_Imageinfo.src_width);
-
-            u_dst += va_image.pitches[1];
-            v_dst += va_image.pitches[2];
-            u_src += vpp_Imageinfo.src_width;
-            v_src += vpp_Imageinfo.src_width;
-        }
-        break;
-
-    case VA_FOURCC_411P:        //U, V plane are 1/4 width+paddings and full height
-    case VA_FOURCC_444P:        //4:4:4
-    case VA_FOURCC_422H:
-        u_size = (vpp_Imageinfo.src_width) * (vpp_Imageinfo.src_height); //4:2:2 + padding
-        y_src = src_buffer;
-        u_src = src_buffer + y_size;
-        v_src = src_buffer + y_size + u_size;
-
-        y_dst = (char*)surface_p + va_image.offsets[0];
-        u_dst = (char*)surface_p + va_image.offsets[1];
-        v_dst = (char*)surface_p + va_image.offsets[2];
-
-        /* Y plane */
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(y_dst, y_src, vpp_Imageinfo.src_width);
-            y_dst += va_image.pitches[0];
-            y_src += vpp_Imageinfo.src_width;
-        }
-
-        /* U V plane */
-        for (i = 0; i < vpp_Imageinfo.src_height; i++)
-        {
-            memcpy(u_dst, u_src, vpp_Imageinfo.src_width);
-            memcpy(v_dst, v_src, vpp_Imageinfo.src_width);
-
-            u_dst += va_image.pitches[1];
-            v_dst += va_image.pitches[2];
-            u_src += vpp_Imageinfo.src_width;
-            v_src += vpp_Imageinfo.src_width;
-        }
-        break;
-    default: // should not come here
-        printf("VA_STATUS_ERROR_INVALID_IMAGE_FORMAT");
-        va_status = VA_STATUS_ERROR_INVALID_IMAGE_FORMAT;
-        break;
+                u_dst += va_image.pitches[1];
+                v_dst += va_image.pitches[2];
+                u_src += vpp_Imageinfo.src_width;
+                v_src += vpp_Imageinfo.src_width;
+            }
+            break;
+        default: // should not come here
+            printf("VA_STATUS_ERROR_INVALID_IMAGE_FORMAT");
+            va_status = VA_STATUS_ERROR_INVALID_IMAGE_FORMAT;
+            break;
     }
 
     vaUnmapBuffer(_va_dpy, va_image.buf);
@@ -345,192 +349,192 @@ bool copyFrameFromSurface(VASurfaceID surface_id)
     va_status = vaMapBuffer(_va_dpy, va_image.buf, (void **)&image_data);
     assert ( va_status == VA_STATUS_SUCCESS);
     switch (va_image.format.fourcc) {
-    case VA_FOURCC_NV12:
-    case VA_FOURCC_NV21:
-    {
-        char *pY = ( char *)image_data +va_image.offsets[0];
-        char *pUV = ( char *)image_data + va_image.offsets[1];
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-             fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
-             pY += va_image.pitches[0];
-        }
-        //UV
-        for(int i = 0; i < vpp_Imageinfo.dst_height/2; i++)
-        {
-            fwrite(pUV, 1, vpp_Imageinfo.dst_width, fOut);
-            pUV += va_image.pitches[1];
-        }
-        break;
-    }
-    case VA_FOURCC_YV12:
-    case VA_FOURCC_I420:
-    {
-        if (vpp_Imageinfo.dst_format == VA_FOURCC_YV12)
+        case VA_FOURCC_NV12:
+        case VA_FOURCC_NV21:
         {
             char *pY = ( char *)image_data +va_image.offsets[0];
-            char *pV = ( char *)image_data + va_image.offsets[1];
-            char *pU = ( char *)image_data + va_image.offsets[2];
+            char *pUV = ( char *)image_data + va_image.offsets[1];
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                 fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
+                 pY += va_image.pitches[0];
+            }
+            //UV
+            for(int i = 0; i < vpp_Imageinfo.dst_height/2; i++)
+            {
+                fwrite(pUV, 1, vpp_Imageinfo.dst_width, fOut);
+                pUV += va_image.pitches[1];
+            }
+            break;
+        }
+        case VA_FOURCC_YV12:
+        case VA_FOURCC_I420:
+        {
+            if (vpp_Imageinfo.dst_format == VA_FOURCC_YV12)
+            {
+                char *pY = ( char *)image_data +va_image.offsets[0];
+                char *pV = ( char *)image_data + va_image.offsets[1];
+                char *pU = ( char *)image_data + va_image.offsets[2];
 
-           for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-           {
-               fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
-               pY += va_image.pitches[0];
+               for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+               {
+                   fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
+                   pY += va_image.pitches[0];
+               }
+
+               for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
+               {
+                   fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
+                   pV += va_image.pitches[1];
+               }
+               for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
+               {
+                   fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
+                   pU += va_image.pitches[2];
+               }
            }
-
-           for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
-           {
-               fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
-               pV += va_image.pitches[1];
-           }
-           for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
-           {
-               fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
-               pU += va_image.pitches[2];
-           }
-       }
-      else if(vpp_Imageinfo.dst_format == VA_FOURCC_I420)
-      {
-          char *pY = ( char *)image_data +va_image.offsets[0];
-          char *pV = ( char *)image_data + va_image.offsets[1];
-          char *pU = ( char *)image_data + va_image.offsets[2];
-
-          for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+          else if(vpp_Imageinfo.dst_format == VA_FOURCC_I420)
           {
-              fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
-              pY += va_image.pitches[0];
+              char *pY = ( char *)image_data +va_image.offsets[0];
+              char *pV = ( char *)image_data + va_image.offsets[1];
+              char *pU = ( char *)image_data + va_image.offsets[2];
+
+              for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+              {
+                  fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
+                  pY += va_image.pitches[0];
+              }
+
+              for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
+              {
+                  fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
+                  pU += va_image.pitches[2];
+              }
+              for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
+              {
+                  fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
+                  pV += va_image.pitches[1];
+              }
           }
+          break;
+        }
+        case VA_FOURCC_ARGB:
+        case VA_FOURCC_ABGR:
+        case VA_FOURCC_RGB565:
+        case VA_FOURCC_XRGB:
+        case VA_FOURCC_XBGR:
+        case VA_FOURCC_RGBA:
+        case VA_FOURCC_BGRA:
+        case VA_FOURCC_RGBX:
+        case VA_FOURCC_BGRX:
+        case VA_FOURCC_AYUV:
+        case VA_FOURCC_Y410:
+        case VA_FOURCC_Y416:
+        {
+            char *pdst = ( char *)image_data +va_image.offsets[0];
+            int  bytes_per_pixel = 4;
+            if (vpp_Imageinfo.dst_format == VA_FOURCC_RGB565)
+                bytes_per_pixel = 2; //rgb565
+            else if (vpp_Imageinfo.dst_format == VA_FOURCC_Y416)
+                bytes_per_pixel = 8; //Y416
+            else
+                bytes_per_pixel = 4; //ARGB
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pdst, 1, vpp_Imageinfo.dst_width*bytes_per_pixel, fOut);
+                pdst += va_image.pitches[0];
+            }
+            break;
+        }
+        case VA_FOURCC_YUY2:
+        case VA_FOURCC_UYVY:
+        case VA_FOURCC_Y210:
+        case VA_FOURCC_Y216:
+        {
+            int   shift_yuv422 = 1;
+            if(vpp_Imageinfo.dst_format == VA_FOURCC_Y210 || vpp_Imageinfo.dst_format == VA_FOURCC_Y216)
+                shift_yuv422 = 2;
 
-          for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
-          {
-              fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
-              pU += va_image.pitches[2];
-          }
-          for(int i = 0; i < vpp_Imageinfo.dst_height/4; i++)
-          {
-              fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
-              pV += va_image.pitches[1];
-          }
-      }
-      break;
-    }
-    case VA_FOURCC_ARGB:
-    case VA_FOURCC_ABGR:
-    case VA_FOURCC_RGB565:
-    case VA_FOURCC_XRGB:
-    case VA_FOURCC_XBGR:
-    case VA_FOURCC_RGBA:
-    case VA_FOURCC_BGRA:
-    case VA_FOURCC_RGBX:
-    case VA_FOURCC_BGRX:
-    case VA_FOURCC_AYUV:
-    case VA_FOURCC_Y410:
-    case VA_FOURCC_Y416:
-    {
-        char *pdst = ( char *)image_data +va_image.offsets[0];
-        int  bytes_per_pixel = 4;
-        if (vpp_Imageinfo.dst_format == VA_FOURCC_RGB565)
-            bytes_per_pixel = 2; //rgb565
-        else if (vpp_Imageinfo.dst_format == VA_FOURCC_Y416)
-            bytes_per_pixel = 8; //Y416
-        else
-            bytes_per_pixel = 4; //ARGB
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pdst, 1, vpp_Imageinfo.dst_width*bytes_per_pixel, fOut);
-            pdst += va_image.pitches[0];
+            char *pdst = ( char *)image_data +va_image.offsets[0];
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pdst, 1, vpp_Imageinfo.dst_width<<shift_yuv422, fOut);
+                pdst += va_image.pitches[0];
+            }
+            break;
         }
-        break;
-    }
-    case VA_FOURCC_YUY2:
-    case VA_FOURCC_UYVY:
-    case VA_FOURCC_Y210:
-    case VA_FOURCC_Y216:
-    {
-        int   shift_yuv422 = 1;
-        if(vpp_Imageinfo.dst_format == VA_FOURCC_Y210 || vpp_Imageinfo.dst_format == VA_FOURCC_Y216)
-            shift_yuv422 = 2;
+        case VA_FOURCC_P010:
+        {
+            char *pY  = ( char *)image_data + va_image.offsets[0];
+            char *pUV = ( char *)image_data + va_image.offsets[1];
+            // copy Y plane
 
-        char *pdst = ( char *)image_data +va_image.offsets[0];
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pdst, 1, vpp_Imageinfo.dst_width<<shift_yuv422, fOut);
-            pdst += va_image.pitches[0];
-        }
-        break;
-    }
-    case VA_FOURCC_P010:
-    {
-        char *pY  = ( char *)image_data + va_image.offsets[0];
-        char *pUV = ( char *)image_data + va_image.offsets[1];
-        // copy Y plane
+            for (int i=0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pY, 1, vpp_Imageinfo.dst_width*2, fOut);
+                pY += va_image.pitches[0];
+            }
 
-        for (int i=0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pY, 1, vpp_Imageinfo.dst_width*2, fOut);
-            pY += va_image.pitches[0];
+            for (int i=0; i < vpp_Imageinfo.dst_height/2; i++)
+            {
+                fwrite(pUV, 1, vpp_Imageinfo.dst_width*2, fOut);
+                pUV += va_image.pitches[1];
+            }
+            break;
         }
+        case VA_FOURCC_422V:
+        case VA_FOURCC_IMC3:
+        {
+            char *pY = ( char *)image_data +va_image.offsets[0];
+            char *pU = ( char *)image_data + va_image.offsets[1];
+            char *pV = ( char *)image_data + va_image.offsets[2];
 
-        for (int i=0; i < vpp_Imageinfo.dst_height/2; i++)
-        {
-            fwrite(pUV, 1, vpp_Imageinfo.dst_width*2, fOut);
-            pUV += va_image.pitches[1];
-        }
-        break;
-    }
-    case VA_FOURCC_422V:
-    case VA_FOURCC_IMC3:
-    {
-        char *pY = ( char *)image_data +va_image.offsets[0];
-        char *pU = ( char *)image_data + va_image.offsets[1];
-        char *pV = ( char *)image_data + va_image.offsets[2];
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
+                pY += va_image.pitches[0];
+            }
 
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
-            pY += va_image.pitches[0];
+            for(int i = 0; i < vpp_Imageinfo.dst_height>>1; i++)
+            {
+                fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
+                pU += va_image.pitches[1];
+            }
+            for(int i = 0; i < vpp_Imageinfo.dst_height>>1; i++)
+            {
+                fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
+                pV += va_image.pitches[2];
+            }
+            break;
         }
+        case VA_FOURCC_411P:        //U, V plane are 1/4 width+paddings and full height
+        case VA_FOURCC_444P:        //4:4:4
+        case VA_FOURCC_422H:
+        {
+            char *pY = ( char *)image_data +va_image.offsets[0];
+            char *pU = ( char *)image_data + va_image.offsets[1];
+            char *pV = ( char *)image_data + va_image.offsets[2];
 
-        for(int i = 0; i < vpp_Imageinfo.dst_height>>1; i++)
-        {
-            fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
-            pU += va_image.pitches[1];
-        }
-        for(int i = 0; i < vpp_Imageinfo.dst_height>>1; i++)
-        {
-            fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
-            pV += va_image.pitches[2];
-        }
-        break;
-    }
-    case VA_FOURCC_411P:        //U, V plane are 1/4 width+paddings and full height
-    case VA_FOURCC_444P:        //4:4:4
-    case VA_FOURCC_422H:
-    {
-        char *pY = ( char *)image_data +va_image.offsets[0];
-        char *pU = ( char *)image_data + va_image.offsets[1];
-        char *pV = ( char *)image_data + va_image.offsets[2];
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
+                pY += va_image.pitches[0];
+            }
 
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pY, 1, vpp_Imageinfo.dst_width, fOut);
-            pY += va_image.pitches[0];
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
+                pU += va_image.pitches[1];
+            }
+            for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
+            {
+                fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
+                pV += va_image.pitches[2];
+            }
+            break;
         }
-
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pU, 1, vpp_Imageinfo.dst_width, fOut);
-            pU += va_image.pitches[1];
-        }
-        for(int i = 0; i < vpp_Imageinfo.dst_height; i++)
-        {
-            fwrite(pV, 1, vpp_Imageinfo.dst_width, fOut);
-            pV += va_image.pitches[2];
-        }
-        break;
-    }
-    default:
-        return false;
+        default:
+            return false;
     }
     va_status = vaUnmapBuffer(_va_dpy, va_image.buf);
     va_status = vaDestroyImage(_va_dpy,va_image.image_id);
@@ -596,40 +600,40 @@ unsigned int RawVidFrameBytesCalc()
     unsigned int fourcc = vpp_Imageinfo.src_format;
     switch(fourcc)
     {
-    case VA_FOURCC_I420:
-    case VA_FOURCC_NV12:
-    case VA_FOURCC_YV12:
-    case VA_FOURCC_NV21:
-        return width*height*3/2;
-    case VA_FOURCC_411P:
-    case VA_FOURCC_444P:
-    case VA_FOURCC_422H:
-    case VA_FOURCC_P010:
-        return width*height*3;
-    case VA_FOURCC_YUY2:
-    case VA_FOURCC_UYVY:
-    case VA_FOURCC_IMC3:
-    case VA_FOURCC_422V:
-    case VA_FOURCC_RGB565:
-        return width*height*2;
-    case VA_FOURCC_ARGB:
-    case VA_FOURCC_ABGR:
-    case VA_FOURCC_RGBA:
-    case VA_FOURCC_BGRA:
-    case VA_FOURCC_XRGB:
-    case VA_FOURCC_XBGR:
-    case VA_FOURCC_RGBX:
-    case VA_FOURCC_BGRX:
-    case VA_FOURCC_AYUV:
-    case VA_FOURCC_Y210:
-    case VA_FOURCC_Y216:
-    case VA_FOURCC_Y410:
-        return width*height*4;
-    case VA_FOURCC_Y416:
-        return width*height*8;
-    default:
-        printf(": Error - Unhandled fourccType:%d Returning I420_FOURCC_FMT as default\n",fourcc);
-        return width*height*3/2;
+        case VA_FOURCC_I420:
+        case VA_FOURCC_NV12:
+        case VA_FOURCC_YV12:
+        case VA_FOURCC_NV21:
+            return width*height*3/2;
+        case VA_FOURCC_411P:
+        case VA_FOURCC_444P:
+        case VA_FOURCC_422H:
+        case VA_FOURCC_P010:
+            return width*height*3;
+        case VA_FOURCC_YUY2:
+        case VA_FOURCC_UYVY:
+        case VA_FOURCC_IMC3:
+        case VA_FOURCC_422V:
+        case VA_FOURCC_RGB565:
+            return width*height*2;
+        case VA_FOURCC_ARGB:
+        case VA_FOURCC_ABGR:
+        case VA_FOURCC_RGBA:
+        case VA_FOURCC_BGRA:
+        case VA_FOURCC_XRGB:
+        case VA_FOURCC_XBGR:
+        case VA_FOURCC_RGBX:
+        case VA_FOURCC_BGRX:
+        case VA_FOURCC_AYUV:
+        case VA_FOURCC_Y210:
+        case VA_FOURCC_Y216:
+        case VA_FOURCC_Y410:
+            return width*height*4;
+        case VA_FOURCC_Y416:
+            return width*height*8;
+        default:
+            printf(": Error - Unhandled fourccType:%d Returning I420_FOURCC_FMT as default\n",fourcc);
+            return width*height*3/2;
     }
 }
 
@@ -722,23 +726,23 @@ bool createPipeLineBuf()
     vpInputParam.surface_region = &vpp_Imageinfo.region_in;
     vpInputParam.output_region = &vpp_Imageinfo.region_out;
     switch (vpp_Imageinfo.chroma_siting_mode) {
-    case UNKNOWN:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_UNKNOWN; break;
-    case CHROMA_SITING_TOP_LEFT:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_LEFT; break;
-    case CHROMA_SITING_TOP_CENTER:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_CENTER; break;
-    case CHROMA_SITING_CENTER_LEFT:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_LEFT; break;
-    case CHROMA_SITING_CENTER_CENTER:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_CENTER; break;
-    case CHROMA_SITING_BOTTOM_LEFT:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_LEFT; break;
-    case CHROMA_SITING_BOTTOM_CENTER:
-        vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_CENTER; break;
-    default:
-        printf("Unsupported chroma siting mode : %d", vpp_Imageinfo.chroma_siting_mode);
-        return false;
+        case UNKNOWN:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_UNKNOWN; break;
+        case CHROMA_SITING_TOP_LEFT:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_LEFT; break;
+        case CHROMA_SITING_TOP_CENTER:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_CENTER; break;
+        case CHROMA_SITING_CENTER_LEFT:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_LEFT; break;
+        case CHROMA_SITING_CENTER_CENTER:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_CENTER; break;
+        case CHROMA_SITING_BOTTOM_LEFT:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_LEFT; break;
+        case CHROMA_SITING_BOTTOM_CENTER:
+            vpInputParam.input_color_properties.chroma_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_CENTER; break;
+        default:
+            printf("Unsupported chroma siting mode : %d", vpp_Imageinfo.chroma_siting_mode);
+            return false;
     }
     vaStatus=vaCreateBuffer(_va_dpy,
                                     _context_id,
@@ -768,7 +772,7 @@ bool destorySurface()
     if (vp_pipeline_inbuf != VA_INVALID_ID)
         vaDestroyBuffer(_va_dpy,vp_pipeline_inbuf);
 
-       va_status = vaDestroySurfaces( _va_dpy,&in_surface, 1);
+    va_status = vaDestroySurfaces( _va_dpy,&in_surface, 1);
     va_status = vaDestroySurfaces(_va_dpy,&out_surface, 1);
 
     if(vpp_Imageinfo.src_buffer != NULL){
@@ -810,9 +814,9 @@ bool parseCommand( int argc, char** argv)
 {
     if (( argc % 2 == 0 ) || ( argc == 1 ))
     {
-    printf("wrong parameters count\n");
-    print_help();
-    return false;
+        printf("wrong parameters count\n");
+        print_help();
+        return false;
     }
 
     for (int arg_idx = 1; arg_idx < argc - 1; arg_idx += 2)
@@ -868,7 +872,7 @@ bool parseCommand( int argc, char** argv)
                 }
             }
             if(i == sizeof(sFomatMap)/sizeof(VPP_FormatMap)){
-            print_help();
+                print_help();
             }
         }
         else
