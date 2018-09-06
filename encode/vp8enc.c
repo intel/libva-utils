@@ -400,11 +400,12 @@ vp8enc_upload_thread_function(void *data)
 void vp8enc_init_QMatrix(VAQMatrixBufferVP8 *qMatrix)
 {
   // When segmentation is disabled, only quantization_index[0] will be used
-  for (size_t i = 0; i < N_ELEMENTS(qMatrix->quantization_index); i++) {
+  size_t i;
+  for (i = 0; i < N_ELEMENTS(qMatrix->quantization_index); i++) {
       qMatrix->quantization_index[i] = settings.quantization_parameter;
   }
 
-  for (size_t i = 0; i < N_ELEMENTS(qMatrix->quantization_index_delta); i++) {
+  for (i = 0; i < N_ELEMENTS(qMatrix->quantization_index_delta); i++) {
       qMatrix->quantization_index_delta[i] = 0;
   }
 
@@ -412,7 +413,7 @@ void vp8enc_init_QMatrix(VAQMatrixBufferVP8 *qMatrix)
 
 void vp8enc_init_SequenceParameterBuffer(VAEncSequenceParameterBufferVP8* seqParam)
 {
-
+  size_t i;
   memset(seqParam, 0, sizeof(VAEncSequenceParameterBufferVP8));
 
   seqParam->frame_width = settings.width;
@@ -426,14 +427,14 @@ void vp8enc_init_SequenceParameterBuffer(VAEncSequenceParameterBufferVP8* seqPar
   seqParam->intra_period = settings.intra_period;
   seqParam->error_resilient = settings.error_resilient;
 
-  for (size_t i = 0; i < N_ELEMENTS(seqParam->reference_frames); i++)
+  for (i = 0; i < N_ELEMENTS(seqParam->reference_frames); i++)
      seqParam->reference_frames[i] = VA_INVALID_ID;
 }
 
 void vp8enc_init_PictureParameterBuffer(VAEncPictureParameterBufferVP8 *picParam)
 {
+  size_t i;
   memset(picParam, 0, sizeof(VAEncPictureParameterBufferVP8));
-
   picParam->ref_last_frame = VA_INVALID_SURFACE;
   picParam->ref_gf_frame = VA_INVALID_SURFACE;
   picParam->ref_arf_frame = VA_INVALID_SURFACE;
@@ -441,7 +442,7 @@ void vp8enc_init_PictureParameterBuffer(VAEncPictureParameterBufferVP8 *picParam
   /* always show it */
   picParam->pic_flags.bits.show_frame = 1;
 
-  for (size_t i = 0; i < N_ELEMENTS(picParam->loop_filter_level); i++) {
+  for (i = 0; i < N_ELEMENTS(picParam->loop_filter_level); i++) {
       picParam->loop_filter_level[i] = settings.loop_filter_level;
   }
 
@@ -578,8 +579,8 @@ void vp8enc_update_picture_parameter(int frame_type, int current_frame)
 VASurfaceID vp8enc_get_unused_surface()
 {
   VASurfaceID current_surface;
-
-  for (size_t i = 0; i < NUM_REF_SURFACES; i++) {
+  size_t i;
+  for (i = 0; i < NUM_REF_SURFACES; i++) {
         current_surface = vaapi_context.surfaces[i];
 
         if(current_surface != vaapi_context.last_ref_surface && current_surface != vaapi_context.golden_ref_surface && current_surface != vaapi_context.alt_ref_surface)
@@ -681,6 +682,7 @@ void vp8enc_create_EncoderPipe()
   VASurfaceAttrib surface_attrib;
   int major_ver, minor_ver;
   VAStatus va_status;
+  int i;
 
   vaapi_context.display = va_open_display();
   va_status = vaInitialize(vaapi_context.display, &major_ver, &minor_ver);
@@ -690,7 +692,7 @@ void vp8enc_create_EncoderPipe()
                            &num_entrypoints);
 
   entrypoint_found = true;
-  for(int i = 0; i < num_entrypoints;i++)
+  for(i = 0; i < num_entrypoints;i++)
   {
     if (entrypoints[i] == settings.vaapi_entry_point)
       entrypoint_found = true;
@@ -773,6 +775,7 @@ void vp8enc_destory_EncoderPipe()
 
 void vp8enc_init_VaapiContext()
 {
+  size_t i; 
   vaapi_context.profile = VAProfileVP8Version0_3;
 
   vp8enc_init_SequenceParameterBuffer(&vaapi_context.seq_param);
@@ -784,7 +787,7 @@ void vp8enc_init_VaapiContext()
   vaapi_context.rate_control_param.header.type = VAEncMiscParameterTypeRateControl;
   vp8enc_init_MiscParameterBuffers(&vaapi_context.hrd_param.data, &vaapi_context.frame_rate_param.data,&vaapi_context.rate_control_param.data);
 
-  for(size_t i = 0; i < N_ELEMENTS(vaapi_context.va_buffers);i++)
+  for(i = 0; i < N_ELEMENTS(vaapi_context.va_buffers);i++)
     vaapi_context.va_buffers[i] = VA_INVALID_ID;
   vaapi_context.num_va_buffers = 0;
 
@@ -957,8 +960,8 @@ vp8enc_render_picture()
 void vp8enc_destroy_buffers()
 {
   VAStatus va_status;
-
-  for(int i = 0; i < vaapi_context.num_va_buffers; i++) {
+  int i;
+  for(i = 0; i < vaapi_context.num_va_buffers; i++) {
     if (vaapi_context.va_buffers[i] != VA_INVALID_ID) {
       va_status = vaDestroyBuffer(vaapi_context.display, vaapi_context.va_buffers[i]);
       CHECK_VASTATUS(va_status,"vaDestroyBuffer");
