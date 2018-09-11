@@ -1,5 +1,6 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
-#
+
+# Copyright (C) 2018 Intel Corporation. All Rights Reserved.
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -20,30 +21,35 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
-AUTOMAKE_OPTIONS = foreign
+bin_PROGRAMS = sfcsample
 
-SUBDIRS = common decode encode vainfo videoprocess vendor/intel vendor/intel/sfcsample
 
-if USE_X11
-SUBDIRS += putsurface
-else
-if USE_WAYLAND
-SUBDIRS += putsurface
-endif
-endif
+AM_CPPFLAGS = \
+	-Wall	\
+	-fstack-protector	\
+	$(LIBVA_CFLAGS)		\
+	-I$(top_srcdir)/common	\
+	-I$(top_srcdir)/vendor/intel/sfcsample	\
+	$(NULL)
 
-if ENABLE_TESTS
-SUBDIRS += test
-endif
+TEST_LIBS = \
+	$(LIBVA_LIBS)				\
+	$(top_builddir)/common/libva-display.la	\
+	$(NULL)
 
-# Extra clean files so that maintainer-clean removes *everything*
-MAINTAINERCLEANFILES = \
-	aclocal.m4 compile config.guess config.sub \
-	configure depcomp install-sh ltmain.sh     \
-	Makefile.in missing
 
-EXTRA_DIST = \
-        autogen.sh \
-        $(NULL)
+sfcsample_LDADD = $(TEST_LIBS)
+
+source_c = TestMain.cpp
+source_c += VDecAccelVA.cpp
+
+sfcsample_SOURCES = $(source_c)
+
+
+valgrind:$(bin_PROGRAMS)
+	for a in $(bin_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done
+
+
