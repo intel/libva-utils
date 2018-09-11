@@ -216,6 +216,7 @@ AC_OUTPUT([
     putsurface/Makefile
     videoprocess/Makefile
     vendor/intel/Makefile
+    vendor/intel/sfcsample/Makefile
 ])
 
 
