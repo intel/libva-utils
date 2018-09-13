@@ -114,6 +114,13 @@ static int temporal_ids_in_pgop[16] = { // index is (encoding order) % gop_size 
     1, 2, 1, 3,
 };
 
+static int long_ref_temporal_ids_in_pgop[16] = { // index is (encoding order) % gop_size - 1, available from the 2nd encoded frame
+    1, 1, 1, 3,                         // each element is (the number of temporal layers - temporal id)
+    1, 2, 1, 3,
+    1, 2, 1, 3,
+    1, 2, 1, 3,
+};
+
 static int gop_factors_in_bgop[16] = {
     1,
     1,
@@ -177,6 +184,7 @@ struct svcenc_context
     int num_ref_frames;
     int hierarchical_levels;
     int layer_brc;
+    int long_ref;    /* long term reference flag */
 
     /* the info for next picture in encoding order */
     svcenc_surface next_svcenc_surface;
@@ -1266,6 +1274,7 @@ usage(char *program)
     fprintf(stderr, "\t--brcmode <value>\tBRC mode, 0 is CQP mode, otherwise CBR mode, default mode is CQP\n");
     fprintf(stderr, "\t--brclayer<value>\tDisable/Enalbe BRC per temporal layer, default is disable(0)\n");
     fprintf(stderr, "\t--bitrate <value>\tbit rate in Kbps(1024 bits). It is available for CBR mode only and default value is 2000\n");
+    fprintf(stderr, "\t--longref <value>\tLong term reference mode enable. 0 is off, 1 is on, default is off\n");
 }
 
 static void
@@ -1297,6 +1306,7 @@ parse_args(struct svcenc_context *ctx, int argc, char **argv)
         {"bitrate",     required_argument,      0,      'b'},
         {"brcmode",     required_argument,      0,      'm'},
         {"brclayer",    required_argument,      0,      'l'},
+        {"longref",     required_argument,      0,      'f'},
         {"help",        no_argument,            0,      'h'},
         { NULL,         0,                      NULL,   0 }
     };
@@ -1350,6 +1360,7 @@ parse_args(struct svcenc_context *ctx, int argc, char **argv)
     ctx->bits_per_kbps = -1;
     ctx->rate_control_mode = VA_RC_CQP;
     ctx->layer_brc = 0;
+    ctx->long_ref = 0;
 
     while ((c = getopt_long(argc, argv,
                             "",
@@ -1407,6 +1418,13 @@ parse_args(struct svcenc_context *ctx, int argc, char **argv)
 
             break;
 
+        case 'f':
+            tmp = atoi(optarg);
+
+            ctx->long_ref = !!tmp;
+
+            break;
+
         case '?':
             fprintf(stderr, "Error: unkown command options\n");
 
@@ -1416,6 +1434,9 @@ parse_args(struct svcenc_context *ctx, int argc, char **argv)
     }
 
     ctx->num_pictures = ((ctx->num_pictures - 1) & ~(ctx->gop_size - 1)) + 1;
+
+    if (ctx->long_ref == 1)
+        ctx->gop_size = 4;
 
     if (ctx->rate_control_mode == VA_RC_CQP)
         ctx->bits_per_kbps = -1;
@@ -1522,7 +1543,10 @@ svcenc_coding_order_to_level_pgop(struct svcenc_context *ctx, int coding_order)
     if (m == 0)
         return 0;
 
-    level = ctx->hierarchical_levels - temporal_ids_in_pgop[m - 1];
+    if (ctx->long_ref == 1)
+        level = ctx->hierarchical_levels - long_ref_temporal_ids_in_pgop[m - 1];
+    else
+        level = ctx->hierarchical_levels - temporal_ids_in_pgop[m - 1];
 
     assert(level > 0 && level < 5);
 
@@ -1542,8 +1566,16 @@ update_next_picture_info_pgop(struct svcenc_context *ctx)
     next_surface.coding_order = current_surface->coding_order + 1;
     next_surface.display_order = next_surface.coding_order;
     next_surface.slot_in_surfaces = (current_surface->slot_in_surfaces + 1) % NUM_SURFACES;
-    next_surface.temporal_id = svcenc_coding_order_to_level_pgop(ctx, next_surface.coding_order);
-    next_surface.is_ref = (next_surface.temporal_id != ctx->hierarchical_levels - 1);
+    if (ctx->long_ref == 1) {
+        if (next_surface.coding_order % 16 == 0)
+            next_surface.temporal_id = 0;
+        else
+            next_surface.temporal_id = 1;
+        next_surface.is_ref = !next_surface.temporal_id;
+    } else {
+        next_surface.temporal_id = svcenc_coding_order_to_level_pgop(ctx, next_surface.coding_order);
+        next_surface.is_ref = (next_surface.temporal_id != ctx->hierarchical_levels - 1);
+    }
 
     if (next_surface.temporal_id == 0) {
         if (!(next_surface.display_order % ctx->intra_period))
@@ -2962,6 +2994,12 @@ svcenc_init(struct svcenc_context *ctx)
         ctx->intra_period = 2 * ctx->gop_size;
         ctx->ip_period = 1;
         ctx->intra_idr_period = 8 * ctx->intra_period;
+    }
+
+    if (ctx->long_ref == 1) {
+        ctx->intra_period = 2 * ctx->gop_size;
+        ctx->ip_period = 16;
+        ctx->intra_idr_period = 2 * ctx->intra_period;
     }
 
     ctx->framerate_per_100s = frame_rates[ctx->hierarchical_levels - 1] * 100;
