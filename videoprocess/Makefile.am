@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = vavpp
+bin_PROGRAMS = vavpp vppscaling
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -36,6 +36,9 @@ TEST_LIBS = \
 
 vavpp_SOURCES = vavpp.cpp
 vavpp_LDADD   = $(TEST_LIBS)
+
+vppscaling_SOURCES = vppscaling.c
+vppscaling_LDADD = $(TEST_LIBS)
 
 valgrind:(bin_PROGRAMS)
 	for a in(bin_PROGRAMS); do \
