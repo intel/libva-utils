@@ -1499,42 +1499,6 @@ vpp_context_create()
                                &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
-    /* Source surface format check */
-    uint32_t num_surf_attribs = VASurfaceAttribCount;
-    VASurfaceAttrib * surf_attribs = (VASurfaceAttrib*)
-              malloc(sizeof(VASurfaceAttrib) * num_surf_attribs);
-    if (!surf_attribs)
-       assert(0);
-
-    va_status = vaQuerySurfaceAttributes(va_dpy,
-                                        config_id,
-                                        surf_attribs,
-                                        &num_surf_attribs);
-
-    if (va_status == VA_STATUS_ERROR_MAX_NUM_EXCEEDED) {
-        surf_attribs = (VASurfaceAttrib*)realloc(surf_attribs,
-                        sizeof(VASurfaceAttrib) * num_surf_attribs);
-         if (!surf_attribs)
-             assert(0);
-         va_status = vaQuerySurfaceAttributes(va_dpy,
-                                              config_id,
-                                              surf_attribs,
-                                              &num_surf_attribs);
-    }
-    CHECK_VASTATUS(va_status, "vaQuerySurfaceAttributes");
-
-    for (i = 0; i < num_surf_attribs; i++) {
-        if (surf_attribs[i].type == VASurfaceAttribPixelFormat &&
-            surf_attribs[i].value.value.i == (int)g_in_fourcc)
-            break;
-    }
-    free(surf_attribs);
-
-    if (i == num_surf_attribs) {
-        printf("Input fourCC %d  is not supported by VPP !\n", g_in_fourcc);
-        assert(0);
-    }
-
     va_status = vaCreateContext(va_dpy,
                                 config_id,
                                 g_out_pic_width,
@@ -1593,37 +1557,26 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
 
     if (!strcmp(str, "YV12")){
         tfourcc = VA_FOURCC('Y', 'V', '1', '2');
-        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "I420")){
         tfourcc = VA_FOURCC('I', '4', '2', '0');
-        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "NV12")){
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
-        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
         tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
-        tformat = VA_RT_FORMAT_YUV422;
     } else if(!strcmp(str, "UYVY")){
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
-        tformat = VA_RT_FORMAT_YUV422;
     } else if (!strcmp(str, "P010")) {
         tfourcc = VA_FOURCC('P', '0', '1', '0');
-        tformat = VA_RT_FORMAT_YUV420_10BPP;
     } else if (!strcmp(str, "I010")) {
         tfourcc = VA_FOURCC('I', '0', '1', '0');
-        tformat = VA_RT_FORMAT_YUV420_10BPP;
     } else if (!strcmp(str, "RGBA")) {
         tfourcc = VA_FOURCC_RGBA;
-        tformat = VA_RT_FORMAT_RGB32;
     } else if (!strcmp(str, "RGBX")) {
         tfourcc = VA_FOURCC_RGBX;
-        tformat = VA_RT_FORMAT_RGB32;
     } else if (!strcmp(str, "BGRA")) {
         tfourcc = VA_FOURCC_BGRA;
-        tformat = VA_RT_FORMAT_RGB32;
     } else if (!strcmp(str, "BGRX")) {
         tfourcc = VA_FOURCC_BGRX;
-        tformat = VA_RT_FORMAT_RGB32;
     } else{
         printf("Not supported format: %s! Currently only support following format: %s\n",
                str, "YV12, I420, NV12, YUY2(YUYV), UYVY, P010, I010, RGBA, RGBX, BGRA or BGRX");

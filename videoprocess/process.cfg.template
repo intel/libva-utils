@@ -39,8 +39,8 @@ FILTER_TYPE: VAProcFilterNone
 #default value will be applied then.
 
 #5.1 Denoise filter paramters
- #(0.0 ~ 1.0, default 0.5)
-DENOISE_INTENSITY: 0.75
+ #(0--64, default:0 )
+DENOISE_INTENSITY: 44
 
 #5.2 Deinterlacding parameters
   #(VAProcDeinterlacingBob, VAProcDeinterlacingWeave,
@@ -54,8 +54,8 @@ DEINTERLACING_ALGORITHM:  VAProcDeinterlacingBob
 DEINTERLACING_FLAGS: 0
 
 #5.3 Sharpening parameters
- # (0.0 ~ 1.0, default 0.5)
-SHARPENING_INTENSITY: 0.75
+# (0 ~ 64, default 44)
+SHARPENING_INTENSITY: 44
 
 #5.4 Blending
  # (0, 1, default 0)
