@@ -5,7 +5,7 @@ m = c.find_library('m')
 executable('avcenc', [ 'avcenc.c' ],
            dependencies: [ libva_display_dep, threads ],
            install: true)
-executable('h264enc', [ 'h264encode.c' ],
+executable('h264encode', [ 'h264encode.c' ],
            dependencies: [ libva_display_dep, threads, m ],
            install: true)
 executable('mpeg2vaenc', [ 'mpeg2vaenc.c' ],
