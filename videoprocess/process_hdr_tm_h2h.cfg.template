@@ -1,0 +1,56 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420/P010)
+#  you require. After video processing, the processed content (ARGB10 surface)
+#  will be stored to frames(ARGB10 format in file).
+#    Supported features include: HDR Tone Mapping, implicit format conversion(P010->A2RGB10). Each
+# time only one kind of processing will be executed in test application. Although libva supports
+# multiple filters execution in one time. you can modify this configuration file to set the
+# filter and the corresponding parameters.
+
+#To simplify this test app, we use the default gamut for both source and destination.
+#Please set correct gamut according to the real value.
+#BT2020    Gammut	  Multiplier		Output	
+#G	0.17	  0.797		   50000		    8500	39850
+#R	0.708	  0.292		   50000		    35400	14600
+#B	0.131	  0.046		   50000		    6550	2300
+#w	0.3127	0.329		   50000		    15635	16450
+#BT709    Gammut	  Multiplier		Output	
+#G	0.3	0.6		50000		15000	30000
+#R	0.64	0.33		50000		32000	16500
+#B	0.15	0.06		50000		7500	3000
+#w	0.3127	0.329		50000		15635	16450
+
+#0. Tone Map Type: 0-H2H, 1-H2E, 2-H2S
+TM_TYPE: 0
+
+#1.Source YUV(RGB) file information
+SRC_FILE_NAME: ShowGirl2Teaser_1920x1080_4000nits.p010
+SRC_FRAME_WIDTH: 1920 
+SRC_FRAME_HEIGHT: 1080
+SRC_FRAME_FORMAT: P010
+SRC_FRAME_COLOUR_PRIMARIES: 9
+SRC_FRAME_TRANSFER_CHARACTERISTICS: 16
+SRC_MAX_DISPLAY_MASTERING_LUMINANCE: 1000
+SRC_MIN_DISPLAY_MASTERING_LUMINANCE: 100
+SRC_MAX_CONTENT_LIGHT_LEVEL: 4000
+SRC_MAX_PICTURE_AVERAGE_LIGHT_LEVEL: 100
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ShowGirl2Teaser_1920x1080_1000nits_writer.a2rgb10
+DST_FRAME_WIDTH:  1920
+DST_FRAME_HEIGHT: 1080
+DST_FRAME_FORMAT: A2RGB10
+DST_FRAME_COLOUR_PRIMARIES: 9
+DST_FRAME_TRANSFER_CHARACTERISTICS: 16
+DST_MAX_DISPLAY_MASTERING_LUMINANCE: 1000
+DST_MIN_DISPLAY_MASTERING_LUMINANCE: 100
+DST_MAX_CONTENT_LIGHT_LEVEL: 1000
+DST_MAX_PICTURE_AVERAGE_LIGHT_LEVEL: 100
+
+#3.How many frames to be processed
+FRAME_SUM: 1
+
+#4.VPP filter specific parameters. If they are not specified here,
+#default value will be applied then.
+FILTER_TYPE: VAProcFilterHighDynamicRangeToneMapping
+
