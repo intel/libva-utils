@@ -42,3 +42,7 @@ valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
 	done
+
+EXTRA_DIST = 			\
+	avcstreamoutdemo.h 	\
+	$(NULL)

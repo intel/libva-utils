@@ -52,4 +52,7 @@ valgrind:$(bin_PROGRAMS)
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
 	done
 
-
+EXTRA_DIST =		\
+	VDecAccelVA.h 	\
+	DecodeParamBuffer.h	\
+	$(NULL)
