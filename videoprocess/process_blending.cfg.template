@@ -1,0 +1,61 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420)
+#  you require. After video processing, the processed content (NV12/YV12/I420 surface)
+#  will be stored to frames(yv12 format in file).
+#    Supported features include blending and implicit format conversion(NV12<->YV12<->I420). 
+#  you can modify this configuration file to set the corresponding parameters.
+
+#1.Source YUV(RGB) file information
+#src file number:
+SRC_NUMBER: 2
+#source file1
+SRC_FILE_NAME_1: ./00003_section1_ColorfulPens_960x640.nv12
+SRC_FRAME_WIDTH_1:960  
+SRC_FRAME_HEIGHT_1:640
+SRC_FRAME_FORMAT_1: NV12
+SRC_FILE_FORMAT_1: NV12
+#Cropping info
+SRC_CROP_LEFT_X_1: 0
+SRC_CROP_TOP_Y_1: 0
+SRC_CROP_WIDTH_1:960
+SRC_CROP_HEIGHT_1:640
+
+#destination area (used in scaling)
+SRC_DstLeftX_1: 0
+SRC_DstTopY_1: 0
+SRC_DstWidth_1: 960
+SRC_DstHeight_1: 640
+#we can support N>=2 input, you just need add the para to xx_N format
+SRC_FILE_NAME_2: ./00003_section1_ColorfulPens_5f_720x480_writer720x480.argb
+SRC_FRAME_WIDTH_2:720
+SRC_FRAME_HEIGHT_2: 480
+SRC_FRAME_FORMAT_2: ARGB
+SRC_FILE_FORMAT_2: ARGB
+#Cropping info
+SRC_CROP_LEFT_X_2: 0
+SRC_CROP_TOP_Y_2: 0
+SRC_CROP_WIDTH_2:720
+SRC_CROP_HEIGHT_2:480
+#destination area (used in scaling)
+SRC_DstLeftX_2: 100
+SRC_DstTopY_2: 100
+SRC_DstWidth_2: 720
+SRC_DstHeight_2: 480
+#Defines Video blend flags 1-Global Alpah, 2-Premutiplied Alpha, 3-Luma Key
+SRC_CompositionBlendFlags_2: 1
+#Defines Global Alpah blending value 0.0 to 1.0
+SRC_CompositionAlpha_2: 0.5
+#Defines Minimum Luma value 0.0 to 1.0 for Luma Key  (used in composition)
+SRC_compositionLumaMin_2:0.0
+#Defines Maximum Luma value 0.0 to 1.0 for Luma Key  (used in composition)
+SRC_compositionLumaMax_2:1.0
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ./writer960x640.argb
+DST_FRAME_WIDTH:  960
+DST_FRAME_HEIGHT: 640
+DST_FRAME_FORMAT: ARGB
+DST_FILE_FORMAT: ARGB
+
+#3.How many frames to be processed
+FRAME_SUM: 5
