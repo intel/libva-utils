@@ -1,0 +1,34 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames(NV12/YV12/I420/YUY2) to one type of surface(NV12,YUY2)
+#  you require. After video processing, the processed content (NV12,YUY2 surface)
+#  will be stored to frames(NV12/YV12/I420/YUY2 format in file).
+#    Supported features include: procAmp(HSBC-Hue,Saturation,Brightness, Contrast).
+
+#1.Source (NV12/YV12/I420/YUY2) file information
+SRC_FILE_NAME: ./../../../../../share/Content/flowersky_352x288.yuy2
+SRC_FRAME_WIDTH: 352 
+SRC_FRAME_HEIGHT: 288
+#NV12/YUY2 format
+SRC_FRAME_FORMAT: YUY2
+
+#Note NV12/YV12/I420,YUY2 format
+SRC_FILE_FORMAT: YUY2
+
+#2.Destination (NV12/YV12/I420,YUY2) file information
+DST_FILE_NAME:    ./flowersky_352x288_writer352x288.yuy2
+
+#Note NV12/YV12/I420/YUY2 format
+DST_FILE_FORMAT: YUY2
+
+#3.How many frames to be processed
+FRAME_SUM: 3
+
+4. Color balance parameters
+ #(-180.0 ~ 180.0, default 0.0, step:0.1)
+COLOR_BALANCE_HUE: 180
+ #(0.0 ~ 10.0, default 1.0, step:0.01)
+COLOR_BALANCE_SATURATION: 1.0
+ #(-100 ~ 100, default 0.0, step:0.1)
+COLOR_BALANCE_BRIGHTNESS: 0.0
+ #(0.0 ~ 10.0, default 1.0, step:0.01)
+COLOR_BALANCE_CONTRAST:  1.0
