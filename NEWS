@@ -1,14 +1,14 @@
 libva-utils NEWS -- summary of changes.  2018-09-30
 Copyright (C) 2009-2018 Intel Corporation
 Version 2.4.0 - 1.Feb.2019
-fix make dist issue caused by decode streamout sample
-add VP sample for Blending.
-add VP seperate sample for scaling,csc,sharpness,denoise,chromasitting.
+* fix make dist issue caused by decode streamout sample
+* add VP sample for Blending.
+* add VP seperate sample for scaling,csc,sharpness,denoise,chromasitting.
 
 Version 2.3.0 - 30.Sep.2018
-add HEVC encode sample code
-Add sample code for avc decode streamout
-Add VP8 sample encoder application (SVCT supported)
+* add HEVC encode sample code
+* Add sample code for avc decode streamout
+* Add VP8 sample encoder application (SVCT supported)
 
 Version 2.2.0 - DD.Jul.2018
 * Bump version to 2.2.0
