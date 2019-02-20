@@ -41,7 +41,7 @@ m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
 
 # libva minimum version requirement, at this released version
 # libva-utils was created
-m4_define([libva_api_min_version], [1.0.0])
+m4_define([libva_api_min_version], [1.1.0])
 
 # libdrm minimun version requirement
 m4_define([libdrm_version], [2.4])

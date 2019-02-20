@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -155,14 +155,12 @@ int main(int argc, const char* argv[])
   VAStatus va_status;
   int major_version, minor_version;
   const char *driver;
-  const char *name = strrchr(argv[0], '/');
+  const char *name = strrchr(argv[0], '/'); 
   VAProfile profile, *profile_list = NULL;
   int num_profiles, max_num_profiles, i;
   VAEntrypoint entrypoint, *entrypoints = NULL;
   int num_entrypoint = 0;
   int ret_val = 0;
-  int num_image_formats, max_num_image_formats;
-  VAImageFormat image_format, *image_formats = NULL;
   char verbose = FALSE;
 
   if (name)
@@ -178,10 +176,10 @@ int main(int argc, const char* argv[])
       fprintf(stderr, "%s: vaGetDisplay() failed\n", name);
       return 2;
   }
-
+  
   va_status = vaInitialize(va_dpy, &major_version, &minor_version);
   CHECK_VASTATUS(va_status, "vaInitialize", 3);
-
+  
   printf("%s: VA-API version: %d.%d (libva %s)\n",
          name, major_version, minor_version, LIBVA_VERSION_S);
 
@@ -211,15 +209,15 @@ int main(int argc, const char* argv[])
 
   for (i = 0; i < num_profiles; i++) {
       profile = profile_list[i];
-      va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints,
+      va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
                                            &num_entrypoint);
       if (va_status == VA_STATUS_ERROR_UNSUPPORTED_PROFILE)
-          continue;
+	continue;
 
       CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints", 4);
 
       for (entrypoint = 0; entrypoint < num_entrypoint; entrypoint++) {
-          printf("      %-32s:  %s\n",
+          printf("      %-32s:	%s\n",
                  vaProfileStr(profile),
                  vaEntrypointStr(entrypoints[entrypoint]));
           if (verbose == FALSE)
@@ -228,12 +226,12 @@ int main(int argc, const char* argv[])
                                             entrypoints[entrypoint]);
       }
   }
-
+  
 error:
   free(entrypoints);
   free(profile_list);
   vaTerminate(va_dpy);
   va_close_display(va_dpy);
-
+  
   return ret_val;
 }
