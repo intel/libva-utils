@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -90,13 +90,15 @@ int main(int argc, const char* argv[])
   VAStatus va_status;
   int major_version, minor_version;
   const char *driver;
-  const char *name = strrchr(argv[0], '/'); 
+  const char *name = strrchr(argv[0], '/');
   VAProfile profile, *profile_list = NULL;
   int num_profiles, max_num_profiles, i;
   VAEntrypoint entrypoint, *entrypoints = NULL;
   int num_entrypoint = 0;
   int ret_val = 0;
-  
+  int num_image_formats, max_num_image_formats;
+  VAImageFormat image_format, *image_formats = NULL;
+
   if (name)
       name++;
   else
@@ -110,10 +112,10 @@ int main(int argc, const char* argv[])
       fprintf(stderr, "%s: vaGetDisplay() failed\n", name);
       return 2;
   }
-  
+
   va_status = vaInitialize(va_dpy, &major_version, &minor_version);
-  CHECK_VASTATUS(va_status, "vaInitialize", 3);
-  
+  //CHECK_VASTATUS(va_status, "vaInitialize", 3);
+
   printf("%s: VA-API version: %d.%d (libva %s)\n",
          name, major_version, minor_version, LIBVA_VERSION_S);
 
@@ -143,25 +145,51 @@ int main(int argc, const char* argv[])
 
   for (i = 0; i < num_profiles; i++) {
       profile = profile_list[i];
-      va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
+      va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints,
                                            &num_entrypoint);
       if (va_status == VA_STATUS_ERROR_UNSUPPORTED_PROFILE)
-	continue;
+          continue;
 
       CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints", 4);
 
       for (entrypoint = 0; entrypoint < num_entrypoint; entrypoint++) {
-          printf("      %-32s:	%s\n",
+          printf("      %-32s:  %s\n",
                  vaProfileStr(profile),
                  vaEntrypointStr(entrypoints[entrypoint]));
       }
   }
-  
+
+  max_num_image_formats = vaMaxNumImageFormats(va_dpy);
+  image_formats = malloc(max_num_image_formats * sizeof(VAImageFormat));
+  if (max_num_image_formats < 0) {
+      printf("Failed to allocate memory for image format list\n");
+      ret_val = -1;
+      goto error;
+  }
+
+  va_status =
+          vaQueryImageFormats(va_dpy, image_formats, &num_image_formats);
+  CHECK_VASTATUS(va_status, "vaQueryImageFormats failed", 6);
+  if (num_image_formats < 0 || num_image_formats > max_num_image_formats)
+      goto error;
+
+  for (i = 0; i < num_image_formats; i++) {
+      image_format = image_formats[i];
+      char fourcc_as_string[5] = {0};
+      sprintf(fourcc_as_string, "%c%c%c%c",
+              (image_format.fourcc >> 24) & 0xFF,
+              (image_format.fourcc >> 16) & 0xFF,
+              (image_format.fourcc >> 8) & 0xFF, image_format.fourcc & 0xFF);
+      printf("      %s:  %d\n", fourcc_as_string, image_format.bits_per_pixel);
+  }
+
+
 error:
   free(entrypoints);
   free(profile_list);
+  free(image_formats);
   vaTerminate(va_dpy);
   va_close_display(va_dpy);
-  
+
   return ret_val;
 }
