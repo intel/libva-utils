@@ -118,9 +118,6 @@ void print_supported_config_attributes(VADisplay va_dpy,
     {0x80000000, "VA_RT_FORMAT_PROTECTED"}};
   VAStatus va_status;
   VAConfigAttrib attribs[1] = {0};
-  VAConfigID va_config_id;
-  unsigned int num_attributes;
-  VASurfaceAttrib attribute, *attributes = NULL;
   int j, k;
 
   const size_t num_va_rt_formats = sizeof(va_rt_format_to_names_map) /
@@ -135,7 +132,7 @@ void print_supported_config_attributes(VADisplay va_dpy,
     if (attribs[0].value == VA_ATTRIB_NOT_SUPPORTED)
       continue;
     if (attribs[0].type != VAConfigAttribRTFormat) {
-      printf("         %-32s default value: %d\n",
+      printf("         %-32s default value: %u\n",
              vaConfigAttribTypeStr(j), attribs[0].value);
     } else {
       // VAConfigAttribRTFormat conveys a bitmask.
