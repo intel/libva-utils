@@ -46,12 +46,16 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     goto error;                                                         \
 }
 
+#define TRUE 1
+#define FALSE 0
+
 static void
 usage_exit(const char *program)
 {
     fprintf(stdout, "Show information from VA-API driver\n");
     fprintf(stdout, "Usage: %s --help\n", program);
-    fprintf(stdout, "\t--help print this message\n\n");
+    fprintf(stdout, "\t--help print this message\n");
+    fprintf(stdout, "\t--verbose\n\n");
     fprintf(stdout, "Usage: %s [options]\n", program);
     va_print_display_options(stdout);
 
@@ -59,29 +63,90 @@ usage_exit(const char *program)
 }
 
 static void
-parse_args(const char *name, int argc, char **argv)
+parse_args(const char *name, int argc, char **argv, char *verbose)
 {
     int c;
     int option_index = 0;
 
     static struct option long_options[] = {
         {"help",        no_argument,            0,      'h'},
+        {"verbose",     no_argument,            0,      'v'},
         { NULL,         0,                      NULL,   0 }
     };
 
-    va_init_display_args(&argc, argv);
-
     while ((c = getopt_long(argc, argv,
-                            "",
+                            "hv",
                             long_options,
                             &option_index)) != -1) {
         switch(c) {
+        case 'v':
+            *verbose = TRUE;
+            break;
         case 'h':
         default:
             usage_exit(name);
             break;
         }
     }
+
+    va_init_display_args(&argc, argv);
+}
+
+
+void print_supported_config_attributes(VADisplay va_dpy,
+                                       VAProfile profile,
+                                       VAEntrypoint entrypoint) {
+  static struct {
+    int bitmask;
+    char name[22];
+  } va_rt_format_to_names_map[] = {
+    {0x00000001, "VA_RT_FORMAT_YUV420   "},
+    {0x00000002, "VA_RT_FORMAT_YUV422   "},
+    {0x00000004, "VA_RT_FORMAT_YUV444   "},
+    {0x00000008, "VA_RT_FORMAT_YUV411   "},
+    {0x00000010, "VA_RT_FORMAT_YUV400   "},
+    {0x00000100, "VA_RT_FORMAT_YUV420_10"},
+    {0x00000200, "VA_RT_FORMAT_YUV422_10"},
+    {0x00000400, "VA_RT_FORMAT_YUV444_10"},
+    {0x00001000, "VA_RT_FORMAT_YUV420_12"},
+    {0x00002000, "VA_RT_FORMAT_YUV422_12"},
+    {0x00004000, "VA_RT_FORMAT_YUV444_12"},
+    {0x00010000, "VA_RT_FORMAT_RGB16    "},
+    {0x00020000, "VA_RT_FORMAT_RGB32    "},
+    {0x00100000, "VA_RT_FORMAT_RGBP     "},
+    {0x00200000, "VA_RT_FORMAT_RGB32_10 "},
+    {0x80000000, "VA_RT_FORMAT_PROTECTED"}};
+  VAStatus va_status;
+  VAConfigAttrib attribs[1] = {0};
+  VAConfigID va_config_id;
+  unsigned int num_attributes;
+  VASurfaceAttrib attribute, *attributes = NULL;
+  int j, k;
+
+  const size_t num_va_rt_formats = sizeof(va_rt_format_to_names_map) /
+                                   sizeof(va_rt_format_to_names_map[0]);
+
+  for (j = 0; j < VAConfigAttribTypeMax; j++) {
+    attribs[0].type = (VAConfigAttribType)j;
+    va_status = vaGetConfigAttributes(va_dpy, profile, entrypoint,
+                                      attribs, 1);
+    if (va_status != VA_STATUS_SUCCESS)
+      continue;
+    if (attribs[0].value == VA_ATTRIB_NOT_SUPPORTED)
+      continue;
+    if (attribs[0].type != VAConfigAttribRTFormat) {
+      printf("         %-32s default value: %d\n",
+             vaConfigAttribTypeStr(j), attribs[0].value);
+    } else {
+      // VAConfigAttribRTFormat conveys a bitmask.
+      for (k = 0; k < num_va_rt_formats; k++) {
+        if (attribs[0].value & va_rt_format_to_names_map[k].bitmask) {
+          printf("         %-32s: %s\n", vaConfigAttribTypeStr(j),
+                 va_rt_format_to_names_map[k].name);
+        }
+      }
+    }
+  }
 }
 
 int main(int argc, const char* argv[])
@@ -98,13 +163,14 @@ int main(int argc, const char* argv[])
   int ret_val = 0;
   int num_image_formats, max_num_image_formats;
   VAImageFormat image_format, *image_formats = NULL;
+  char verbose = FALSE;
 
   if (name)
       name++;
   else
       name = argv[0];
 
-  parse_args(name, argc, (char **)argv);
+  parse_args(name, argc, (char **)argv, &verbose);
 
   va_dpy = va_open_display();
   if (NULL == va_dpy)
@@ -114,7 +180,7 @@ int main(int argc, const char* argv[])
   }
 
   va_status = vaInitialize(va_dpy, &major_version, &minor_version);
-  //CHECK_VASTATUS(va_status, "vaInitialize", 3);
+  CHECK_VASTATUS(va_status, "vaInitialize", 3);
 
   printf("%s: VA-API version: %d.%d (libva %s)\n",
          name, major_version, minor_version, LIBVA_VERSION_S);
@@ -156,38 +222,16 @@ int main(int argc, const char* argv[])
           printf("      %-32s:  %s\n",
                  vaProfileStr(profile),
                  vaEntrypointStr(entrypoints[entrypoint]));
+          if (verbose == FALSE)
+              continue;
+          print_supported_config_attributes(va_dpy, profile,
+                                            entrypoints[entrypoint]);
       }
   }
-
-  max_num_image_formats = vaMaxNumImageFormats(va_dpy);
-  image_formats = malloc(max_num_image_formats * sizeof(VAImageFormat));
-  if (max_num_image_formats < 0) {
-      printf("Failed to allocate memory for image format list\n");
-      ret_val = -1;
-      goto error;
-  }
-
-  va_status =
-          vaQueryImageFormats(va_dpy, image_formats, &num_image_formats);
-  CHECK_VASTATUS(va_status, "vaQueryImageFormats failed", 6);
-  if (num_image_formats < 0 || num_image_formats > max_num_image_formats)
-      goto error;
-
-  for (i = 0; i < num_image_formats; i++) {
-      image_format = image_formats[i];
-      char fourcc_as_string[5] = {0};
-      sprintf(fourcc_as_string, "%c%c%c%c",
-              (image_format.fourcc >> 24) & 0xFF,
-              (image_format.fourcc >> 16) & 0xFF,
-              (image_format.fourcc >> 8) & 0xFF, image_format.fourcc & 0xFF);
-      printf("      %s:  %d\n", fourcc_as_string, image_format.bits_per_pixel);
-  }
-
 
 error:
   free(entrypoints);
   free(profile_list);
-  free(image_formats);
   vaTerminate(va_dpy);
   va_close_display(va_dpy);
 
