@@ -1033,7 +1033,7 @@ store_yuv_surface_to_file(FILE *fp,
                 g_dst_file_fourcc == VA_FOURCC_RGBA) ||
                (g_out_fourcc == VA_FOURCC_RGBX &&
                 g_dst_file_fourcc == VA_FOURCC_RGBX) ||
-               (g_out_fourcc == VA_FOURCC_RGBA &&
+               (g_out_fourcc == VA_FOURCC_BGRA &&
                 g_dst_file_fourcc == VA_FOURCC_BGRA) ||
                (g_out_fourcc == VA_FOURCC_BGRX &&
                 g_dst_file_fourcc == VA_FOURCC_BGRX)) {
