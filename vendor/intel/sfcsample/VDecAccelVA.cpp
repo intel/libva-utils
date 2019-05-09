@@ -42,7 +42,6 @@
 #include "VDecAccelVA.h"
 #include <va/va.h>
 #include <va/va_drm.h>
-#include <va/va_x11.h>
 
 #define VASUCCEEDED(err)    (err == VA_STATUS_SUCCESS)
 #define VAFAILED(err)       (err != VA_STATUS_SUCCESS)
