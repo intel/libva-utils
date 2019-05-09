@@ -39,9 +39,6 @@
 #include <va/va.h>
 #include "DecodeParamBuffer.h"
 
-#include <X11/Xlib.h>
-typedef Display*     HDISP;
-
 namespace mvaccel
 {
 /**
