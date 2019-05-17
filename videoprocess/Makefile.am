@@ -24,10 +24,13 @@ bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vpp
 
 AM_CPPFLAGS = \
 	-Wall					\
-	-fstack-protector			\
 	$(LIBVA_CFLAGS)				\
 	-I$(top_srcdir)/common			\
 	$(NULL)
+
+if USE_SSP
+AM_CPPFLAGS += -fstack-protector
+endif
 
 TEST_LIBS = \
 	$(LIBVA_LIBS)				\

@@ -26,8 +26,11 @@ TEST_CFLAGS = \
 	$(LIBVA_CFLAGS)			\
 	-I$(top_srcdir)/common		\
 	-Wall				\
-	-fstack-protector		\
 	$(NULL)
+
+if USE_SSP
+TEST_CFLAGS += -fstack-protector
+endif
 
 TEST_LIBS = \
 	$(LIBVA_LIBS)		\

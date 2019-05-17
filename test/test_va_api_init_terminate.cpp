@@ -74,12 +74,32 @@ TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_Environment)
 
 TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_vaSetDriverName)
 {
-    char driver[4] = "bad";
+    int major, minor;
+
     VADisplay display = getDisplay();
     ASSERT_TRUE(display);
 
-    EXPECT_STATUS_EQ(
-        VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
+    { // driver name length == 0 invalid
+      char driver[1] = "";
+      EXPECT_STATUS_EQ(
+          VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
+    }
+
+    { // driver name length >= 256 invalid
+      char driver[257];
+      driver[256] = '\0';
+      std::string(256, 'x').copy(driver, 256);
+      EXPECT_STATUS_EQ(
+          VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
+    }
+
+    { // acceptable driver name, but does not exist
+      char driver[4] = "bad";
+      EXPECT_STATUS(vaSetDriverName(display, driver));
+
+      EXPECT_STATUS_EQ(
+          VA_STATUS_ERROR_UNKNOWN, vaInitialize(display, &major, &minor));
+    }
 
     EXPECT_STATUS(vaTerminate(display));
 }
