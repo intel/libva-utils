@@ -1,5 +1,15 @@
-libva-utils NEWS -- summary of changes.  2018-09-30
-Copyright (C) 2009-2018 Intel Corporation
+libva-utils NEWS -- summary of changes.  2019-07-08
+Copyright (C) 2009-2019 Intel Corporation
+
+Version 2.5.0 - 8.Jul.2019
+* meson: rename the h264enc binary to be in line with the autotools build
+* unify NEWS format
+* sfcsample: don't include X11 headers
+* test: update vaInitialize_vaTerminate_Bad_vaSetDriverName
+* Check for -fstack-protector
+* vavpp: csc with AYUV format
+* vavpp: requires BGRA frame when saving a BGRA file
+
 Version 2.4.0 - 1.Feb.2019
 * fix make dist issue caused by decode streamout sample
 * add VP sample for Blending.
