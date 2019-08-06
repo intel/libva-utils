@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vppblending
+bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vppblending vppcsc_vaCreateImage
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -54,6 +54,9 @@ vppchromasitting_LDADD   = $(TEST_LIBS)
 
 vppblending_SOURCES = vppblending.cpp
 vppblending_LDADD   = $(TEST_LIBS)
+
+vppcsc_vaCreateImage_SOURCES = vppcsc_vaCreateImage.cpp
+vppcsc_vaCreateImage_LDADD   = $(TEST_LIBS)
 
 valgrind:(bin_PROGRAMS)
 	for a in(bin_PROGRAMS); do \
