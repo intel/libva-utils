@@ -1,0 +1,90 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420)
+#  you require. After video processing, the processed content (NV12/YV12/I420 surface)
+#  will be stored to frames(yv12 format in file).
+#    Supported features include scaling and implicit format conversion(NV12<->YV12<->I420). 
+#    input and output crop and usrptr.
+#  you can modify this configuration file to set the corresponding parameters.
+
+#1.Source YUV(RGB) file information
+SRC_FILE_NAME: ./flowersky_352x288_writer352x288.yv12
+SRC_FRAME_WIDTH: 352 
+SRC_FRAME_HEIGHT: 288
+SRC_FRAME_FORMAT: YV12
+
+# supported type: (CPU, VA), default: VA
+SRC_SURFACE_MEMORY_TYPE: VA
+
+#if use usrptr CPU memory type, can support 16/128 align mode
+SRC_SURFACE_CPU_ALIGN_MODE: 128
+
+#if you want to do source crop, you need define the area below to crop
+#do the crop: 1; not do the crop: 0(default)
+SRC_SURFACE_CROP: 1
+
+#Cropping info
+SRC_CROP_LEFT_X: 10
+SRC_CROP_TOP_Y: 20
+SRC_CROP_WIDTH:200
+SRC_CROP_HEIGHT:200
+
+#2.Destination YUV(RGB) file information
+#dest file number:
+DST_NUMBER: 1 
+
+#we can support N>=2 outputs, you just need add the para to xx_N format
+DST_FILE_NAME_1:    ./scaling_out_1400x1200.nv12
+DST_FRAME_WIDTH_1:  1400
+DST_FRAME_HEIGHT_1: 1200
+DST_FRAME_FORMAT_1: NV12
+
+#dest surface memory type
+# supported type: (CPU, VA), default: VA
+DST_SURFACE_MEMORY_TYPE_1: VA
+
+#if use usrptr CPU memory type, can support 16/128 align mode
+DST_SURFACE_CPU_ALIGN_MODE_1: 128
+
+#we can support the output crop with none (0, 0) top/left in render target 
+#if the value set to 1, the output can be scale to the positon below defined
+#if the value set to 0, ignore and do not crop output
+#if the value set to 1, please ensure the DST_NUMBER to 1
+DST_SURFACE_CROP: 1
+#destination area (used in scaling)
+DST_CROP_LEFT_X: 100
+DST_CROP_TOP_Y: 100
+DST_CROP_WIDTH: 1000
+DST_CROP_HEIGHT: 800
+
+DST_FILE_NAME_2:    ./scaling_out_1000x800_2.yuy2
+DST_FRAME_WIDTH_2:  1000
+DST_FRAME_HEIGHT_2: 800
+DST_FRAME_FORMAT_2: YUY2
+
+DST_FILE_FORMAT_2: YUY2
+#dest surface memory type
+# supported type: (CPU, VA), default: VA
+DST_SURFACE_MEMORY_TYPE_2: CPU
+
+#if use usrptr CPU memory type, can support 16/128 align mode
+DST_SURFACE_CPU_ALIGN_MODE_2: 128
+
+DST_FILE_NAME_3:    ./scaling_out_1200x1000_3.nv12
+DST_FRAME_WIDTH_3:  1200
+DST_FRAME_HEIGHT_3: 1000
+DST_FRAME_FORMAT_3: NV12
+
+#dest surface memory type
+# supported type: (CPU, VA), default: VA
+DST_SURFACE_MEMORY_TYPE_3: CPU
+
+#if use usrptr CPU memory type, can support 16/128 align mode
+DST_SURFACE_CPU_ALIGN_MODE_3: 128
+
+#if you need to scale the 16align output as input, you can add the para 2ND_SCALE,
+#xx_02 will be the 2nd scale output, regarding the 1st scale output as input
+# 1: enable the 2ndscale, default:0
+2ND_SCALE: 0
+#3.How many frames to be processed
+FRAME_SUM: 1
+
