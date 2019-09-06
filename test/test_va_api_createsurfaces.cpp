@@ -75,6 +75,7 @@ protected:
                     if ((attrib.value & mask) == mask) { // supported value
                         const ConfigAttributes attribs(
                             1, {type : attrib.type, value : mask });
+                        SCOPED_TRACE(attribs.front());
                         createConfig(profile, entrypoint, attribs);
                         test(attribs);
                         destroyConfig();
@@ -83,6 +84,7 @@ protected:
             } else {
                 // it's a standard attribute
                 const ConfigAttributes attribs(1, attrib);
+                SCOPED_TRACE(attribs.front());
                 createConfig(profile, entrypoint, attribs);
                 test(attribs);
                 destroyConfig();
@@ -122,6 +124,7 @@ protected:
                             VASurfaceAttrib maskAttrib = attrib;
                             maskAttrib.value.value.i = mask;
                             const SurfaceAttributes attribs = {maskAttrib,};
+                            SCOPED_TRACE(attribs.front());
                             test(attribs);
                         }
                     }
@@ -131,6 +134,7 @@ protected:
             } else {
                 // it's a standard attribute
                 const SurfaceAttributes attribs = {attrib,};
+                SCOPED_TRACE(attribs.front());
                 test(attribs);
             }
         }
