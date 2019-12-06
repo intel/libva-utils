@@ -984,38 +984,64 @@ store_yuv_surface_to_file(FILE *fp,
 }
 
 static VAStatus
-chromasitting_param_init(uint8_t *chroma_sample_location)
+chromasitting_param_init(uint8_t *in_chroma_sample_location,uint8_t *dst_chroma_sample_location)
 {
     VAStatus va_status = VA_STATUS_SUCCESS;
-    uint8_t  sample_location;
-    char     chroma_siting_mode[MAX_LEN];
+    uint8_t  in_sample_location = 0;
+    char     in_chroma_siting_mode[MAX_LEN];
     
-    
+    uint8_t  dst_sample_location = 0;
+    char     dst_chroma_siting_mode[MAX_LEN];
+
     /* Read filter type */
-    if (read_value_string(g_config_file_fd, "CHROMA_SITTING_MODE", chroma_siting_mode)){
-        printf("Read CHROMA_SITTING_MODE type error !\n");
+    if (read_value_string(g_config_file_fd, "IN_CHROMA_SITTING_MODE", in_chroma_siting_mode)){
+        printf("Read IN_CHROMA_SITTING_MODE type error !\n");
         assert(0);
     }
-
-    if (!strcmp(chroma_siting_mode, "UNKNOWN"))
-        sample_location = VA_CHROMA_SITING_UNKNOWN;
-    else if (!strcmp(chroma_siting_mode, "CHROMA_SITING_TOP_LEFT"))
-        sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_LEFT;
-    else if (!strcmp(chroma_siting_mode, "CHROMA_SITING_TOP_CENTER"))
-        sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_CENTER;
-    else if (!strcmp(chroma_siting_mode, "CHROMA_SITING_CENTER_LEFT"))
-        sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_LEFT;
-    else if (!strcmp(chroma_siting_mode, "CHROMA_SITING_CENTER_CENTER"))
-         sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_CENTER;
-    else if (!strcmp(chroma_siting_mode, "CHROMA_SITING_BOTTOM_LEFT"))
-        sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_LEFT;
-    else if (!strcmp(chroma_siting_mode, "CHROMA_SITING_BOTTOM_CENTER"))
-        sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_CENTER;
+    if (!strcmp(in_chroma_siting_mode, "UNKNOWN"))
+        in_sample_location = VA_CHROMA_SITING_UNKNOWN;
+    else if (!strcmp(in_chroma_siting_mode, "CHROMA_SITING_TOP_LEFT"))
+        in_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_LEFT;
+    else if (!strcmp(in_chroma_siting_mode, "CHROMA_SITING_TOP_CENTER"))
+        in_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_CENTER;
+    else if (!strcmp(in_chroma_siting_mode, "CHROMA_SITING_CENTER_LEFT"))
+        in_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_LEFT;
+    else if (!strcmp(in_chroma_siting_mode, "CHROMA_SITING_CENTER_CENTER"))
+        in_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_CENTER;
+    else if (!strcmp(in_chroma_siting_mode, "CHROMA_SITING_BOTTOM_LEFT"))
+        in_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_LEFT;
+    else if (!strcmp(in_chroma_siting_mode, "CHROMA_SITING_BOTTOM_CENTER"))
+        in_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_CENTER;
     else {
-        printf("Unsupported CHROMA_SITTING_MODE type :%s \n", chroma_siting_mode);
+        printf("Unsupported IN_CHROMA_SITTING_MODE type :%s \n", in_chroma_siting_mode);
         return -1;
     }
-    *chroma_sample_location = sample_location;
+    *in_chroma_sample_location = in_sample_location;
+
+    if (read_value_string(g_config_file_fd, "DST_CHROMA_SITTING_MODE", dst_chroma_siting_mode)){
+        printf("Read DST_CHROMA_SITTING_MODE type error !\n");
+        assert(0);
+    }
+    if (!strcmp(dst_chroma_siting_mode, "UNKNOWN"))
+        dst_sample_location = VA_CHROMA_SITING_UNKNOWN;
+    else if (!strcmp(dst_chroma_siting_mode, "CHROMA_SITING_TOP_LEFT"))
+        dst_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_LEFT;
+    else if (!strcmp(dst_chroma_siting_mode, "CHROMA_SITING_TOP_CENTER"))
+        dst_sample_location = VA_CHROMA_SITING_VERTICAL_TOP | VA_CHROMA_SITING_HORIZONTAL_CENTER;
+    else if (!strcmp(dst_chroma_siting_mode, "CHROMA_SITING_CENTER_LEFT"))
+        dst_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_LEFT;
+    else if (!strcmp(dst_chroma_siting_mode, "CHROMA_SITING_CENTER_CENTER"))
+         dst_sample_location = VA_CHROMA_SITING_VERTICAL_CENTER | VA_CHROMA_SITING_HORIZONTAL_CENTER;
+    else if (!strcmp(dst_chroma_siting_mode, "CHROMA_SITING_BOTTOM_LEFT"))
+        dst_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_LEFT;
+    else if (!strcmp(dst_chroma_siting_mode, "CHROMA_SITING_BOTTOM_CENTER"))
+        dst_sample_location = VA_CHROMA_SITING_VERTICAL_BOTTOM | VA_CHROMA_SITING_HORIZONTAL_CENTER;
+    else {
+        printf("Unsupported DST_CHROMA_SITTING_MODE type :%s \n", dst_chroma_siting_mode);
+        return -1;
+    }
+    *dst_chroma_sample_location = dst_sample_location;
+
     return va_status;
 }
 
@@ -1027,8 +1053,9 @@ video_frame_process(       VASurfaceID in_surface_id,
     VAProcPipelineParameterBuffer pipeline_param;
     VARectangle surface_region, output_region;
     VABufferID pipeline_param_buf_id = VA_INVALID_ID;
-    uint8_t chroma_sample_location = VA_CHROMA_SITING_UNKNOWN;
-    chromasitting_param_init(&chroma_sample_location);
+    uint8_t in_chroma_sample_location = VA_CHROMA_SITING_UNKNOWN;
+    uint8_t dst_chroma_sample_location = VA_CHROMA_SITING_UNKNOWN;
+    chromasitting_param_init(&in_chroma_sample_location, &dst_chroma_sample_location);
     /* Fill pipeline buffer */
     surface_region.x = 0;
     surface_region.y = 0;
@@ -1043,7 +1070,9 @@ video_frame_process(       VASurfaceID in_surface_id,
     pipeline_param.surface = in_surface_id;
     pipeline_param.surface_region = &surface_region;
     pipeline_param.output_region = &output_region;
-    pipeline_param.input_color_properties.chroma_sample_location = chroma_sample_location;
+    pipeline_param.input_color_properties.chroma_sample_location = in_chroma_sample_location;
+    pipeline_param.output_color_properties.chroma_sample_location = dst_chroma_sample_location;
+
     va_status = vaCreateBuffer(va_dpy,
                                context_id,
                                VAProcPipelineParameterBufferType,
