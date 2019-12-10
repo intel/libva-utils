@@ -1,5 +1,11 @@
-libva-utils NEWS -- summary of changes.  2019-07-08
+libva-utils NEWS -- summary of changes.  2019-Dec-10
 Copyright (C) 2009-2019 Intel Corporation
+
+Version 2.6.0 - 10.Dec.2019
+* Align libva attribute check
+* Added displaying supported config attributes
+* add the VP samples README.
+* add VP sample for usrptr and 1:N output
 
 Version 2.5.0 - 8.Jul.2019
 * meson: rename the h264enc binary to be in line with the autotools build
