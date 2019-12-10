@@ -1,7 +1,7 @@
 libva-utils NEWS -- summary of changes.  2020-04-01
-Copyright (C) 2009-2019 Intel Corporation
+Copyright (C) 2009-2020 Intel Corporation
 
-Version 2.6.0 - 1.Apr.2020
+Version 2.7.0 - 1.Apr.2020
 * meson: add missing samples
 * sfcsample: drop unused Linux-only header
 * autotools: drop libdrm dependency (only libva-drm is used)
@@ -13,6 +13,11 @@ Version 2.6.0 - 1.Apr.2020
 * Align libva attribute check
 * Added displaying supported config attributes
 * add the VP samples README
+
+Version 2.6.0 - 10.Dec.2019
+* Align libva attribute check
+* Added displaying supported config attributes
+* add the VP samples README.
 * add VP sample for usrptr and 1:N output
 
 Version 2.5.0 - 8.Jul.2019
