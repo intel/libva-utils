@@ -20,7 +20,6 @@ use_drm = false
 if get_option('drm') != 'false'
   require_drm = get_option('drm') == 'true'
   drm_deps = [
-    dependency('libdrm', version: '>= 2.4', required: require_drm),
     dependency('libva-drm', required: require_drm),
   ]
   use_drm = true
