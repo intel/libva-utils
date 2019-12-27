@@ -83,6 +83,8 @@ subdir('encode')
 subdir('putsurface')
 subdir('vainfo')
 subdir('videoprocess')
+subdir('vendor/intel')
+subdir('vendor/intel/sfcsample')
 
 if get_option('tests')
   subdir('test')

@@ -8,6 +8,9 @@ executable('avcenc', [ 'avcenc.c' ],
 executable('h264encode', [ 'h264encode.c' ],
            dependencies: [ libva_display_dep, threads, m ],
            install: true)
+executable('hevcencode', [ 'hevcencode.c' ],
+           dependencies: [ libva_display_dep, threads, m ],
+           install: true)
 executable('mpeg2vaenc', [ 'mpeg2vaenc.c' ],
            dependencies: [ libva_display_dep, threads ],
            install: true)
