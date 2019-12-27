@@ -173,7 +173,7 @@ AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 # Check for X11
 USE_X11="no"
 if test "x$enable_x11" != "xno"; then
-    PKG_CHECK_MODULES([X11],    [x11 xext xfixes libva-x11],
+    PKG_CHECK_MODULES([X11],    [x11 libva-x11],
         [USE_X11="yes"], [:])
 
     if test "x$USE_X11" = "xno" -a "x$enable_x11" = "xyes"; then
