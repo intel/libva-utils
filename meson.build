@@ -40,8 +40,6 @@ if get_option('x11') != 'false'
   require_x11 = get_option('x11') == 'true'
   x11_deps = [
     dependency('x11', required: require_x11),
-    dependency('xext', required: require_x11),
-    dependency('xfixes', required: require_x11),
     dependency('libva-x11', required: require_x11),
   ]
   use_x11 = true
