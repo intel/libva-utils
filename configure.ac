@@ -43,9 +43,6 @@ m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
 # libva-utils was created
 m4_define([libva_api_min_version], [1.1.0])
 
-# libdrm minimun version requirement
-m4_define([libdrm_version], [2.4])
-
 # Wayland minimum version number
 m4_define([wayland_api_version], [1.0.0])
 
@@ -146,10 +143,7 @@ fi
 AM_CONDITIONAL(USE_SSP, test "$ssp_cc" = "yes")
 
 # Check for DRM (mandatory)
-LIBDRM_VERSION=libdrm_version
-PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
 PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm])
-AC_SUBST(LIBDRM_VERSION)
 
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version
