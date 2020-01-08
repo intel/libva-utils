@@ -38,7 +38,9 @@
 #include <va/va.h>
 #include <va/va_vpp.h>
 #include "va_display.h"
+#if 0
 #include <va/va_x11.h>
+#endif
 
 #define MAX_LEN   1024
 
