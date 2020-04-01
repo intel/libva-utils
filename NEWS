@@ -1,5 +1,19 @@
-libva-utils NEWS -- summary of changes.  2019-07-08
+libva-utils NEWS -- summary of changes.  2020-04-01
 Copyright (C) 2009-2019 Intel Corporation
+
+Version 2.6.0 - 1.Apr.2020
+* meson: add missing samples
+* sfcsample: drop unused Linux-only header
+* autotools: drop libdrm dependency (only libva-drm is used)
+* autotools: drop unused X11 dependencies
+* Add 10/12bit RT format check
+* test/createsurfaces: add some scoped traces
+* test/streamable: add VAConfigAttrib and VASurfaceAttrib
+* Modify output CS settings for Chroma siting on Linux
+* Align libva attribute check
+* Added displaying supported config attributes
+* add the VP samples README
+* add VP sample for usrptr and 1:N output
 
 Version 2.5.0 - 8.Jul.2019
 * meson: rename the h264enc binary to be in line with the autotools build
