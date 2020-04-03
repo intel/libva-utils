@@ -39,7 +39,6 @@ VAAPIFixture::VAAPIFixture()
     , m_vaDisplay(NULL)
     , m_restoreDriverName(getenv("LIBVA_DRIVER_NAME"))
     , m_drmHandle(-1)
-    , drmDevicePaths({ "/dev/dri/renderD128", "/dev/dri/card0" })
     , m_configID(VA_INVALID_ID)
     , m_contextID(VA_INVALID_ID)
     , m_bufferID(VA_INVALID_ID)
@@ -73,10 +72,14 @@ VAAPIFixture::~VAAPIFixture()
 
 VADisplay VAAPIFixture::getDisplay()
 {
-    uint32_t i;
+    typedef std::vector<std::string> DevicePaths;
+    typedef DevicePaths::const_iterator DevicePathsIterator;
 
-    for (i = 0; i < sizeof(drmDevicePaths) / sizeof(*drmDevicePaths); i++) {
-        m_drmHandle = open(drmDevicePaths[i].c_str(), O_RDWR);
+    static DevicePaths paths({"/dev/dri/renderD128", "/dev/dri/card0"});
+
+    const DevicePathsIterator endIt(paths.end());
+    for (DevicePathsIterator it(paths.begin()); it != endIt; ++it) {
+        m_drmHandle = open(it->c_str(), O_RDWR);
         if (m_drmHandle < 0)
             continue;
         m_vaDisplay = vaGetDisplayDRM(m_drmHandle);
