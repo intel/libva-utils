@@ -1,5 +1,9 @@
-libva-utils NEWS -- summary of changes.  2020-04-01
+libva-utils NEWS -- summary of changes.  2020-06-26
 Copyright (C) 2009-2020 Intel Corporation
+
+Version 2.8.0 - 26.Jun.2020
+* test: cast VA_STATUS_ERROR_UNKNOWN to VAStatus type
+* test/fixture: fix GCC 10.0.1 error with drmDevicePaths
 
 Version 2.7.0 - 1.Apr.2020
 * meson: add missing samples
