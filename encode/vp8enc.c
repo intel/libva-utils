@@ -1095,7 +1095,8 @@ int parse_options(int ac,char *av[])
 int main(int argc, char *argv[])
 {
   int current_frame, frame_type;
-  FILE *fp_vp8_output, *fp_yuv_input;
+  FILE *fp_vp8_output = NULL;
+  FILE *fp_yuv_input = NULL;
   uint64_t timestamp;
   struct timeval t1,t2;
   double fps, elapsed_time;
@@ -1118,7 +1119,15 @@ int main(int argc, char *argv[])
   settings.height = atoi(argv[2]);
   parameter_check("Height", settings.height, 16, MAX_XY_RESOLUTION);
 
-  fp_yuv_input = fopen(argv[3],"rb");
+  if( settings.rc_mode == VA_RC_VBR && settings.max_variable_bitrate < settings.frame_bitrate)
+  {
+      fprintf(stderr,"Error: max. variable bitrate should be greater than frame bitrate (--vbr_max >= --fb)\n");
+      return VP8ENC_FAIL;
+  }
+
+  if(argv[3]) {
+    fp_yuv_input = fopen(argv[3],"rb");
+  }
   if(fp_yuv_input == NULL)
   {
     fprintf(stderr,"Error: Couldn't open input file.\n");
@@ -1131,12 +1140,6 @@ int main(int argc, char *argv[])
   {
     fprintf(stderr,"Error: Couldn't open output file.\n");
     return VP8ENC_FAIL;
-  }
-
-  if( settings.rc_mode == VA_RC_VBR && settings.max_variable_bitrate < settings.frame_bitrate)
-  {
-      fprintf(stderr,"Error: max. variable bitrate should be greater than frame bitrate (--vbr_max >= --fb)\n");
-      return VP8ENC_FAIL;
   }
 
   if( settings.temporal_svc_layers == 2 && settings.intra_period % 2)

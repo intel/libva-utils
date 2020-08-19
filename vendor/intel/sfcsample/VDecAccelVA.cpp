@@ -76,6 +76,9 @@ mvaccel::VDecAccelVAImpl::VDecAccelVAImpl()
 
 mvaccel::VDecAccelVAImpl::~VDecAccelVAImpl()
 {
+    if (drm_fd != -1) {
+        close(drm_fd);
+    }
 }
 
 
@@ -85,7 +88,6 @@ int mvaccel::VDecAccelVAImpl::Open()
 
     //get display device
     int MajorVer, MinorVer;
-    int drm_fd = -1;
 
 	if (vaStatus != VA_STATUS_SUCCESS) {
         drm_fd = open("/dev/dri/renderD128", O_RDWR);
@@ -595,8 +597,10 @@ bool mvaccel::VDecAccelVAImpl::DecodePicture()
     //write to yuv file
     FILE* sfc_stream = fopen("sfc_sample_176_144_argb.yuv", "wb");
     uint32_t file_size = m_DecodeDesc.sfc_widht * m_DecodeDesc.sfc_height * 4; //ARGB format
-    fwrite(gfx_surface_buf, file_size, 1, sfc_stream);
-    fclose(sfc_stream);
+    if (sfc_stream) {
+        fwrite(gfx_surface_buf, file_size, 1, sfc_stream);
+        fclose(sfc_stream);
+    }
  
     //unlock surface and clear
     unlock_surface(m_sfcIDs[0]);

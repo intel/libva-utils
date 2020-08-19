@@ -931,15 +931,6 @@ int main(int argc, char *argv[])
     yuv_type = atoi(argv[5]);
     quality = atoi(argv[6]);
     
-    yuv_fp = fopen(argv[3],"rb");
-    if ( yuv_fp == NULL){
-        printf("Can't open input YUV file\n");
-        return -1;
-    }
-    
-    fseeko(yuv_fp, (off_t)0, SEEK_END);
-    file_size = ftello(yuv_fp);
-    
     //<input file type: 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)>
     switch(yuv_type)
     {
@@ -970,8 +961,16 @@ int main(int argc, char *argv[])
             show_help();
             return -1;
         }
-        
     }
+
+    yuv_fp = fopen(argv[3],"rb");
+    if ( yuv_fp == NULL){
+        printf("Can't open input YUV file\n");
+        return -1;
+    }
+
+    fseeko(yuv_fp, (off_t)0, SEEK_END);
+    file_size = ftello(yuv_fp);
     
     if ( (file_size < frame_size) || (file_size % frame_size) ) {
         fclose(yuv_fp);

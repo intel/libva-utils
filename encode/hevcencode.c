@@ -2051,7 +2051,9 @@ static int process_cmdline(int argc, char *argv[])
     }
 
     /* store coded data into a file */
-    coded_fp = fopen(coded_fn,"w+");
+    if (coded_fn) {
+        coded_fp = fopen(coded_fn,"w+");
+    }
     if (coded_fp == NULL) {
         printf("Open file %s failed, exit\n", coded_fn);
         exit(1);
@@ -2298,8 +2300,10 @@ static int setup_encode()
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     tmp_surfaceid = calloc(2 * SURFACE_NUM, sizeof(VASurfaceID));
-    memcpy(tmp_surfaceid, src_surface, SURFACE_NUM * sizeof(VASurfaceID));
-    memcpy(tmp_surfaceid + SURFACE_NUM, ref_surface, SURFACE_NUM * sizeof(VASurfaceID));
+    if (tmp_surfaceid) {
+        memcpy(tmp_surfaceid, src_surface, SURFACE_NUM * sizeof(VASurfaceID));
+        memcpy(tmp_surfaceid + SURFACE_NUM, ref_surface, SURFACE_NUM * sizeof(VASurfaceID));
+    }
 
     /* Create a context for this encode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
@@ -3098,8 +3102,10 @@ static int storage_task_queue(unsigned long long display_order, unsigned long lo
     struct storage_task_t *tmp;
 
     tmp = calloc(1, sizeof(struct storage_task_t));
-    tmp->display_order = display_order;
-    tmp->encode_order = encode_order;
+    if (tmp) {
+        tmp->display_order = display_order;
+        tmp->encode_order = encode_order;
+    }
 
     pthread_mutex_lock(&encode_mutex);
 

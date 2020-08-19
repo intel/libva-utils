@@ -180,7 +180,7 @@ read_value_uint16(FILE* fp, const char* field_name, uint16_t* value)
 static VAStatus
 create_surface(VPP_ImageInfo &img_info,VASurfaceID * p_surface_id)
 {
-    VAStatus va_status;
+    VAStatus va_status = VA_STATUS_SUCCESS;
     if(img_info.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA){
         VASurfaceAttrib    surface_attrib;
         surface_attrib.type =  VASurfaceAttribPixelFormat;
