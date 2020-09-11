@@ -1,5 +1,9 @@
-libva-utils NEWS -- summary of changes.  2020-06-26
+libva-utils NEWS -- summary of changes.  2020-09-11
 Copyright (C) 2009-2020 Intel Corporation
+
+Version 2.9.0 - 11.Sep.2020
+* Fix KW issues
+* Add support for csc with RGBP
 
 Version 2.8.0 - 26.Jun.2020
 * test: cast VA_STATUS_ERROR_UNKNOWN to VAStatus type
