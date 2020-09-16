@@ -2049,6 +2049,10 @@ static int process_cmdline(int argc, char *argv[])
         else
             coded_fn = strdup("./test.265");
     }
+    else{
+        printf("Copy file string failed");
+        exit(1);
+    }
 
     /* store coded data into a file */
     if (coded_fn) {
