@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vppblending vppscaling_n_out_usrptr
+bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vppblending vppscaling_n_out_usrptr vacopy
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -57,6 +57,9 @@ vppblending_LDADD   = $(TEST_LIBS)
 
 vppscaling_n_out_usrptr_SOURCES = vppscaling_n_out_usrptr.cpp
 vppscaling_n_out_usrptr_LDADD   = $(TEST_LIBS)
+
+vacopy_SOURCES = vacopy.cpp
+vacopy_LDADD = $(TEST_LIBS)
 valgrind:(bin_PROGRAMS)
 	for a in(bin_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
