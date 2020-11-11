@@ -1,5 +1,8 @@
 dist: xenial
 sudo: required
+arch:
+    - amd64
+    - ppc64le
 
 language: c
 compiler: gcc
