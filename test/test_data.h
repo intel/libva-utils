@@ -205,6 +205,9 @@ static const BitMasks g_vaRateControls = {
     VA_RC_NONE, VA_RC_CBR, VA_RC_VBR, VA_RC_VCM, VA_RC_CQP,
     VA_RC_VBR_CONSTRAINED, VA_RC_ICQ, VA_RC_MB, VA_RC_CFS,
     VA_RC_PARALLEL,VA_RC_QVBR,VA_RC_AVBR,
+#if VA_CHECK_VERSION(1, 10, 0)
+    VA_RC_TCBRC,
+#endif
 };
 
 static const BitMasks g_vaDecSliceModes = {
