@@ -111,6 +111,7 @@ static const struct option long_opts[] = {
     {"error_resilient", no_argument, NULL, 9},
     {"debug", no_argument, NULL, 10},
     {"temp_svc", required_argument, NULL, 11},
+    {"repeat", required_argument, NULL, 12},
     {NULL, no_argument, NULL, 0 }
 };
 
@@ -142,6 +143,7 @@ struct vp8enc_settings {
   int error_resilient;
   int debug;
   int temporal_svc_layers;
+  int repeat_times;
 };
 
 
@@ -163,6 +165,7 @@ static struct vp8enc_settings settings =
     .error_resilient = 0,
     .debug = 0,
     .temporal_svc_layers = 1,
+    .repeat_times = 1,
  };
 
  struct vp8enc_vaapi_context {
@@ -280,7 +283,7 @@ vp8enc_write_ivf_header(FILE *vp8_file)
     vp8enc_write_word(header + 14, settings.height);
     vp8enc_write_dword(header + 16, settings.frame_rate);
     vp8enc_write_dword(header + 20, 1);
-    vp8enc_write_dword(header + 24, settings.num_frames);
+    vp8enc_write_dword(header + 24, settings.num_frames * settings.repeat_times);
     vp8enc_write_dword(header + 28, 0);
 
     fwrite(header, 1, 32, vp8_file);
@@ -995,7 +998,8 @@ void vp8enc_show_help ()
   printf("--fn_num <num>\n  how many frames to be encoded\n");
   printf("--error_resilient Turn on Error resilient mode\n");
   printf("--debug Turn debug info on\n");
-  printf("--temp_svc <num> number of temporal layers 2 or 3\n");
+  printf("--temp_svc <num> Number of temporal layers 2 or 3\n");
+  printf("--repeat <num> Number of times to repeat the encoding\n");
 }
 
 void parameter_check(const char *param, int val, int min, int max)
@@ -1082,6 +1086,11 @@ int parse_options(int ac,char *av[])
           parameter_check("--temp_svc",tmp_input,2,3);
           settings.temporal_svc_layers = tmp_input;
           break;
+      case 12:
+          tmp_input = atoi(optarg);
+          parameter_check("--repeat", tmp_input, 1, 1000000);
+          settings.repeat_times = tmp_input;
+          break;
       case 'h':
       case 0:
       default:
@@ -1095,7 +1104,8 @@ int parse_options(int ac,char *av[])
 int main(int argc, char *argv[])
 {
   int current_frame, frame_type;
-  FILE *fp_vp8_output, *fp_yuv_input;
+  FILE *fp_vp8_output = NULL;
+  FILE *fp_yuv_input = NULL;
   uint64_t timestamp;
   struct timeval t1,t2;
   double fps, elapsed_time;
@@ -1118,7 +1128,15 @@ int main(int argc, char *argv[])
   settings.height = atoi(argv[2]);
   parameter_check("Height", settings.height, 16, MAX_XY_RESOLUTION);
 
-  fp_yuv_input = fopen(argv[3],"rb");
+  if( settings.rc_mode == VA_RC_VBR && settings.max_variable_bitrate < settings.frame_bitrate)
+  {
+      fprintf(stderr,"Error: max. variable bitrate should be greater than frame bitrate (--vbr_max >= --fb)\n");
+      return VP8ENC_FAIL;
+  }
+
+  if(argv[3]) {
+    fp_yuv_input = fopen(argv[3],"rb");
+  }
   if(fp_yuv_input == NULL)
   {
     fprintf(stderr,"Error: Couldn't open input file.\n");
@@ -1131,12 +1149,6 @@ int main(int argc, char *argv[])
   {
     fprintf(stderr,"Error: Couldn't open output file.\n");
     return VP8ENC_FAIL;
-  }
-
-  if( settings.rc_mode == VA_RC_VBR && settings.max_variable_bitrate < settings.frame_bitrate)
-  {
-      fprintf(stderr,"Error: max. variable bitrate should be greater than frame bitrate (--vbr_max >= --fb)\n");
-      return VP8ENC_FAIL;
   }
 
   if( settings.temporal_svc_layers == 2 && settings.intra_period % 2)
@@ -1165,11 +1177,11 @@ int main(int argc, char *argv[])
   vaapi_context.input_surface = vaapi_context.surfaces[SID_INPUT_PICTURE_0];
   vaapi_context.upload_thread.input_surface_num = SID_INPUT_PICTURE_0;
 
-  while (current_frame < settings.num_frames)
+  while (current_frame < settings.num_frames * settings.repeat_times)
   {
     fprintf(stderr,"\rProcessing frame: %d",current_frame);
 
-    if ( (current_frame%settings.intra_period) == 0)
+    if ( (current_frame % settings.intra_period) == 0)
       frame_type = KEY_FRAME;
     else
       frame_type = INTER_FRAME;
@@ -1184,8 +1196,8 @@ int main(int argc, char *argv[])
     }
 
     // Start Upload thread
-    if((current_frame + 1) < settings.num_frames) {
-      vaapi_context.upload_thread.processed_frame = current_frame + 1;
+    if((current_frame + 1) < settings.num_frames * settings.repeat_times) {
+      vaapi_context.upload_thread.processed_frame = (current_frame % settings.num_frames - 1) + 1;
 
       if(vaapi_context.upload_thread.input_surface_num == SID_INPUT_PICTURE_0)
         vaapi_context.upload_thread.input_surface_num = SID_INPUT_PICTURE_1;

@@ -1,5 +1,5 @@
 project('libva-utils', 'c', 'cpp',
-        version : '2.6.0.1',
+        version : '2.9.0.1',
         default_options : [
           'warning_level=2',
           'c_std=gnu99',
@@ -20,7 +20,6 @@ use_drm = false
 if get_option('drm') != 'false'
   require_drm = get_option('drm') == 'true'
   drm_deps = [
-    dependency('libdrm', version: '>= 2.4', required: require_drm),
     dependency('libva-drm', required: require_drm),
   ]
   use_drm = true
@@ -40,8 +39,6 @@ if get_option('x11') != 'false'
   require_x11 = get_option('x11') == 'true'
   x11_deps = [
     dependency('x11', required: require_x11),
-    dependency('xext', required: require_x11),
-    dependency('xfixes', required: require_x11),
     dependency('libva-x11', required: require_x11),
   ]
   use_x11 = true
@@ -83,6 +80,8 @@ subdir('encode')
 subdir('putsurface')
 subdir('vainfo')
 subdir('videoprocess')
+subdir('vendor/intel')
+subdir('vendor/intel/sfcsample')
 
 if get_option('tests')
   subdir('test')

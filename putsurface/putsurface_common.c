@@ -591,7 +591,7 @@ int main(int argc,char **argv)
                     printf("The validate input for -f is: 1(top field)/2(bottom field)\n");
                 break;
             case '1':
-                sscanf(optarg, "%s", str_src_fmt);
+                sscanf(optarg, "%5s", str_src_fmt);
                 csc_src_fourcc = map_str_to_vafourcc (str_src_fmt);
                 
 				if (!csc_src_fourcc) {
@@ -600,7 +600,7 @@ int main(int argc,char **argv)
                 }
                 break;
             case '2':
-                sscanf(optarg, "%s", str_dst_fmt);
+                sscanf(optarg, "%5s", str_dst_fmt);
                 csc_dst_fourcc = map_str_to_vafourcc (str_dst_fmt);
                 
 				if (!csc_dst_fourcc) {

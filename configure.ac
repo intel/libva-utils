@@ -29,7 +29,7 @@
 # - micro version is libva_micro_version
 # - pre version is libva_pre_version, usually development version
 m4_define([libva_utils_major_version], [2])
-m4_define([libva_utils_minor_version], [6])
+m4_define([libva_utils_minor_version], [9])
 m4_define([libva_utils_micro_version], [0])
 m4_define([libva_utils_pre_version],   [1])
 
@@ -42,9 +42,6 @@ m4_append([libva_utils_version], libva_utils_pre_version, [.pre])
 # libva minimum version requirement, at this released version
 # libva-utils was created
 m4_define([libva_api_min_version], [1.1.0])
-
-# libdrm minimun version requirement
-m4_define([libdrm_version], [2.4])
 
 # Wayland minimum version number
 m4_define([wayland_api_version], [1.0.0])
@@ -146,10 +143,7 @@ fi
 AM_CONDITIONAL(USE_SSP, test "$ssp_cc" = "yes")
 
 # Check for DRM (mandatory)
-LIBDRM_VERSION=libdrm_version
-PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
 PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm])
-AC_SUBST(LIBDRM_VERSION)
 
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version
@@ -173,7 +167,7 @@ AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 # Check for X11
 USE_X11="no"
 if test "x$enable_x11" != "xno"; then
-    PKG_CHECK_MODULES([X11],    [x11 xext xfixes libva-x11],
+    PKG_CHECK_MODULES([X11],    [x11 libva-x11],
         [USE_X11="yes"], [:])
 
     if test "x$USE_X11" = "xno" -a "x$enable_x11" = "xyes"; then

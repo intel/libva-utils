@@ -1533,7 +1533,9 @@ main(int argc, char *argv[])
     gettimeofday(&tpstart, NULL);
 
     memset(&ctx, 0, sizeof(ctx));
-    parse_args(&ctx, argc, argv);
+    if (argv) {
+        parse_args(&ctx, argc, argv);
+    }
     mpeg2enc_init(&ctx);
     mpeg2enc_run(&ctx);
     mpeg2enc_end(&ctx);

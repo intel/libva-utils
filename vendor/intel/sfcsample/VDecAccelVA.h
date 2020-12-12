@@ -99,6 +99,7 @@ protected:
     int         create_resources();
 
 protected:
+    int drm_fd = -1;
     // VA ID & Handles
     VADisplay       m_vaDisplay;    /**< @brief VA hardware device */
     VAProfile       m_vaProfile;    /**< @brief Video decoder profile */
@@ -129,14 +130,14 @@ protected:
         NEW_H,
     };
 
-    DecodeDesc                    m_DecodeDesc;       /**< @brief decode discription */
-    VARectangle                   m_rectSrc;          /**< @brief Rectangle for source input */
-    VARectangle                   m_rectSFC;          /**< @brief Rectangle for SFC output */
-    std::vector<uint32_t>         m_in4CC;            /**< @brief input FOURCC */
-    std::vector<uint32_t>         m_out4CC;           /**< @brief output FOURCC */
-    std::map<SFC,uint32_t>        m_sfcSize;          /**< @brief SFC sizes */
-    std::vector<VASurfaceID>      m_sfcIDs;           /**< @brief sfc surfaces */
-    VAProcPipelineParameterBuffer m_vaProcBuffer;     /**< @brief sfc pipeline buffer */
+    DecodeDesc                    m_DecodeDesc{};     /**< @brief decode discription */
+    VARectangle                   m_rectSrc{};        /**< @brief Rectangle for source input */
+    VARectangle                   m_rectSFC{};        /**< @brief Rectangle for SFC output */
+    std::vector<uint32_t>         m_in4CC{};          /**< @brief input FOURCC */
+    std::vector<uint32_t>         m_out4CC{};         /**< @brief output FOURCC */
+    std::map<SFC,uint32_t>        m_sfcSize{};        /**< @brief SFC sizes */
+    std::vector<VASurfaceID>      m_sfcIDs{};         /**< @brief sfc surfaces */
+    VAProcPipelineParameterBuffer m_vaProcBuffer{};   /**< @brief sfc pipeline buffer */
 };
 } // namespace mvaccel
 #endif // MV_ACCELERATOR_VAAPI_DECODE_H

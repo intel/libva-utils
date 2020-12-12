@@ -102,7 +102,6 @@ protected:
 private:
     char *m_restoreDriverName;
     int m_drmHandle;
-    const std::string drmDevicePaths[2];
 
     VAConfigID m_configID;
     VAContextID m_contextID;

@@ -1,5 +1,32 @@
-libva-utils NEWS -- summary of changes.  2019-07-08
-Copyright (C) 2009-2019 Intel Corporation
+libva-utils NEWS -- summary of changes.  2020-09-11
+Copyright (C) 2009-2020 Intel Corporation
+
+Version 2.9.0 - 11.Sep.2020
+* Fix KW issues
+* Add support for csc with RGBP
+
+Version 2.8.0 - 26.Jun.2020
+* test: cast VA_STATUS_ERROR_UNKNOWN to VAStatus type
+* test/fixture: fix GCC 10.0.1 error with drmDevicePaths
+
+Version 2.7.0 - 1.Apr.2020
+* meson: add missing samples
+* sfcsample: drop unused Linux-only header
+* autotools: drop libdrm dependency (only libva-drm is used)
+* autotools: drop unused X11 dependencies
+* Add 10/12bit RT format check
+* test/createsurfaces: add some scoped traces
+* test/streamable: add VAConfigAttrib and VASurfaceAttrib
+* Modify output CS settings for Chroma siting on Linux
+* Align libva attribute check
+* Added displaying supported config attributes
+* add the VP samples README
+
+Version 2.6.0 - 10.Dec.2019
+* Align libva attribute check
+* Added displaying supported config attributes
+* add the VP samples README.
+* add VP sample for usrptr and 1:N output
 
 Version 2.5.0 - 8.Jul.2019
 * meson: rename the h264enc binary to be in line with the autotools build
