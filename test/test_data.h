@@ -204,7 +204,7 @@ static const BufferTypes g_vaBufferTypes = {
 static const BitMasks g_vaRateControls = {
     VA_RC_NONE, VA_RC_CBR, VA_RC_VBR, VA_RC_VCM, VA_RC_CQP,
     VA_RC_VBR_CONSTRAINED, VA_RC_ICQ, VA_RC_MB, VA_RC_CFS,
-    VA_RC_PARALLEL,VA_RC_QVBR,VA_RC_AVBR,
+    VA_RC_PARALLEL,VA_RC_QVBR,VA_RC_AVBR,VA_RC_TCBRC,
 };
 
 static const BitMasks g_vaDecSliceModes = {
