@@ -1,5 +1,11 @@
-libva-utils NEWS -- summary of changes.  2020-09-11
+libva-utils NEWS -- summary of changes.  2020-12-18
 Copyright (C) 2009-2020 Intel Corporation
+
+Version 2.10.0 - 18.Dec.2020
+* add Mediacopy Sample code
+* Enable new caps for rate control TCBRC
+* Add support for a --repeat command line option to vp8enc.
+* fix one null pointer dereference risk 
 
 Version 2.9.0 - 11.Sep.2020
 * Fix KW issues
