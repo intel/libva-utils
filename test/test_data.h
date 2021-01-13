@@ -229,6 +229,15 @@ static const BitMasks g_vaFEIFunctionTypes = {
     VA_FEI_FUNCTION_ENC, VA_FEI_FUNCTION_PAK, VA_FEI_FUNCTION_ENC_PAK,
 };
 
+#if VA_CHECK_VERSION(1, 11, 0)
+static const BitMasks g_vaEncryptionTypes = {
+    VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR,
+    VA_ENCRYPTION_TYPE_FULLSAMPLE_CBC,
+    VA_ENCRYPTION_TYPE_SUBSAMPLE_CTR,
+    VA_ENCRYPTION_TYPE_SUBSAMPLE_CBC,
+};
+#endif
+
 static const std::map<VAConfigAttribType, const BitMasks&>
     g_vaConfigAttribBitMasks = {
         {VAConfigAttribRTFormat, g_vaRTFormats},
@@ -237,6 +246,9 @@ static const std::map<VAConfigAttribType, const BitMasks&>
         {VAConfigAttribEncPackedHeaders, g_vaEncPackedHeaders},
         {VAConfigAttribEncInterlaced, g_vaEncInterlaced},
         {VAConfigAttribFEIFunctionType, g_vaFEIFunctionTypes},
+#if VA_CHECK_VERSION(1, 11, 0)
+        {VAConfigAttribEncryption, g_vaEncryptionTypes},
+#endif
     };
 
 static const BitMasks g_vaSurfaceMemTypes = {
