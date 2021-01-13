@@ -1059,6 +1059,8 @@ static int process_cmdline(int argc, char *argv[])
     return 0;
 }
 
+static VAEntrypoint available_entrypoint = 0;
+
 static int init_va(void)
 {
     VAProfile profile_list[]={VAProfileH264High,VAProfileH264Main,VAProfileH264ConstrainedBaseline};
@@ -1088,8 +1090,10 @@ static int init_va(void)
         h264_profile = profile_list[i];
         vaQueryConfigEntrypoints(va_dpy, h264_profile, entrypoints, &num_entrypoints);
         for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
-            if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice) {
+            if ( (entrypoints[slice_entrypoint] == VAEntrypointEncSlice) ||
+                 (entrypoints[slice_entrypoint] == VAEntrypointEncSliceLP) ) {
                 support_encode = 1;
+                available_entrypoint = entrypoints[slice_entrypoint];
                 break;
             }
         }
@@ -1098,7 +1102,7 @@ static int init_va(void)
     }
     
     if (support_encode == 0) {
-        printf("Can't find VAEntrypointEncSlice for H264 profiles\n");
+        printf("Can't find VAEntrypointEncSlice or  VAEntrypointEncSliceLP for H264 profiles\n");
         exit(1);
     } else {
         switch (h264_profile) {
@@ -1130,7 +1134,7 @@ static int init_va(void)
     for (i = 0; i < VAConfigAttribTypeMax; i++)
         attrib[i].type = i;
 
-    va_status = vaGetConfigAttributes(va_dpy, h264_profile, VAEntrypointEncSlice,
+    va_status = vaGetConfigAttributes(va_dpy, h264_profile, available_entrypoint,
                                       &attrib[0], VAConfigAttribTypeMax);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     /* check the interested configattrib */
@@ -1272,7 +1276,7 @@ static int setup_encode()
     VASurfaceID *tmp_surfaceid;
     int codedbuf_size, i;
     
-    va_status = vaCreateConfig(va_dpy, h264_profile, VAEntrypointEncSlice,
+    va_status = vaCreateConfig(va_dpy, h264_profile, available_entrypoint,
             &config_attrib[0], config_attrib_num, &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
