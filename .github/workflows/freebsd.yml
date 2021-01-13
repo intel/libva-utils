@@ -1,0 +1,43 @@
+name: freebsd
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/freebsd.yml'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/freebsd.yml'
+
+jobs:
+  freebsd:
+    runs-on: macos-latest
+    steps:
+    - name: checkout libva
+      uses: actions/checkout@v2
+      with:
+        repository: intel/libva
+        path: libva
+    - name: checkout libva-utils
+      uses: actions/checkout@v2
+      with:
+        path: libva-utils
+    - name: test
+      uses: vmactions/freebsd-vm@v0.0.7
+      with:
+        prepare: |
+          pkg install -y meson pkgconf libdrm libXext libXfixes wayland
+          pkg install -y -x '^mesa($|-libs)'
+        run: |
+          set PREFIX="$PWD/_install"
+          set LIBDIR="$PREFIX/lib"
+          setenv PKG_CONFIG_PATH $LIBDIR/pkgconfig
+          cd libva
+          meson --prefix=$PREFIX --libdir=$LIBDIR _build
+          meson compile -C _build
+          meson install -C _build
+          cd ../libva-utils
+          meson --prefix=$PREFIX --libdir=$LIBDIR _build
+          meson compile -C _build
+          meson install -C _build
