@@ -1,44 +1,39 @@
 /*
- * Copyright (c) 2014 Intel Corporation. All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sub license, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice (including the
- * next paragraph) shall be included in all copies or substantial portions
- * of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
- * IN NO EVENT SHALL INTEL AND/OR ITS SUPPLIERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+* Copyright (c) 2009-2021, Intel Corporation
+*
+* Permission is hereby granted, free of charge, to any person obtaining a
+* copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+* OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
 /*
  * Video process test case based on LibVA.
- * This test covers deinterlace, denoise, color balance, sharpening,
- * blending, scaling and several surface format conversion.
- * Usage: vavpp process.cfg
+ * This test covers scaling and several surface format conversion.
+ * Usage: ./vppscaling_csc process_scaling_csc.cfg
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <sys/time.h>
+#include <time.h>
 #include <assert.h>
 #include <va/va.h>
 #include <va/va_vpp.h>
 #include "va_display.h"
-
-#define BLEND_ON        0
 
 #ifndef VA_FOURCC_I420
 #define VA_FOURCC_I420 0x30323449
@@ -52,12 +47,20 @@
       exit(1);                                                              \
   }
 
+/* indicate the pipleine is scaling -> 3dlut, two seperate calls */
+#define VA_SCALING_3DLUT 0
+/* indicate the pipleine is 3dlut -> scaling, by default in one call */
+#define VA_3DLUT_SCALING 1
+#define VA_SCALING_ONLY  2
+
 static VADisplay va_dpy = NULL;
 static VAContextID context_id = 0;
 static VAConfigID  config_id = 0;
-static VAProcFilterType g_filter_type = VAProcFilterNone;
 static VASurfaceID g_in_surface_id = VA_INVALID_ID;
 static VASurfaceID g_out_surface_id = VA_INVALID_ID;
+/* only for VA_SCALING_3DLUT scaled surface */
+static VASurfaceID g_inter_surface_id = VA_INVALID_ID;
+static VASurfaceID g_3dlut_surface_id = VA_INVALID_ID;
 
 static FILE* g_config_file_fd = NULL;
 static FILE* g_src_file_fd = NULL;
@@ -66,7 +69,6 @@ static FILE* g_dst_file_fd = NULL;
 static char g_config_file_name[MAX_LEN];
 static char g_src_file_name[MAX_LEN];
 static char g_dst_file_name[MAX_LEN];
-static char g_filter_type_name[MAX_LEN];
 
 static uint32_t g_in_pic_width = 352;
 static uint32_t g_in_pic_height = 288;
@@ -78,20 +80,24 @@ static uint32_t g_in_format  = VA_RT_FORMAT_YUV420;
 static uint32_t g_out_fourcc = VA_FOURCC('N', 'V', '1', '2');
 static uint32_t g_out_format = VA_RT_FORMAT_YUV420;
 static uint32_t g_src_file_fourcc = VA_FOURCC('I', '4', '2', '0');
-static uint32_t g_dst_file_fourcc = VA_FOURCC('Y', 'V', '1', '2');
+static uint32_t g_dst_file_fourcc = VA_FOURCC('N', 'V', '1', '2');
 
-static uint8_t g_blending_enabled = 0;
-static uint8_t g_blending_min_luma = 1;
-static uint8_t g_blending_max_luma = 254;
+static uint32_t g_frame_count = 1;
+static uint32_t g_pipeline_sequence = VA_3DLUT_SCALING;
 
-static uint32_t g_frame_count = 0;
+static char g_3dlut_file_name[MAX_LEN];
+static uint16_t g_3dlut_seg_size = 65;
+static uint16_t g_3dlut_mul_size = 128;
+static uint32_t g_3dlut_channel_mapping = 1;
+
+#if VA_CHECK_VERSION(1, 12, 0)
 
 static int8_t
 read_value_string(FILE *fp, const char* field_name, char* value)
 {
     char strLine[MAX_LEN];
-    char* field;
-    char* str;
+    char* field = NULL;
+    char* str = NULL;
     uint16_t i;
 
     if (!fp || !field_name || !value)  {
@@ -132,20 +138,6 @@ read_value_string(FILE *fp, const char* field_name, char* value)
 }
 
 static int8_t
-read_value_uint8(FILE* fp, const char* field_name, uint8_t* value)
-{
-    char str[MAX_LEN];
-
-    if (read_value_string(fp, field_name, str)) {
-        printf("Failed to find integer field: %s", field_name);
-        return -1;
-    }
-
-    *value = (uint8_t)atoi(str);
-    return 0;
-}
-
-static int8_t
 read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
 {
     char str[MAX_LEN];
@@ -160,98 +152,17 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
 }
 
 static int8_t
-read_value_float(FILE *fp, const char* field_name, float* value)
+read_value_uint16(FILE* fp, const char* field_name, uint16_t* value)
 {
     char str[MAX_LEN];
+
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find float field: %s \n",field_name);
+       printf("Failed to find integer field: %s", field_name);
        return -1;
     }
 
-    *value = atof(str);
+    *value = (uint16_t)atoi(str);
     return 0;
-}
-
-static float
-adjust_to_range(VAProcFilterValueRange *range, float value)
-{
-    if (value < range->min_value || value > range->max_value){
-        printf("Value: %f exceed range: (%f ~ %f), force to use default: %f \n",
-                value, range->min_value, range->max_value, range->default_value);
-        return range->default_value;
-    }
-
-    return value;
-}
-
-static VAStatus
-create_surface(VASurfaceID * p_surface_id,
-               uint32_t width, uint32_t height,
-               uint32_t fourCC, uint32_t format)
-{
-    VAStatus va_status;
-    VASurfaceAttrib    surface_attrib;
-    surface_attrib.type =  VASurfaceAttribPixelFormat;
-    surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
-    surface_attrib.value.type = VAGenericValueTypeInteger;
-    surface_attrib.value.value.i = fourCC;
-
-    va_status = vaCreateSurfaces(va_dpy,
-                                 format,
-                                 width ,
-                                 height,
-                                 p_surface_id,
-                                 1,
-                                 &surface_attrib,
-                                 1);
-   return va_status;
-}
-
-static VAStatus
-construct_nv12_mask_surface(VASurfaceID surface_id,
-                            uint8_t min_luma,
-                            uint8_t max_luma)
-{
-    VAStatus va_status;
-    VAImage surface_image;
-    void *surface_p = NULL;
-    unsigned char *y_dst, *u_dst;
-    uint32_t row, col;
-
-    va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
-    CHECK_VASTATUS(va_status, "vaDeriveImage");
-
-    va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
-    CHECK_VASTATUS(va_status, "vaMapBuffer");
-
-    y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
-    u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
-
-    /* fill Y plane, the luma values of some pixels is in the range of min_luma~max_luma,
-     * and others are out side of it, in luma key blending case, the pixels with Y value
-     * exceeding the range will be hided*/
-    for (row = 0; row < surface_image.height; row++) {
-        if (row < surface_image.height / 4 || row > surface_image.height * 3 / 4)
-            memset(y_dst, max_luma + 1, surface_image.pitches[0]);
-        else
-            memset(y_dst, (min_luma + max_luma) / 2, surface_image.pitches[0]);
-
-        y_dst += surface_image.pitches[0];
-     }
-
-     /* fill UV plane */
-     for (row = 0; row < surface_image.height / 2; row++) {
-         for (col = 0; col < surface_image.width / 2; col++) {
-             u_dst[col * 2] = 128;
-             u_dst[col * 2 + 1] = 128;
-        }
-        u_dst += surface_image.pitches[1];
-     }
-
-    vaUnmapBuffer(va_dpy, surface_image.buf);
-    vaDestroyImage(va_dpy, surface_image.image_id);
-
-    return VA_STATUS_SUCCESS;
 }
 
 /* Load yuv frame to NV12/YV12/I420 surface*/
@@ -261,13 +172,19 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 {
     VAStatus va_status;
     VAImage surface_image;
-    unsigned char *y_src, *u_src, *v_src;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *u_src = NULL;
+    unsigned char *v_src = NULL;
+    unsigned char *y_dst = NULL;
+    unsigned char *u_dst = NULL;
+    unsigned char *v_dst = NULL;
     void *surface_p = NULL;
     uint32_t frame_size, row, col;
     size_t n_items;
     unsigned char * newImageBuffer = NULL;
-
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
+    
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
 
@@ -374,12 +291,8 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
     } else if ((surface_image.format.fourcc == VA_FOURCC_YUY2 &&
                 g_src_file_fourcc == VA_FOURCC_YUY2) ||
                (surface_image.format.fourcc == VA_FOURCC_UYVY &&
-                g_src_file_fourcc == VA_FOURCC_UYVY) ||
-               (surface_image.format.fourcc == VA_FOURCC_AYUV &&
-                g_src_file_fourcc == VA_FOURCC_AYUV)) {
-        uint32_t byte_per_pixel = (g_src_file_fourcc == VA_FOURCC_AYUV) ? 4 : 2;
-
-        frame_size = surface_image.width * surface_image.height * byte_per_pixel;
+                g_src_file_fourcc == VA_FOURCC_UYVY)) {
+        frame_size = surface_image.width * surface_image.height * 2;
         newImageBuffer = (unsigned char*)malloc(frame_size);
         assert(newImageBuffer);
 
@@ -392,8 +305,8 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 
         /* plane 0, directly copy */
         for (row = 0; row < surface_image.height; row++) {
-            memcpy(y_dst, y_src, surface_image.width * byte_per_pixel);
-            y_src += surface_image.width * byte_per_pixel;
+            memcpy(y_dst, y_src, surface_image.width * 2);
+            y_src += surface_image.width * 2;
             y_dst += surface_image.pitches[0];
         }
     } else if ((surface_image.format.fourcc == VA_FOURCC_P010 &&
@@ -482,29 +395,6 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             y_src += surface_image.width * 4;
             y_dst += surface_image.pitches[0];
         }
-    } else if (surface_image.format.fourcc == VA_FOURCC_RGBP &&
-                g_src_file_fourcc == VA_FOURCC_RGBP) {
-        int i;
-
-        frame_size = surface_image.width * surface_image.height * 3;
-        newImageBuffer = (unsigned char*)malloc(frame_size);
-        assert(newImageBuffer);
-
-        do {
-            n_items = fread(newImageBuffer, frame_size, 1, fp);
-        } while (n_items != 1);
-
-        y_src = newImageBuffer;
-
-        for (i = 0; i < 3; i++) {
-            y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[i]);
-
-            for (row = 0; row < surface_image.height; row++) {
-                memcpy(y_dst, y_src, surface_image.width);
-                y_src += surface_image.width;
-                y_dst += surface_image.pitches[i];
-            }
-        }
     } else {
          printf("Not supported YUV surface fourcc !!! \n");
          return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -529,11 +419,17 @@ store_yuv_surface_to_yv12_file(FILE *fp,
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_src, *u_src, *v_src;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *u_src = NULL;
+    unsigned char *v_src = NULL;
+    unsigned char *y_dst = NULL;
+    unsigned char *u_dst = NULL;
+    unsigned char *v_dst = NULL;
     uint32_t row, col;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
@@ -635,11 +531,17 @@ store_yuv_surface_to_i420_file(FILE *fp,
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_src, *u_src, *v_src;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *u_src = NULL;
+    unsigned char *v_src = NULL;
+    unsigned char *y_dst = NULL;
+    unsigned char *u_dst = NULL;
+    unsigned char *v_dst = NULL;
     uint32_t row, col;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
@@ -741,11 +643,17 @@ store_yuv_surface_to_nv12_file(FILE *fp,
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_src, *u_src, *v_src;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *u_src = NULL;
+    unsigned char *v_src = NULL;
+    unsigned char *y_dst = NULL;
+    unsigned char *u_dst = NULL;
+    unsigned char *v_dst = NULL;
     uint32_t row, col;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
@@ -842,11 +750,13 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_src;
-    unsigned char *y_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *y_dst = NULL;
     uint32_t row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
@@ -856,10 +766,8 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
 
     /* store the surface to one YUY2 or UYVY file */
     if (surface_image.format.fourcc == VA_FOURCC_YUY2 ||
-        surface_image.format.fourcc == VA_FOURCC_UYVY ||
-        surface_image.format.fourcc == VA_FOURCC_AYUV) {
-        uint32_t byte_per_pixel = (surface_image.format.fourcc == VA_FOURCC_AYUV ? 4 : 2);
-        uint32_t frame_size = surface_image.width * surface_image.height * byte_per_pixel;
+        surface_image.format.fourcc == VA_FOURCC_UYVY) {
+        uint32_t frame_size = surface_image.width * surface_image.height * 2;
 
         newImageBuffer = (unsigned char*)malloc(frame_size);
         assert(newImageBuffer);
@@ -872,9 +780,9 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
 
         /* Plane 0 copy */
         for (row = 0; row < surface_image.height; row++) {
-            memcpy(y_dst, y_src, surface_image.width * byte_per_pixel);
+            memcpy(y_dst, y_src, surface_image.width * 2);
             y_src += surface_image.pitches[0];
-            y_dst += surface_image.width * byte_per_pixel;
+            y_dst += surface_image.width * 2;
         }
 
         /* write frame to file */
@@ -904,11 +812,17 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_src, *u_src, *v_src;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *u_src = NULL;
+    unsigned char *v_src = NULL;
+    unsigned char *y_dst = NULL;
+    unsigned char *u_dst = NULL;
+    unsigned char *v_dst = NULL;
     uint32_t row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
@@ -990,11 +904,13 @@ store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
     VAStatus va_status;
     VAImage surface_image;
     void *surface_p = NULL;
-    unsigned char *y_src;
-    unsigned char *y_dst;
+    unsigned char *y_src = NULL;
+    unsigned char *y_dst = NULL;
     uint32_t frame_size, row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
@@ -1013,56 +929,6 @@ store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
         memcpy(y_dst, y_src, surface_image.width * 4);
         y_src += surface_image.pitches[0];
         y_dst += surface_image.width * 4;
-    }
-
-    /* write frame to file */
-    do {
-        n_items = fwrite(newImageBuffer, frame_size, 1, fp);
-    } while (n_items != 1);
-
-    if (newImageBuffer){
-        free(newImageBuffer);
-        newImageBuffer = NULL;
-    }
-
-    vaUnmapBuffer(va_dpy, surface_image.buf);
-    vaDestroyImage(va_dpy, surface_image.image_id);
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus
-store_rgbp_surface_to_rgbp_file(FILE *fp, VASurfaceID surface_id)
-{
-    VAStatus va_status;
-    VAImage surface_image;
-    void *surface_p = NULL;
-    unsigned char *y_src;
-    unsigned char *y_dst;
-    uint32_t frame_size, row;
-    int32_t n_items;
-    unsigned char * newImageBuffer = NULL;
-    int i;
-
-    va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
-    CHECK_VASTATUS(va_status, "vaDeriveImage");
-
-    va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
-    CHECK_VASTATUS(va_status, "vaMapBuffer");
-
-    frame_size = surface_image.width * surface_image.height * 3;
-    newImageBuffer = (unsigned char*)malloc(frame_size);
-    assert(newImageBuffer);
-    y_dst = newImageBuffer;
-
-    for (i = 0; i < 3; i++) {
-        y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[i]);
-
-        for (row = 0; row < surface_image.height; row++) {
-            memcpy(y_dst, y_src, surface_image.width);
-            y_src += surface_image.pitches[i];
-            y_dst += surface_image.width;
-        }
     }
 
     /* write frame to file */
@@ -1101,9 +967,7 @@ store_yuv_surface_to_file(FILE *fp,
     } else if ((g_out_fourcc == VA_FOURCC_YUY2 &&
                 g_dst_file_fourcc == VA_FOURCC_YUY2) ||
                (g_out_fourcc == VA_FOURCC_UYVY &&
-                g_dst_file_fourcc == VA_FOURCC_UYVY) ||
-               (g_out_fourcc == VA_FOURCC_AYUV &&
-                g_dst_file_fourcc == VA_FOURCC_AYUV)) {
+                g_dst_file_fourcc == VA_FOURCC_UYVY)) {
         return store_packed_yuv_surface_to_packed_file(fp, surface_id);
     } else if ((g_out_fourcc == VA_FOURCC_I010 &&
                 g_dst_file_fourcc == VA_FOURCC_I010) ||
@@ -1114,14 +978,11 @@ store_yuv_surface_to_file(FILE *fp,
                 g_dst_file_fourcc == VA_FOURCC_RGBA) ||
                (g_out_fourcc == VA_FOURCC_RGBX &&
                 g_dst_file_fourcc == VA_FOURCC_RGBX) ||
-               (g_out_fourcc == VA_FOURCC_BGRA &&
+               (g_out_fourcc == VA_FOURCC_RGBA &&
                 g_dst_file_fourcc == VA_FOURCC_BGRA) ||
                (g_out_fourcc == VA_FOURCC_BGRX &&
                 g_dst_file_fourcc == VA_FOURCC_BGRX)) {
         return store_rgb_surface_to_rgb_file(fp, surface_id);
-    } else if (g_out_fourcc == VA_FOURCC_RGBP &&
-               g_out_fourcc == VA_FOURCC_BGRP) {
-        return store_rgbp_surface_to_rgbp_file(fp, surface_id);
     } else {
         printf("Not supported YUV fourcc for output !!!\n");
         return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -1129,336 +990,141 @@ store_yuv_surface_to_file(FILE *fp,
 }
 
 static VAStatus
-denoise_filter_init(VABufferID *filter_param_buf_id)
-{
-    VAStatus va_status = VA_STATUS_SUCCESS;
-    VAProcFilterParameterBuffer denoise_param;
-    VABufferID denoise_param_buf_id;
-    float intensity;
-
-    VAProcFilterCap denoise_caps;
-    uint32_t num_denoise_caps = 1;
-    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
-                                           VAProcFilterNoiseReduction,
-                                           &denoise_caps, &num_denoise_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
-
-    if (read_value_float(g_config_file_fd, "DENOISE_INTENSITY", &intensity)) {
-        printf("Read denoise intensity failed, use default value");
-        intensity = denoise_caps.range.default_value;
-    }
-    intensity = adjust_to_range(&denoise_caps.range, intensity);
-
-    denoise_param.type  = VAProcFilterNoiseReduction;
-    denoise_param.value = intensity;
-
-    printf("Denoise intensity: %f\n", intensity);
-
-    va_status = vaCreateBuffer(va_dpy, context_id,
-                               VAProcFilterParameterBufferType, sizeof(denoise_param), 1,
-                               &denoise_param, &denoise_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
-
-    *filter_param_buf_id = denoise_param_buf_id;
-
-    return va_status;
-}
-
-/*
- * This is a method to initialize STDE filter.
- * If this filter is called, it is enabled by default.
- */
-static VAStatus
-skintone_filter_init(VABufferID *filter_param_buf_id)
-{
-     VAStatus va_status = VA_STATUS_SUCCESS;
-     VAProcFilterParameterBuffer stde_param;
-     VABufferID stde_param_buf_id;
-     uint8_t stde_factor = 0;
-
-     if (read_value_uint8(g_config_file_fd, "STDE_FACTOR", &stde_factor)) {
-        printf("Read STDE Factor failed, use default value");
-        stde_factor = 0;
-    }
-
-    printf("Applying STDE factor: %d\n", stde_factor);
-
-     stde_param.type  = VAProcFilterSkinToneEnhancement;
-     stde_param.value = stde_factor;
-
-     va_status = vaCreateBuffer(va_dpy, context_id,
-                                VAProcFilterParameterBufferType, sizeof(stde_param), 1,
-                                &stde_param, &stde_param_buf_id);
-     CHECK_VASTATUS(va_status,"vaCreateBuffer");
-
-     *filter_param_buf_id = stde_param_buf_id;
-
-     return va_status;
-}
-
-static VAStatus
-deinterlace_filter_init(VABufferID *filter_param_buf_id)
-{
-    VAStatus va_status = VA_STATUS_SUCCESS;
-    VAProcFilterParameterBufferDeinterlacing deinterlacing_param;
-    VABufferID deinterlacing_param_buf_id;
-    char algorithm_str[MAX_LEN], flags_str[MAX_LEN];
-    uint32_t i;
-
-    /* read and check whether configured deinterlace algorithm is supported */
-    deinterlacing_param.algorithm  = VAProcDeinterlacingBob;
-    if (!read_value_string(g_config_file_fd, "DEINTERLACING_ALGORITHM", algorithm_str)) {
-        printf("Deinterlacing algorithm in config: %s \n", algorithm_str);
-        if (!strcmp(algorithm_str, "VAProcDeinterlacingBob"))
-            deinterlacing_param.algorithm  = VAProcDeinterlacingBob;
-        else if (!strcmp(algorithm_str, "VAProcDeinterlacingWeave"))
-            deinterlacing_param.algorithm  = VAProcDeinterlacingWeave;
-        else if (!strcmp(algorithm_str, "VAProcDeinterlacingMotionAdaptive"))
-            deinterlacing_param.algorithm  = VAProcDeinterlacingMotionAdaptive;
-        else if (!strcmp(algorithm_str, "VAProcDeinterlacingMotionCompensated"))
-            deinterlacing_param.algorithm  = VAProcDeinterlacingMotionCompensated;
-    } else {
-        printf("Read deinterlace algorithm failed, use default algorithm");
-        deinterlacing_param.algorithm  = VAProcDeinterlacingBob;
-    }
-
-    VAProcFilterCapDeinterlacing deinterlacing_caps[VAProcDeinterlacingCount];
-    uint32_t num_deinterlacing_caps = VAProcDeinterlacingCount;
-    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
-                                           VAProcFilterDeinterlacing,
-                                           &deinterlacing_caps, &num_deinterlacing_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
-
-    for (i = 0; i < VAProcDeinterlacingCount; i ++)
-       if (deinterlacing_caps[i].type == deinterlacing_param.algorithm)
-         break;
-
-    if (i == VAProcDeinterlacingCount) {
-        printf("Deinterlacing algorithm: %d is not supported by driver, \
-                use defautl algorithm :%d \n",
-                deinterlacing_param.algorithm,
-                VAProcDeinterlacingBob);
-        deinterlacing_param.algorithm = VAProcDeinterlacingBob;
-    }
-
-    /* read and check the deinterlace flags */
-    deinterlacing_param.flags = 0;
-    if (!read_value_string(g_config_file_fd, "DEINTERLACING_FLAG", flags_str)) {
-        if (strstr(flags_str, "VA_DEINTERLACING_BOTTOM_FIELD_FIRST"))
-            deinterlacing_param.flags |= VA_DEINTERLACING_BOTTOM_FIELD_FIRST;
-        if (strstr(flags_str, "VA_DEINTERLACING_BOTTOM_FIELD"))
-            deinterlacing_param.flags |= VA_DEINTERLACING_BOTTOM_FIELD;
-        if (strstr(flags_str, "VA_DEINTERLACING_ONE_FIELD"))
-            deinterlacing_param.flags |= VA_DEINTERLACING_ONE_FIELD;
-    }
-
-    deinterlacing_param.type  = VAProcFilterDeinterlacing;
-
-    /* create deinterlace fitler buffer */
-    va_status = vaCreateBuffer(va_dpy, context_id,
-                               VAProcFilterParameterBufferType, sizeof(deinterlacing_param), 1,
-                               &deinterlacing_param, &deinterlacing_param_buf_id);
-    CHECK_VASTATUS(va_status, "vaCreateBuffer");
-
-    *filter_param_buf_id = deinterlacing_param_buf_id;
-
-    return va_status;
-}
-
-static VAStatus
-sharpening_filter_init(VABufferID *filter_param_buf_id)
+upload_data_to_3dlut(FILE *fp,
+                     VASurfaceID &surface_id)
 {
     VAStatus va_status;
-    VAProcFilterParameterBuffer sharpening_param;
-    VABufferID sharpening_param_buf_id;
-    float intensity;
+    VAImage surface_image;
+    void *surface_p = NULL;
+    uint32_t frame_size, lut3d_size;
+    unsigned char * newImageBuffer = NULL;
+    va_status = vaSyncSurface (va_dpy,surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
+    
+    va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
 
-    VAProcFilterCap sharpening_caps;
-    uint32_t num_sharpening_caps = 1;
-    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
-                VAProcFilterSharpening,
-                &sharpening_caps, &num_sharpening_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
 
-    if(read_value_float(g_config_file_fd, "SHARPENING_INTENSITY", &intensity)) {
-        printf("Read sharpening intensity failed, use default value.");
-        intensity = sharpening_caps.range.default_value;
-    }
+    if (surface_image.format.fourcc == VA_FOURCC_RGBA  && fp) {
+        /* 3DLUT surface is allocated to 32 bit RGB */
+        frame_size = surface_image.width * surface_image.height * 4;
+        newImageBuffer = (unsigned char*)malloc(frame_size);
+        assert(newImageBuffer);
 
-    intensity = adjust_to_range(&sharpening_caps.range, intensity);
-    printf("Sharpening intensity: %f\n", intensity);
-    sharpening_param.value = intensity;
+        fseek(fp, 0L, SEEK_END);
+        lut3d_size = ftell(fp);
+        rewind(fp);
 
-    sharpening_param.type  = VAProcFilterSharpening;
+        uint32_t real_size = (frame_size > lut3d_size) ? lut3d_size : frame_size;
 
-    /* create sharpening fitler buffer */
-    va_status = vaCreateBuffer(va_dpy, context_id,
-                               VAProcFilterParameterBufferType, sizeof(sharpening_param), 1,
-                               &sharpening_param, &sharpening_param_buf_id);
+        if (fread(newImageBuffer, real_size, 1, fp) != 0)
+        {
+            memcpy(surface_p, newImageBuffer, real_size);
+            printf("upload_data_to_3dlut: 3DLUT surface width %d, height %d, pitch %d, frame size %d, 3dlut file size: %d\n", surface_image.width, surface_image.height, surface_image.pitches[0],frame_size, lut3d_size);
+        }
+     } 
 
-    *filter_param_buf_id = sharpening_param_buf_id;
+     if (newImageBuffer)  {
+         free(newImageBuffer);
+         newImageBuffer = NULL;
+     }
 
-    return va_status;
+     vaUnmapBuffer(va_dpy, surface_image.buf);
+     vaDestroyImage(va_dpy, surface_image.image_id);
+
+     return VA_STATUS_SUCCESS;
 }
 
 static VAStatus
-color_balance_filter_init(VABufferID *filter_param_buf_id)
+create_surface(VASurfaceID * p_surface_id,
+               uint32_t width, uint32_t height,
+               uint32_t fourCC, uint32_t format)
 {
     VAStatus va_status;
-    VAProcFilterParameterBufferColorBalance color_balance_param[4];
-    VABufferID color_balance_param_buf_id;
-    float value;
-    uint32_t i, count;
-    int8_t status;
+    VASurfaceAttrib    surface_attrib;
+    surface_attrib.type =  VASurfaceAttribPixelFormat;
+    surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
+    surface_attrib.value.type = VAGenericValueTypeInteger;
+    surface_attrib.value.value.i = fourCC;
 
-    VAProcFilterCapColorBalance color_balance_caps[VAProcColorBalanceCount];
-    unsigned int num_color_balance_caps = VAProcColorBalanceCount;
-    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
-                                           VAProcFilterColorBalance,
-                                           &color_balance_caps, &num_color_balance_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
-
-    count = 0;
-    printf("Color balance params: ");
-    for (i = 0; i < num_color_balance_caps; i++) {
-        if (color_balance_caps[i].type == VAProcColorBalanceHue) {
-            color_balance_param[count].attrib  = VAProcColorBalanceHue;
-            status = read_value_float(g_config_file_fd, "COLOR_BALANCE_HUE", &value);
-            printf("Hue: ");
-        } else if (color_balance_caps[i].type == VAProcColorBalanceSaturation) {
-            color_balance_param[count].attrib  = VAProcColorBalanceSaturation;
-            status = read_value_float(g_config_file_fd, "COLOR_BALANCE_SATURATION", &value);
-            printf("Saturation: ");
-        } else if (color_balance_caps[i].type == VAProcColorBalanceBrightness) {
-            color_balance_param[count].attrib  = VAProcColorBalanceBrightness;
-            status = read_value_float(g_config_file_fd, "COLOR_BALANCE_BRIGHTNESS", &value);
-            printf("Brightness: ");
-        } else if (color_balance_caps[i].type == VAProcColorBalanceContrast) {
-            color_balance_param[count].attrib  = VAProcColorBalanceContrast;
-            status = read_value_float(g_config_file_fd, "COLOR_BALANCE_CONTRAST", &value);
-            printf("Contrast: ");
-        } else {
-            continue;
-        }
-
-        if (status)
-            value = color_balance_caps[i].range.default_value;
-        else
-            value = adjust_to_range(&color_balance_caps[i].range, value);
-
-        color_balance_param[count].value = value;
-        color_balance_param[count].type  = VAProcFilterColorBalance;
-        count++;
-
-        printf("%4f,  ", value);
-    }
-    printf("\n");
-
-    va_status = vaCreateBuffer(va_dpy, context_id,
-                               VAProcFilterParameterBufferType, sizeof(color_balance_param), 4,
-                               color_balance_param, &color_balance_param_buf_id);
-
-    *filter_param_buf_id = color_balance_param_buf_id;
-
-    return va_status;
+    va_status = vaCreateSurfaces(va_dpy,
+                                 format,
+                                 width ,
+                                 height,
+                                 p_surface_id,
+                                 1,
+                                 &surface_attrib,
+                                 1);
+   return va_status;
 }
 
-#if BLEND_ON
-
 static VAStatus
-blending_state_init(VABlendState *state)
+lut3D_filter_init(VABufferID &filter_param_buf_id)
 {
-    VAStatus va_status = VA_STATUS_SUCCESS;
-    char blending_flags_str[MAX_LEN];
-    float global_alpha;
-    uint32_t min_luma, max_luma;
+    VAStatus va_status;
+    VAProcFilterParameterBuffer3DLUT lut3d_param;
+    VABufferID lut3d_param_buf_id;
+    uint32_t num_caps = 10;
+    bool bSupported = false;
 
-    /* read and check blend state */
-    state->flags = 0;
-    if (!read_value_string(g_config_file_fd, "BLENDING_FLAGS", blending_flags_str)){
-        if (strstr(blending_flags_str, "VA_BLEND_GLOBAL_ALPHA")) {
-           if (read_value_float(g_config_file_fd, "BLENDING_GLOBAL_ALPHA", &global_alpha)) {
-               global_alpha = 1.0  ;
-               printf("Use default global alpha : %4f \n", global_alpha);
-           }
-           state->flags |= VA_BLEND_GLOBAL_ALPHA;
-           state->global_alpha = global_alpha;
-        }
-        if (strstr(blending_flags_str, "VA_BLEND_LUMA_KEY")) {
-            if (read_value_uint8(g_config_file_fd, "BLENDING_MIN_LUMA", &g_blending_min_luma)) {
-                g_blending_min_luma = 1;
-                printf("Use default min luma : %3d \n", g_blending_min_luma);
-            }
-            if (read_value_uint8(g_config_file_fd, "BLENDING_MAX_LUMA", &g_blending_max_luma)) {
-                g_blending_max_luma = 254;
-                printf("Use default max luma : %3d \n", g_blending_max_luma);
-            }
-            state->flags |= VA_BLEND_LUMA_KEY;
-            state->min_luma = g_blending_min_luma * 1.0 / 256;
-            state->max_luma = g_blending_max_luma * 1.0 / 256;
-        }
+    VAProcFilterCap3DLUT caps[num_caps];
+    memset(&caps, 0, sizeof(VAProcFilterCap3DLUT)*num_caps);
+    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
+                                           VAProcFilter3DLUT,
+                                           (void *)caps, &num_caps);
+    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    printf("vaQueryVideoProcFilterCaps num_caps %d\n", num_caps);
 
-        printf("Blending type = %s, alpha = %f, min_luma = %3d, max_luma = %3d \n",
-              blending_flags_str, global_alpha, min_luma, max_luma);
+    /* check if the input parameters are supported */
+    for (uint32_t index = 0; index < num_caps; index++)
+    {
+        // check lut_size and lut_stride
+        if ((caps[index].lut_size = g_3dlut_seg_size) &&
+            (caps[index].lut_stride[0] == g_3dlut_seg_size) &&
+            (caps[index].lut_stride[1] == g_3dlut_seg_size) &&
+            (caps[index].lut_stride[2] == g_3dlut_mul_size))
+        {
+            bSupported = true;
+        }
     }
 
-    VAProcPipelineCaps pipeline_caps;
-    va_status = vaQueryVideoProcPipelineCaps(va_dpy, context_id,
-                NULL, 0, &pipeline_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcPipelineCaps");
+    if (bSupported)
+    {
+        lut3d_param.type  = VAProcFilter3DLUT;
+        lut3d_param.lut_surface   = g_3dlut_surface_id;
+        lut3d_param.lut_size      = g_3dlut_seg_size;
+        lut3d_param.lut_stride[0] = g_3dlut_seg_size;
+        lut3d_param.lut_stride[1] = g_3dlut_seg_size;
+        lut3d_param.lut_stride[2] = g_3dlut_mul_size;
+        lut3d_param.bit_depth     = 16;
+        lut3d_param.num_channel   = 4;
+        lut3d_param.channel_mapping = g_3dlut_channel_mapping;
 
-    if (!pipeline_caps.blend_flags){
-        printf("Blending is not supported in driver! \n");
-        return VA_STATUS_ERROR_UNIMPLEMENTED;
-    }
+        /* create 3dlut fitler buffer */
+        va_status = vaCreateBuffer(va_dpy, context_id,
+                                   VAProcFilterParameterBufferType, sizeof(lut3d_param), 1,
+                                   &lut3d_param, &lut3d_param_buf_id);
 
-    if (! (pipeline_caps.blend_flags & state->flags)) {
-        printf("Driver do not support current blending flags: %d", state->flags);
-        return VA_STATUS_ERROR_UNIMPLEMENTED;
+        filter_param_buf_id = lut3d_param_buf_id;
     }
 
     return va_status;
 }
 
-#endif
-
 static VAStatus
-video_frame_process(VAProcFilterType filter_type,
-                    uint32_t frame_idx,
-                    VASurfaceID in_surface_id,
-                    VASurfaceID out_surface_id)
+video_frame_process_3dlut(VASurfaceID in_surface_id,
+                          VASurfaceID out_surface_id)
 {
     VAStatus va_status;
     VAProcPipelineParameterBuffer pipeline_param;
     VARectangle surface_region, output_region;
     VABufferID pipeline_param_buf_id = VA_INVALID_ID;
     VABufferID filter_param_buf_id = VA_INVALID_ID;
-#if BLEND_ON
-    VABlendState state ;
-#endif
-    uint32_t filter_count = 1;
 
-    /* create denoise_filter buffer id */
-    switch(filter_type){
-      case VAProcFilterNoiseReduction:
-           denoise_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterDeinterlacing:
-           deinterlace_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterSharpening:
-           sharpening_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterColorBalance:
-           color_balance_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterSkinToneEnhancement:
-            skintone_filter_init(&filter_param_buf_id);
-            break;
-      default :
-           filter_count = 0;
-         break;
-    }
+    /*Create 3DLUT Filter*/
+    lut3D_filter_init(filter_param_buf_id);
 
     /* Fill pipeline buffer */
     surface_region.x = 0;
@@ -1474,19 +1140,13 @@ video_frame_process(VAProcFilterType filter_type,
     pipeline_param.surface = in_surface_id;
     pipeline_param.surface_region = &surface_region;
     pipeline_param.output_region = &output_region;
-
     pipeline_param.filter_flags = 0;
-    pipeline_param.filters      = &filter_param_buf_id;
-    pipeline_param.num_filters  = filter_count;
-
-#if BLEND_ON
-    /* Blending related state */
-    if (g_blending_enabled){
-        blending_state_init(&state);
-        pipeline_param.blend_state = &state;
-    }
-#endif
-
+    pipeline_param.filters = &filter_param_buf_id;
+    pipeline_param.num_filters  = 1;
+    /* input is bt2020 */
+    pipeline_param.surface_color_standard = VAProcColorStandardBT2020;
+    pipeline_param.output_color_standard = VAProcColorStandardBT709;
+    
     va_status = vaCreateBuffer(va_dpy,
                                context_id,
                                VAProcPipelineParameterBufferType,
@@ -1510,11 +1170,79 @@ video_frame_process(VAProcFilterType filter_type,
     va_status = vaEndPicture(va_dpy, context_id);
     CHECK_VASTATUS(va_status, "vaEndPicture");
 
-    if (filter_param_buf_id != VA_INVALID_ID)
-        vaDestroyBuffer(va_dpy,filter_param_buf_id);
-
-    if (pipeline_param_buf_id != VA_INVALID_ID)
+    if (pipeline_param_buf_id != VA_INVALID_ID) {
         vaDestroyBuffer(va_dpy,pipeline_param_buf_id);
+    }
+
+    if (filter_param_buf_id != VA_INVALID_ID) {
+        vaDestroyBuffer(va_dpy,filter_param_buf_id);
+    }
+
+    return va_status;
+}
+
+static VAStatus
+video_frame_process_scaling(VASurfaceID in_surface_id,
+                          VASurfaceID out_surface_id)
+{
+    VAStatus va_status;
+    VAProcPipelineParameterBuffer pipeline_param;
+    VARectangle surface_region, output_region;
+    VABufferID pipeline_param_buf_id = VA_INVALID_ID;
+    VABufferID filter_param_buf_id = VA_INVALID_ID; 
+
+    /* Fill pipeline buffer */
+    surface_region.x = 0;
+    surface_region.y = 0;
+    surface_region.width = g_in_pic_width;
+    surface_region.height = g_in_pic_height;
+    output_region.x = 0;
+    output_region.y = 0;
+    output_region.width = g_out_pic_width;
+    output_region.height = g_out_pic_height;
+
+    memset(&pipeline_param, 0, sizeof(pipeline_param));
+    pipeline_param.surface = in_surface_id;
+    pipeline_param.surface_region = &surface_region;
+    pipeline_param.output_region = &output_region;
+    /* Default is going to SFC */
+    // pipeline_param.filter_flags = 0;
+    // pipeline_param.filters = &filter_param_buf_id;
+    pipeline_param.num_filters  = 0;
+    /* input is bt2020 */
+    // pipeline_param.surface_color_standard = VAProcColorStandardBT2020;
+    // pipeline_param.output_color_standard = VAProcColorStandardBT709;
+    
+    va_status = vaCreateBuffer(va_dpy,
+                               context_id,
+                               VAProcPipelineParameterBufferType,
+                               sizeof(pipeline_param),
+                               1,
+                               &pipeline_param,
+                               &pipeline_param_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+    va_status = vaBeginPicture(va_dpy,
+                               context_id,
+                               out_surface_id);
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
+
+    va_status = vaRenderPicture(va_dpy,
+                                context_id,
+                                &pipeline_param_buf_id,
+                                1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+
+    va_status = vaEndPicture(va_dpy, context_id);
+    CHECK_VASTATUS(va_status, "vaEndPicture");
+
+    if (pipeline_param_buf_id != VA_INVALID_ID) {
+        vaDestroyBuffer(va_dpy,pipeline_param_buf_id);
+    }
+
+    if (filter_param_buf_id != VA_INVALID_ID) {
+        vaDestroyBuffer(va_dpy,filter_param_buf_id);
+    }
 
     return va_status;
 }
@@ -1523,7 +1251,6 @@ static VAStatus
 vpp_context_create()
 {
     VAStatus va_status = VA_STATUS_SUCCESS;
-    uint32_t i;
     int32_t j;
 
     /* VA driver initialization */
@@ -1571,9 +1298,33 @@ vpp_context_create()
                                 g_in_fourcc, g_in_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for input");
 
+    if (g_pipeline_sequence == VA_SCALING_3DLUT) {
+        /* Create intermediate surface for scaling + 3DLUT */
+        va_status = create_surface(&g_inter_surface_id, g_out_pic_width, g_out_pic_height,
+                                g_in_fourcc, g_in_format);
+        CHECK_VASTATUS(va_status, "vaCreateSurfaces for input");		
+    }
+
     va_status = create_surface(&g_out_surface_id, g_out_pic_width, g_out_pic_height,
                                 g_out_fourcc, g_out_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for output");
+
+    if (g_pipeline_sequence != VA_SCALING_ONLY) {
+        uint32_t lut3d_size = g_3dlut_seg_size * g_3dlut_seg_size * g_3dlut_mul_size *(16 / 8) * 4;
+        printf("3dlut file name: %s, 3dlut size: %d\n", g_3dlut_file_name, lut3d_size);
+        /* create 3dlut surface and fill it with the data in 3dlut file */
+        va_status = create_surface(&g_3dlut_surface_id, g_3dlut_seg_size * g_3dlut_mul_size, g_3dlut_seg_size * 2,
+                                   VA_FOURCC_RGBA, VA_RT_FORMAT_RGB32);
+        CHECK_VASTATUS(va_status, "vaCreateSurfaces for 3dlut.");
+        /* fill 3dlut with the 3dlut file data */
+        FILE *lut3d_file = NULL;
+        lut3d_file = fopen(g_3dlut_file_name, "rb");
+        upload_data_to_3dlut(lut3d_file, g_3dlut_surface_id);
+        if (lut3d_file) {
+            fclose(lut3d_file);
+            lut3d_file = NULL;
+        }
+    }
 
     va_status = vaCreateConfig(va_dpy,
                                VAProfileNone,
@@ -1582,42 +1333,6 @@ vpp_context_create()
                                1,
                                &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
-
-    /* Source surface format check */
-    uint32_t num_surf_attribs = VASurfaceAttribCount;
-    VASurfaceAttrib * surf_attribs = (VASurfaceAttrib*)
-              malloc(sizeof(VASurfaceAttrib) * num_surf_attribs);
-    if (!surf_attribs)
-       assert(0);
-
-    va_status = vaQuerySurfaceAttributes(va_dpy,
-                                        config_id,
-                                        surf_attribs,
-                                        &num_surf_attribs);
-
-    if (va_status == VA_STATUS_ERROR_MAX_NUM_EXCEEDED) {
-        surf_attribs = (VASurfaceAttrib*)realloc(surf_attribs,
-                        sizeof(VASurfaceAttrib) * num_surf_attribs);
-         if (!surf_attribs)
-             assert(0);
-         va_status = vaQuerySurfaceAttributes(va_dpy,
-                                              config_id,
-                                              surf_attribs,
-                                              &num_surf_attribs);
-    }
-    CHECK_VASTATUS(va_status, "vaQuerySurfaceAttributes");
-
-    for (i = 0; i < num_surf_attribs; i++) {
-        if (surf_attribs[i].type == VASurfaceAttribPixelFormat &&
-            surf_attribs[i].value.value.i == (int)g_in_fourcc)
-            break;
-    }
-    free(surf_attribs);
-
-    if (i == num_surf_attribs) {
-        printf("Input fourCC %d  is not supported by VPP !\n", g_in_fourcc);
-        assert(0);
-    }
 
     va_status = vaCreateContext(va_dpy,
                                 config_id,
@@ -1628,31 +1343,6 @@ vpp_context_create()
                                 1,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
-
-
-    /* Validate  whether currect filter is supported */
-    if (g_filter_type != VAProcFilterNone) {
-        uint32_t supported_filter_num = VAProcFilterCount;
-        VAProcFilterType supported_filter_types[VAProcFilterCount];
-
-        va_status = vaQueryVideoProcFilters(va_dpy,
-                                            context_id,
-                                            supported_filter_types,
-                                            &supported_filter_num);
-
-        CHECK_VASTATUS(va_status, "vaQueryVideoProcFilters");
-
-        for (i = 0; i < supported_filter_num; i++){
-            if (supported_filter_types[i] == g_filter_type)
-                break;
-        }
-
-        if (i == supported_filter_num) {
-            printf("VPP filter type %s is not supported by driver !\n", g_filter_type_name);
-            assert(0);
-        }
-    }
-
     return va_status;
 }
 
@@ -1660,12 +1350,25 @@ static void
 vpp_context_destroy()
 {
     /* Release resource */
+    printf("vaDestroySurfaces input and output surface!\n");
     vaDestroySurfaces(va_dpy, &g_in_surface_id, 1);
     vaDestroySurfaces(va_dpy, &g_out_surface_id, 1);
+    if (g_pipeline_sequence == VA_SCALING_3DLUT) {
+        printf("vaDestroySurfaces intermediate surface for Scaling->3DLUT!\n");
+        vaDestroySurfaces(va_dpy, &g_inter_surface_id, 1);
+    }
+     if (g_pipeline_sequence != VA_SCALING_ONLY) {
+        printf("vaDestroySurfaces 3dlut surface for Scaling!\n");
+        vaDestroySurfaces(va_dpy, &g_3dlut_surface_id, 1);
+    }
+    printf("vaDestroyContext!\n");
     vaDestroyContext(va_dpy, context_id);
+    printf("vaDestroyConfig!\n");
     vaDestroyConfig(va_dpy, config_id);
 
+    printf("vaTerminate!\n");
     vaTerminate(va_dpy);
+    printf("va_close_display!\n");
     va_close_display(va_dpy);
 }
 
@@ -1677,50 +1380,29 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
 
     if (!strcmp(str, "YV12")){
         tfourcc = VA_FOURCC('Y', 'V', '1', '2');
-        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "I420")){
         tfourcc = VA_FOURCC('I', '4', '2', '0');
-        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "NV12")){
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
-        tformat = VA_RT_FORMAT_YUV420;
     } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
         tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
-        tformat = VA_RT_FORMAT_YUV422;
     } else if(!strcmp(str, "UYVY")){
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
-        tformat = VA_RT_FORMAT_YUV422;
     } else if (!strcmp(str, "P010")) {
         tfourcc = VA_FOURCC('P', '0', '1', '0');
-        tformat = VA_RT_FORMAT_YUV420_10BPP;
     } else if (!strcmp(str, "I010")) {
         tfourcc = VA_FOURCC('I', '0', '1', '0');
-        tformat = VA_RT_FORMAT_YUV420_10BPP;
     } else if (!strcmp(str, "RGBA")) {
         tfourcc = VA_FOURCC_RGBA;
-        tformat = VA_RT_FORMAT_RGB32;
     } else if (!strcmp(str, "RGBX")) {
         tfourcc = VA_FOURCC_RGBX;
-        tformat = VA_RT_FORMAT_RGB32;
     } else if (!strcmp(str, "BGRA")) {
         tfourcc = VA_FOURCC_BGRA;
-        tformat = VA_RT_FORMAT_RGB32;
     } else if (!strcmp(str, "BGRX")) {
         tfourcc = VA_FOURCC_BGRX;
-        tformat = VA_RT_FORMAT_RGB32;
-    } else if (!strcmp(str, "AYUV")) {
-        tfourcc = VA_FOURCC_AYUV;
-        tformat = VA_RT_FORMAT_YUV444;
-    } else if (!strcmp(str, "RGBP")) {
-        tfourcc = VA_FOURCC_RGBP;
-        tformat = VA_RT_FORMAT_RGBP;
-    } else if (!strcmp(str, "BGRP")) {
-        tfourcc = VA_FOURCC_BGRP;
-        tformat = VA_RT_FORMAT_RGBP;
-    } else {
+    } else{
         printf("Not supported format: %s! Currently only support following format: %s\n",
-               str, "YV12, I420, NV12, YUY2(YUYV), UYVY, AYUV, P010, I010, RGBA, RGBX, BGRA, "
-               "BGRX or RGBP");
+               str, "YV12, I420, NV12, YUY2(YUYV), UYVY, P010, I010, RGBA, RGBX, BGRA or BGRX");
         assert(0);
     }
 
@@ -1760,35 +1442,23 @@ parse_basic_parameters()
 
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
 
-    /* Read filter type */
-    if (read_value_string(g_config_file_fd, "FILTER_TYPE", g_filter_type_name)){
-        printf("Read filter type error !\n");
-        assert(0);
+    read_value_uint32(g_config_file_fd, "3DLUT_SCALING", &g_pipeline_sequence);
+
+    if(read_value_string(g_config_file_fd, "3DLUT_FILE_NAME", g_3dlut_file_name)) {
+        printf("Read 3DLUT file failed, exit.");
     }
 
-    if (!strcmp(g_filter_type_name, "VAProcFilterNoiseReduction"))
-        g_filter_type = VAProcFilterNoiseReduction;
-    else if (!strcmp(g_filter_type_name, "VAProcFilterDeinterlacing"))
-        g_filter_type = VAProcFilterDeinterlacing;
-    else if (!strcmp(g_filter_type_name, "VAProcFilterSharpening"))
-        g_filter_type = VAProcFilterSharpening;
-    else if (!strcmp(g_filter_type_name, "VAProcFilterColorBalance"))
-        g_filter_type = VAProcFilterColorBalance;
-    else if (!strcmp(g_filter_type_name, "VAProcFilterSkinToneEnhancement"))
-         g_filter_type = VAProcFilterSkinToneEnhancement;
-    else if (!strcmp(g_filter_type_name, "VAProcFilterNone"))
-        g_filter_type = VAProcFilterNone;
-    else {
-        printf("Unsupported filter type :%s \n", g_filter_type_name);
-        return -1;
+    if(read_value_uint16(g_config_file_fd, "3DLUT_SEG_SIZE", &g_3dlut_seg_size)) {
+        printf("Read segment_size failed, exit.");
     }
 
-    /* Check whether blending is enabled */
-    if (read_value_uint8(g_config_file_fd, "BLENDING_ENABLED", &g_blending_enabled))
-        g_blending_enabled = 0;
+    if(read_value_uint16(g_config_file_fd, "3DLUT_MUL_SIZE", &g_3dlut_mul_size)) {
+        printf("Read multiple_size failed, exit.");
+    }
 
-    if (g_blending_enabled)
-        printf("Blending will be done \n");
+    if(read_value_uint32(g_config_file_fd, "3DLUT_CHANNEL_MAPPING", &g_3dlut_channel_mapping)) {
+        printf("Read channel_mapping failed, exit.");
+    }
 
     if (g_in_pic_width != g_out_pic_width ||
         g_in_pic_height != g_out_pic_height)
@@ -1803,13 +1473,22 @@ parse_basic_parameters()
     return 0;
 }
 
+static void
+print_help()
+{
+    printf("The app is used to test the scaling and csc feature.\n");
+    printf("Cmd Usage: ./vpp3dlut process_3dlut.cfg\n");
+    printf("The configure file process_scaling_csc.cfg is used to configure the para.\n");
+    printf("You can refer process_scaling_csc.cfg.template for each para meaning and create the configure file.\n");
+}
+
 int32_t main(int32_t argc, char *argv[])
 {
     VAStatus va_status;
     uint32_t i;
 
-    if (argc != 2){
-        printf("Input error! please specify the configure file \n");
+    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")){
+        print_help();
         return -1;
     }
 
@@ -1847,28 +1526,31 @@ int32_t main(int32_t argc, char *argv[])
         assert(0);
     }
 
-    printf("\nStart to process, processing type is %s ...\n", g_filter_type_name);
-    struct timeval start_time, end_time;
-    gettimeofday(&start_time, NULL);
-
     for (i = 0; i < g_frame_count; i ++){
-        if (g_blending_enabled) {
-            construct_nv12_mask_surface(g_in_surface_id, g_blending_min_luma, g_blending_max_luma);
-            upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_out_surface_id);
-        } else {
-            upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_in_surface_id);
+        upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_in_surface_id);
+        if (g_pipeline_sequence == VA_3DLUT_SCALING)
+        {
+            printf("process frame #%d in VA_3DLUT_SCALING\n", i);
+            video_frame_process_3dlut(g_in_surface_id, g_out_surface_id);
         }
-
-        video_frame_process(g_filter_type, i, g_in_surface_id, g_out_surface_id);
+        else if (g_pipeline_sequence == VA_SCALING_3DLUT)
+        {
+            printf("process frame #%d in VA_SCALING_3DLUT\n", i);
+            video_frame_process_scaling(g_in_surface_id, g_inter_surface_id);
+            video_frame_process_3dlut(g_inter_surface_id, g_out_surface_id);
+        }
+        else if (g_pipeline_sequence == VA_SCALING_ONLY)
+        {
+            printf("process frame #%d in VA_SCALING_ONLY\n", i);
+            video_frame_process_scaling(g_in_surface_id, g_out_surface_id);
+        }
+        else
+        {
+            printf("Unknown pipeline sequence, default is 3DLUT->scaling!\n");
+        }
         store_yuv_surface_to_file(g_dst_file_fd, g_out_surface_id);
     }
-
-    gettimeofday(&end_time, NULL);
-    float duration = (end_time.tv_sec - start_time.tv_sec) +
-                     (end_time.tv_usec - start_time.tv_usec)/1000000.0;
-    printf("Finish processing, performance: \n" );
-    printf("%d frames processed in: %f s, ave time = %.6fs \n",g_frame_count, duration, duration/g_frame_count);
-
+    
     if (g_src_file_fd)
        fclose(g_src_file_fd);
 
@@ -1882,3 +1564,5 @@ int32_t main(int32_t argc, char *argv[])
 
     return 0;
 }
+
+#endif

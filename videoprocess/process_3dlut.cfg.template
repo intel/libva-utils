@@ -1,0 +1,33 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(P010)
+#  you require. After video processing, the processed content (NV12 surface)
+#  will be stored to frames(nv12 format in file).
+#    Supported features include scaling and implicit format conversion(P010<->RGB<->NV12). 
+#  you can modify this configuration file to set the corresponding parameters.
+
+#1.Source YUV file information
+SRC_FILE_NAME: ./Flower.p010
+SRC_FRAME_WIDTH:  1920
+SRC_FRAME_HEIGHT: 1080
+SRC_FRAME_FORMAT: P010
+SRC_FILE_FORMAT: P010
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ./out_1920x1080.p010
+DST_FRAME_WIDTH:  1920
+DST_FRAME_HEIGHT: 1080
+DST_FRAME_FORMAT: P010
+DST_FILE_FORMAT: P010
+
+#3.How many frames to be processed
+FRAME_SUM: 1
+
+#4.3DLUT configuration file
+3DLUT_FILE_NAME: ./3dlut_65cubic.dat
+3DLUT_SEG_SIZE: 65
+3DLUT_MUL_SIZE: 128
+3DLUT_CHANNEL_MAPPING: 1
+
+#5. 3DLUT Scaling pipeline(3DLUT->Scaling: 1, Scaling->3DLUT: 0, Scaling only: 2)
+3DLUT_SCALING: 1
+
