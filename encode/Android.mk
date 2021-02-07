@@ -10,7 +10,8 @@ LOCAL_SRC_FILES := \
   h264encode.c
 
 LOCAL_CFLAGS += \
-    -DANDROID
+    -DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
   $(LOCAL_PATH)/../common
@@ -18,6 +19,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	h264encode
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl  libcutils libutils libgui libm
 
 include $(BUILD_EXECUTABLE)
@@ -32,7 +34,8 @@ LOCAL_SRC_FILES := \
 	avcenc.c
 
 LOCAL_CFLAGS += \
-	-DANDROID
+	-DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../common
@@ -40,6 +43,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	avcenc
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
@@ -54,7 +58,8 @@ LOCAL_SRC_FILES := \
 	vp9enc.c
 
 LOCAL_CFLAGS += \
-	-DANDROID
+	-DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../common
@@ -62,6 +67,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	vp9enc
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
@@ -76,7 +82,8 @@ LOCAL_SRC_FILES := \
 	jpegenc.c
 
 LOCAL_CFLAGS += \
-	-DANDROID
+	-DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../common
@@ -84,6 +91,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	jpegenc
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
@@ -98,7 +106,8 @@ LOCAL_SRC_FILES := \
 	mpeg2vaenc.c
 
 LOCAL_CFLAGS += \
-	-DANDROID
+	-DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../common
@@ -106,6 +115,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	mpeg2vaenc
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
@@ -120,7 +130,8 @@ LOCAL_SRC_FILES := \
 	svctenc.c
 
 LOCAL_CFLAGS += \
-	-DANDROID
+	-DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../common
@@ -130,4 +141,5 @@ LOCAL_MODULE :=	svctenc
 
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl libcutils libutils libgui
 
+LOCAL_VENDOR_MODULE := true
 include $(BUILD_EXECUTABLE)

@@ -10,7 +10,8 @@ LOCAL_SRC_FILES := \
   vavpp.cpp
 
 LOCAL_CFLAGS += \
-    -DANDROID
+    -DANDROID   \
+    -Wno-error
 
 LOCAL_C_INCLUDES += \
   $(LOCAL_PATH)/../common
@@ -20,4 +21,5 @@ LOCAL_MODULE :=	vavpp
 
 LOCAL_SHARED_LIBRARIES := libva-android libva libdl libcutils libutils libgui libm
 
+LOCAL_VENDOR_MODULE := true
 include $(BUILD_EXECUTABLE)

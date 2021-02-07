@@ -10,7 +10,8 @@ LOCAL_SRC_FILES := \
 	../common/va_display_android.cpp
 
 LOCAL_CFLAGS += \
-    -DANDROID
+    -DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
   $(LOCAL_PATH)/../common
@@ -18,6 +19,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	mpeg2vldemo
 
+LOCAL_VENDOR_MODULE := true
 LOCAL_SHARED_LIBRARIES := libva libva-android libdl libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
@@ -33,7 +35,8 @@ LOCAL_SRC_FILES := \
 	../common/va_display_android.cpp
 
 LOCAL_CFLAGS += \
-    -DANDROID
+    -DANDROID	\
+	-Wno-error
 
 LOCAL_C_INCLUDES += \
   $(LOCAL_PATH)/../common
@@ -43,4 +46,5 @@ LOCAL_MODULE :=	loadjpeg
 
 LOCAL_SHARED_LIBRARIES := libva libva-android libdl libcutils libutils libgui
 
+LOCAL_VENDOR_MODULE := true
 include $(BUILD_EXECUTABLE)
