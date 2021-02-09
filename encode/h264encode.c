@@ -174,6 +174,10 @@ static unsigned int SyncPictureTicks=0;
 static unsigned int SavePictureTicks=0;
 static unsigned int TotalTicks=0;
 
+//Default entrypoint for Encode
+static VAEntrypoint requested_entrypoint = -1;
+static VAEntrypoint selected_entrypoint = -1;
+
 struct __bitstream {
     unsigned int *buffer;
     int bit_offset;
@@ -860,6 +864,7 @@ static int print_help(void)
     printf("   --enablePSNR calculate PSNR of recyuv vs. srcyuv\n");
     printf("   --entropy <0|1>, 1 means cabac, 0 cavlc\n");
     printf("   --profile <BP|MP|HP>\n");
+    printf("   --low_power <num> 0: Normal mode, 1: Low power mode, others: auto mode\n");
     return 0;
 }
 
@@ -885,6 +890,7 @@ static int process_cmdline(int argc, char *argv[])
         {"framecount", required_argument, NULL, 16 },
         {"entropy", required_argument, NULL, 17 },
         {"profile", required_argument, NULL, 18 },
+        {"low_power", required_argument, NULL, 19 },
         {NULL, no_argument, NULL, 0 }};
     int long_index;
     
@@ -977,6 +983,17 @@ static int process_cmdline(int argc, char *argv[])
                 h264_profile = VAProfileH264High;
             else
                 h264_profile = 0;
+            break;
+        case 19:
+        {   
+            int lp_option = atoi(optarg);
+            if (lp_option == 0)
+                requested_entrypoint = VAEntrypointEncSlice; //normal 0
+            else if (lp_option == 1)
+                requested_entrypoint =  VAEntrypointEncSliceLP; //low power 1
+            else
+                requested_entrypoint = -1;
+        }
             break;
         case ':':
         case '?':
@@ -1088,17 +1105,29 @@ static int init_va(void)
         h264_profile = profile_list[i];
         vaQueryConfigEntrypoints(va_dpy, h264_profile, entrypoints, &num_entrypoints);
         for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
-            if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice) {
+            if (requested_entrypoint == -1 ) {
+                //Select the entry point based on what is avaiable
+                if ( (entrypoints[slice_entrypoint] == VAEntrypointEncSlice) ||
+                     (entrypoints[slice_entrypoint] == VAEntrypointEncSliceLP) ) {
+                    support_encode = 1;
+                    selected_entrypoint = entrypoints[slice_entrypoint];
+                    break;
+                }
+            } else if ((entrypoints[slice_entrypoint] == requested_entrypoint)) {
+                //Select the entry point based on what was requested in cmd line option 
                 support_encode = 1;
+                selected_entrypoint = entrypoints[slice_entrypoint];
                 break;
             }
         }
-        if (support_encode == 1)
+        if (support_encode == 1) {
+            printf("Using EntryPoint - %d \n",selected_entrypoint);
             break;
+        }
     }
     
     if (support_encode == 0) {
-        printf("Can't find VAEntrypointEncSlice for H264 profiles\n");
+        printf("Can't find VAEntrypointEncSlice or  VAEntrypointEncSliceLP for H264 profiles\n");
         exit(1);
     } else {
         switch (h264_profile) {
@@ -1130,7 +1159,7 @@ static int init_va(void)
     for (i = 0; i < VAConfigAttribTypeMax; i++)
         attrib[i].type = i;
 
-    va_status = vaGetConfigAttributes(va_dpy, h264_profile, VAEntrypointEncSlice,
+    va_status = vaGetConfigAttributes(va_dpy, h264_profile, selected_entrypoint,
                                       &attrib[0], VAConfigAttribTypeMax);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     /* check the interested configattrib */
@@ -1272,7 +1301,7 @@ static int setup_encode()
     VASurfaceID *tmp_surfaceid;
     int codedbuf_size, i;
     
-    va_status = vaCreateConfig(va_dpy, h264_profile, VAEntrypointEncSlice,
+    va_status = vaCreateConfig(va_dpy, h264_profile, selected_entrypoint,
             &config_attrib[0], config_attrib_num, &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
