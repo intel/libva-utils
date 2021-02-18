@@ -228,7 +228,7 @@ void VAAPIFixture::createConfig(const VAProfile& profile,
             attribs.size(), &m_configID))
         << "profile    = " << profile << std::endl
         << "entrypoint = " << entrypoint << std::endl
-        << "numAttribs = " << attribs.size();
+        << "Attribs    = " << attribs.data();
 
     if (expectation == VA_STATUS_SUCCESS) {
         EXPECT_ID(m_configID);
