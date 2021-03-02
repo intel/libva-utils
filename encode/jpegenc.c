@@ -489,7 +489,7 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
     VAImage surface_image;
     VAStatus va_status;
     void *surface_p = NULL;
-    unsigned char newImageBuffer[frame_size];
+    unsigned char *newImageBuffer;
     unsigned char *y_src, *u_src, *v_src;
     unsigned char *y_dst, *u_dst;
     int y_size = picture_width * picture_height;
@@ -500,6 +500,7 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
     //u_size is used for I420, NV12 formats only
     u_size = ((picture_width >> 1) * (picture_height >> 1));
 
+    newImageBuffer = malloc(frame_size);
     memset(newImageBuffer,0,frame_size);
     do {
         n_items = fread(newImageBuffer, frame_size, 1, yuv_fp);
@@ -574,6 +575,7 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
     
     vaUnmapBuffer(va_dpy, surface_image.buf);
     vaDestroyImage(va_dpy, surface_image.image_id);
+    free(newImageBuffer);
     
 }
 
