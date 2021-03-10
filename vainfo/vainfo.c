@@ -183,6 +183,7 @@ static int show_config_attributes(VADisplay va_dpy, VAProfile profile, VAEntrypo
       {VA_RC_PARALLEL,        "VA_RC_PARALLEL"},
       {VA_RC_QVBR,            "VA_RC_QVBR"},
       {VA_RC_AVBR,            "VA_RC_AVBR"},
+      {VA_RC_TCBRC,           "VA_RC_TCBRC"},
     };
     printf("    %-39s: ", vaConfigAttribTypeStr(attrib_list[VAConfigAttribRateControl].type));
     for (i = 0, n = 0; i < sizeof(list)/sizeof(list[0]); i++) {
