@@ -1,5 +1,13 @@
-libva-utils NEWS -- summary of changes.  2020-12-18
+libva-utils NEWS -- summary of changes.  2021-3-23
 Copyright (C) 2009-2020 Intel Corporation
+
+Version 2.11.0 - 23.Mar.2020
+* vainfo: add VA_RC_TCBRC to reported caps list
+* jpegenc: Allow encoding a 4K frame
+* h264encode: Added low_power command line option
+* test_va_api: Enable new caps for VAConfigAttribEncryption
+* ci: upgrade FreeBSD to 12.2
+* ci: enable github actions
 
 Version 2.10.0 - 18.Dec.2020
 * add Mediacopy Sample code
