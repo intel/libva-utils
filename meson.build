@@ -1,5 +1,5 @@
 project('libva-utils', 'c', 'cpp',
-        version : '2.9.0.1',
+        version : '2.11.0.1',
         default_options : [
           'warning_level=2',
           'c_std=gnu99',
