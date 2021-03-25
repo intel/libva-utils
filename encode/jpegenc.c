@@ -501,6 +501,11 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
     u_size = ((picture_width >> 1) * (picture_height >> 1));
 
     newImageBuffer = malloc(frame_size);
+    if(newImageBuffer == NULL)
+    {
+        printf("ERROR......upload_yuv_to_surface malloc failed");
+        exit(1);
+    }
     memset(newImageBuffer,0,frame_size);
     do {
         n_items = fread(newImageBuffer, frame_size, 1, yuv_fp);
