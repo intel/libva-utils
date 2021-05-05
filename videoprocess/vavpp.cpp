@@ -1119,7 +1119,7 @@ store_yuv_surface_to_file(FILE *fp,
                (g_out_fourcc == VA_FOURCC_BGRX &&
                 g_dst_file_fourcc == VA_FOURCC_BGRX)) {
         return store_rgb_surface_to_rgb_file(fp, surface_id);
-    } else if (g_out_fourcc == VA_FOURCC_RGBP &&
+    } else if (g_out_fourcc == VA_FOURCC_RGBP ||
                g_out_fourcc == VA_FOURCC_BGRP) {
         return store_rgbp_surface_to_rgbp_file(fp, surface_id);
     } else {
