@@ -42,8 +42,7 @@ protected:
 
         EXPECT_EQ(VA_MAJOR_VERSION, major)
             << "Check installed driver version";
-
-        EXPECT_EQ(VA_MINOR_VERSION, minor)
+        EXPECT_LE(VA_MINOR_VERSION, minor)
             << "Check installed driver version";
 
         ASSERT_STATUS(vaTerminate(display));
