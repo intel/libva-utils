@@ -1,5 +1,9 @@
-libva-utils NEWS -- summary of changes.  2021-3-23
+libva-utils NEWS -- summary of changes.  2021-6-21
 Copyright (C) 2009-2020 Intel Corporation
+
+Version 2.12.0 - 21.Jun.2020
+* test: Remove version check for test vaInitialize_vaTerminate
+* vpp: Added 3DLUT sample code and configuration file
 
 Version 2.11.0 - 23.Mar.2020
 * vainfo: add VA_RC_TCBRC to reported caps list
