@@ -89,6 +89,8 @@ static int frame_rate = 30;
 static int lf_level = 10;
 static int opt_header = 0;
 
+static int temp_layers = 1;
+
 static int current_slot;
 
 static int frame_number;
@@ -105,7 +107,6 @@ static  VASurfaceID vp9_ref_list[8];
 
 static  VASurfaceID surface_ids[SID_NUMBER];
 static  VASurfaceID ref_surfaces[SURFACE_NUM + SID_NUMBER];
-static  int use_slot[SURFACE_NUM];
 
 #ifndef VA_FOURCC_I420
 #define VA_FOURCC_I420          0x30323449
@@ -131,12 +132,13 @@ static const struct option long_opts[] = {
     {"qp", required_argument, NULL, 2 },
     {"intra_period", required_argument, NULL, 3 },
     {"fb", required_argument, NULL, 4 },
-    {"lf_level", required_argument, NULL, 6 },
-    {"opt_header", required_argument, NULL, 7},
-    {"hrd_win", required_argument, NULL, 8},
-    {"vbr_max", required_argument, NULL, 9},
-    {"fn_num", required_argument, NULL, 10},
-    {"low_power", required_argument, NULL, 11},
+    {"lf_level", required_argument, NULL, 5 },
+    {"opt_header", required_argument, NULL, 6},
+    {"hrd_win", required_argument, NULL, 7},
+    {"vbr_max", required_argument, NULL, 8},
+    {"fn_num", required_argument, NULL, 9},
+    {"low_power", required_argument, NULL, 10},
+    {"temp_svc", required_argument, NULL, 11},
     {NULL, no_argument, NULL, 0 }
 };
 
@@ -178,6 +180,8 @@ struct vp9encode_context {
     struct upload_thread_param upload_thread_param;
     pthread_t upload_thread_id;
     int upload_thread_value;
+
+    int is_golden_refreshed;
 };
 
 static struct vp9encode_context vp9enc_context;
@@ -202,6 +206,22 @@ vp9enc_write_dword(char *ptr, uint32_t value)
     *(tmp + 1) = (value >> 8) & 0XFF;
     *(tmp + 2) = (value >> 16) & 0XFF;
     *(tmp + 3) = (value >> 24) & 0XFF;
+}
+
+static void
+vp9enc_write_qword(char *ptr, uint64_t value)
+{
+    uint8_t *tmp;
+
+    tmp = (uint8_t *)ptr;
+    *(tmp) = (value >> 0) & 0XFF;
+    *(tmp + 1) = (value >> 8) & 0XFF;
+    *(tmp + 2) = (value >> 16) & 0XFF;
+    *(tmp + 3) = (value >> 24) & 0XFF;
+    *(tmp + 4) = (value >> 32) & 0XFF;
+    *(tmp + 5) = (value >> 40) & 0XFF;
+    *(tmp + 6) = (value >> 48) & 0XFF;
+    *(tmp + 7) = (value >> 56) & 0XFF;
 }
 
 static void
@@ -749,12 +769,20 @@ vp9enc_release_encode_resource()
 static int
 vp9enc_get_free_slot()
 {
-    int i, index = -1;
+    int i, j, index = -1;
+    int used;
 
     for (i = 0; i < SURFACE_NUM; i++) {
-        if (use_slot[i] == 0) {
-            index = i;
-            break;
+        used = 0;
+        for( j = 0; j < 8;j++) {
+            if( vp9_ref_list[j] == ref_surfaces[i]) {
+              used = 1;
+              break;
+            }
+        }
+        if(!used) {
+          index = i;
+          break;
         }
     }
 
@@ -767,53 +795,86 @@ vp9enc_get_free_slot()
 }
 
 static void
-vp9enc_update_reference_list(void)
+vp9enc_update_reference_list()
 {
-    VASurfaceID last_surf;
-    int last_slot;
     int i;
+    unsigned char refresh_frame;
 
-    /* Todo: Add the full support of reference frames */
+    refresh_frame = vp9enc_context.pic_param.refresh_frame_flags;
 
     if (current_frame_type == KEY_FRAME) {
-        memset(use_slot, 0, sizeof(use_slot));
-        use_slot[current_slot] = 1;
-        for (i = 0; i < SURFACE_NUM; i++)
-            vp9_ref_list[i] = ref_surfaces[current_slot];
+        vp9_ref_list[0] = ref_surfaces[current_slot];
+        for (i = 1; i < 8; i++)
+            vp9_ref_list[i] = 0;
 
         return;
-    }
+   } else {
 
-    last_slot = -1;
-    use_slot[current_slot] = 1;
-    last_surf = vp9_ref_list[0];
+     for(i = 0; i < 8; i++) {
+       if( refresh_frame & (1<<i)) {
+         vp9_ref_list[i] = ref_surfaces[current_slot];
+       }
+     }
 
-    vp9_ref_list[0] = ref_surfaces[current_slot];
+   }
+}
 
-    for (i = 0; i < SURFACE_NUM; i++) {
-        if (ref_surfaces[i] == last_surf) {
-            last_slot = i;
-            break;
-        }
-    }
+static
+void vp9enc_set_refreshparameter_for_svct_2layers(VAEncPictureParameterBufferVP9 *pic_param, int current_frame, int *is_golden_refreshed)
+{
+  /* Pattern taken from libyami */
 
-    if (last_slot != -1) {
-        int used_flag = 0;
+  pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 1;
+  if(*is_golden_refreshed && (current_frame % 2) != 0)
+    pic_param->ref_flags.bits.ref_frame_ctrl_l0 |= 0x2;
 
-        for (i = 1; i < SURFACE_NUM;i++) {
-            if (vp9_ref_list[i] == last_surf) {
-                used_flag = 1;
-                break;
-            }
-        }
 
-        if (!used_flag)
-            use_slot[last_slot] = 0;
-    }
+  switch(current_frame % 2) {
+    case 0:
+      /* Layer 0 */
+      pic_param->refresh_frame_flags = 0x01;
+      break;
+    case 1:
+      /* Layer 1 */
+      pic_param->refresh_frame_flags = 0x02;
+      *is_golden_refreshed = 1;
+      break;
+  }
+
+}
+
+static
+void vp9enc_set_refreshparameter_for_svct_3layers(VAEncPictureParameterBufferVP9 *pic_param, int current_frame,int *is_golden_refreshed)
+{
+  /* Pattern taken from libyami - Note that the alternate frame is never referenced,
+     this is because, libyami implementation suggests to be able to drop individual
+     frames from Layer 2 on bad network connections */
+
+  pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0x1;
+  if(*is_golden_refreshed && (current_frame % 4) != 0)
+    pic_param->ref_flags.bits.ref_frame_ctrl_l0 |= 0x2;
+
+  switch(current_frame % 4) {
+    case 0:
+      /* Layer 0 */
+      pic_param->refresh_frame_flags = 0x01;
+      break;
+    case 1:
+    case 3:
+      /* Layer 2 */
+      pic_param->refresh_frame_flags = 0x00;
+      break;
+    case 2:
+      /* Layer 1 */
+      pic_param->refresh_frame_flags = 0x02;
+      *is_golden_refreshed = 1;
+      break;
+  }
+
 }
 
 static void
-vp9enc_update_picture_parameter(int frame_type)
+vp9enc_update_picture_parameter(int frame_type, int current_frame)
 {
     VAEncPictureParameterBufferVP9 *pic_param;
     int recon_index;
@@ -832,7 +893,9 @@ vp9enc_update_picture_parameter(int frame_type)
 
     ref_num = sizeof(pic_param->reference_frames) / sizeof(VASurfaceID);
 
+
     if (frame_type == KEY_FRAME) {
+        vp9enc_context.is_golden_refreshed = 0;
         pic_param->pic_flags.bits.frame_type = KEY_FRAME;
         pic_param->pic_flags.bits.frame_context_idx = 0;
         pic_param->ref_flags.bits.ref_last_idx = 0;
@@ -844,14 +907,22 @@ vp9enc_update_picture_parameter(int frame_type)
         for (i = 0;i < ref_num;i++)
             pic_param->reference_frames[i] = VA_INVALID_ID;
     } else {
-        pic_param->refresh_frame_flags = 0x01;
         pic_param->pic_flags.bits.frame_type = INTER_FRAME;
-        pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0x7;
-
         pic_param->ref_flags.bits.ref_last_idx = 0;
         pic_param->ref_flags.bits.ref_gf_idx = 1;
         pic_param->ref_flags.bits.ref_arf_idx = 2;
         pic_param->pic_flags.bits.frame_context_idx = 0;
+
+        if (temp_layers == 1) {
+            pic_param->refresh_frame_flags = 0x01;
+            pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0x7;
+        } else if (temp_layers == 2) {
+            pic_param->pic_flags.bits.error_resilient_mode = 1;
+            vp9enc_set_refreshparameter_for_svct_2layers(pic_param,current_frame,&vp9enc_context.is_golden_refreshed);
+        } else if (temp_layers == 3) {
+            pic_param->pic_flags.bits.error_resilient_mode = 1;
+            vp9enc_set_refreshparameter_for_svct_3layers(pic_param,current_frame,&vp9enc_context.is_golden_refreshed);
+        }
 
         memcpy(&pic_param->reference_frames, vp9_ref_list, sizeof(vp9_ref_list));
     }
@@ -1046,19 +1117,18 @@ vp9enc_destroy_buffers(VABufferID *va_buffers, uint32_t num_va_buffers)
 }
 
 static void
-vp9enc_write_frame_header(FILE *vp9_output, int frame_size)
+vp9enc_write_frame_header(FILE *vp9_output, int frame_size, uint64_t timestamp)
 {
     char header[12];
 
     vp9enc_write_dword(header, (uint32_t)frame_size);
-    vp9enc_write_dword(header + 4, 0);
-    vp9enc_write_dword(header + 8, 0);
+    vp9enc_write_qword(header + 4, timestamp);
 
     fwrite(header, 1, 12, vp9_output);
 }
 
 static int
-vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type)
+vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type, uint64_t timestamp)
 {
     VACodedBufferSegment *coded_buffer_segment;
     uint8_t *coded_mem;
@@ -1090,7 +1160,7 @@ vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type)
 
     data_length = coded_buffer_segment->size;
 
-    vp9enc_write_frame_header(vp9_fp, data_length);
+    vp9enc_write_frame_header(vp9_fp, data_length, timestamp);
 
     do {
         w_items = fwrite(coded_mem, data_length, 1, vp9_fp);
@@ -1122,8 +1192,8 @@ vp9enc_write_ivf_header(FILE *vp9_file,
     vp9enc_write_dword(header + 8, VP9_FOURCC);
     vp9enc_write_word(header + 12, width);
     vp9enc_write_word(header + 14, height);
-    vp9enc_write_dword(header + 16, 1);
-    vp9enc_write_dword(header + 20, frame_rate);
+    vp9enc_write_dword(header + 16, frame_rate);
+    vp9enc_write_dword(header + 20, 1);
     vp9enc_write_dword(header + 24, frame_num);
     vp9enc_write_dword(header + 28, 0);
 
@@ -1212,7 +1282,7 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
         CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
         /* picture parameter set */
-        vp9enc_update_picture_parameter(current_frame_type);
+        vp9enc_update_picture_parameter(current_frame_type, next_enc_frame - 1);
 
         if (opt_header) {
             char raw_data[64];
@@ -1245,7 +1315,7 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
 
         vp9enc_render_picture();
 
-        ret = vp9enc_store_coded_buffer(vp9_fp, current_frame_type);
+        ret = vp9enc_store_coded_buffer(vp9_fp, current_frame_type, next_enc_frame - 1);
     } while (ret);
 
     vp9enc_update_reference_list();
@@ -1319,8 +1389,6 @@ vp9enc_context_init(int width, int height)
     memset(&vp9enc_context, 0, sizeof(vp9enc_context));
     vp9enc_context.profile = VAProfileVP9Profile0;
 
-    memset(&use_slot, 0, sizeof(use_slot));
-
     vp9enc_context.seq_param_buf_id = VA_INVALID_ID;
     vp9enc_context.pic_param_buf_id = VA_INVALID_ID;
     vp9enc_context.mb_seg_buf_id = VA_INVALID_ID;
@@ -1360,6 +1428,7 @@ vp9enc_show_help()
     printf("--opt_header \n  write the uncompressed header manually. without this, the driver will add those headers by itself\n");
     printf("--fn_num <num>\n  how many frames to be encoded\n");
     printf("--low_power <num> 0: Normal mode, 1: Low power mode, others: auto mode\n");
+    printf("--temp_svc <num> number of temporal layers 2 or 3\n");
 }
 
 int
@@ -1450,25 +1519,25 @@ main(int argc, char *argv[])
                 tmp_input = atoi(optarg);
                 frame_bit_rate = tmp_input;
                 break;
-            case 6:
+            case 5:
                 tmp_input = atoi(optarg);
                 if (tmp_input < 0 || tmp_input > 63)
                     tmp_input = 10;
                 lf_level = tmp_input;
                 break;
-            case 7:
+            case 6:
                 tmp_input = atoi(optarg);
                 if (tmp_input)
                     tmp_input = 1;
                 opt_header = tmp_input;
                 break;
-            case 8:
+            case 7:
                 tmp_input = atoi(optarg);
                 if (tmp_input > 8000 || tmp_input < 1000)
                     tmp_input = 1500;
                 hrd_window = tmp_input;
                 break;
-            case 9:
+            case 8:
                 tmp_input = atoi(optarg);
                 if (tmp_input < 0)
                     tmp_input = 20000;
@@ -1476,11 +1545,11 @@ main(int argc, char *argv[])
                     tmp_input = 100000;
                 vbr_max = tmp_input;
                 break;
-            case 10:
+            case 9:
                 tmp_input = atoi(optarg);
                 fn_num = tmp_input;
                 break;
-            case 11:
+            case 10:
                 tmp_input = atoi(optarg);
 
                 if (tmp_input == 0 || tmp_input == 1)
@@ -1488,6 +1557,11 @@ main(int argc, char *argv[])
                 else
                     select_entrypoint = -1;
 
+                break;
+            case 11:
+                tmp_input = atoi(optarg);
+                if(tmp_input == 2 || tmp_input == 3)
+                    temp_layers = tmp_input;
                 break;
 
             default:
