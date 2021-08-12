@@ -2012,7 +2012,7 @@ static int process_cmdline(int argc, char *argv[])
     }
 
     if (frame_bitrate == 0)
-        frame_bitrate = frame_width * frame_height * 12 * frame_rate / 50;
+        frame_bitrate = (long long int) frame_width * frame_height * 12 * frame_rate / 50;
 
     /* open source file */
     if (srcyuv_fn) {
@@ -2318,7 +2318,7 @@ static int setup_encode()
     CHECK_VASTATUS(va_status, "vaCreateContext");
     free(tmp_surfaceid);
 
-    codedbuf_size = (frame_width_aligned * frame_height_aligned * 400) / (16*16);
+    codedbuf_size = ((long long int) frame_width_aligned * frame_height_aligned * 400) / (16*16);
 
     for (i = 0; i < SURFACE_NUM; i++) {
         /* create coded buffer once for all
