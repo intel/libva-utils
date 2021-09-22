@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -30,8 +30,8 @@
  * ./avcstreamoutdemo  : only do decode
  * ./avcstreamoutdemo <any parameter >: do decode and dump mv info
  *
- */  
- 
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -54,7 +54,7 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
 
 /* Data dump of a 176x144 AVC video clip,it has one I frame and one P frame
  */
-static unsigned int avc_clip[]={
+static unsigned int avc_clip[] = {
     0xce20b865, 0xe2201c0f, 0x9a80c737, 0xd10130c0,
     0x73f8f26f, 0xfe2e0af8, 0x04bd8666, 0x333fbfb3,
     0x901da37e, 0x870d050c, 0x5f46568d, 0x2fe68e2c,
@@ -414,756 +414,829 @@ static unsigned int avc_clip1[] = {
 
 /* hardcoded here without a bitstream parser helper
  */
-static VAPictureParameterBufferH264 pic_param[2] ={
-  {
-      CurrPic:{
-          0, 0, 8, 0, 0
-      },
-      ReferenceFrames:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      picture_width_in_mbs_minus1:10,
-      picture_height_in_mbs_minus1:8,
-      bit_depth_luma_minus8:0,
-      bit_depth_chroma_minus8:0,
-      num_ref_frames:7,
-      {
-          {
-              chroma_format_idc:1, 
-              residual_colour_transform_flag:0, 
-              gaps_in_frame_num_value_allowed_flag:0, 
-              frame_mbs_only_flag:1, 
-              mb_adaptive_frame_field_flag:0, 
-              direct_8x8_inference_flag:1, 
-              MinLumaBiPredSize8x8:0,
-              log2_max_frame_num_minus4:1,
-              pic_order_cnt_type:1,
-              log2_max_pic_order_cnt_lsb_minus4:0,
-              delta_pic_order_always_zero_flag:1,
-          }
-      },
-      num_slice_groups_minus1:0,
-      slice_group_map_type:0,
-      slice_group_change_rate_minus1:0,
-      pic_init_qp_minus26:0,
-      pic_init_qs_minus26:0,
-      chroma_qp_index_offset:0,
-      second_chroma_qp_index_offset:0,
-      {
-          {
-              entropy_coding_mode_flag:0,
-              weighted_pred_flag:0,
-              weighted_bipred_idc:0,
-              transform_8x8_mode_flag:0,
-              field_pic_flag:0,
-              constrained_intra_pred_flag:0,
-              pic_order_present_flag:0,
-              deblocking_filter_control_present_flag:0,
-              redundant_pic_cnt_present_flag:0,
-              reference_pic_flag:1,
-          }
-      },
-      frame_num:0
-  },
-  {
-      CurrPic:{
-          1, 1, 8, 1, 1
-      },
-      ReferenceFrames:{
-          {0, 0, 8, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      picture_width_in_mbs_minus1:10,
-      picture_height_in_mbs_minus1:8,
-      bit_depth_luma_minus8:0,
-      bit_depth_chroma_minus8:0,
-      num_ref_frames:7,
-      {
-          {
-              chroma_format_idc:1, 
-              residual_colour_transform_flag:0, 
-              gaps_in_frame_num_value_allowed_flag:0, 
-              frame_mbs_only_flag:1, 
-              mb_adaptive_frame_field_flag:0, 
-              direct_8x8_inference_flag:1, 
-              MinLumaBiPredSize8x8:0,
-              log2_max_frame_num_minus4:1,
-              pic_order_cnt_type:1,
-              log2_max_pic_order_cnt_lsb_minus4:0,
-              delta_pic_order_always_zero_flag:1,
-          }
-      },
-      num_slice_groups_minus1:0,
-      slice_group_map_type:0,
-      slice_group_change_rate_minus1:0,
-      pic_init_qp_minus26:0,
-      pic_init_qs_minus26:0,
-      chroma_qp_index_offset:0,
-      second_chroma_qp_index_offset:0,
-      {
-          {
-              entropy_coding_mode_flag:0,
-              weighted_pred_flag:0,
-              weighted_bipred_idc:0,
-              transform_8x8_mode_flag:0,
-              field_pic_flag:0,
-              constrained_intra_pred_flag:0,
-              pic_order_present_flag:0,
-              deblocking_filter_control_present_flag:0,
-              redundant_pic_cnt_present_flag:0,
-              reference_pic_flag:1,
-          }
-      },
-      frame_num:1
-  }
+static VAPictureParameterBufferH264 pic_param[2] = {
+    {
+CurrPic:
+        {
+            0, 0, 8, 0, 0
+        },
+ReferenceFrames:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        picture_width_in_mbs_minus1: 10,
+        picture_height_in_mbs_minus1: 8,
+        bit_depth_luma_minus8: 0,
+        bit_depth_chroma_minus8: 0,
+        num_ref_frames: 7,
+        {
+            {
+                chroma_format_idc: 1,
+                residual_colour_transform_flag: 0,
+                gaps_in_frame_num_value_allowed_flag: 0,
+                frame_mbs_only_flag: 1,
+                mb_adaptive_frame_field_flag: 0,
+                direct_8x8_inference_flag: 1,
+                MinLumaBiPredSize8x8: 0,
+                log2_max_frame_num_minus4: 1,
+                pic_order_cnt_type: 1,
+                log2_max_pic_order_cnt_lsb_minus4: 0,
+                delta_pic_order_always_zero_flag: 1,
+            }
+        },
+        num_slice_groups_minus1: 0,
+        slice_group_map_type: 0,
+        slice_group_change_rate_minus1: 0,
+        pic_init_qp_minus26: 0,
+        pic_init_qs_minus26: 0,
+        chroma_qp_index_offset: 0,
+        second_chroma_qp_index_offset: 0,
+        {
+            {
+                entropy_coding_mode_flag: 0,
+                weighted_pred_flag: 0,
+                weighted_bipred_idc: 0,
+                transform_8x8_mode_flag: 0,
+                field_pic_flag: 0,
+                constrained_intra_pred_flag: 0,
+                pic_order_present_flag: 0,
+                deblocking_filter_control_present_flag: 0,
+                redundant_pic_cnt_present_flag: 0,
+                reference_pic_flag: 1,
+            }
+        },
+        frame_num: 0
+    },
+    {
+CurrPic:
+        {
+            1, 1, 8, 1, 1
+        },
+ReferenceFrames:
+        {
+            {0, 0, 8, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        picture_width_in_mbs_minus1: 10,
+        picture_height_in_mbs_minus1: 8,
+        bit_depth_luma_minus8: 0,
+        bit_depth_chroma_minus8: 0,
+        num_ref_frames: 7,
+        {
+            {
+                chroma_format_idc: 1,
+                residual_colour_transform_flag: 0,
+                gaps_in_frame_num_value_allowed_flag: 0,
+                frame_mbs_only_flag: 1,
+                mb_adaptive_frame_field_flag: 0,
+                direct_8x8_inference_flag: 1,
+                MinLumaBiPredSize8x8: 0,
+                log2_max_frame_num_minus4: 1,
+                pic_order_cnt_type: 1,
+                log2_max_pic_order_cnt_lsb_minus4: 0,
+                delta_pic_order_always_zero_flag: 1,
+            }
+        },
+        num_slice_groups_minus1: 0,
+        slice_group_map_type: 0,
+        slice_group_change_rate_minus1: 0,
+        pic_init_qp_minus26: 0,
+        pic_init_qs_minus26: 0,
+        chroma_qp_index_offset: 0,
+        second_chroma_qp_index_offset: 0,
+        {
+            {
+                entropy_coding_mode_flag: 0,
+                weighted_pred_flag: 0,
+                weighted_bipred_idc: 0,
+                transform_8x8_mode_flag: 0,
+                field_pic_flag: 0,
+                constrained_intra_pred_flag: 0,
+                pic_order_present_flag: 0,
+                deblocking_filter_control_present_flag: 0,
+                redundant_pic_cnt_present_flag: 0,
+                reference_pic_flag: 1,
+            }
+        },
+        frame_num: 1
+    }
 };
 
 static VAIQMatrixBufferH264 iq_matrix[2] = {
     {
-        ScalingList4x4:{
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}
-            },
-        ScalingList8x8:{{0}}
+ScalingList4x4:
+        {
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}
+        },
+ScalingList8x8:
+        {{0}}
     },
     {
-        ScalingList4x4:{
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
-                {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}
-            },
-        ScalingList8x8:{{0}}
+ScalingList4x4:
+        {
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10},
+            {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}
+        },
+ScalingList8x8:
+        {{0}}
     }
 };
 
-static VASliceParameterBufferH264 slice_param_surface0[4]={
-  {
-      slice_data_size:1101,
-      slice_data_offset:0,
-      slice_data_flag:0,
-      slice_data_bit_offset:28,
-      first_mb_in_slice:0,
-      slice_type:2,
-      direct_spatial_mv_pred_flag:0,
-      num_ref_idx_l0_active_minus1:0,
-      num_ref_idx_l1_active_minus1:0,
-      cabac_init_idc:0,
-      slice_qp_delta:6,
-      disable_deblocking_filter_idc:0,
-      slice_alpha_c0_offset_div2:0,
-      slice_beta_offset_div2:0,
-      RefPicList0:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      RefPicList1:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      luma_log2_weight_denom:0,
-      chroma_log2_weight_denom:0,
-      luma_weight_l0_flag:0,
-      luma_weight_l0:{0},
-      luma_offset_l0:{0},
-      chroma_weight_l0_flag:0,
-      chroma_weight_l0:{{0, 0}},
-      chroma_offset_l0:{{0, 0}},
-      luma_weight_l1_flag:0,
-      luma_weight_l1:{0},
-      luma_offset_l1:{0},
-      chroma_weight_l1_flag:0,
-      chroma_weight_l1:{{0, 0}},
-      chroma_offset_l1:{{0, 0}}
-  },
-  {
-      slice_data_size:1133,
-      slice_data_offset:1101,
-      slice_data_flag:0,
-      slice_data_bit_offset:32,
-      first_mb_in_slice:22,
-      slice_type:2,
-      direct_spatial_mv_pred_flag:0,
-      num_ref_idx_l0_active_minus1:0,
-      num_ref_idx_l1_active_minus1:0,
-      cabac_init_idc:0,
-      slice_qp_delta:-1,
-      disable_deblocking_filter_idc:0,
-      slice_alpha_c0_offset_div2:0,
-      slice_beta_offset_div2:0,
-      RefPicList0:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      RefPicList1:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      luma_log2_weight_denom:0,
-      chroma_log2_weight_denom:0,
-      luma_weight_l0_flag:0,
-      luma_weight_l0:{0},
-      luma_offset_l0:{0},
-      chroma_weight_l0_flag:0,
-      chroma_weight_l0:{{0, 0}},
-      chroma_offset_l0:{{0, 0}},
-      luma_weight_l1_flag:0,
-      luma_weight_l1:{0},
-      luma_offset_l1:{0},
-      chroma_weight_l1_flag:0,
-      chroma_weight_l1:{{0, 0}},
-      chroma_offset_l1:{{0, 0}}
-  },
-  {
-      slice_data_size:1115,
-      slice_data_offset:2234,
-      slice_data_flag:0,
-      slice_data_bit_offset:34,
-      first_mb_in_slice:46,
-      slice_type:2,
-      direct_spatial_mv_pred_flag:0,
-      num_ref_idx_l0_active_minus1:0,
-      num_ref_idx_l1_active_minus1:0,
-      cabac_init_idc:0,
-      slice_qp_delta:-1,
-      disable_deblocking_filter_idc:0,
-      slice_alpha_c0_offset_div2:0,
-      slice_beta_offset_div2:0,
-      RefPicList0:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      RefPicList1:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      luma_log2_weight_denom:0,
-      chroma_log2_weight_denom:0,
-      luma_weight_l0_flag:0,
-      luma_weight_l0:{0},
-      luma_offset_l0:{0},
-      chroma_weight_l0_flag:0,
-      chroma_weight_l0:{{0, 0}},
-      chroma_offset_l0:{{0, 0}},
-      luma_weight_l1_flag:0,
-      luma_weight_l1:{0},
-      luma_offset_l1:{0},
-      chroma_weight_l1_flag:0,
-      chroma_weight_l1:{{0, 0}},
-      chroma_offset_l1:{{0, 0}}
-  },
-  {
-      slice_data_size:951,
-      slice_data_offset:3349,
-      slice_data_flag:0,
-      slice_data_bit_offset:36,
-      first_mb_in_slice:76,
-      slice_type:2,
-      direct_spatial_mv_pred_flag:0,
-      num_ref_idx_l0_active_minus1:0,
-      num_ref_idx_l1_active_minus1:0,
-      cabac_init_idc:0,
-      slice_qp_delta:-1,
-      disable_deblocking_filter_idc:0,
-      slice_alpha_c0_offset_div2:0,
-      slice_beta_offset_div2:0,
-      RefPicList0:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      RefPicList1:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      luma_log2_weight_denom:0,
-      chroma_log2_weight_denom:0,
-      luma_weight_l0_flag:0,
-      luma_weight_l0:{0},
-      luma_offset_l0:{0},
-      chroma_weight_l0_flag:0,
-      chroma_weight_l0:{{0, 0}},
-      chroma_offset_l0:{{0, 0}},
-      luma_weight_l1_flag:0,
-      luma_weight_l1:{0},
-      luma_offset_l1:{0},
-      chroma_weight_l1_flag:0,
-      chroma_weight_l1:{{0, 0}},
-      chroma_offset_l1:{{0, 0}}
-  }
+static VASliceParameterBufferH264 slice_param_surface0[4] = {
+    {
+        slice_data_size: 1101,
+        slice_data_offset: 0,
+        slice_data_flag: 0,
+        slice_data_bit_offset: 28,
+        first_mb_in_slice: 0,
+        slice_type: 2,
+        direct_spatial_mv_pred_flag: 0,
+        num_ref_idx_l0_active_minus1: 0,
+        num_ref_idx_l1_active_minus1: 0,
+        cabac_init_idc: 0,
+        slice_qp_delta: 6,
+        disable_deblocking_filter_idc: 0,
+        slice_alpha_c0_offset_div2: 0,
+        slice_beta_offset_div2: 0,
+RefPicList0:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+RefPicList1:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        luma_log2_weight_denom: 0,
+        chroma_log2_weight_denom: 0,
+        luma_weight_l0_flag: 0,
+luma_weight_l0:
+        {0},
+luma_offset_l0:
+        {0},
+        chroma_weight_l0_flag: 0,
+chroma_weight_l0:
+        {{0, 0}},
+chroma_offset_l0:
+        {{0, 0}},
+        luma_weight_l1_flag: 0,
+luma_weight_l1:
+        {0},
+luma_offset_l1:
+        {0},
+        chroma_weight_l1_flag: 0,
+chroma_weight_l1:
+        {{0, 0}},
+chroma_offset_l1:
+        {{0, 0}}
+    },
+    {
+        slice_data_size: 1133,
+        slice_data_offset: 1101,
+        slice_data_flag: 0,
+        slice_data_bit_offset: 32,
+        first_mb_in_slice: 22,
+        slice_type: 2,
+        direct_spatial_mv_pred_flag: 0,
+        num_ref_idx_l0_active_minus1: 0,
+        num_ref_idx_l1_active_minus1: 0,
+        cabac_init_idc: 0,
+slice_qp_delta:
+        -1,
+            disable_deblocking_filter_idc: 0,
+            slice_alpha_c0_offset_div2: 0,
+            slice_beta_offset_div2: 0,
+    RefPicList0:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+RefPicList1:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        luma_log2_weight_denom: 0,
+        chroma_log2_weight_denom: 0,
+        luma_weight_l0_flag: 0,
+luma_weight_l0:
+        {0},
+luma_offset_l0:
+        {0},
+        chroma_weight_l0_flag: 0,
+chroma_weight_l0:
+        {{0, 0}},
+chroma_offset_l0:
+        {{0, 0}},
+        luma_weight_l1_flag: 0,
+luma_weight_l1:
+        {0},
+luma_offset_l1:
+        {0},
+        chroma_weight_l1_flag: 0,
+chroma_weight_l1:
+        {{0, 0}},
+chroma_offset_l1:
+        {{0, 0}}
+    },
+    {
+        slice_data_size: 1115,
+        slice_data_offset: 2234,
+        slice_data_flag: 0,
+        slice_data_bit_offset: 34,
+        first_mb_in_slice: 46,
+        slice_type: 2,
+        direct_spatial_mv_pred_flag: 0,
+        num_ref_idx_l0_active_minus1: 0,
+        num_ref_idx_l1_active_minus1: 0,
+        cabac_init_idc: 0,
+slice_qp_delta:
+        -1,
+            disable_deblocking_filter_idc: 0,
+            slice_alpha_c0_offset_div2: 0,
+            slice_beta_offset_div2: 0,
+    RefPicList0:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+RefPicList1:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        luma_log2_weight_denom: 0,
+        chroma_log2_weight_denom: 0,
+        luma_weight_l0_flag: 0,
+luma_weight_l0:
+        {0},
+luma_offset_l0:
+        {0},
+        chroma_weight_l0_flag: 0,
+chroma_weight_l0:
+        {{0, 0}},
+chroma_offset_l0:
+        {{0, 0}},
+        luma_weight_l1_flag: 0,
+luma_weight_l1:
+        {0},
+luma_offset_l1:
+        {0},
+        chroma_weight_l1_flag: 0,
+chroma_weight_l1:
+        {{0, 0}},
+chroma_offset_l1:
+        {{0, 0}}
+    },
+    {
+        slice_data_size: 951,
+        slice_data_offset: 3349,
+        slice_data_flag: 0,
+        slice_data_bit_offset: 36,
+        first_mb_in_slice: 76,
+        slice_type: 2,
+        direct_spatial_mv_pred_flag: 0,
+        num_ref_idx_l0_active_minus1: 0,
+        num_ref_idx_l1_active_minus1: 0,
+        cabac_init_idc: 0,
+slice_qp_delta:
+        -1,
+            disable_deblocking_filter_idc: 0,
+            slice_alpha_c0_offset_div2: 0,
+            slice_beta_offset_div2: 0,
+    RefPicList0:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+RefPicList1:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        luma_log2_weight_denom: 0,
+        chroma_log2_weight_denom: 0,
+        luma_weight_l0_flag: 0,
+luma_weight_l0:
+        {0},
+luma_offset_l0:
+        {0},
+        chroma_weight_l0_flag: 0,
+chroma_weight_l0:
+        {{0, 0}},
+chroma_offset_l0:
+        {{0, 0}},
+        luma_weight_l1_flag: 0,
+luma_weight_l1:
+        {0},
+luma_offset_l1:
+        {0},
+        chroma_weight_l1_flag: 0,
+chroma_weight_l1:
+        {{0, 0}},
+chroma_offset_l1:
+        {{0, 0}}
+    }
 };
 
-static VASliceParameterBufferH264 slice_param_surface1[2]={
-  {
-      slice_data_size:1091,
-      slice_data_offset:0,
-      slice_data_flag:0,
-      slice_data_bit_offset:32,
-      first_mb_in_slice:0,
-      slice_type:0,
-      direct_spatial_mv_pred_flag:0,
-      num_ref_idx_l0_active_minus1:0,
-      num_ref_idx_l1_active_minus1:0,
-      cabac_init_idc:0,
-      slice_qp_delta:-1,
-      disable_deblocking_filter_idc:0,
-      slice_alpha_c0_offset_div2:0,
-      slice_beta_offset_div2:0,
-      RefPicList0:{
-          {0, 0, 8, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      RefPicList1:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      luma_log2_weight_denom:0,
-      chroma_log2_weight_denom:0,
-      luma_weight_l0_flag:0,
-      luma_weight_l0:{0},
-      luma_offset_l0:{0},
-      chroma_weight_l0_flag:0,
-      chroma_weight_l0:{{0, 0}},
-      chroma_offset_l0:{{0, 0}},
-      luma_weight_l1_flag:0,
-      luma_weight_l1:{0},
-      luma_offset_l1:{0},
-      chroma_weight_l1_flag:0,
-      chroma_weight_l1:{{0, 0}},
-      chroma_offset_l1:{{0, 0}}
-  },
-  {
-      slice_data_size:138,
-      slice_data_offset:1091,
-      slice_data_flag:0,
-      slice_data_bit_offset:44,
-      first_mb_in_slice:92,
-      slice_type:0,
-      direct_spatial_mv_pred_flag:0,
-      num_ref_idx_l0_active_minus1:0,
-      num_ref_idx_l1_active_minus1:0,
-      cabac_init_idc:0,
-      slice_qp_delta:-1,
-      disable_deblocking_filter_idc:0,
-      slice_alpha_c0_offset_div2:0,
-      slice_beta_offset_div2:0,
-      RefPicList0:{
-          {0, 0, 8, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      RefPicList1:{
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0},
-          {VA_INVALID_SURFACE, 0, 1, 0, 0}
-      },
-      luma_log2_weight_denom:0,
-      chroma_log2_weight_denom:0,
-      luma_weight_l0_flag:0,
-      luma_weight_l0:{0},
-      luma_offset_l0:{0},
-      chroma_weight_l0_flag:0,
-      chroma_weight_l0:{{0, 0}},
-      chroma_offset_l0:{{0, 0}},
-      luma_weight_l1_flag:0,
-      luma_weight_l1:{0},
-      luma_offset_l1:{0},
-      chroma_weight_l1_flag:0,
-      chroma_weight_l1:{{0, 0}},
-      chroma_offset_l1:{{0, 0}}
-  }
+static VASliceParameterBufferH264 slice_param_surface1[2] = {
+    {
+        slice_data_size: 1091,
+        slice_data_offset: 0,
+        slice_data_flag: 0,
+        slice_data_bit_offset: 32,
+        first_mb_in_slice: 0,
+        slice_type: 0,
+        direct_spatial_mv_pred_flag: 0,
+        num_ref_idx_l0_active_minus1: 0,
+        num_ref_idx_l1_active_minus1: 0,
+        cabac_init_idc: 0,
+slice_qp_delta:
+        -1,
+            disable_deblocking_filter_idc: 0,
+            slice_alpha_c0_offset_div2: 0,
+            slice_beta_offset_div2: 0,
+    RefPicList0:
+        {
+            {0, 0, 8, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+RefPicList1:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        luma_log2_weight_denom: 0,
+        chroma_log2_weight_denom: 0,
+        luma_weight_l0_flag: 0,
+luma_weight_l0:
+        {0},
+luma_offset_l0:
+        {0},
+        chroma_weight_l0_flag: 0,
+chroma_weight_l0:
+        {{0, 0}},
+chroma_offset_l0:
+        {{0, 0}},
+        luma_weight_l1_flag: 0,
+luma_weight_l1:
+        {0},
+luma_offset_l1:
+        {0},
+        chroma_weight_l1_flag: 0,
+chroma_weight_l1:
+        {{0, 0}},
+chroma_offset_l1:
+        {{0, 0}}
+    },
+    {
+        slice_data_size: 138,
+        slice_data_offset: 1091,
+        slice_data_flag: 0,
+        slice_data_bit_offset: 44,
+        first_mb_in_slice: 92,
+        slice_type: 0,
+        direct_spatial_mv_pred_flag: 0,
+        num_ref_idx_l0_active_minus1: 0,
+        num_ref_idx_l1_active_minus1: 0,
+        cabac_init_idc: 0,
+slice_qp_delta:
+        -1,
+            disable_deblocking_filter_idc: 0,
+            slice_alpha_c0_offset_div2: 0,
+            slice_beta_offset_div2: 0,
+    RefPicList0:
+        {
+            {0, 0, 8, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+RefPicList1:
+        {
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0},
+            {VA_INVALID_SURFACE, 0, 1, 0, 0}
+        },
+        luma_log2_weight_denom: 0,
+        chroma_log2_weight_denom: 0,
+        luma_weight_l0_flag: 0,
+luma_weight_l0:
+        {0},
+luma_offset_l0:
+        {0},
+        chroma_weight_l0_flag: 0,
+chroma_weight_l0:
+        {{0, 0}},
+chroma_offset_l0:
+        {{0, 0}},
+        luma_weight_l1_flag: 0,
+luma_weight_l1:
+        {0},
+luma_offset_l1:
+        {0},
+        chroma_weight_l1_flag: 0,
+chroma_weight_l1:
+        {{0, 0}},
+chroma_offset_l1:
+        {{0, 0}}
+    }
 };
 
 
@@ -1177,7 +1250,7 @@ static VASliceParameterBufferH264 slice_param_surface1[2]={
 
 void dumpMvs(VADecStreamOutData *streamout, int mbIndex)
 {
-    if(IF_EQUAL_M(streamout->QW8[0].MvFwd_x, streamout->QW8[1].MvFwd_x, streamout->QW8[2].MvFwd_x, streamout->QW8[2].MvFwd_x)
+    if (IF_EQUAL_M(streamout->QW8[0].MvFwd_x, streamout->QW8[1].MvFwd_x, streamout->QW8[2].MvFwd_x, streamout->QW8[2].MvFwd_x)
         && IF_EQUAL_M(streamout->QW8[0].MvFwd_y, streamout->QW8[1].MvFwd_y, streamout->QW8[2].MvFwd_y, streamout->QW8[2].MvFwd_y)) {
         printf("*************MB:%2d*********\n", mbIndex);
         printf("*                          *\n");
@@ -1194,13 +1267,12 @@ void dumpMvs(VADecStreamOutData *streamout, int mbIndex)
         printf("*%3d,%3d->0                *\n", streamout->QW8[0].MvFwd_x, streamout->QW8[0].MvFwd_y);
         printf("*                          *\n");
         printf("****************************\n\n");
-    }
-    else if((IF_EQUAL(streamout->QW8[1].MvFwd_x, streamout->QW8[3].MvFwd_x)
-        && IF_EQUAL(streamout->QW8[1].MvFwd_y, streamout->QW8[3].MvFwd_y))
-        && (IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[2].MvFwd_x)
-        && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[2].MvFwd_y))
-        && !(IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[1].MvFwd_x)
-        && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[1].MvFwd_y))) {
+    } else if ((IF_EQUAL(streamout->QW8[1].MvFwd_x, streamout->QW8[3].MvFwd_x)
+                && IF_EQUAL(streamout->QW8[1].MvFwd_y, streamout->QW8[3].MvFwd_y))
+               && (IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[2].MvFwd_x)
+                   && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[2].MvFwd_y))
+               && !(IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[1].MvFwd_x)
+                    && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[1].MvFwd_y))) {
         printf("*************MB:%2d*********\n", mbIndex);
         printf("*            *             *\n");
         printf("*            *             *\n");
@@ -1216,13 +1288,12 @@ void dumpMvs(VADecStreamOutData *streamout, int mbIndex)
         printf("*%3d,%3d->0  * %3d,%3d->0  *\n", streamout->QW8[0].MvFwd_x, streamout->QW8[0].MvFwd_y, streamout->QW8[1].MvFwd_x, streamout->QW8[1].MvFwd_y);
         printf("*            *             *\n");
         printf("****************************\n\n");
-    }
-    else if((IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[1].MvFwd_x)
-        && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[1].MvFwd_y))
-        && (IF_EQUAL(streamout->QW8[2].MvFwd_x, streamout->QW8[3].MvFwd_x)
-        && IF_EQUAL(streamout->QW8[2].MvFwd_y, streamout->QW8[3].MvFwd_y))
-        && !(IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[2].MvFwd_x)
-        && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[2].MvFwd_y))) {
+    } else if ((IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[1].MvFwd_x)
+                && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[1].MvFwd_y))
+               && (IF_EQUAL(streamout->QW8[2].MvFwd_x, streamout->QW8[3].MvFwd_x)
+                   && IF_EQUAL(streamout->QW8[2].MvFwd_y, streamout->QW8[3].MvFwd_y))
+               && !(IF_EQUAL(streamout->QW8[0].MvFwd_x, streamout->QW8[2].MvFwd_x)
+                    && IF_EQUAL(streamout->QW8[0].MvFwd_y, streamout->QW8[2].MvFwd_y))) {
         printf("*************MB:%2d*********\n", mbIndex);
         printf("*                          *\n");
         printf("*                          *\n");
@@ -1238,8 +1309,7 @@ void dumpMvs(VADecStreamOutData *streamout, int mbIndex)
         printf("*%3d,%3d->0                *\n", streamout->QW8[2].MvFwd_x, streamout->QW8[2].MvFwd_y);
         printf("*                          *\n");
         printf("****************************\n\n");
-    }
-    else {
+    } else {
         printf("*************MB:%2d*********\n", mbIndex);
         printf("*            *             *\n");
         printf("*            *             *\n");
@@ -1258,40 +1328,40 @@ void dumpMvs(VADecStreamOutData *streamout, int mbIndex)
     }
 }
 
-int main(int argc,char **argv)
+int main(int argc, char **argv)
 {
     VAEntrypoint entrypoints[5];
-    int num_entrypoints,vld_entrypoint;
+    int num_entrypoints, vld_entrypoint;
     VAConfigAttrib attrib;
     VAConfigID config_id;
     VASurfaceID surface_ids[AVC_SURFACE_NUM];
     VAContextID context_id;
-    VABufferID pic_param_buf,iqmatrix_buf,slice_param_buf,slice_data_buf,streamout_buf;
+    VABufferID pic_param_buf, iqmatrix_buf, slice_param_buf, slice_data_buf, streamout_buf;
     VABufferID tmp_buff_ids[5];
     int major_ver, minor_ver;
     VADisplay   va_dpy;
     VAStatus va_status;
     int is_dump_streamout = 0;
-	int surface_index;
+    int surface_index;
     VASurfaceStatus surface_status;
     unsigned char *pbuf;
-    unsigned int mb_counts = ((CLIP_WIDTH+ 15) / 16) * ((CLIP_HEIGHT+ 15) / 16);
+    unsigned int mb_counts = ((CLIP_WIDTH + 15) / 16) * ((CLIP_HEIGHT + 15) / 16);
     unsigned int streamout_buffsize = mb_counts * sizeof(VADecStreamOutData);
 
     va_init_display_args(&argc, argv);
 
     if (argc > 1)
         is_dump_streamout = 1;
-    
+
     va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     assert(va_status == VA_STATUS_SUCCESS);
-    
-    va_status = vaQueryConfigEntrypoints(va_dpy, VAProfileH264Main, entrypoints, 
-                             &num_entrypoints);
+
+    va_status = vaQueryConfigEntrypoints(va_dpy, VAProfileH264Main, entrypoints,
+                                         &num_entrypoints);
     CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
-    for(vld_entrypoint = 0; vld_entrypoint < num_entrypoints; vld_entrypoint++) {
+    for (vld_entrypoint = 0; vld_entrypoint < num_entrypoints; vld_entrypoint++) {
         if (entrypoints[vld_entrypoint] == VAEntrypointVLD)
             break;
     }
@@ -1308,97 +1378,95 @@ int main(int argc,char **argv)
         /* not find desired YUV420 RT format */
         assert(0);
     }
-    
+
     va_status = vaCreateConfig(va_dpy, VAProfileH264Main, VAEntrypointVLD,
-                              &attrib, 1,&config_id);
+                               &attrib, 1, &config_id);
     CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, CLIP_WIDTH, CLIP_HEIGHT,
-        &surface_ids[0], 2,
-        NULL, 0
-    );
+                    va_dpy,
+                    VA_RT_FORMAT_YUV420, CLIP_WIDTH, CLIP_HEIGHT,
+                    &surface_ids[0], 2,
+                    NULL, 0
+                );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* Create a context for this decode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
-                               CLIP_WIDTH,
-                               ((CLIP_HEIGHT+15)/16)*16,
-                               VA_PROGRESSIVE,
-                               &surface_ids[0],
-                               2,
-                               &context_id);
+                                CLIP_WIDTH,
+                                ((CLIP_HEIGHT + 15) / 16) * 16,
+                                VA_PROGRESSIVE,
+                                &surface_ids[0],
+                                2,
+                                &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
 
-    for(surface_index = 0 ; surface_index < AVC_SURFACE_NUM; surface_index++)
-    {
+    for (surface_index = 0 ; surface_index < AVC_SURFACE_NUM; surface_index++) {
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                  VAPictureParameterBufferType,
-                                  sizeof(VAPictureParameterBufferH264),
-                                  1, &pic_param[surface_index],
-                                  &pic_param_buf);
-        CHECK_VASTATUS(va_status, "vaCreateBuffer");
-        
-        va_status = vaCreateBuffer(va_dpy, context_id,
-                                  VAIQMatrixBufferType,
-                                  sizeof(VAIQMatrixBufferH264),
-                                  1, &iq_matrix[surface_index],
-                                  &iqmatrix_buf );
+                                   VAPictureParameterBufferType,
+                                   sizeof(VAPictureParameterBufferH264),
+                                   1, &pic_param[surface_index],
+                                   &pic_param_buf);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-        if(surface_index == 0) {
-            va_status = vaCreateBuffer(va_dpy, context_id,
-                                      VASliceParameterBufferType,
-                                      sizeof(VASliceParameterBufferH264),
-                                      4,
-                                      &slice_param_surface0[0], &slice_param_buf);
-        }
-        else {
-            va_status = vaCreateBuffer(va_dpy, context_id,
-                                  VASliceParameterBufferType,
-                                  sizeof(VASliceParameterBufferH264),
-                                  2,
-                                  &slice_param_surface1[0], &slice_param_buf);
-        }
-        CHECK_VASTATUS(va_status, "vaCreateBuffer");
-    
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                  VASliceDataBufferType,
-                                  surface_index == 0 ? sizeof(avc_clip) : sizeof(avc_clip1),
-                                  1,
-                                  surface_index == 0 ? avc_clip : avc_clip1,
-                                  &slice_data_buf);
+                                   VAIQMatrixBufferType,
+                                   sizeof(VAIQMatrixBufferH264),
+                                   1, &iq_matrix[surface_index],
+                                   &iqmatrix_buf);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
-    
-        /* Create StreamOut va buffer */    
+
+        if (surface_index == 0) {
+            va_status = vaCreateBuffer(va_dpy, context_id,
+                                       VASliceParameterBufferType,
+                                       sizeof(VASliceParameterBufferH264),
+                                       4,
+                                       &slice_param_surface0[0], &slice_param_buf);
+        } else {
+            va_status = vaCreateBuffer(va_dpy, context_id,
+                                       VASliceParameterBufferType,
+                                       sizeof(VASliceParameterBufferH264),
+                                       2,
+                                       &slice_param_surface1[0], &slice_param_buf);
+        }
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                  VADecodeStreamoutBufferType,
-                                  streamout_buffsize,
-                                  1, NULL, &streamout_buf);
+                                   VASliceDataBufferType,
+                                   surface_index == 0 ? sizeof(avc_clip) : sizeof(avc_clip1),
+                                   1,
+                                   surface_index == 0 ? avc_clip : avc_clip1,
+                                   &slice_data_buf);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
-    
+
+        /* Create StreamOut va buffer */
+        va_status = vaCreateBuffer(va_dpy, context_id,
+                                   VADecodeStreamoutBufferType,
+                                   streamout_buffsize,
+                                   1, NULL, &streamout_buf);
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
         tmp_buff_ids[0] = pic_param_buf;
         tmp_buff_ids[1] = iqmatrix_buf;
         tmp_buff_ids[2] = slice_param_buf;
         tmp_buff_ids[3] = slice_data_buf;
         tmp_buff_ids[4] = streamout_buf;
-    
+
         va_status = vaBeginPicture(va_dpy, context_id, surface_ids[surface_index]);
         CHECK_VASTATUS(va_status, "vaBeginPicture");
-    
-        va_status = vaRenderPicture(va_dpy,context_id, tmp_buff_ids, 5);
+
+        va_status = vaRenderPicture(va_dpy, context_id, tmp_buff_ids, 5);
         CHECK_VASTATUS(va_status, "vaRenderPicture");
-        
-        va_status = vaEndPicture(va_dpy,context_id);
+
+        va_status = vaEndPicture(va_dpy, context_id);
         CHECK_VASTATUS(va_status, "vaEndPicture");
-    
+
         va_status = vaSyncSurface(va_dpy, surface_ids[surface_index]);
         CHECK_VASTATUS(va_status, "vaSyncSurface");
-    
+
         va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[surface_index], &surface_status);//to check surface_status if needed
         CHECK_VASTATUS(va_status, "vaQuerySurfaceStatus");
-    
+
         /*map streamout buffer to dump*/
         VADecStreamOutData *dec_streamout_buf = (VADecStreamOutData *)malloc(streamout_buffsize);
         if (NULL == dec_streamout_buf) {
@@ -1410,27 +1478,27 @@ int main(int argc,char **argv)
         memcpy(dec_streamout_buf, pbuf, streamout_buffsize);// to check streamout data for usage
         va_status = vaUnmapBuffer(va_dpy, streamout_buf);
         CHECK_VASTATUS(va_status, "vaUnmapBuffer");
-        
+
         if (is_dump_streamout && surface_index != 0) {
             //dump streamout buffer to local file
             VADecStreamOutData *temp_dec_streamout_buf = dec_streamout_buf;
-			unsigned int i;
-            for(i = 0; i < mb_counts && temp_dec_streamout_buf != NULL; i++) {
+            unsigned int i;
+            for (i = 0; i < mb_counts && temp_dec_streamout_buf != NULL; i++) {
                 dumpMvs(temp_dec_streamout_buf++, i);
             }
         }
 
-        if(dec_streamout_buf) {
+        if (dec_streamout_buf) {
             free(dec_streamout_buf);
         }
     }
-    
+
     printf("press any key to exit\n");
     getchar();
 
-    vaDestroySurfaces(va_dpy,surface_ids,2);
-    vaDestroyConfig(va_dpy,config_id);
-    vaDestroyContext(va_dpy,context_id);
+    vaDestroySurfaces(va_dpy, surface_ids, 2);
+    vaDestroyConfig(va_dpy, config_id);
+    vaDestroyContext(va_dpy, context_id);
 
     vaTerminate(va_dpy);
     va_close_display(va_dpy);

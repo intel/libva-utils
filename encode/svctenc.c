@@ -61,7 +61,7 @@
 
 #define NAL_NON_IDR                     1
 #define NAL_IDR                         5
-#define NAL_SEI			        6
+#define NAL_SEI                 6
 #define NAL_SPS                         7
 #define NAL_PPS                         8
 #define NAL_PREFIX                      14
@@ -134,8 +134,7 @@ static VAProfile g_va_profiles[] = {
     VAProfileH264ConstrainedBaseline,
 };
 
-typedef struct _svcenc_surface
-{
+typedef struct _svcenc_surface {
     int slot_in_surfaces; /* index in src_surfaces and rec_surfaces */
     int coding_order;
     int display_order;
@@ -160,8 +159,7 @@ struct upload_task_t {
     unsigned int surface;
 };
 
-struct svcenc_context
-{
+struct svcenc_context {
     /* parameter info */
     FILE *ifp;  /* a FILE pointer for source YUV file */
     FILE *ofp;  /* a FILE pointer for output SVC file */
@@ -477,7 +475,7 @@ sps_data(struct svcenc_context *ctx,
             bitstream_put_ui(bs, 0, 4); /* bit_rate_scale */
             bitstream_put_ui(bs, 2, 4); /* cpb_size_scale */
 
-	    /* the bits_per_kbps is in kbps */
+            /* the bits_per_kbps is in kbps */
             bitstream_put_ue(bs, (((ctx->bits_per_kbps * 1024) >> 6) - 1)); /* bit_rate_value_minus1[0] */
             bitstream_put_ue(bs, ((ctx->bits_per_kbps * 8 * 1024) >> 6) - 1); /* cpb_size_value_minus1[0] */
             bitstream_put_ui(bs, 1, 1);  /* cbr_flag[0] */
@@ -569,7 +567,7 @@ pps_rbsp(struct svcenc_context *ctx,
     bitstream_put_ue(bs, pic_param->num_ref_idx_l1_active_minus1);      /* num_ref_idx_l1_active_minus1 1 */
 
     bitstream_put_ui(bs, pic_param->pic_fields.bits.weighted_pred_flag, 1);     /* weighted_pred_flag: 0 */
-    bitstream_put_ui(bs, pic_param->pic_fields.bits.weighted_bipred_idc, 2);	/* weighted_bipred_idc: 0 */
+    bitstream_put_ui(bs, pic_param->pic_fields.bits.weighted_bipred_idc, 2);    /* weighted_bipred_idc: 0 */
 
     bitstream_put_se(bs, pic_param->pic_init_qp - 26);  /* pic_init_qp_minus26 */
     bitstream_put_se(bs, 0);                            /* pic_init_qs_minus26 */
@@ -582,7 +580,7 @@ pps_rbsp(struct svcenc_context *ctx,
     /* more_rbsp_data */
     bitstream_put_ui(bs, pic_param->pic_fields.bits.transform_8x8_mode_flag, 1);    /*transform_8x8_mode_flag */
     bitstream_put_ui(bs, 0, 1);                         /* pic_scaling_matrix_present_flag */
-    bitstream_put_se(bs, pic_param->second_chroma_qp_index_offset );    /*second_chroma_qp_index_offset */
+    bitstream_put_se(bs, pic_param->second_chroma_qp_index_offset);     /*second_chroma_qp_index_offset */
 
     rbsp_trailing_bits(bs);
 }
@@ -651,9 +649,9 @@ build_packed_pic_buffer(struct svcenc_context *ctx,
 
 static int
 build_packed_sei_buffering_period_buffer(struct svcenc_context *ctx,
-                                         const VAEncSequenceParameterBufferH264 *seq_param,
-                                         int frame_num,
-                                         unsigned char **sei_buffer)
+        const VAEncSequenceParameterBufferH264 *seq_param,
+        int frame_num,
+        unsigned char **sei_buffer)
 {
     bitstream sei_bp_bs;
 
@@ -721,10 +719,10 @@ build_packed_sei_pic_timing_buffer(struct svcenc_context *ctx, int frame_num, un
 
 static int
 build_packed_sei_scalability_info_buffer(struct svcenc_context *ctx,
-                                         const VAEncSequenceParameterBufferH264 *seq_param,
-                                         const VAEncPictureParameterBufferH264 *pic_param,
-                                         int frame_num,
-                                         unsigned char **sei_buffer)
+        const VAEncSequenceParameterBufferH264 *seq_param,
+        const VAEncPictureParameterBufferH264 *pic_param,
+        int frame_num,
+        unsigned char **sei_buffer)
 {
     bitstream scalability_info_bs;
     int i;
@@ -914,7 +912,7 @@ slice_header(bitstream *bs,
     }
 
     if (pic_param->pic_fields.bits.idr_pic_flag)
-        bitstream_put_ue(bs, slice_param->idr_pic_id);		/* idr_pic_id: 0 */
+        bitstream_put_ue(bs, slice_param->idr_pic_id);      /* idr_pic_id: 0 */
 
     if (sps_param->seq_fields.bits.pic_order_cnt_type == 0) {
         bitstream_put_ui(bs, pic_param->CurrPic.TopFieldOrderCnt, sps_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 + 4);
@@ -944,7 +942,7 @@ slice_header(bitstream *bs,
     } else if (IS_B_SLICE(slice_param->slice_type)) {
         bitstream_put_ui(bs, slice_param->direct_spatial_mv_pred_flag, 1);            /* direct_spatial_mv_pred: 1 */
 
-        bitstream_put_ui(bs, ((reordering_info[0] >> 16) & 0xFF) || ((reordering_info[1] >> 16) & 0xFF) , 1);               /* num_ref_idx_active_override_flag: */
+        bitstream_put_ui(bs, ((reordering_info[0] >> 16) & 0xFF) || ((reordering_info[1] >> 16) & 0xFF), 1);                /* num_ref_idx_active_override_flag: */
 
         if (((reordering_info[0] >> 16) & 0xFF) || ((reordering_info[1] >> 16) & 0xFF)) {
             bitstream_put_ue(bs, (reordering_info[0] >> 24) & 0xFF);        /* num_ref_idx_l0_active_minus1 */
@@ -1168,7 +1166,7 @@ upload_task(struct svcenc_context *ctx, unsigned int display_order, int surface)
     } while (n_items != 1);
 
     va_status = vaDeriveImage(ctx->va_dpy, src_surfaces[surface], &surface_image);
-    CHECK_VASTATUS(va_status,"vaDeriveImage");
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
 
     vaMapBuffer(ctx->va_dpy, surface_image.buf, &surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
@@ -1355,7 +1353,7 @@ parse_args(struct svcenc_context *ctx, int argc, char **argv)
                             "",
                             long_options,
                             &option_index)) != -1) {
-        switch(c) {
+        switch (c) {
         case 'g':
             tmp = atoi(optarg);
 
@@ -1638,7 +1636,7 @@ svcenc_update_sequence_parameter_buffer(struct svcenc_context *ctx,
     seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = 10;
 
     if (ctx->bits_per_kbps > 0)
-        seq_param->vui_parameters_present_flag = 1;	//HRD info located in vui
+        seq_param->vui_parameters_present_flag = 1; //HRD info located in vui
     else
         seq_param->vui_parameters_present_flag = 0;
 
@@ -1649,7 +1647,7 @@ svcenc_update_sequence_parameter_buffer(struct svcenc_context *ctx,
                                1,
                                seq_param,
                                &ctx->seq_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 }
 
 void
@@ -1669,7 +1667,7 @@ svcenc_update_picture_parameter_buffer(struct svcenc_context *ctx,
                                NULL,
                                &ctx->codedbuf_buf_id);
     assert(ctx->codedbuf_buf_id != VA_INVALID_ID);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     /* H.264 picture parameter */
     pic_param = &ctx->pic_param;
@@ -1729,7 +1727,7 @@ svcenc_update_picture_parameter_buffer(struct svcenc_context *ctx,
                                pic_param,
                                &ctx->pic_param_buf_id);
     assert(ctx->pic_param_buf_id != VA_INVALID_ID);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 }
 
 #define partition(ref, field, key, ascending)   \
@@ -1949,7 +1947,7 @@ svcenc_update_slice_parameter_buffer(struct svcenc_context *ctx,
 
     /* FIXME: fill other fields */
     if ((slice_type == SLICE_TYPE_P) || (slice_type == SLICE_TYPE_B)) {
-	int j;
+        int j;
         num_ref_l0 = MIN((pic_param->num_ref_idx_l0_active_minus1 + 1), ctx->num_ref_frames);
 
         for (j = 0; j < num_ref_l0; j++) {
@@ -1960,17 +1958,17 @@ svcenc_update_slice_parameter_buffer(struct svcenc_context *ctx,
             RefPicList0[j].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
         }
 
-	for (; j < 32; j++) {
-	    RefPicList0[j].picture_id = VA_INVALID_SURFACE;
-	    RefPicList0[j].flags = VA_PICTURE_H264_INVALID;
-	}
+        for (; j < 32; j++) {
+            RefPicList0[j].picture_id = VA_INVALID_SURFACE;
+            RefPicList0[j].flags = VA_PICTURE_H264_INVALID;
+        }
 
         if (num_ref_l0 != pic_param->num_ref_idx_l0_active_minus1 + 1)
             num_ref_idx_active_override_flag = 1;
     }
 
     if (slice_type == SLICE_TYPE_B) {
-	int j;
+        int j;
         num_ref_l1 = MIN((pic_param->num_ref_idx_l1_active_minus1 + 1), ctx->num_ref_frames);
 
         for (j = 0; j < num_ref_l1; j++) {
@@ -1981,10 +1979,10 @@ svcenc_update_slice_parameter_buffer(struct svcenc_context *ctx,
             RefPicList1[j].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
         }
 
-	for (; j < 32; j++) {
-	    RefPicList1[j].picture_id = VA_INVALID_SURFACE;
-	    RefPicList1[j].flags = VA_PICTURE_H264_INVALID;
-	}
+        for (; j < 32; j++) {
+            RefPicList1[j].picture_id = VA_INVALID_SURFACE;
+            RefPicList1[j].flags = VA_PICTURE_H264_INVALID;
+        }
 
         if (num_ref_l1 != pic_param->num_ref_idx_l1_active_minus1 + 1)
             num_ref_idx_active_override_flag = 1;
@@ -2064,7 +2062,7 @@ svcenc_update_slice_parameter_buffer(struct svcenc_context *ctx,
                                1,
                                slice_param,
                                &ctx->slice_param_buf_id[i]);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");;
 
     ctx->num_slices = ++i;
 }
@@ -2269,8 +2267,8 @@ svcenc_update_packed_slice_header_buffer(struct svcenc_context *ctx, unsigned in
 
     for (i = 0; i < ctx->num_slices; i++) {
         length_in_bits = build_packed_svc_prefix_nal_unit(&ctx->pic_param,
-                                                          temporal_id,
-                                                          &packed_header_data_buffer);
+                         temporal_id,
+                         &packed_header_data_buffer);
 
         packed_header_param_buffer.type = VAEncPackedHeaderRawData;
         packed_header_param_buffer.bit_length = length_in_bits;
@@ -2283,7 +2281,7 @@ svcenc_update_packed_slice_header_buffer(struct svcenc_context *ctx, unsigned in
                                    1,
                                    &packed_header_param_buffer,
                                    &ctx->packed_prefix_nal_unit_param_buf_id[i]);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
@@ -2292,16 +2290,16 @@ svcenc_update_packed_slice_header_buffer(struct svcenc_context *ctx, unsigned in
                                    1,
                                    packed_header_data_buffer,
                                    &ctx->packed_prefix_nal_unit_data_buf_id[i]);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_header_data_buffer);
 
         length_in_bits = build_packed_slice_header_buffer(ctx,
-                                                          &ctx->seq_param,
-                                                          &ctx->pic_param,
-                                                          &ctx->slice_param[i],
-                                                          ctx->reordering_info,
-                                                          &packed_header_data_buffer);
+                         &ctx->seq_param,
+                         &ctx->pic_param,
+                         &ctx->slice_param[i],
+                         ctx->reordering_info,
+                         &packed_header_data_buffer);
 
         packed_header_param_buffer.type = VAEncPackedHeaderSlice;
         packed_header_param_buffer.bit_length = length_in_bits;
@@ -2314,7 +2312,7 @@ svcenc_update_packed_slice_header_buffer(struct svcenc_context *ctx, unsigned in
                                    1,
                                    &packed_header_param_buffer,
                                    &ctx->packed_slice_header_param_buf_id[i]);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
@@ -2323,7 +2321,7 @@ svcenc_update_packed_slice_header_buffer(struct svcenc_context *ctx, unsigned in
                                    1,
                                    packed_header_data_buffer,
                                    &ctx->packed_slice_header_data_buf_id[i]);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_header_data_buffer);
     }
@@ -2339,10 +2337,10 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
     unsigned char *packed_seq_buffer = NULL, *packed_pic_buffer = NULL, *packed_sei_buffer = NULL;
 
     length_in_bits = build_packed_sei_buffer(ctx,
-                                             &ctx->seq_param,
-                                             &ctx->pic_param,
-                                             current_surface,
-                                             &packed_sei_buffer);
+                     &ctx->seq_param,
+                     &ctx->pic_param,
+                     current_surface,
+                     &packed_sei_buffer);
 
     if (packed_sei_buffer) {
         assert(length_in_bits);
@@ -2357,7 +2355,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    &packed_header_param_buffer,
                                    &ctx->packed_sei_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
@@ -2366,7 +2364,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    packed_sei_buffer,
                                    &ctx->packed_sei_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_sei_buffer);
     }
@@ -2376,8 +2374,8 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
         unsigned char *packed_svc_seq_buffer = NULL;
 
         length_in_bits = build_packed_seq_buffer(ctx,
-                                                 &ctx->seq_param,
-                                                 &packed_seq_buffer);
+                         &ctx->seq_param,
+                         &packed_seq_buffer);
 
         packed_header_param_buffer.type = VAEncPackedHeaderH264_SPS;
         packed_header_param_buffer.bit_length = length_in_bits;
@@ -2389,7 +2387,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    &packed_header_param_buffer,
                                    &ctx->packed_seq_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
@@ -2398,7 +2396,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    packed_seq_buffer,
                                    &ctx->packed_seq_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         save_profile_idc = ctx->profile_idc;
         save_constraint_set_flag = ctx->constraint_set_flag;
@@ -2406,8 +2404,8 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
         ctx->constraint_set_flag = ctx->svc_constraint_set_flag;
 
         length_in_bits = build_packed_subset_seq_buffer(ctx,
-                                                        &ctx->seq_param,
-                                                        &packed_svc_seq_buffer);
+                         &ctx->seq_param,
+                         &packed_svc_seq_buffer);
         packed_header_param_buffer.type = VAEncPackedHeaderRawData;
         packed_header_param_buffer.bit_length = length_in_bits;
         packed_header_param_buffer.has_emulation_bytes = 0;
@@ -2418,7 +2416,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    &packed_header_param_buffer,
                                    &ctx->packed_svc_seq_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
@@ -2427,7 +2425,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    packed_svc_seq_buffer,
                                    &ctx->packed_svc_seq_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         ctx->profile_idc = save_profile_idc;
         ctx->constraint_set_flag = save_constraint_set_flag;
@@ -2435,8 +2433,8 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
         free(packed_svc_seq_buffer);
 
         length_in_bits = build_packed_pic_buffer(ctx,
-                                                 &ctx->pic_param,
-                                                 &packed_pic_buffer);
+                         &ctx->pic_param,
+                         &packed_pic_buffer);
         packed_header_param_buffer.type = VAEncPackedHeaderH264_PPS;
         packed_header_param_buffer.bit_length = length_in_bits;
         packed_header_param_buffer.has_emulation_bytes = 0;
@@ -2448,7 +2446,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    &packed_header_param_buffer,
                                    &ctx->packed_pic_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
@@ -2457,7 +2455,7 @@ svcenc_update_packed_buffers(struct svcenc_context *ctx,
                                    1,
                                    packed_pic_buffer,
                                    &ctx->packed_pic_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_seq_buffer);
         free(packed_pic_buffer);
@@ -2538,10 +2536,10 @@ svcenc_store_coded_buffer(struct svcenc_context *ctx,
     size_t w_items;
 
     va_status = vaSyncSurface(ctx->va_dpy, src_surfaces[current_surface->slot_in_surfaces]);
-    CHECK_VASTATUS(va_status,"vaSyncSurface");
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaMapBuffer(ctx->va_dpy, ctx->codedbuf_buf_id, (void **)(&coded_buffer_segment));
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
 
     coded_mem = coded_buffer_segment->buf;
 
@@ -2620,48 +2618,48 @@ render_picture(struct svcenc_context *ctx,
     va_status = vaBeginPicture(ctx->va_dpy,
                                ctx->context_id,
                                src_surfaces[current_surface->slot_in_surfaces]);
-    CHECK_VASTATUS(va_status,"vaBeginPicture");
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
 
     va_status = vaRenderPicture(ctx->va_dpy,
                                 ctx->context_id,
                                 va_buffers,
                                 num_va_buffers);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     for (i = 0; i < ctx->num_slices; i++) {
         va_status = vaRenderPicture(ctx->va_dpy,
                                     ctx->context_id,
                                     &ctx->packed_prefix_nal_unit_param_buf_id[i],
                                     1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
 
         va_status = vaRenderPicture(ctx->va_dpy,
                                     ctx->context_id,
                                     &ctx->packed_prefix_nal_unit_data_buf_id[i],
                                     1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
 
         va_status = vaRenderPicture(ctx->va_dpy,
                                     ctx->context_id,
                                     &ctx->packed_slice_header_param_buf_id[i],
                                     1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
 
         va_status = vaRenderPicture(ctx->va_dpy,
                                     ctx->context_id,
                                     &ctx->packed_slice_header_data_buf_id[i],
                                     1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
 
         va_status = vaRenderPicture(ctx->va_dpy,
                                     ctx->context_id,
                                     &ctx->slice_param_buf_id[i],
                                     1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
     }
 
     va_status = vaEndPicture(ctx->va_dpy, ctx->context_id);
-    CHECK_VASTATUS(va_status,"vaEndPicture");
+    CHECK_VASTATUS(va_status, "vaEndPicture");
 
     svcenc_store_coded_buffer(ctx, current_surface);
 
@@ -2679,7 +2677,7 @@ svcenc_destroy_buffers(struct svcenc_context *ctx,
     for (i = 0; i < num_va_buffers; i++) {
         if (va_buffers[i] != VA_INVALID_ID) {
             va_status = vaDestroyBuffer(ctx->va_dpy, va_buffers[i]);
-            CHECK_VASTATUS(va_status,"vaDestroyBuffer");
+            CHECK_VASTATUS(va_status, "vaDestroyBuffer");
             va_buffers[i] = VA_INVALID_ID;
         }
     }
@@ -2789,7 +2787,7 @@ svcenc_va_init(struct svcenc_context *ctx)
                              entrypoint_list,
                              &num_entrypoints);
 
-    for	(entrypoint = 0; entrypoint < num_entrypoints; entrypoint++) {
+    for (entrypoint = 0; entrypoint < num_entrypoints; entrypoint++) {
         if (entrypoint_list[entrypoint] == VAEntrypointEncSlice)
             break;
     }

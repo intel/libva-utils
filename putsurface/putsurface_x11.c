@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -56,11 +56,11 @@ static Pixmap create_pixmap(void *win_display, int width, int height)
     Window root;
     Pixmap pixmap;
     XWindowAttributes attr;
-    
+
     root = RootWindow(x11_display, screen);
 
-    XGetWindowAttributes (x11_display, root, &attr);
-    
+    XGetWindowAttributes(x11_display, root, &attr);
+
     printf("Create a pixmap from ROOT window %dx%d, pixmap size %dx%d\n\n", attr.width, attr.height, width, height);
     pixmap = XCreatePixmap(x11_display, root, width, height,
                            DefaultDepth(x11_display, DefaultScreen(x11_display)));
@@ -78,7 +78,7 @@ static int create_window(void *win_display, int x, int y, int width, int height)
 
     printf("Create window0 for thread0\n");
     drawable_thread0 = (void *)XCreateSimpleWindow(x11_display, root, x, y, width, height,
-                                           0, 0, WhitePixel(x11_display, 0));
+                       0, 0, WhitePixel(x11_display, 0));
 
     win = (Window)drawable_thread0;
     if (drawable_thread0) {
@@ -100,14 +100,14 @@ static int create_window(void *win_display, int x, int y, int width, int height)
         window_thread0 = (Window)drawable_thread0;
         drawable_thread0 = (void *)create_pixmap(x11_display, width, height);
     }
-    
+
     if (multi_thread == 0)
         return 0;
 
     printf("Create window1 for thread1\n");
-    
+
     drawable_thread1 = (void *)XCreateSimpleWindow(x11_display, root, width, 0, width, height,
-                                            0, 0, WhitePixel(x11_display, 0));
+                       0, 0, WhitePixel(x11_display, 0));
     win = (Window)drawable_thread1;
     if (drawable_thread1) {
         XSizeHints sizehints;
@@ -128,7 +128,7 @@ static int create_window(void *win_display, int x, int y, int width, int height)
     context_thread1 = XCreateGC(x11_display, win, 0, 0);
     XSelectInput(x11_display, win, KeyPressMask | StructureNotifyMask);
     XSync(x11_display, False);
-    
+
     return 0;
 }
 
@@ -138,27 +138,27 @@ static int check_window_event(void *win_display, void *drawable, int *width, int
     XEvent event;
     Window win = (Window)drawable;
     Display *x11_display = (Display *)win_display;
-    
-    
+
+
     if (check_event == 0)
         return 0;
 
     pthread_mutex_lock(&gmutex);
-    is_event = XCheckWindowEvent(x11_display, win, StructureNotifyMask|KeyPressMask,&event);
+    is_event = XCheckWindowEvent(x11_display, win, StructureNotifyMask | KeyPressMask, &event);
     pthread_mutex_unlock(&gmutex);
-    
+
     if (is_event == 0)
         return 0;
 
     /* bail on any focused key press */
-    if(event.type == KeyPress) {  
+    if (event.type == KeyPress) {
         *quit = 1;
         return 0;
     }
-    
+
 #if 0
     /* rescale the video to fit the window */
-    if(event.type == ConfigureNotify) { 
+    if (event.type == ConfigureNotify) {
         *width = event.xconfigure.width;
         *height = event.xconfigure.height;
         printf("Scale window to %dx%d\n", width, height);

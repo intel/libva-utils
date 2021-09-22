@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -36,9 +36,9 @@
 static void *open_display(void);
 static void close_display(void *win_display);
 static int create_window(void *win_display,
-             int x, int y, int width, int height);
+                         int x, int y, int width, int height);
 static int check_window_event(void *win_display, void *drawable,
-                  int *width, int *height, int *quit);
+                              int *width, int *height, int *quit);
 
 struct display;
 struct drawable;
@@ -154,7 +154,7 @@ va_put_surface(
     /* Wait for the previous frame to complete redraw */
     if (wl_drawable->redraw_pending) {
         wl_display_flush(d->display);
-        while (wl_drawable->redraw_pending && ret >=0)
+        while (wl_drawable->redraw_pending && ret >= 0)
             ret = wl_display_dispatch(wl_drawable->display);
     }
 
@@ -204,12 +204,12 @@ open_display(void)
 {
     struct display *d;
 
-    d = calloc(1, sizeof *d);
+    d = calloc(1, sizeof * d);
     if (!d)
         return NULL;
 
     d->display = wl_display_connect(NULL);
-    if (!d->display){
+    if (!d->display) {
         free(d);
         return NULL;
     }
@@ -320,7 +320,7 @@ check_window_event(
 
 #if 0
     /* bail on any focused key press */
-    if(event.type == KeyPress) {  
+    if (event.type == KeyPress) {
         *quit = 1;
         return 0;
     }
@@ -328,7 +328,7 @@ check_window_event(
 
 #if 0
     /* rescale the video to fit the window */
-    if(event.type == ConfigureNotify) { 
+    if (event.type == ConfigureNotify) {
         *width = event.xconfigure.width;
         *height = event.xconfigure.height;
         printf("Scale window to %dx%d\n", width, height);

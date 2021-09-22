@@ -27,14 +27,14 @@
 
 #include <iostream>
 
-namespace VAAPI {
-
-struct Resolution
+namespace VAAPI
 {
+
+struct Resolution {
     typedef uint32_t DataType;
 
     Resolution(const DataType w = 1, const DataType h = 1)
-      : width(w), height(h)
+        : width(w), height(h)
     { }
 
     inline bool operator <=(const Resolution& other) const

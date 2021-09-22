@@ -56,8 +56,7 @@ mvaccel::VDecAccelVAImpl::VDecAccelVAImpl(void* device)
     if (device)
         m_vaDisplay = *(reinterpret_cast<VADisplay*>(device));
 
-    if (!m_vaDisplay)
-    {
+    if (!m_vaDisplay) {
         printf("Invalid VADisplay\n");
         delete this;
         return;
@@ -89,7 +88,7 @@ int mvaccel::VDecAccelVAImpl::Open()
     //get display device
     int MajorVer, MinorVer;
 
-	if (vaStatus != VA_STATUS_SUCCESS) {
+    if (vaStatus != VA_STATUS_SUCCESS) {
         drm_fd = open("/dev/dri/renderD128", O_RDWR);
         if (drm_fd >= 0) {
             m_vaDisplay = vaGetDisplayDRM(drm_fd);
@@ -111,24 +110,22 @@ int mvaccel::VDecAccelVAImpl::Open()
 
     std::vector<VAEntrypoint> vaEntrypoints(count);
     vaStatus = vaQueryConfigEntrypoints(
-        m_vaDisplay,
-        m_vaProfile,
-        &vaEntrypoints[0],
-        &count);
-    if(VAFAILED(vaStatus))
-            printf("vaQueryConfigEntrypoints fail\n");
+                   m_vaDisplay,
+                   m_vaProfile,
+                   &vaEntrypoints[0],
+                   &count);
+    if (VAFAILED(vaStatus))
+        printf("vaQueryConfigEntrypoints fail\n");
 
     std::vector<VAEntrypoint>::iterator it = std::find(vaEntrypoints.begin(), vaEntrypoints.end(), m_vaEntrypoint);
-    if (it == vaEntrypoints.end())
-    {
-        if(VAFAILED(vaStatus))
+    if (it == vaEntrypoints.end()) {
+        if (VAFAILED(vaStatus))
             printf("VAEntrypoint is not found\n");
         return 1;
     }
 
-    if (!is_config_compatible(m_DecodeDesc))
-    {
-        if(VAFAILED(vaStatus))
+    if (!is_config_compatible(m_DecodeDesc)) {
+        if (VAFAILED(vaStatus))
             printf("Decode configuration is not compatible\n");
         return 1;
     }
@@ -138,19 +135,18 @@ int mvaccel::VDecAccelVAImpl::Open()
     prepare_config_attribs(m_DecodeDesc, vaAttribs);
     // Create config
     vaStatus = vaCreateConfig(
-        m_vaDisplay,
-        m_vaProfile,
-        m_vaEntrypoint,
-        &vaAttribs.at(0),
-        vaAttribs.size(),
-        &m_vaConfigID
-        );
-    if(VAFAILED(vaStatus))
-            printf("vaCreateConfig fail\n");
+                   m_vaDisplay,
+                   m_vaProfile,
+                   m_vaEntrypoint,
+                   &vaAttribs.at(0),
+                   vaAttribs.size(),
+                   &m_vaConfigID
+               );
+    if (VAFAILED(vaStatus))
+        printf("vaCreateConfig fail\n");
 
-    if (!is_rt_foramt_supported(m_DecodeDesc))
-    {
-        if(VAFAILED(vaStatus))
+    if (!is_rt_foramt_supported(m_DecodeDesc)) {
+        if (VAFAILED(vaStatus))
             printf("Render target is not supported\n");
         return 1;
     }
@@ -162,45 +158,43 @@ int mvaccel::VDecAccelVAImpl::Open()
     // Setup surface attributes
     prepare_surface_attribs(m_DecodeDesc, m_vaSurfAttribs, false);
     // Create surfaces
-    for (uint32_t i=0; i<m_DecodeDesc.surfaces_num; i++)
-    {
+    for (uint32_t i = 0; i < m_DecodeDesc.surfaces_num; i++) {
         VASurfaceID vaID = VA_INVALID_SURFACE;
         vaStatus = vaCreateSurfaces(
-                    m_vaDisplay,
-                    m_surfaceType,
-                    aligned_width,
-                    aligned_height,
-                    &vaID,
-                    1,
-                    &(m_vaSurfAttribs.at(0)),
-                    m_vaSurfAttribs.size()
-        );
+                       m_vaDisplay,
+                       m_surfaceType,
+                       aligned_width,
+                       aligned_height,
+                       &vaID,
+                       1,
+                       &(m_vaSurfAttribs.at(0)),
+                       m_vaSurfAttribs.size()
+                   );
 
         if (VASUCCEEDED(vaStatus))
             m_vaIDs.push_back(vaID);
     }
 
     // Check if surfaces created is equal to requested.
-    if (m_vaIDs.size() != m_DecodeDesc.surfaces_num)
-    {
-        if(VAFAILED(vaStatus))
+    if (m_vaIDs.size() != m_DecodeDesc.surfaces_num) {
+        if (VAFAILED(vaStatus))
             printf("Create surface fail\n");
         return 1;
     }
 
     // Create context
     vaStatus = vaCreateContext(
-        m_vaDisplay,
-        m_vaConfigID,
-        aligned_width,
-        aligned_height,
-        VA_PROGRESSIVE,
-        &(m_vaIDs.at(0)),
-        m_vaIDs.size(),
-        &m_vaContextID
-        );
-    if(VAFAILED(vaStatus))
-            printf("vaCreateContext fail\n");
+                   m_vaDisplay,
+                   m_vaConfigID,
+                   aligned_width,
+                   aligned_height,
+                   VA_PROGRESSIVE,
+                   &(m_vaIDs.at(0)),
+                   m_vaIDs.size(),
+                   &m_vaContextID
+               );
+    if (VAFAILED(vaStatus))
+        printf("vaCreateContext fail\n");
 
     check_process_pipeline_caps(m_DecodeDesc);
 
@@ -243,7 +237,7 @@ bool mvaccel::VDecAccelVAImpl::is_config_compatible(DecodeDesc& desc)
     if (!is_encryption_supported(desc))
         return false;
 
-    if(!is_sfc_config_supported(desc))
+    if (!is_sfc_config_supported(desc))
         return false;
 
     return true;
@@ -267,8 +261,8 @@ bool mvaccel::VDecAccelVAImpl::is_slice_mode_supported(DecodeDesc& desc)
         m_vaEntrypoint,
         &vaAttrib,
         1);
- 
-    if(vaAttrib.value & VA_DEC_SLICE_MODE_BASE || vaAttrib.value & VA_DEC_SLICE_MODE_NORMAL)
+
+    if (vaAttrib.value & VA_DEC_SLICE_MODE_BASE || vaAttrib.value & VA_DEC_SLICE_MODE_NORMAL)
         return true;
     else
         return false;
@@ -292,8 +286,8 @@ bool mvaccel::VDecAccelVAImpl::is_encryption_supported(DecodeDesc& desc)
         m_vaEntrypoint,
         &vaAttrib,
         1
-        );
-    if(vaAttrib.value & VA_ATTRIB_NOT_SUPPORTED)
+    );
+    if (vaAttrib.value & VA_ATTRIB_NOT_SUPPORTED)
         return true;
     else
         return false;
@@ -336,13 +330,12 @@ bool mvaccel::VDecAccelVAImpl::is_rt_foramt_supported(DecodeDesc& desc)
     std::vector<VASurfaceAttrib> attribs(count);
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     vaStatus = vaQuerySurfaceAttributes(
-        m_vaDisplay,
-        m_vaConfigID,
-        &attribs.at(0),
-        &count
-        );
-    if (VAFAILED(vaStatus))
-    {
+                   m_vaDisplay,
+                   m_vaConfigID,
+                   &attribs.at(0),
+                   &count
+               );
+    if (VAFAILED(vaStatus)) {
         printf("vaQuerySurfaceAttributes failed\n");
         return false;
     }
@@ -396,7 +389,7 @@ void mvaccel::VDecAccelVAImpl::prepare_surface_attribs(
     attrib.value.type = VAGenericValueTypeInteger;
 
     // VA_FOURCC and MVFOURCC are interchangeable
-    if(bDecodeDownsamplingHinted)
+    if (bDecodeDownsamplingHinted)
         attrib.value.value.i = VA_FOURCC_ARGB;
     else
         attrib.value.value.i = VA_FOURCC_NV12;
@@ -423,32 +416,28 @@ uint8_t* mvaccel::VDecAccelVAImpl::lock_surface(VASurfaceID id, bool write)
 {
     // Check if decode is completed
     VAStatus status = vaSyncSurface(m_vaDisplay, id);
-    if (VAFAILED(status))
-    {
+    if (VAFAILED(status)) {
         printf("vaSyncSurface Error.\n");
         return NULL;
     }
 
     //sync decode surface
     VASurfaceStatus surf_status = VASurfaceSkipped;
-    for(;;)
-    {
+    for (;;) {
         vaQuerySurfaceStatus(m_vaDisplay, id, &surf_status);
         if (surf_status != VASurfaceRendering &&
             surf_status != VASurfaceDisplaying)
             break;
     }
 
-    if (surf_status != VASurfaceReady)
-    {
+    if (surf_status != VASurfaceReady) {
         printf("Surface is not ready by vaQueryStatusSurface");
         return NULL;
     }
 
     uint8_t* buffer = NULL;
     //map the decoded buffer
-    for(;;)
-    {
+    for (;;) {
         status = vaDeriveImage(m_vaDisplay, id, &m_images[id]);
         if (VAFAILED(status))
             printf("vaDeriveImage fail. \n");
@@ -460,8 +449,7 @@ uint8_t* mvaccel::VDecAccelVAImpl::lock_surface(VASurfaceID id, bool write)
         break;
     }
 
-    if (VAFAILED(status))
-    {
+    if (VAFAILED(status)) {
         status = vaUnmapBuffer(m_vaDisplay, m_images[id].buf);
         status = vaDestroyImage(m_vaDisplay, m_images[id].image_id);
     }
@@ -492,8 +480,7 @@ void mvaccel::VDecAccelVAImpl::create_decode_desc()
 bool mvaccel::VDecAccelVAImpl::DecodePicture()
 {
     // Create addition surfaces for scaled video output
-    if (m_sfcIDs.empty())
-    {
+    if (m_sfcIDs.empty()) {
         if (create_resources())
             return 1;
     }
@@ -513,72 +500,71 @@ bool mvaccel::VDecAccelVAImpl::DecodePicture()
     std::vector<VABufferID> vaBufferIDs;
     // Pic parameters buffers
     VABufferID vaBufferID;
-    vaStatus = vaCreateBuffer(  m_vaDisplay,
-                                m_vaContextID,
-                                VAPictureParameterBufferType,
-                                sizeof(g_PicParams_AVC),
-                                1,
-                                (uint8_t*)g_PicParams_AVC,
-                                &vaBufferID );
+    vaStatus = vaCreateBuffer(m_vaDisplay,
+                              m_vaContextID,
+                              VAPictureParameterBufferType,
+                              sizeof(g_PicParams_AVC),
+                              1,
+                              (uint8_t*)g_PicParams_AVC,
+                              &vaBufferID);
     assert(VASUCCEEDED(vaStatus));
     if (VASUCCEEDED(vaStatus))
-                vaBufferIDs.push_back(vaBufferID);
+        vaBufferIDs.push_back(vaBufferID);
 
     // IQ matrics
-    vaStatus = vaCreateBuffer( m_vaDisplay,
-                                m_vaContextID,
-                                VAIQMatrixBufferType,
-                                sizeof(g_Qmatrix_AVC),
-                                1,
-                                (uint8_t*)g_Qmatrix_AVC,
-                                &vaBufferID );
+    vaStatus = vaCreateBuffer(m_vaDisplay,
+                              m_vaContextID,
+                              VAIQMatrixBufferType,
+                              sizeof(g_Qmatrix_AVC),
+                              1,
+                              (uint8_t*)g_Qmatrix_AVC,
+                              &vaBufferID);
     assert(VASUCCEEDED(vaStatus));
     if (VASUCCEEDED(vaStatus))
-                vaBufferIDs.push_back(vaBufferID);
+        vaBufferIDs.push_back(vaBufferID);
 
     //slice parameter buffers
     vaStatus = vaCreateBuffer(m_vaDisplay,
-                               m_vaContextID,
-                               VASliceParameterBufferType,
-                               sizeof(g_SlcParams_AVC),
-                               1,
-                               (uint8_t*)g_SlcParams_AVC,
-                               &vaBufferID );
+                              m_vaContextID,
+                              VASliceParameterBufferType,
+                              sizeof(g_SlcParams_AVC),
+                              1,
+                              (uint8_t*)g_SlcParams_AVC,
+                              &vaBufferID);
     assert(VASUCCEEDED(vaStatus));
     if (VASUCCEEDED(vaStatus))
-                vaBufferIDs.push_back(vaBufferID);
+        vaBufferIDs.push_back(vaBufferID);
 
     //BITSTREAM buffers
     vaStatus = vaCreateBuffer(m_vaDisplay,
-                               m_vaContextID,
-                               VASliceDataBufferType,
-                               sizeof(g_Bitstream_AVC),
-                               1,
-                               (uint8_t*)g_Bitstream_AVC,
-                               &vaBufferID );
+                              m_vaContextID,
+                              VASliceDataBufferType,
+                              sizeof(g_Bitstream_AVC),
+                              1,
+                              (uint8_t*)g_Bitstream_AVC,
+                              &vaBufferID);
     assert(VASUCCEEDED(vaStatus));
     if (VASUCCEEDED(vaStatus))
-                vaBufferIDs.push_back(vaBufferID);
+        vaBufferIDs.push_back(vaBufferID);
 
     //PROC_PIPELINE buffers
     vaStatus = vaCreateBuffer(m_vaDisplay,
-                               m_vaContextID,
-                               VAProcPipelineParameterBufferType,
-                               sizeof(m_vaProcBuffer),
-                               1,
-                               (uint8_t*)&m_vaProcBuffer,
-                               &vaBufferID );
+                              m_vaContextID,
+                              VAProcPipelineParameterBufferType,
+                              sizeof(m_vaProcBuffer),
+                              1,
+                              (uint8_t*)&m_vaProcBuffer,
+                              &vaBufferID);
     assert(VASUCCEEDED(vaStatus));
     if (VASUCCEEDED(vaStatus))
-                vaBufferIDs.push_back(vaBufferID);
+        vaBufferIDs.push_back(vaBufferID);
 
-    if (vaBufferIDs.size())
-    {
+    if (vaBufferIDs.size()) {
         vaStatus = vaRenderPicture(
-            m_vaDisplay,
-            m_vaContextID,
-            &(vaBufferIDs.at(0)),
-            vaBufferIDs.size());
+                       m_vaDisplay,
+                       m_vaContextID,
+                       &(vaBufferIDs.at(0)),
+                       vaBufferIDs.size());
     }
 
     //va end picture
@@ -588,8 +574,7 @@ bool mvaccel::VDecAccelVAImpl::DecodePicture()
 
     //lock surface
     uint8_t* gfx_surface_buf = lock_surface(m_sfcIDs[0], false);
-    if (gfx_surface_buf == NULL)
-    {
+    if (gfx_surface_buf == NULL) {
         printf("Fail to lock gfx surface\n");
         return 1;
     }
@@ -601,7 +586,7 @@ bool mvaccel::VDecAccelVAImpl::DecodePicture()
         fwrite(gfx_surface_buf, file_size, 1, sfc_stream);
         fclose(sfc_stream);
     }
- 
+
     //unlock surface and clear
     unlock_surface(m_sfcIDs[0]);
     Close();
@@ -629,14 +614,13 @@ int mvaccel::VDecAccelVAImpl::check_process_pipeline_caps(DecodeDesc& desc)
 
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     vaStatus = vaQueryVideoProcPipelineCaps(
-        m_vaDisplay,
-        m_vaContextID,
-        filterIDs,
-        filterCount,
-        &caps
-        );
-    if (VAFAILED(vaStatus))
-    {
+                   m_vaDisplay,
+                   m_vaContextID,
+                   filterIDs,
+                   filterCount,
+                   &caps
+               );
+    if (VAFAILED(vaStatus)) {
         printf("vaQueryVideoProcPipelineCaps fail\n");
         return 1;
     }
@@ -658,15 +642,14 @@ int mvaccel::VDecAccelVAImpl::create_resources()
 
     //prepare sfc surface attribs
     DecodeDesc SfcDesc;
-    SfcDesc.sfcformat = VA_FOURCC('A','R','G','B');
+    SfcDesc.sfcformat = VA_FOURCC('A', 'R', 'G', 'B');
     VASurfaceAttribArray Sfc_vaSurfAttribs;
     prepare_surface_attribs(SfcDesc, Sfc_vaSurfAttribs, true);
 
     uint32_t surfaceType = m_surfaceType;
     m_surfaceType = (uint32_t)SfcDesc.sfcformat;
 
-    for(uint32_t i = 0; i < m_sfcIDs.size(); i++)
-    {
+    for (uint32_t i = 0; i < m_sfcIDs.size(); i++) {
         vaCreateSurfaces(
             m_vaDisplay,
             m_surfaceType,
@@ -686,14 +669,14 @@ int mvaccel::VDecAccelVAImpl::create_resources()
     // Prepare VAProcPipelineParameterBuffer for decode
     VAProcPipelineParameterBuffer buffer;
     memset(&buffer, 0, sizeof(buffer));
-    
+
     m_rectSrc.x = m_rectSrc.y = 0;
     m_rectSrc.width = (uint16_t)m_DecodeDesc.width;
     m_rectSrc.height = (uint16_t)m_DecodeDesc.height;
-    
+
     buffer.surface_region = &m_rectSrc;
     buffer.output_region = &m_rectSFC;
-    buffer.additional_outputs = (VASurfaceID*)&(m_sfcIDs[0]);
+    buffer.additional_outputs = (VASurfaceID*) & (m_sfcIDs[0]);
     buffer.num_additional_outputs = 1;
     m_vaProcBuffer = buffer;
 

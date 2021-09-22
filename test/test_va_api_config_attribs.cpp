@@ -24,7 +24,8 @@
 
 #include "test_va_api_fixture.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 class VAAPIConfigAttribs
     : public VAAPIFixture
@@ -54,7 +55,7 @@ protected:
     }
 
     void validateConfigAttributes(const ConfigAttributes& actual,
-        const ConfigAttributes& supported) const
+                                  const ConfigAttributes& supported) const
     {
         const size_t size(actual.size());
         ASSERT_EQ(size, supported.size());
@@ -126,7 +127,9 @@ TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
     // can get the supported values for them.
     ConfigAttributes supported = actual;
     std::for_each(supported.begin(), supported.end(),
-        [](VAConfigAttrib& s) { s.value = 0; });
+    [](VAConfigAttrib & s) {
+        s.value = 0;
+    });
 
     // get supported config attribute values
     getConfigAttributes(profile, entrypoint, supported);
@@ -138,6 +141,6 @@ TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
 INSTANTIATE_TEST_CASE_P(
     Attributes, VAAPIConfigAttribs,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
-        ::testing::ValuesIn(g_vaEntrypoints)));
+                       ::testing::ValuesIn(g_vaEntrypoints)));
 
 } // namespace VAAPI

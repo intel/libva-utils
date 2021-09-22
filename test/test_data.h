@@ -32,7 +32,8 @@
 #include <va/va.h>
 #include <va/va_drmcommon.h>
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 static const Profiles g_vaProfiles = {
     VAProfileNone,
@@ -157,7 +158,8 @@ static const Resolutions g_vaResolutions = {
     { 352, 288 },    { 480, 320 },   { 720, 480 },   { 720, 576 },
     { 768, 576 },    { 800, 480 },   { 854, 480 },   { 1280, 720 },
     { 1920, 1080 },  { 2048, 1080 }, { 4096, 2160 }, { 8192, 8192 },
-    { 10240, 10240 } };
+    { 10240, 10240 }
+};
 
 static const BitMasks g_vaRTFormats = {
     VA_RT_FORMAT_YUV420, VA_RT_FORMAT_YUV422, VA_RT_FORMAT_YUV444,
@@ -204,7 +206,7 @@ static const BufferTypes g_vaBufferTypes = {
 static const BitMasks g_vaRateControls = {
     VA_RC_NONE, VA_RC_CBR, VA_RC_VBR, VA_RC_VCM, VA_RC_CQP,
     VA_RC_VBR_CONSTRAINED, VA_RC_ICQ, VA_RC_MB, VA_RC_CFS,
-    VA_RC_PARALLEL,VA_RC_QVBR,VA_RC_AVBR,
+    VA_RC_PARALLEL, VA_RC_QVBR, VA_RC_AVBR,
 #if VA_CHECK_VERSION(1, 10, 0)
     VA_RC_TCBRC,
 #endif
@@ -239,17 +241,17 @@ static const BitMasks g_vaEncryptionTypes = {
 #endif
 
 static const std::map<VAConfigAttribType, const BitMasks&>
-    g_vaConfigAttribBitMasks = {
-        {VAConfigAttribRTFormat, g_vaRTFormats},
-        {VAConfigAttribRateControl, g_vaRateControls},
-        {VAConfigAttribDecSliceMode, g_vaDecSliceModes},
-        {VAConfigAttribEncPackedHeaders, g_vaEncPackedHeaders},
-        {VAConfigAttribEncInterlaced, g_vaEncInterlaced},
-        {VAConfigAttribFEIFunctionType, g_vaFEIFunctionTypes},
+g_vaConfigAttribBitMasks = {
+    {VAConfigAttribRTFormat, g_vaRTFormats},
+    {VAConfigAttribRateControl, g_vaRateControls},
+    {VAConfigAttribDecSliceMode, g_vaDecSliceModes},
+    {VAConfigAttribEncPackedHeaders, g_vaEncPackedHeaders},
+    {VAConfigAttribEncInterlaced, g_vaEncInterlaced},
+    {VAConfigAttribFEIFunctionType, g_vaFEIFunctionTypes},
 #if VA_CHECK_VERSION(1, 11, 0)
-        {VAConfigAttribEncryption, g_vaEncryptionTypes},
+    {VAConfigAttribEncryption, g_vaEncryptionTypes},
 #endif
-    };
+};
 
 static const BitMasks g_vaSurfaceMemTypes = {
     VA_SURFACE_ATTRIB_MEM_TYPE_VA, VA_SURFACE_ATTRIB_MEM_TYPE_V4L2,
@@ -259,9 +261,9 @@ static const BitMasks g_vaSurfaceMemTypes = {
 };
 
 static const std::map<VASurfaceAttribType, const BitMasks&>
-    g_vaSurfaceAttribBitMasks = {
-        {VASurfaceAttribMemoryType, g_vaSurfaceMemTypes},
-    };
+g_vaSurfaceAttribBitMasks = {
+    {VASurfaceAttribMemoryType, g_vaSurfaceMemTypes},
+};
 
 } // namespace VAAPI
 #endif

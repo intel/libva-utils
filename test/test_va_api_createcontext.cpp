@@ -26,7 +26,8 @@
 
 #include <sstream>
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 typedef VAAPIFixture VAAPICreateContextToFail;
 
@@ -43,8 +44,8 @@ TEST_F(VAAPICreateContextToFail, CreateContextWithNoConfig)
 
 class VAAPICreateContext
     : public VAAPIFixture
-    , public ::testing::WithParamInterface<
-          std::tuple<VAProfile, VAEntrypoint, Resolution> >
+    , public ::testing::WithParamInterface <
+      std::tuple<VAProfile, VAEntrypoint, Resolution> >
 {
 public:
     VAAPICreateContext()
@@ -107,7 +108,7 @@ TEST_P(VAAPICreateContext, CreateContext)
 INSTANTIATE_TEST_CASE_P(
     CreateContext, VAAPICreateContext,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
-        ::testing::ValuesIn(g_vaEntrypoints),
-        ::testing::ValuesIn(g_vaResolutions)));
+                       ::testing::ValuesIn(g_vaEntrypoints),
+                       ::testing::ValuesIn(g_vaResolutions)));
 
 } // namespace VAAPI

@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -75,8 +75,7 @@ va_open_display_wayland(void)
     if (g_display) {
         d = g_display;
         d->ref_count++;
-    }
-    else {
+    } else {
         d = calloc(1, sizeof(*d));
         if (!d)
             return NULL;
@@ -181,9 +180,9 @@ va_put_surface_wayland(
 
     wl_surface_attach(d->surface, buffer, 0, 0);
     wl_surface_damage(
-         d->surface,
-         dst_rect->x, dst_rect->y, dst_rect->width, dst_rect->height
-     );
+        d->surface,
+        dst_rect->x, dst_rect->y, dst_rect->width, dst_rect->height
+    );
 
     wl_surface_commit(d->surface);
     wl_display_flush(d->display);

@@ -24,14 +24,15 @@
 
 #include "test_va_api_fixture.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 // Testing VABufferType in groups that will be associated with VAProfile and
 // VAEntrypoint. vaCreateBuffer doesn't require these itself but its input
 // parameter do care about them.
 
 typedef ::testing::WithParamInterface<std::tuple<VAProfile, VAEntrypoint,
-    VABufferType, size_t>> CreateBufferParamInterface;
+        VABufferType, size_t>> CreateBufferParamInterface;
 
 class VAAPICreateBuffer
     : public VAAPIFixture
@@ -72,101 +73,129 @@ typedef std::map<VABufferType, BufferSpecs> BufferSpecsMap;
 using std::make_tuple;
 
 static const BufferSpecsMap decodeBufferSpecs = {
-    {VAPictureParameterBufferType, {
-        make_tuple(g_vaMPEG2Profiles, sizeof(VAPictureParameterBufferMPEG2)),
-        make_tuple(g_vaMPEG4Profiles, sizeof(VAPictureParameterBufferMPEG4)),
-        make_tuple(g_vaH264Profiles, sizeof(VAPictureParameterBufferH264)),
-        make_tuple(g_vaVC1Profiles, sizeof(VAPictureParameterBufferVC1)),
-        make_tuple(g_vaJPEGProfiles,
-            sizeof(VAPictureParameterBufferJPEGBaseline)),
-        make_tuple(g_vaVP8Profiles, sizeof(VAPictureParameterBufferVP8)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VAPictureParameterBufferHEVC)),
-        make_tuple(g_vaVP9Profiles, sizeof(VADecPictureParameterBufferVP9)),
-    }},
-    {VAIQMatrixBufferType, {
-        make_tuple(g_vaMPEG2Profiles, sizeof(VAIQMatrixBufferMPEG2)),
-        make_tuple(g_vaMPEG4Profiles, sizeof(VAIQMatrixBufferMPEG4)),
-        make_tuple(g_vaH264Profiles, sizeof(VAIQMatrixBufferH264)),
-        make_tuple(g_vaJPEGProfiles, sizeof(VAIQMatrixBufferJPEGBaseline)),
-        make_tuple(g_vaVP8Profiles, sizeof(VAIQMatrixBufferVP8)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VAIQMatrixBufferHEVC)),
-    }},
-    {VASliceParameterBufferType, {
-        make_tuple(g_vaMPEG2Profiles, sizeof(VASliceParameterBufferMPEG2)),
-        make_tuple(g_vaMPEG4Profiles, sizeof(VASliceParameterBufferMPEG4)),
-        make_tuple(g_vaH264Profiles, sizeof(VASliceParameterBufferH264)),
-        make_tuple(g_vaVC1Profiles, sizeof(VASliceParameterBufferVC1)),
-        make_tuple(g_vaJPEGProfiles,
-            sizeof(VASliceParameterBufferJPEGBaseline)),
-        make_tuple(g_vaVP8Profiles, sizeof(VASliceParameterBufferVP8)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VASliceParameterBufferHEVC)),
-        make_tuple(g_vaVP9Profiles, sizeof(VASliceParameterBufferVP9)),
-    }},
-    {VAMacroblockParameterBufferType, {
-        make_tuple(g_vaMPEG2Profiles, sizeof(VAMacroblockParameterBufferMPEG2)),
-    }},
-    {VAQMatrixBufferType, {
-        make_tuple(g_vaJPEGProfiles, sizeof(VAQMatrixBufferJPEG)),
-        make_tuple(g_vaVP8Profiles, sizeof(VAQMatrixBufferVP8)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VAQMatrixBufferHEVC)),
-    }},
-    {VAHuffmanTableBufferType, {
-        make_tuple(g_vaJPEGProfiles, sizeof(VAHuffmanTableBufferJPEGBaseline)),
-    }},
-    {VAProbabilityBufferType, {
-        make_tuple(g_vaVP8Profiles, sizeof(VAProbabilityDataBufferVP8)),
-    }},
+    {
+        VAPictureParameterBufferType, {
+            make_tuple(g_vaMPEG2Profiles, sizeof(VAPictureParameterBufferMPEG2)),
+            make_tuple(g_vaMPEG4Profiles, sizeof(VAPictureParameterBufferMPEG4)),
+            make_tuple(g_vaH264Profiles, sizeof(VAPictureParameterBufferH264)),
+            make_tuple(g_vaVC1Profiles, sizeof(VAPictureParameterBufferVC1)),
+            make_tuple(g_vaJPEGProfiles,
+                       sizeof(VAPictureParameterBufferJPEGBaseline)),
+            make_tuple(g_vaVP8Profiles, sizeof(VAPictureParameterBufferVP8)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VAPictureParameterBufferHEVC)),
+            make_tuple(g_vaVP9Profiles, sizeof(VADecPictureParameterBufferVP9)),
+        }
+    },
+    {
+        VAIQMatrixBufferType, {
+            make_tuple(g_vaMPEG2Profiles, sizeof(VAIQMatrixBufferMPEG2)),
+            make_tuple(g_vaMPEG4Profiles, sizeof(VAIQMatrixBufferMPEG4)),
+            make_tuple(g_vaH264Profiles, sizeof(VAIQMatrixBufferH264)),
+            make_tuple(g_vaJPEGProfiles, sizeof(VAIQMatrixBufferJPEGBaseline)),
+            make_tuple(g_vaVP8Profiles, sizeof(VAIQMatrixBufferVP8)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VAIQMatrixBufferHEVC)),
+        }
+    },
+    {
+        VASliceParameterBufferType, {
+            make_tuple(g_vaMPEG2Profiles, sizeof(VASliceParameterBufferMPEG2)),
+            make_tuple(g_vaMPEG4Profiles, sizeof(VASliceParameterBufferMPEG4)),
+            make_tuple(g_vaH264Profiles, sizeof(VASliceParameterBufferH264)),
+            make_tuple(g_vaVC1Profiles, sizeof(VASliceParameterBufferVC1)),
+            make_tuple(g_vaJPEGProfiles,
+                       sizeof(VASliceParameterBufferJPEGBaseline)),
+            make_tuple(g_vaVP8Profiles, sizeof(VASliceParameterBufferVP8)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VASliceParameterBufferHEVC)),
+            make_tuple(g_vaVP9Profiles, sizeof(VASliceParameterBufferVP9)),
+        }
+    },
+    {
+        VAMacroblockParameterBufferType, {
+            make_tuple(g_vaMPEG2Profiles, sizeof(VAMacroblockParameterBufferMPEG2)),
+        }
+    },
+    {
+        VAQMatrixBufferType, {
+            make_tuple(g_vaJPEGProfiles, sizeof(VAQMatrixBufferJPEG)),
+            make_tuple(g_vaVP8Profiles, sizeof(VAQMatrixBufferVP8)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VAQMatrixBufferHEVC)),
+        }
+    },
+    {
+        VAHuffmanTableBufferType, {
+            make_tuple(g_vaJPEGProfiles, sizeof(VAHuffmanTableBufferJPEGBaseline)),
+        }
+    },
+    {
+        VAProbabilityBufferType, {
+            make_tuple(g_vaVP8Profiles, sizeof(VAProbabilityDataBufferVP8)),
+        }
+    },
 };
 
 static const BufferSpecsMap encodeBufferSpecs = {
-    {VAEncSequenceParameterBufferType, {
-        make_tuple(g_vaMPEG2Profiles,
-            sizeof(VAEncSequenceParameterBufferMPEG2)),
-        make_tuple(g_vaMPEG4Profiles,
-            sizeof(VAEncSequenceParameterBufferMPEG4)),
-        make_tuple(g_vaH263Profiles, sizeof(VAEncSequenceParameterBufferH263)),
-        make_tuple(g_vaH264Profiles, sizeof(VAEncSequenceParameterBufferH264)),
-        make_tuple(g_vaVP8Profiles, sizeof(VAEncSequenceParameterBufferVP8)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VAEncSequenceParameterBufferHEVC)),
-        make_tuple(g_vaVP9Profiles, sizeof(VAEncSequenceParameterBufferVP9)),
-    }},
-    {VAEncPictureParameterBufferType, {
-        make_tuple(g_vaMPEG2Profiles, sizeof(VAEncPictureParameterBufferMPEG2)),
-        make_tuple(g_vaMPEG4Profiles, sizeof(VAEncPictureParameterBufferMPEG4)),
-        make_tuple(g_vaH263Profiles, sizeof(VAEncPictureParameterBufferH263)),
-        make_tuple(g_vaH264Profiles, sizeof(VAEncPictureParameterBufferH264)),
-        make_tuple(g_vaJPEGProfiles, sizeof(VAEncPictureParameterBufferJPEG)),
-        make_tuple(g_vaVP8Profiles, sizeof(VAEncPictureParameterBufferVP8)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VAEncPictureParameterBufferHEVC)),
-        make_tuple(g_vaVP9Profiles, sizeof(VAEncPictureParameterBufferVP9)),
-    }},
-    {VAEncSliceParameterBufferType, {
-        make_tuple(g_vaMPEG2Profiles, sizeof(VAEncSliceParameterBufferMPEG2)),
-        make_tuple(g_vaH264Profiles, sizeof(VAEncSliceParameterBufferH264)),
-        make_tuple(g_vaJPEGProfiles, sizeof(VAEncSliceParameterBufferJPEG)),
-        make_tuple(g_vaHEVCProfiles, sizeof(VAEncSliceParameterBufferHEVC)),
-    }},
-    {VAEncPackedHeaderParameterBufferType, {
-        make_tuple(g_vaProfiles, sizeof(VAEncPackedHeaderParameterBuffer)),
-    }},
-    {VAEncMiscParameterBufferType, {
-        make_tuple(g_vaProfiles, sizeof(VAEncMiscParameterBuffer)),
-    }},
+    {
+        VAEncSequenceParameterBufferType, {
+            make_tuple(g_vaMPEG2Profiles,
+                       sizeof(VAEncSequenceParameterBufferMPEG2)),
+            make_tuple(g_vaMPEG4Profiles,
+                       sizeof(VAEncSequenceParameterBufferMPEG4)),
+            make_tuple(g_vaH263Profiles, sizeof(VAEncSequenceParameterBufferH263)),
+            make_tuple(g_vaH264Profiles, sizeof(VAEncSequenceParameterBufferH264)),
+            make_tuple(g_vaVP8Profiles, sizeof(VAEncSequenceParameterBufferVP8)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VAEncSequenceParameterBufferHEVC)),
+            make_tuple(g_vaVP9Profiles, sizeof(VAEncSequenceParameterBufferVP9)),
+        }
+    },
+    {
+        VAEncPictureParameterBufferType, {
+            make_tuple(g_vaMPEG2Profiles, sizeof(VAEncPictureParameterBufferMPEG2)),
+            make_tuple(g_vaMPEG4Profiles, sizeof(VAEncPictureParameterBufferMPEG4)),
+            make_tuple(g_vaH263Profiles, sizeof(VAEncPictureParameterBufferH263)),
+            make_tuple(g_vaH264Profiles, sizeof(VAEncPictureParameterBufferH264)),
+            make_tuple(g_vaJPEGProfiles, sizeof(VAEncPictureParameterBufferJPEG)),
+            make_tuple(g_vaVP8Profiles, sizeof(VAEncPictureParameterBufferVP8)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VAEncPictureParameterBufferHEVC)),
+            make_tuple(g_vaVP9Profiles, sizeof(VAEncPictureParameterBufferVP9)),
+        }
+    },
+    {
+        VAEncSliceParameterBufferType, {
+            make_tuple(g_vaMPEG2Profiles, sizeof(VAEncSliceParameterBufferMPEG2)),
+            make_tuple(g_vaH264Profiles, sizeof(VAEncSliceParameterBufferH264)),
+            make_tuple(g_vaJPEGProfiles, sizeof(VAEncSliceParameterBufferJPEG)),
+            make_tuple(g_vaHEVCProfiles, sizeof(VAEncSliceParameterBufferHEVC)),
+        }
+    },
+    {
+        VAEncPackedHeaderParameterBufferType, {
+            make_tuple(g_vaProfiles, sizeof(VAEncPackedHeaderParameterBuffer)),
+        }
+    },
+    {
+        VAEncMiscParameterBufferType, {
+            make_tuple(g_vaProfiles, sizeof(VAEncMiscParameterBuffer)),
+        }
+    },
 };
 
 static const BufferSpecsMap vppBufferSpecs = {
-    {VAProcPipelineParameterBufferType, {
-        make_tuple(g_vaNoneProfiles, sizeof(VAProcPipelineParameterBuffer)),
-    }},
-    {VAProcFilterParameterBufferType, {
-        make_tuple(g_vaNoneProfiles, sizeof(VAProcFilterParameterBuffer)),
-        make_tuple(g_vaNoneProfiles,
-            sizeof(VAProcFilterParameterBufferDeinterlacing)),
-        make_tuple(g_vaNoneProfiles,
-            sizeof(VAProcFilterParameterBufferColorBalance)),
-        make_tuple(g_vaNoneProfiles,
-            sizeof(VAProcFilterParameterBufferTotalColorCorrection)),
-    }},
+    {
+        VAProcPipelineParameterBufferType, {
+            make_tuple(g_vaNoneProfiles, sizeof(VAProcPipelineParameterBuffer)),
+        }
+    },
+    {
+        VAProcFilterParameterBufferType, {
+            make_tuple(g_vaNoneProfiles, sizeof(VAProcFilterParameterBuffer)),
+            make_tuple(g_vaNoneProfiles,
+                       sizeof(VAProcFilterParameterBufferDeinterlacing)),
+            make_tuple(g_vaNoneProfiles,
+                       sizeof(VAProcFilterParameterBufferColorBalance)),
+            make_tuple(g_vaNoneProfiles,
+                       sizeof(VAProcFilterParameterBufferTotalColorCorrection)),
+        }
+    },
 };
 
 TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
@@ -204,11 +233,10 @@ std::vector<CreateBufferParamInterface::ParamType> generateInput()
     std::vector<CreateBufferParamInterface::ParamType> inputs;
 
     const auto addBufferSpecs = [&](
-        const BufferSpecsMap& bsm, const Entrypoints& entrypoints)
-    {
+    const BufferSpecsMap & bsm, const Entrypoints & entrypoints) {
         for (const auto& specs : bsm) {
             const auto& bufferType = std::get<0>(specs);
-            for (const auto& spec: std::get<1>(specs)) {
+            for (const auto& spec : std::get<1>(specs)) {
                 const auto& bufferSize = std::get<1>(spec);
                 for (const auto& profile : std::get<0>(spec)) {
                     for (const auto& entrypoint : entrypoints) {
@@ -223,7 +251,8 @@ std::vector<CreateBufferParamInterface::ParamType> generateInput()
 
     addBufferSpecs(decodeBufferSpecs, {VAEntrypointVLD,});
     addBufferSpecs(encodeBufferSpecs, {VAEntrypointEncSlice,
-        VAEntrypointEncSliceLP, VAEntrypointEncPicture,});
+                                       VAEntrypointEncSliceLP, VAEntrypointEncPicture,
+                                      });
     addBufferSpecs(vppBufferSpecs, {VAEntrypointVideoProc,});
 
     return inputs;

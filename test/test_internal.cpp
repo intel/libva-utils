@@ -57,17 +57,17 @@ TEST(Internal, Resolution)
     EXPECT_TRUE(res.isWithin(res, Resolution(res.width, res.height + 1)));
 
     EXPECT_FALSE(res.isWithin(
-        Resolution(res.width + 1, res.height),
-        Resolution(res.width + 1, res.height + 1)));
+                     Resolution(res.width + 1, res.height),
+                     Resolution(res.width + 1, res.height + 1)));
     EXPECT_FALSE(res.isWithin(
-        Resolution(res.width, res.height + 1),
-        Resolution(res.width + 1, res.height + 1)));
+                     Resolution(res.width, res.height + 1),
+                     Resolution(res.width + 1, res.height + 1)));
     EXPECT_FALSE(res.isWithin(
-        Resolution(res.width - 1, res.height - 1),
-        Resolution(res.width - 1, res.height)));
+                     Resolution(res.width - 1, res.height - 1),
+                     Resolution(res.width - 1, res.height)));
     EXPECT_FALSE(res.isWithin(
-        Resolution(res.width - 1, res.height - 1),
-        Resolution(res.width, res.height - 1)));
+                     Resolution(res.width - 1, res.height - 1),
+                     Resolution(res.width, res.height - 1)));
 
     // Verify different initializers
     {

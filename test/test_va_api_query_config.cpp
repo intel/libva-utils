@@ -24,7 +24,8 @@
 
 #include "test_va_api_fixture.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 class VAAPIQueryConfig
     : public VAAPIFixture
@@ -52,7 +53,7 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
 
     const int maxProfiles = vaMaxNumProfiles(m_vaDisplay);
     EXPECT_TRUE(maxProfiles > 0)
-        << maxProfiles << " profiles are reported";
+            << maxProfiles << " profiles are reported";
 
     Profiles profiles(maxProfiles);
 
@@ -60,11 +61,11 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
         vaQueryConfigProfiles(m_vaDisplay, profiles.data(), &numProfiles));
 
     EXPECT_TRUE(numProfiles > 0)
-        << numProfiles << " profiles are supported by driver";
+            << numProfiles << " profiles are supported by driver";
 
     const int maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
     EXPECT_TRUE(maxEntrypoints > 0)
-        << maxEntrypoints << " entrypoints are reported";
+            << maxEntrypoints << " entrypoints are reported";
 
     Entrypoints entrypoints(maxEntrypoints);
 
@@ -73,19 +74,19 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
 
     if (std::find(begin, end, profile) != end) {
         EXPECT_STATUS(vaQueryConfigEntrypoints(m_vaDisplay,
-                profile, entrypoints.data(), &numEntrypoints))
+                                               profile, entrypoints.data(), &numEntrypoints))
                 << " profile used is " << profile;
 
         EXPECT_TRUE(numEntrypoints > 0)
-            << profile << " is supported but no entrypoints are reported";
+                << profile << " is supported but no entrypoints are reported";
     } else {
         EXPECT_STATUS_EQ(
             VA_STATUS_ERROR_UNSUPPORTED_PROFILE, vaQueryConfigEntrypoints(
                 m_vaDisplay, profile, entrypoints.data(), &numEntrypoints))
-            << " profile used is " << profile;
+                << " profile used is " << profile;
 
         EXPECT_FALSE(numEntrypoints > 0)
-            << profile << " profile is not supported but \
+                << profile << " profile is not supported but \
             valid entrypoints are reported ";
     }
 }

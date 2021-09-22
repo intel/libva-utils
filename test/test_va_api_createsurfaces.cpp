@@ -27,7 +27,8 @@
 #include <functional>
 #include <sstream>
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 // The following tests will operate on supported profile/entrypoint
 // combinations that the driver does support.
@@ -99,8 +100,8 @@ protected:
         querySurfaceAttributes(supported);
 
         const uint32_t drmMemMask = VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM
-            | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME
-            | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2;
+                                    | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME
+                                    | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2;
 
         // create surfaces for each supported attribute
         for (const auto& attrib : supported) {
@@ -141,8 +142,8 @@ protected:
     }
 };
 
-typedef ::testing::WithParamInterface<
-    std::tuple<VAProfile, VAEntrypoint> > QuerySurfacesParamInterface;
+typedef ::testing::WithParamInterface <
+std::tuple<VAProfile, VAEntrypoint> > QuerySurfacesParamInterface;
 
 class VAAPIQuerySurfaces
     : public QuerySurfacesParamInterface
@@ -152,8 +153,8 @@ public:
     VAAPIQuerySurfaces()
         : QuerySurfacesParamInterface()
         , VAAPISurfaceFixture(
-            ::testing::get<0>(GetParam()),
-            ::testing::get<1>(GetParam()))
+              ::testing::get<0>(GetParam()),
+              ::testing::get<1>(GetParam()))
     { }
 };
 
@@ -164,7 +165,7 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
         return;
     }
 
-    const auto test = [&](const ConfigAttributes& ca) {
+    const auto test = [&](const ConfigAttributes & ca) {
         SurfaceAttributes attribs;
         querySurfaceAttributes(attribs);
     };
@@ -188,10 +189,10 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
 INSTANTIATE_TEST_CASE_P(
     QuerySurfaces, VAAPIQuerySurfaces,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
-        ::testing::ValuesIn(g_vaEntrypoints)));
+                       ::testing::ValuesIn(g_vaEntrypoints)));
 
 typedef typename ::testing::WithParamInterface<std::tuple<
-    VAProfile, VAEntrypoint, Resolution>> CreateSurfacesParamInterface;
+VAProfile, VAEntrypoint, Resolution>> CreateSurfacesParamInterface;
 
 class VAAPICreateSurfaces
     : public CreateSurfacesParamInterface
@@ -201,8 +202,8 @@ public:
     VAAPICreateSurfaces()
         : CreateSurfacesParamInterface()
         , VAAPISurfaceFixture(
-            ::testing::get<0>(GetParam()),
-            ::testing::get<1>(GetParam()))
+              ::testing::get<0>(GetParam()),
+              ::testing::get<1>(GetParam()))
         , resolution(::testing::get<2>(GetParam()))
     { }
 
@@ -221,16 +222,17 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
     // drivers
     unsigned format = VA_RT_FORMAT_YUV420;
 
-    const auto testSurfaces = [&](const SurfaceAttributes& attribs) {
+    const auto testSurfaces = [&](const SurfaceAttributes & attribs) {
         Surfaces surfaces(10, VA_INVALID_SURFACE);
         createSurfaces(surfaces, format, resolution, attribs);
         destroySurfaces(surfaces);
     };
 
-    const auto test = [&](const ConfigAttributes& attribs) {
+    const auto test = [&](const ConfigAttributes & attribs) {
         const auto match = std::find_if(attribs.begin(), attribs.end(),
-            [](const VAConfigAttrib& a)
-                { return a.type == VAConfigAttribRTFormat; });
+        [](const VAConfigAttrib & a) {
+            return a.type == VAConfigAttribRTFormat;
+        });
         if (match != attribs.end()) {
             format = match->value;
         }
@@ -250,7 +252,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
         return;
     }
 
-    const auto test = [&](const SurfaceAttributes& attribs) {
+    const auto test = [&](const SurfaceAttributes & attribs) {
         Surfaces surfaces(10, VA_INVALID_SURFACE);
         createSurfaces(surfaces, VA_RT_FORMAT_YUV420, resolution, attribs);
         destroySurfaces(surfaces);
@@ -278,7 +280,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 INSTANTIATE_TEST_CASE_P(
     CreateSurfaces, VAAPICreateSurfaces,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
-        ::testing::ValuesIn(g_vaEntrypoints),
-        ::testing::ValuesIn(g_vaResolutions)));
+                       ::testing::ValuesIn(g_vaEntrypoints),
+                       ::testing::ValuesIn(g_vaResolutions)));
 
 } // namespace VAAPI
