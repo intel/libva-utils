@@ -51,8 +51,7 @@ using namespace std;
 static VADisplay va_dpy = NULL;
 static VAContextID context_id = 0;
 
-typedef struct _SurfInfo
-{
+typedef struct _SurfInfo {
     FILE        *fd;
     char        name[MAX_LEN];
     uint32_t    width;
@@ -64,7 +63,7 @@ typedef struct _SurfInfo
     void        *pBuf;
     uint8_t     *pBufBase;
     uintptr_t   ptrb;
-}SurfInfo;
+} SurfInfo;
 
 static SurfInfo g_src;
 static SurfInfo g_dst;
@@ -88,20 +87,20 @@ static uint32_t g_frame_count = 0;
 static uint32_t g_copy_method = 0; //0 blance, 1 perf. 2 power_saving
 
 static int8_t
-parse_memtype_format(char *str,uint32_t *dst_memtype)
+parse_memtype_format(char *str, uint32_t *dst_memtype)
 {
     uint32_t tmemtype = VA_SURFACE_ATTRIB_MEM_TYPE_VA;
-    
-    if (!strcmp(str, "VA")){
+
+    if (!strcmp(str, "VA")) {
         tmemtype = VA_SURFACE_ATTRIB_MEM_TYPE_VA;
-    } else if(!strcmp(str, "CPU")){
+    } else if (!strcmp(str, "CPU")) {
         tmemtype = VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR;
-    }else{
+    } else {
         printf("Not supported format: %s! Currently only support following format: %s\n",
                str, "VA,CPU");
         assert(0);
     }
-    if(dst_memtype)
+    if (dst_memtype)
         *dst_memtype = tmemtype;
     return 0;
 }
@@ -142,7 +141,7 @@ read_value_string(FILE *fp, const char* field_name, char* value)
         while (*str == ' ')
             str++;
 
-        *(str + strlen(str)-1) = '\0';
+        *(str + strlen(str) - 1) = '\0';
         strcpy(value, str);
 
         return 0;
@@ -157,8 +156,8 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
     char str[MAX_LEN];
 
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find integer field: %s", field_name);
-       return -1;
+        printf("Failed to find integer field: %s", field_name);
+        return -1;
     }
 
     *value = (uint32_t)atoi(str);
@@ -166,32 +165,29 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
 }
 
 static VAStatus
-create_surface(VASurfaceID * p_surface_id,SurfInfo &surf)
+create_surface(VASurfaceID * p_surface_id, SurfInfo &surf)
 {
     VAStatus va_status = VA_STATUS_ERROR_INVALID_PARAMETER;
-    if (surf.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
-    {
+    if (surf.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA) {
         VASurfaceAttrib    surface_attrib;
         surface_attrib.type =  VASurfaceAttribPixelFormat;
         surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
         surface_attrib.value.type = VAGenericValueTypeInteger;
         surface_attrib.value.value.i = surf.fourCC;
-    
+
         va_status = vaCreateSurfaces(va_dpy,
                                      surf.format,
-                                     surf.width ,
+                                     surf.width,
                                      surf.height,
                                      p_surface_id,
                                      1,
                                      &surface_attrib,
                                      1);
-    }
-    else if (surf.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR)
-    {
+    } else if (surf.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR) {
         VASurfaceAttrib surfaceAttrib[3];
         VASurfaceAttribExternalBuffers extBuffer;
         uint32_t base_addr_align = 0x1000;
-        uint32_t size = 0; 
+        uint32_t size = 0;
         surfaceAttrib[0].flags = VA_SURFACE_ATTRIB_SETTABLE;
         surfaceAttrib[0].type = VASurfaceAttribPixelFormat;
         surfaceAttrib[0].value.type = VAGenericValueTypeInteger;
@@ -205,40 +201,38 @@ create_surface(VASurfaceID * p_surface_id,SurfInfo &surf)
         surfaceAttrib[2].flags = VA_SURFACE_ATTRIB_SETTABLE;
         surfaceAttrib[2].type = VASurfaceAttribExternalBufferDescriptor;
         surfaceAttrib[2].value.type = VAGenericValueTypePointer;
-        surfaceAttrib[2].value.value.p = (void *)&extBuffer; 
+        surfaceAttrib[2].value.value.p = (void *)&extBuffer;
         memset(&extBuffer, 0, sizeof(extBuffer));
 
         uint32_t pitch_align = surf.alignsize;
-        switch(surf.fourCC)
-        {
-            case VA_FOURCC_NV12:
-                extBuffer.pitches[0] = ((surf.width + pitch_align -1)/pitch_align) * pitch_align;
-                size = (extBuffer.pitches[0] * surf.height) * 3/2;// frame size align with pitch.
-                size = (size+base_addr_align-1)/base_addr_align*base_addr_align;// frame size align as 4K page.
-                extBuffer.offsets[0] = 0;// Y channel
-                extBuffer.offsets[1] = extBuffer.pitches[0] * surf.height; // UV channel.
-                extBuffer.pitches[1] = extBuffer.pitches[0];
-                extBuffer.num_planes =2;
-                break;
-            case VA_FOURCC_RGBP:
-                extBuffer.pitches[0] = ((surf.width + pitch_align -1)/pitch_align) * pitch_align;
-                size = (extBuffer.pitches[0] * surf.height) * 3;// frame size align with pitch.
-                size = (size+base_addr_align-1)/base_addr_align*base_addr_align;// frame size align as 4K page.
-                extBuffer.offsets[0] = 0;// Y channel
-                extBuffer.offsets[1] = extBuffer.pitches[0] * surf.height; // U channel.
-                extBuffer.pitches[1] = extBuffer.pitches[0];
-                extBuffer.offsets[2] = extBuffer.pitches[0] * surf.height * 2; // V channel.
-                extBuffer.pitches[2] = extBuffer.pitches[0];
-                extBuffer.num_planes = 3;
-                break;
-            default :
-                std::cout << surf.fourCC <<"format doesn't support!"<<endl;
-                return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
+        switch (surf.fourCC) {
+        case VA_FOURCC_NV12:
+            extBuffer.pitches[0] = ((surf.width + pitch_align - 1) / pitch_align) * pitch_align;
+            size = (extBuffer.pitches[0] * surf.height) * 3 / 2; // frame size align with pitch.
+            size = (size + base_addr_align - 1) / base_addr_align * base_addr_align; // frame size align as 4K page.
+            extBuffer.offsets[0] = 0;// Y channel
+            extBuffer.offsets[1] = extBuffer.pitches[0] * surf.height; // UV channel.
+            extBuffer.pitches[1] = extBuffer.pitches[0];
+            extBuffer.num_planes = 2;
+            break;
+        case VA_FOURCC_RGBP:
+            extBuffer.pitches[0] = ((surf.width + pitch_align - 1) / pitch_align) * pitch_align;
+            size = (extBuffer.pitches[0] * surf.height) * 3;// frame size align with pitch.
+            size = (size + base_addr_align - 1) / base_addr_align * base_addr_align; // frame size align as 4K page.
+            extBuffer.offsets[0] = 0;// Y channel
+            extBuffer.offsets[1] = extBuffer.pitches[0] * surf.height; // U channel.
+            extBuffer.pitches[1] = extBuffer.pitches[0];
+            extBuffer.offsets[2] = extBuffer.pitches[0] * surf.height * 2; // V channel.
+            extBuffer.pitches[2] = extBuffer.pitches[0];
+            extBuffer.num_planes = 3;
+            break;
+        default :
+            std::cout << surf.fourCC << "format doesn't support!" << endl;
+            return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
         }
-        if (!surf.pBuf && !surf.pBufBase)
-        {
-            surf.pBuf = malloc(size+base_addr_align);
-            surf.pBufBase = (uint8_t*)((((uint64_t)(surf.pBuf) + base_addr_align-1)/base_addr_align)*base_addr_align);
+        if (!surf.pBuf && !surf.pBufBase) {
+            surf.pBuf = malloc(size + base_addr_align);
+            surf.pBufBase = (uint8_t*)((((uint64_t)(surf.pBuf) + base_addr_align - 1) / base_addr_align) * base_addr_align);
 
             extBuffer.pixel_format = surf.fourCC;
             extBuffer.width = surf.width;
@@ -249,22 +243,20 @@ create_surface(VASurfaceID * p_surface_id,SurfInfo &surf)
             extBuffer.buffers[0] = (uintptr_t)(surf.pBufBase);
             extBuffer.flags = VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR;
 
-            va_status = vaCreateSurfaces(va_dpy, surf.format, surf.width, surf.height,p_surface_id, 1, surfaceAttrib, 3);
+            va_status = vaCreateSurfaces(va_dpy, surf.format, surf.width, surf.height, p_surface_id, 1, surfaceAttrib, 3);
             CHECK_VASTATUS(va_status, "vaCreateSurfaces");
-        }
-        else
-        {
-            std::cout<<"previous frame buffer hasn't be released!"<<endl;
+        } else {
+            std::cout << "previous frame buffer hasn't be released!" << endl;
         }
     }
 
-   return va_status;
+    return va_status;
 }
 
 /* Load frame to surface*/
 static VAStatus
 upload_frame_to_surface(FILE *fp,
-                                 VASurfaceID surface_id)
+                        VASurfaceID surface_id)
 {
     VAStatus va_status;
     VAImage surface_image;
@@ -278,26 +270,22 @@ upload_frame_to_surface(FILE *fp,
     uint32_t frame_size, row;
     size_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
-    
+
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
 
     va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
     CHECK_VASTATUS(va_status, "vaMapBuffer");
 
-    if (g_src.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
-    {
-        std::cout<<"2D src surface width = "<<g_src.width<<" pitch = "<<surface_image.pitches[0]<<endl;
-    }
-    else
-    {
-        std::cout<<"linear src surface width = "<<g_src.width<<" pitch = "<<surface_image.pitches[0]<<((g_src.width%surface_image.pitches[0])?" it is 2D linear":" it is 1D linear")<<endl;
+    if (g_src.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA) {
+        std::cout << "2D src surface width = " << g_src.width << " pitch = " << surface_image.pitches[0] << endl;
+    } else {
+        std::cout << "linear src surface width = " << g_src.width << " pitch = " << surface_image.pitches[0] << ((g_src.width % surface_image.pitches[0]) ? " it is 2D linear" : " it is 1D linear") << endl;
     }
 
-    if (surface_image.format.fourcc == VA_FOURCC_RGBP)
-    {
+    if (surface_image.format.fourcc == VA_FOURCC_RGBP) {
         frame_size = surface_image.width * surface_image.height * 3;
         newImageBuffer = (unsigned char*)malloc(frame_size);
         assert(newImageBuffer);
@@ -327,9 +315,7 @@ upload_frame_to_surface(FILE *fp,
             v_dst += surface_image.pitches[0];
             v_src += surface_image.width;
         }
-    }
-    else if (surface_image.format.fourcc == VA_FOURCC_NV12)
-    {
+    } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
         frame_size = surface_image.width * surface_image.height * 3 / 2;
         newImageBuffer = (unsigned char*)malloc(frame_size);
         assert(newImageBuffer);
@@ -354,8 +340,7 @@ upload_frame_to_surface(FILE *fp,
         }
 
         /* UV plane */
-        for (row = 0; row < surface_image.height / 2; row++) 
-        {
+        for (row = 0; row < surface_image.height / 2; row++) {
             memcpy(u_dst, u_src, surface_image.width);
             u_src += surface_image.width;
             v_src = u_src;
@@ -363,20 +348,20 @@ upload_frame_to_surface(FILE *fp,
         }
     }
 
-     if (newImageBuffer){
-         free(newImageBuffer);
-         newImageBuffer = NULL;
-     }
+    if (newImageBuffer) {
+        free(newImageBuffer);
+        newImageBuffer = NULL;
+    }
 
-     vaUnmapBuffer(va_dpy, surface_image.buf);
-     vaDestroyImage(va_dpy, surface_image.image_id);
+    vaUnmapBuffer(va_dpy, surface_image.buf);
+    vaDestroyImage(va_dpy, surface_image.image_id);
 
-     return VA_STATUS_SUCCESS;
+    return VA_STATUS_SUCCESS;
 }
 
 static VAStatus
 store_surface_to_file(FILE *fp,
-                               VASurfaceID surface_id)
+                      VASurfaceID surface_id)
 {
     VAStatus va_status;
     VAImage surface_image;
@@ -390,7 +375,7 @@ store_surface_to_file(FILE *fp,
     uint32_t row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -399,33 +384,28 @@ store_surface_to_file(FILE *fp,
     va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
     CHECK_VASTATUS(va_status, "vaMapBuffer");
 
-    if (g_dst.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
-    {
-        std::cout<<"2D dst surface width = "<<g_dst.width<<" pitch = "<<surface_image.pitches[0]<<endl;
-    }
-    else
-    {
-        std::cout<<"linear dst surface width = "<<g_dst.width<<" pitch = "<<surface_image.pitches[0]<<((g_dst.width%surface_image.pitches[0])?" it is 2D linear":" it is 1D linear")<<endl;
+    if (g_dst.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA) {
+        std::cout << "2D dst surface width = " << g_dst.width << " pitch = " << surface_image.pitches[0] << endl;
+    } else {
+        std::cout << "linear dst surface width = " << g_dst.width << " pitch = " << surface_image.pitches[0] << ((g_dst.width % surface_image.pitches[0]) ? " it is 2D linear" : " it is 1D linear") << endl;
     }
 
     /* store the surface to one nv12 file */
     if (surface_image.format.fourcc == VA_FOURCC_NV12 ||
-        surface_image.format.fourcc == VA_FOURCC_RGBP ){
+        surface_image.format.fourcc == VA_FOURCC_RGBP) {
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
 
-        if (surface_image.format.fourcc == VA_FOURCC_RGBP){
+        if (surface_image.format.fourcc == VA_FOURCC_RGBP) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
 
-        if(g_dst.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
-        {
-            if (surface_image.format.fourcc == VA_FOURCC_NV12)
-            {
+        if (g_dst.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA) {
+            if (surface_image.format.fourcc == VA_FOURCC_NV12) {
                 uint32_t y_size = surface_image.width * surface_image.height;
                 newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
                 assert(newImageBuffer);
@@ -450,16 +430,14 @@ store_surface_to_file(FILE *fp,
                 do {
                     n_items = fwrite(newImageBuffer, y_size * 3 / 2, 1, fp);
                 } while (n_items != 1);
-            }
-            else if (surface_image.format.fourcc == VA_FOURCC_RGBP)
-            {
+            } else if (surface_image.format.fourcc == VA_FOURCC_RGBP) {
                 uint32_t y_size = surface_image.width * surface_image.height;
                 newImageBuffer = (unsigned char*)malloc(y_size * 3);
                 assert(newImageBuffer);
 
                 y_dst = newImageBuffer;
                 u_dst = newImageBuffer + y_size;
-                v_dst = newImageBuffer + y_size *2;
+                v_dst = newImageBuffer + y_size * 2;
 
                 for (row = 0; row < surface_image.height; row++) {
                     memcpy(y_dst, y_src, surface_image.width);
@@ -479,11 +457,8 @@ store_surface_to_file(FILE *fp,
                     n_items = fwrite(newImageBuffer, y_size * 3, 1, fp);
                 } while (n_items != 1);
             }
-        }
-        else // usrptr surface.
-        {
-            if (surface_image.format.fourcc == VA_FOURCC_NV12)
-            {
+        } else { // usrptr surface.
+            if (surface_image.format.fourcc == VA_FOURCC_NV12) {
                 // directly copy NV12 1D/2D surface. skip derive and map image.
                 uint32_t y_size = surface_image.height * surface_image.pitches[0];
                 newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
@@ -493,9 +468,7 @@ store_surface_to_file(FILE *fp,
                 do {
                     n_items = fwrite(newImageBuffer, y_size * 3 / 2, 1, fp);
                 } while (n_items != 1);
-            }
-            else if (surface_image.format.fourcc == VA_FOURCC_RGBP)
-            {
+            } else if (surface_image.format.fourcc == VA_FOURCC_RGBP) {
                 uint32_t y_size = surface_image.height * surface_image.pitches[0];
                 newImageBuffer = (unsigned char*)malloc(y_size * 3);
                 assert(newImageBuffer);
@@ -506,13 +479,12 @@ store_surface_to_file(FILE *fp,
                 } while (n_items != 1);
             }
         }
-    } 
-    else {
+    } else {
         printf("Not supported surface fourcc !!! \n");
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -524,7 +496,7 @@ store_surface_to_file(FILE *fp,
 }
 
 static VAStatus
-video_frame_process(       VASurfaceID in_surface_id,
+video_frame_process(VASurfaceID in_surface_id,
                     VASurfaceID out_surface_id)
 {
     VAStatus va_status;
@@ -588,10 +560,10 @@ vpp_context_create()
                                       VAProfileNone,
                                       VAEntrypointVideoProc,
                                       &attrib,
-                                     1);
+                                      1);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     if (!(attrib.value & g_dst.format)) {
-        printf("RT format %d is not supported by VPP !\n",g_dst.format);
+        printf("RT format %d is not supported by VPP !\n", g_dst.format);
         assert(0);
     }
 
@@ -644,15 +616,15 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     uint32_t tfourcc = VA_FOURCC('N', 'V', '1', '2');
     uint32_t tformat = VA_RT_FORMAT_YUV420;
 
-    if (!strcmp(str, "YV12")){
+    if (!strcmp(str, "YV12")) {
         tfourcc = VA_FOURCC('Y', 'V', '1', '2');
-    } else if(!strcmp(str, "I420")){
+    } else if (!strcmp(str, "I420")) {
         tfourcc = VA_FOURCC('I', '4', '2', '0');
-    } else if(!strcmp(str, "NV12")){
+    } else if (!strcmp(str, "NV12")) {
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
-    } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
+    } else if (!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
         tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
-    } else if(!strcmp(str, "UYVY")){
+    } else if (!strcmp(str, "UYVY")) {
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
     } else if (!strcmp(str, "P010")) {
         tfourcc = VA_FOURCC('P', '0', '1', '0');
@@ -667,10 +639,10 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     } else if (!strcmp(str, "BGRX")) {
         tfourcc = VA_FOURCC_BGRX;
     } else if (!strcmp(str, "RGBP")) {
-        tfourcc = VA_FOURCC_RGBP; 
+        tfourcc = VA_FOURCC_RGBP;
     } else if (!strcmp(str, "BGRP")) {
-        tfourcc = VA_FOURCC_BGRP; 
-    } else{
+        tfourcc = VA_FOURCC_BGRP;
+    } else {
         printf("Not supported format: %s! Currently only support following format: %s\n",
                str, "YV12, I420, NV12, YUY2(YUYV), UYVY, P010, I010, RGBA, RGBX, BGRA or BGRX");
         assert(0);
@@ -699,17 +671,17 @@ parse_basic_parameters()
     read_value_string(g_config_file_fd, "SRC_FRAME_FORMAT", str);
     parse_fourcc_and_format(str, &g_src.fourCC, &g_src.format);
     read_value_string(g_config_file_fd, "SRC_SURFACE_MEMORY_TYPE", str);
-    parse_memtype_format(str,&g_src.memtype);
+    parse_memtype_format(str, &g_src.memtype);
     read_value_uint32(g_config_file_fd, "SRC_SURFACE_CPU_ALIGN_SIZE", &g_src.alignsize);
 
     /* Read dst frame file information */
     read_value_string(g_config_file_fd, "DST_FILE_NAME", g_dst.name);
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_dst.width);
-    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT",&g_dst.height);
+    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT", &g_dst.height);
     read_value_string(g_config_file_fd, "DST_FRAME_FORMAT", str);
     parse_fourcc_and_format(str, &g_dst.fourCC, &g_dst.format);
     read_value_string(g_config_file_fd, "DST_SURFACE_MEMORY_TYPE", str);
-    parse_memtype_format(str,&g_dst.memtype);
+    parse_memtype_format(str, &g_dst.memtype);
     read_value_uint32(g_config_file_fd, "DST_SURFACE_CPU_ALIGN_SIZE", &g_dst.alignsize);
 
     read_value_string(g_config_file_fd, "SRC_FILE_FORMAT", str);
@@ -722,44 +694,36 @@ parse_basic_parameters()
     read_value_uint32(g_config_file_fd, "COPY_METHOD", &g_copy_method);
 
     if (g_src.width != g_dst.width ||
-        g_src.height != g_dst.height)
-    {
-        std::cout<<"va copy doesn't support resize!"<<endl;
+        g_src.height != g_dst.height) {
+        std::cout << "va copy doesn't support resize!" << endl;
         return -1;
     }
 
-    if (g_src.fourCC != g_dst.fourCC)
-    {
-        std::cout<<"va copy doesn't support CSC!" <<endl;
+    if (g_src.fourCC != g_dst.fourCC) {
+        std::cout << "va copy doesn't support CSC!" << endl;
         return -1;
     }
 
-    std::cout<<"=========Media Copy========="<<endl;
+    std::cout << "=========Media Copy=========" << endl;
 
-    if (g_src.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
-    {
-        std::cout<<"copy from 2D tile surface to ";
-    }
-    else
-    {
-        if (g_src.alignsize == 1 || !(g_src.width%g_src.alignsize))
-            std::cout<<"copy from 1D linear surface to ";
+    if (g_src.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA) {
+        std::cout << "copy from 2D tile surface to ";
+    } else {
+        if (g_src.alignsize == 1 || !(g_src.width % g_src.alignsize))
+            std::cout << "copy from 1D linear surface to ";
         else
-            std::cout<<"copy from 2D linear surface with pitch_align "<<g_src.alignsize<<" to ";
+            std::cout << "copy from 2D linear surface with pitch_align " << g_src.alignsize << " to ";
     }
 
-    if (g_dst.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA)
-    {
-        std::cout<<"2D tile surface."<<endl;
-    }
-    else
-    {
-        if (g_dst.alignsize == 1 || !(g_dst.width%g_dst.alignsize))
-            std::cout<<"1D linear surface."<<endl;
+    if (g_dst.memtype == VA_SURFACE_ATTRIB_MEM_TYPE_VA) {
+        std::cout << "2D tile surface." << endl;
+    } else {
+        if (g_dst.alignsize == 1 || !(g_dst.width % g_dst.alignsize))
+            std::cout << "1D linear surface." << endl;
         else
-            std::cout<<"2D linear surface with pitch_align "<<g_dst.alignsize<<endl;
+            std::cout << "2D linear surface with pitch_align " << g_dst.alignsize << endl;
     }
-    std::cout << "prefer hw engine is "<<g_copy_method<<". notification, 0: blanance(vebox), 1: perf(EU), 2 powersaving(blt)"<<endl;
+    std::cout << "prefer hw engine is " << g_copy_method << ". notification, 0: blanance(vebox), 1: perf(EU), 2 powersaving(blt)" << endl;
 
     return 0;
 }
@@ -777,7 +741,7 @@ int32_t main(int32_t argc, char *argv[])
     VAStatus va_status;
     uint32_t i;
 
-    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")){
+    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
         print_help();
         return -1;
     }
@@ -786,13 +750,13 @@ int32_t main(int32_t argc, char *argv[])
     strncpy(g_config_file_name, argv[1], MAX_LEN);
     g_config_file_name[MAX_LEN - 1] = '\0';
 
-    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))){
-        printf("Open configure file %s failed!\n",g_config_file_name);
+    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))) {
+        printf("Open configure file %s failed!\n", g_config_file_name);
         assert(0);
     }
 
     /* Parse basic parameters */
-    if (parse_basic_parameters()){
+    if (parse_basic_parameters()) {
         printf("Parse parameters in configure file error\n");
         assert(0);
     }
@@ -804,13 +768,13 @@ int32_t main(int32_t argc, char *argv[])
     }
 
     /* Video frame fetch, process and store */
-    if (NULL == (g_src.fd = fopen(g_src.name, "r"))){
+    if (NULL == (g_src.fd = fopen(g_src.name, "r"))) {
         printf("Open SRC_FILE_NAME: %s failed, please specify it in config file: %s !\n",
-                g_src.name, g_config_file_name);
+               g_src.name, g_config_file_name);
         assert(0);
     }
 
-    if (NULL == (g_dst.fd = fopen(g_dst.name, "w"))){
+    if (NULL == (g_dst.fd = fopen(g_dst.name, "w"))) {
         printf("Open DST_FILE_NAME: %s failed, please specify it in config file: %s !\n",
                g_dst.name, g_config_file_name);
         assert(0);
@@ -822,11 +786,10 @@ int32_t main(int32_t argc, char *argv[])
     unsigned int duration = 0;
     clock_gettime(CLOCK_MONOTONIC, &Pre_time);
 
-    for (i = 0; i < g_frame_count; i ++){
+    for (i = 0; i < g_frame_count; i ++) {
         upload_frame_to_surface(g_src.fd, g_in_surface_id);
-        if (VA_STATUS_SUCCESS != video_frame_process(g_in_surface_id, g_out_surface_id))
-        {
-            std::cout<<"***vaCopy failed***"<<std::endl;
+        if (VA_STATUS_SUCCESS != video_frame_process(g_in_surface_id, g_out_surface_id)) {
+            std::cout << "***vaCopy failed***" << std::endl;
         }
         store_surface_to_file(g_dst.fd, g_out_surface_id);
     }
@@ -839,17 +802,17 @@ int32_t main(int32_t argc, char *argv[])
         duration += (Cur_time.tv_nsec + 1000000000 - Pre_time.tv_nsec) / 1000000 - 1000;
     }
 
-    printf("Finish processing, performance: \n" );
-    printf("%d frames processed in: %d ms, ave time = %d ms\n",g_frame_count, duration, duration/g_frame_count);
+    printf("Finish processing, performance: \n");
+    printf("%d frames processed in: %d ms, ave time = %d ms\n", g_frame_count, duration, duration / g_frame_count);
 
     if (g_src.fd)
-       fclose(g_src.fd);
+        fclose(g_src.fd);
 
     if (g_dst.fd)
-       fclose(g_dst.fd);
+        fclose(g_dst.fd);
 
     if (g_config_file_fd)
-       fclose(g_config_file_fd);
+        fclose(g_config_file_fd);
 
     vpp_context_destroy();
 

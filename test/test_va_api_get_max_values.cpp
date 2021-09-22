@@ -24,7 +24,8 @@
 
 #include "test_va_api_fixture.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 class VAAPIGetMaxValues
     : public VAAPIFixture

@@ -101,7 +101,7 @@ static VAEntrypoint select_entrypoint = VAEntrypointEncSlice;
 #define MAX_SLICES      32
 
 
-static  unsigned int MaxFrameNum = (1<<12);
+static  unsigned int MaxFrameNum = (1 << 12);
 static  unsigned int Log2MaxFrameNum = 12;
 static  unsigned int Log2MaxPicOrderCntLsb = 8;
 
@@ -124,24 +124,23 @@ build_packed_seq_buffer(unsigned char **header_buffer);
 static int
 build_nal_delimiter(unsigned char **header_buffer);
 
-static int 
+static int
 build_packed_sei_pic_timing(unsigned int cpb_removal_length,
-				unsigned int dpb_output_length,
-				unsigned char **sei_buffer);
+                            unsigned int dpb_output_length,
+                            unsigned char **sei_buffer);
 
 static int
 build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
-				unsigned int cpb_removal_length,
-				unsigned int dpb_output_length,
-				unsigned char **sei_buffer);
+                                   unsigned int cpb_removal_length,
+                                   unsigned int dpb_output_length,
+                                   unsigned char **sei_buffer);
 
-struct upload_thread_param
-{
+struct upload_thread_param {
     FILE *yuv_fp;
     VASurfaceID surface_id;
 };
 
-static void 
+static void
 upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
 
 static struct {
@@ -196,7 +195,7 @@ static  VAPictureH264 ReferenceFrames[16], RefPicList0[32], RefPicList1[32];
 static void create_encode_pipe()
 {
     VAEntrypoint entrypoints[5];
-    int num_entrypoints,slice_entrypoint;
+    int num_entrypoints, slice_entrypoint;
     VAConfigAttrib attrib[3];
     int major_ver, minor_ver;
     VAStatus va_status;
@@ -205,10 +204,10 @@ static void create_encode_pipe()
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
 
-    vaQueryConfigEntrypoints(va_dpy, avcenc_context.profile, entrypoints, 
+    vaQueryConfigEntrypoints(va_dpy, avcenc_context.profile, entrypoints,
                              &num_entrypoints);
 
-    for	(slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
+    for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
         if (entrypoints[slice_entrypoint] == select_entrypoint)
             break;
     }
@@ -238,11 +237,11 @@ static void create_encode_pipe()
         assert(0);
     }
 
-    if (roi_test_enable){
+    if (roi_test_enable) {
         if (attrib[2].value != VA_ATTRIB_NOT_SUPPORTED) {
-            VAConfigAttribValEncROI *roi_config = (VAConfigAttribValEncROI *)&(attrib[2].value);
-            if(roi_config->bits.num_roi_regions == 0 ||
-               roi_config->bits.roi_rc_qp_delta_support == 0) {
+            VAConfigAttribValEncROI *roi_config = (VAConfigAttribValEncROI *) & (attrib[2].value);
+            if (roi_config->bits.num_roi_regions == 0 ||
+                roi_config->bits.roi_rc_qp_delta_support == 0) {
                 roi_test_enable = 0;
                 printf("WARNING: do not support ROI or ROI delta QP ! \n");
             }
@@ -255,19 +254,19 @@ static void create_encode_pipe()
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = avcenc_context.rate_control_method; /* set to desired RC mode */
 
-    if (roi_test_enable){
+    if (roi_test_enable) {
         va_status = vaCreateConfig(va_dpy, avcenc_context.profile, select_entrypoint,
-                                   &attrib[0], 3,&avcenc_context.config_id);
-    }else {
+                                   &attrib[0], 3, &avcenc_context.config_id);
+    } else {
         va_status = vaCreateConfig(va_dpy, avcenc_context.profile, select_entrypoint,
-                                   &attrib[0], 2,&avcenc_context.config_id);
+                                   &attrib[0], 2, &avcenc_context.config_id);
     }
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
     /* Create a context for this decode pipe */
     va_status = vaCreateContext(va_dpy, avcenc_context.config_id,
                                 picture_width, picture_height,
-                                VA_PROGRESSIVE, 
+                                VA_PROGRESSIVE,
                                 0, 0,
                                 &avcenc_context.context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
@@ -275,15 +274,15 @@ static void create_encode_pipe()
 
 static void destory_encode_pipe()
 {
-    vaDestroyContext(va_dpy,avcenc_context.context_id);
-    vaDestroyConfig(va_dpy,avcenc_context.config_id);
+    vaDestroyContext(va_dpy, avcenc_context.context_id);
+    vaDestroyConfig(va_dpy, avcenc_context.config_id);
     vaTerminate(va_dpy);
     va_close_display(va_dpy);
 }
 
 /***************************************************
  *
- *  The encode pipe resource define 
+ *  The encode pipe resource define
  *
  ***************************************************/
 #define SID_INPUT_PICTURE_0                     0
@@ -349,21 +348,21 @@ static void alloc_encode_resource(FILE *yuv_fp)
 
     // Create surface
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, picture_width, picture_height,
-        surface_ids, SID_NUMBER,
-        NULL, 0
-    );
+                    va_dpy,
+                    VA_RT_FORMAT_YUV420, picture_width, picture_height,
+                    surface_ids, SID_NUMBER,
+                    NULL, 0
+                );
 
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     // Create surface
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, picture_width, picture_height,
-        ref_surface, SURFACE_NUM,
-        NULL, 0
-    );
+                    va_dpy,
+                    VA_RT_FORMAT_YUV420, picture_width, picture_height,
+                    ref_surface, SURFACE_NUM,
+                    NULL, 0
+                );
 
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
@@ -375,9 +374,9 @@ static void alloc_encode_resource(FILE *yuv_fp)
     avcenc_context.upload_thread_param.surface_id = surface_ids[SID_INPUT_PICTURE_1];
 
     avcenc_context.upload_thread_value = pthread_create(&avcenc_context.upload_thread_id,
-                                                        NULL,
-                                                        upload_thread_function, 
-                                                        (void*)&avcenc_context.upload_thread_param);
+                                         NULL,
+                                         upload_thread_function,
+                                         (void*)&avcenc_context.upload_thread_param);
 }
 
 static void release_encode_resource()
@@ -393,42 +392,42 @@ static void release_encode_resource()
 
 static void avcenc_update_sei_param(int is_idr)
 {
-	VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
-	unsigned int length_in_bits;
-	unsigned char *packed_sei_buffer = NULL;
-	VAStatus va_status;
+    VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+    unsigned int length_in_bits;
+    unsigned char *packed_sei_buffer = NULL;
+    VAStatus va_status;
 
-        if (is_idr)
-	    length_in_bits = build_packed_idr_sei_buffer_timing(
-				avcenc_context.i_initial_cpb_removal_delay_length,
-				avcenc_context.i_cpb_removal_delay_length,
-				avcenc_context.i_dpb_output_delay_length,
-				&packed_sei_buffer);
-       else
-	    length_in_bits = build_packed_sei_pic_timing(
-				avcenc_context.i_cpb_removal_delay_length,
-				avcenc_context.i_dpb_output_delay_length,
-				&packed_sei_buffer);
+    if (is_idr)
+        length_in_bits = build_packed_idr_sei_buffer_timing(
+                             avcenc_context.i_initial_cpb_removal_delay_length,
+                             avcenc_context.i_cpb_removal_delay_length,
+                             avcenc_context.i_dpb_output_delay_length,
+                             &packed_sei_buffer);
+    else
+        length_in_bits = build_packed_sei_pic_timing(
+                             avcenc_context.i_cpb_removal_delay_length,
+                             avcenc_context.i_dpb_output_delay_length,
+                             &packed_sei_buffer);
 
-	packed_header_param_buffer.type = VAEncPackedHeaderRawData;
-	packed_header_param_buffer.bit_length = length_in_bits;
-	packed_header_param_buffer.has_emulation_bytes = 0;
+    packed_header_param_buffer.type = VAEncPackedHeaderRawData;
+    packed_header_param_buffer.bit_length = length_in_bits;
+    packed_header_param_buffer.has_emulation_bytes = 0;
 
-	va_status = vaCreateBuffer(va_dpy,
-				avcenc_context.context_id,
-				VAEncPackedHeaderParameterBufferType,
-				sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
-				&avcenc_context.packed_sei_header_param_buf_id);
-	CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    va_status = vaCreateBuffer(va_dpy,
+                               avcenc_context.context_id,
+                               VAEncPackedHeaderParameterBufferType,
+                               sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                               &avcenc_context.packed_sei_header_param_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-	va_status = vaCreateBuffer(va_dpy,
-				avcenc_context.context_id,
-				VAEncPackedHeaderDataBufferType,
-				(length_in_bits + 7) / 8, 1, packed_sei_buffer,
-				&avcenc_context.packed_sei_buf_id);
-	CHECK_VASTATUS(va_status,"vaCreateBuffer");
-	free(packed_sei_buffer);
-	return;
+    va_status = vaCreateBuffer(va_dpy,
+                               avcenc_context.context_id,
+                               VAEncPackedHeaderDataBufferType,
+                               (length_in_bits + 7) / 8, 1, packed_sei_buffer,
+                               &avcenc_context.packed_sei_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+    free(packed_sei_buffer);
+    return;
 }
 
 #define partition(ref, field, key, ascending)   \
@@ -488,8 +487,8 @@ static void sort_two(VAPictureH264 ref[], int left, int right, unsigned int key,
         partition(ref, TopFieldOrderCnt, (signed int)key, partition_ascending);
     }
 
-    sort_one(ref, left, i-1, list0_ascending, frame_idx);
-    sort_one(ref, j+1, right, list1_ascending, frame_idx);
+    sort_one(ref, left, i - 1, list0_ascending, frame_idx);
+    sort_one(ref, j + 1, right, list1_ascending, frame_idx);
 }
 
 static int update_RefPicList()
@@ -497,16 +496,16 @@ static int update_RefPicList()
 
     if (current_frame_type == SLICE_TYPE_P) {
         memcpy(RefPicList0, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
-        sort_one(RefPicList0, 0, numShortTerm-1, 0, 1);
+        sort_one(RefPicList0, 0, numShortTerm - 1, 0, 1);
     }
 
     if (current_frame_type == SLICE_TYPE_B) {
         memcpy(RefPicList0, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
-        sort_two(RefPicList0, 0, numShortTerm-1, current_poc, 0,
+        sort_two(RefPicList0, 0, numShortTerm - 1, current_poc, 0,
                  1, 0, 1);
 
         memcpy(RefPicList1, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
-        sort_two(RefPicList1, 0, numShortTerm-1, current_poc, 0,
+        sort_two(RefPicList1, 0, numShortTerm - 1, current_poc, 0,
                  0, 1, 0);
     }
 
@@ -538,13 +537,13 @@ static void avcenc_update_picture_parameter(int slice_type, int is_idr)
     CurrentCurrPic = pic_param->CurrPic;
 
     if (slice_type == SLICE_TYPE_P || slice_type == SLICE_TYPE_B)
-	memset(pic_param->ReferenceFrames, 0xff, 16 * sizeof(VAPictureH264)); /* invalid all */
+        memset(pic_param->ReferenceFrames, 0xff, 16 * sizeof(VAPictureH264)); /* invalid all */
 
     if ((slice_type == SLICE_TYPE_P) || (slice_type == SLICE_TYPE_B)) {
-	pic_param->ReferenceFrames[0] = RefPicList0[0];
+        pic_param->ReferenceFrames[0] = RefPicList0[0];
     }
     if (slice_type == SLICE_TYPE_B) {
-	pic_param->ReferenceFrames[1] = RefPicList1[0];
+        pic_param->ReferenceFrames[1] = RefPicList1[0];
     }
 
     va_status = vaCreateBuffer(va_dpy,
@@ -552,7 +551,7 @@ static void avcenc_update_picture_parameter(int slice_type, int is_idr)
                                VAEncPictureParameterBufferType,
                                sizeof(*pic_param), 1, pic_param,
                                &avcenc_context.pic_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
 }
 
@@ -577,11 +576,11 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
     } while (n_items != 1);
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
-    CHECK_VASTATUS(va_status,"vaDeriveImage");
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
 
     vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
-        
+
     y_src = newImageBuffer;
     u_src = newImageBuffer + y_size; /* UV offset for NV12 */
     v_src = newImageBuffer + y_size + u_size;
@@ -640,7 +639,7 @@ static void avcenc_update_slice_parameter(int slice_type)
     i = 0;
     slice_param = &avcenc_context.slice_param[i];
     slice_param->macroblock_address = 0;
-    slice_param->num_macroblocks = picture_height_in_mbs * picture_width_in_mbs; 
+    slice_param->num_macroblocks = picture_height_in_mbs * picture_width_in_mbs;
     slice_param->pic_parameter_set_id = 0;
     slice_param->slice_type = slice_type;
     slice_param->direct_spatial_mv_pred_flag = 1;
@@ -655,13 +654,13 @@ static void avcenc_update_slice_parameter(int slice_type)
 
     /* FIXME: fill other fields */
     if ((slice_type == SLICE_TYPE_P) || (slice_type == SLICE_TYPE_B)) {
-	memset(slice_param->RefPicList0, 0xFF, 32 * sizeof(VAPictureH264));
-	slice_param->RefPicList0[0] = RefPicList0[0];
+        memset(slice_param->RefPicList0, 0xFF, 32 * sizeof(VAPictureH264));
+        slice_param->RefPicList0[0] = RefPicList0[0];
     }
 
     if (slice_type == SLICE_TYPE_B) {
-	memset(slice_param->RefPicList1, 0xFF, 32 * sizeof(VAPictureH264));
-	slice_param->RefPicList1[0] = RefPicList1[0];
+        memset(slice_param->RefPicList1, 0xFF, 32 * sizeof(VAPictureH264));
+        slice_param->RefPicList1[0] = RefPicList1[0];
     }
 
     va_status = vaCreateBuffer(va_dpy,
@@ -669,7 +668,7 @@ static void avcenc_update_slice_parameter(int slice_type)
                                VAEncSliceParameterBufferType,
                                sizeof(*slice_param), 1, slice_param,
                                &avcenc_context.slice_param_buf_id[i]);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");;
     i++;
 
 #if 0
@@ -695,7 +694,7 @@ static void avcenc_update_slice_parameter(int slice_type)
                                VAEncSliceParameterBufferType,
                                sizeof(*slice_param), 1, slice_param,
                                &avcenc_context.slice_param_buf_id[i]);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");;
     i++;
 #endif
 
@@ -713,8 +712,8 @@ static int update_ReferenceFrames(void)
     numShortTerm++;
     if (numShortTerm > num_ref_frames)
         numShortTerm = num_ref_frames;
-    for (i=numShortTerm-1; i>0; i--)
-        ReferenceFrames[i] = ReferenceFrames[i-1];
+    for (i = numShortTerm - 1; i > 0; i--)
+        ReferenceFrames[i] = ReferenceFrames[i - 1];
     ReferenceFrames[0] = CurrentCurrPic;
 
     if (current_frame_type != SLICE_TYPE_B)
@@ -763,7 +762,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     else
         avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
 
-    if(aud_nal_enable) {
+    if (aud_nal_enable) {
         VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
         unsigned int length_in_bits;
         unsigned char *packed_buffer = NULL;
@@ -777,14 +776,14 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                                    VAEncPackedHeaderParameterBufferType,
                                    sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
                                    &avcenc_context.packed_aud_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
                                    VAEncPackedHeaderDataBufferType,
                                    (length_in_bits + 7) / 8, 1, packed_buffer,
                                    &avcenc_context.packed_aud_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_buffer);
     }
@@ -804,14 +803,14 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                                    VAEncPackedHeaderParameterBufferType,
                                    sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
                                    &avcenc_context.packed_seq_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
                                    VAEncPackedHeaderDataBufferType,
                                    (length_in_bits + 7) / 8, 1, packed_seq_buffer,
                                    &avcenc_context.packed_seq_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         length_in_bits = build_packed_pic_buffer(&packed_pic_buffer);
         packed_header_param_buffer.type = VAEncPackedHeaderPicture;
@@ -823,14 +822,14 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                                    VAEncPackedHeaderParameterBufferType,
                                    sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
                                    &avcenc_context.packed_pic_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
                                    VAEncPackedHeaderDataBufferType,
                                    (length_in_bits + 7) / 8, 1, packed_pic_buffer,
                                    &avcenc_context.packed_pic_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_seq_buffer);
         free(packed_pic_buffer);
@@ -843,7 +842,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                                VAEncSequenceParameterBufferType,
                                sizeof(*seq_param), 1, seq_param,
                                &avcenc_context.seq_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
 
     /* hrd parameter */
@@ -854,7 +853,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                    VAEncMiscParameterBufferType,
                    sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
                    1,
-                   NULL, 
+                   NULL,
                    &avcenc_context.misc_parameter_hrd_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
@@ -875,21 +874,20 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     vaUnmapBuffer(va_dpy, avcenc_context.misc_parameter_hrd_buf_id);
 
     /* ROI parameter: hard code for test on only one region (0,0,120,120) with qp_delta=4 */
-    if(roi_test_enable)
-    {
+    if (roi_test_enable) {
         VAEncMiscParameterBufferROI *misc_roi_param;
 
         int roi_num = 1;
         vaCreateBuffer(va_dpy,
-            avcenc_context.context_id,
-            VAEncMiscParameterBufferType,
-            sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterBufferROI) + roi_num * sizeof(VAEncROI),
-            1,
-            NULL,
-            &avcenc_context.misc_parameter_roi_buf_id);
+                       avcenc_context.context_id,
+                       VAEncMiscParameterBufferType,
+                       sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterBufferROI) + roi_num * sizeof(VAEncROI),
+                       1,
+                       NULL,
+                       &avcenc_context.misc_parameter_roi_buf_id);
         vaMapBuffer(va_dpy,
-            avcenc_context.misc_parameter_roi_buf_id,
-            (void **)&misc_param);
+                    avcenc_context.misc_parameter_roi_buf_id,
+                    (void **)&misc_param);
         misc_param->type = VAEncMiscParameterTypeROI;
         misc_roi_param = (VAEncMiscParameterBufferROI *)misc_param->data;
         {
@@ -906,8 +904,8 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
             /* one example of ROI region conf.
             * please change it on the fly.
             */
-            VAEncROI *region_roi =(VAEncROI *)((char *)misc_param + sizeof(VAEncMiscParameterBuffer) +
-                sizeof(VAEncMiscParameterBufferROI));
+            VAEncROI *region_roi = (VAEncROI *)((char *)misc_param + sizeof(VAEncMiscParameterBuffer) +
+                                                sizeof(VAEncMiscParameterBufferROI));
 
             /*
             * Under CQP mode roi_value specifies the qp_delta that is added to frame qp
@@ -917,8 +915,8 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
             region_roi->roi_value = 4;
             region_roi->roi_rectangle.x = 0;
             region_roi->roi_rectangle.y = 0;
-            region_roi->roi_rectangle.width = (120 < picture_width/4)? 120:picture_width/4;
-            region_roi->roi_rectangle.height = (120 < picture_height/4)? 120:picture_height/4;
+            region_roi->roi_rectangle.width = (120 < picture_width / 4) ? 120 : picture_width / 4;
+            region_roi->roi_rectangle.height = (120 < picture_height / 4) ? 120 : picture_height / 4;
 
             misc_roi_param->roi = region_roi;
             misc_roi_param->num_roi = 1;
@@ -973,24 +971,24 @@ int avcenc_render_picture()
     va_status = vaBeginPicture(va_dpy,
                                avcenc_context.context_id,
                                surface_ids[avcenc_context.current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaBeginPicture");
-    
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
+
     va_status = vaRenderPicture(va_dpy,
                                 avcenc_context.context_id,
                                 va_buffers,
                                 num_va_buffers);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");
-    
-    for(i = 0; i < avcenc_context.num_slices; i++) {
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+
+    for (i = 0; i < avcenc_context.num_slices; i++) {
         va_status = vaRenderPicture(va_dpy,
-                                avcenc_context.context_id,
-                                &avcenc_context.slice_param_buf_id[i],
-                                1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");
+                                    avcenc_context.context_id,
+                                    &avcenc_context.slice_param_buf_id[i],
+                                    1);
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
     }
 
     va_status = vaEndPicture(va_dpy, avcenc_context.context_id);
-    CHECK_VASTATUS(va_status,"vaEndPicture");
+    CHECK_VASTATUS(va_status, "vaEndPicture");
 
     return 0;
 }
@@ -1003,7 +1001,7 @@ static int avcenc_destroy_buffers(VABufferID *va_buffers, unsigned int num_va_bu
     for (i = 0; i < num_va_buffers; i++) {
         if (va_buffers[i] != VA_INVALID_ID) {
             va_status = vaDestroyBuffer(va_dpy, va_buffers[i]);
-            CHECK_VASTATUS(va_status,"vaDestroyBuffer");
+            CHECK_VASTATUS(va_status, "vaDestroyBuffer");
             va_buffers[i] = VA_INVALID_ID;
         }
     }
@@ -1045,7 +1043,7 @@ struct __bitstream {
 typedef struct __bitstream bitstream;
 
 #if 0
-static int 
+static int
 get_coded_bitsteam_length(unsigned char *buffer, int buffer_length)
 {
     int i;
@@ -1062,7 +1060,7 @@ get_coded_bitsteam_length(unsigned char *buffer, int buffer_length)
 }
 #endif
 
-static unsigned int 
+static unsigned int
 va_swap32(unsigned int val)
 {
     unsigned char *pval = (unsigned char *)&val;
@@ -1093,7 +1091,7 @@ bitstream_end(bitstream *bs)
         bs->buffer[pos] = va_swap32((bs->buffer[pos] << bit_left));
     }
 }
- 
+
 static void
 bitstream_put_ui(bitstream *bs, unsigned int val, int size_in_bits)
 {
@@ -1171,7 +1169,7 @@ bitstream_byte_aligning(bitstream *bs, int bit)
     bitstream_put_ui(bs, new_val, bit_left);
 }
 
-static void 
+static void
 rbsp_trailing_bits(bitstream *bs)
 {
     bitstream_put_ui(bs, 1, 1);
@@ -1209,8 +1207,8 @@ static void sps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, seq_param->level_idc, 8);      /* level_idc */
     bitstream_put_ue(bs, seq_param->seq_parameter_set_id);      /* seq_parameter_set_id */
 
-    if ( profile_idc == PROFILE_IDC_HIGH) {
-        bitstream_put_ue(bs, 1);        /* chroma_format_idc = 1, 4:2:0 */ 
+    if (profile_idc == PROFILE_IDC_HIGH) {
+        bitstream_put_ue(bs, 1);        /* chroma_format_idc = 1, 4:2:0 */
         bitstream_put_ue(bs, 0);        /* bit_depth_luma_minus8 */
         bitstream_put_ue(bs, 0);        /* bit_depth_chroma_minus8 */
         bitstream_put_ui(bs, 0, 1);     /* qpprime_y_zero_transform_bypass_flag */
@@ -1246,8 +1244,8 @@ static void sps_rbsp(bitstream *bs)
         bitstream_put_ue(bs, seq_param->frame_crop_top_offset);         /* frame_crop_top_offset */
         bitstream_put_ue(bs, seq_param->frame_crop_bottom_offset);      /* frame_crop_bottom_offset */
     }
-    
-    if ( frame_bit_rate < 0 ) {
+
+    if (frame_bit_rate < 0) {
         bitstream_put_ui(bs, 0, 1); /* vui_parameters_present_flag */
     } else {
         bitstream_put_ui(bs, 1, 1); /* vui_parameters_present_flag */
@@ -1263,31 +1261,31 @@ static void sps_rbsp(bitstream *bs)
         }
         bitstream_put_ui(bs, 1, 1); /* nal_hrd_parameters_present_flag */
         {
-            // hrd_parameters 
+            // hrd_parameters
             bitstream_put_ue(bs, 0);    /* cpb_cnt_minus1 */
             bitstream_put_ui(bs, 0, 4); /* bit_rate_scale */
             bitstream_put_ui(bs, 2, 4); /* cpb_size_scale */
-           
-	    /* the frame_bit_rate is in kbps */
-            bitstream_put_ue(bs, (((frame_bit_rate * 1000)>> 6) - 1)); /* bit_rate_value_minus1[0] */
+
+            /* the frame_bit_rate is in kbps */
+            bitstream_put_ue(bs, (((frame_bit_rate * 1000) >> 6) - 1)); /* bit_rate_value_minus1[0] */
             bitstream_put_ue(bs, ((frame_bit_rate * 8000) >> 6) - 1); /* cpb_size_value_minus1[0] */
             bitstream_put_ui(bs, 1, 1);  /* cbr_flag[0] */
 
             /* initial_cpb_removal_delay_length_minus1 */
             bitstream_put_ui(bs,
-                (avcenc_context.i_initial_cpb_removal_delay_length - 1), 5);
+                             (avcenc_context.i_initial_cpb_removal_delay_length - 1), 5);
             /* cpb_removal_delay_length_minus1 */
             bitstream_put_ui(bs,
-                (avcenc_context.i_cpb_removal_delay_length - 1), 5);
+                             (avcenc_context.i_cpb_removal_delay_length - 1), 5);
             /* dpb_output_delay_length_minus1 */
             bitstream_put_ui(bs,
-                (avcenc_context.i_dpb_output_delay_length - 1), 5);
+                             (avcenc_context.i_dpb_output_delay_length - 1), 5);
             /* time_offset_length  */
             bitstream_put_ui(bs,
-                (avcenc_context.time_offset_length - 1), 5);
+                             (avcenc_context.time_offset_length - 1), 5);
         }
         bitstream_put_ui(bs, 0, 1);   /* vcl_hrd_parameters_present_flag */
-        bitstream_put_ui(bs, 0, 1);   /* low_delay_hrd_flag */ 
+        bitstream_put_ui(bs, 0, 1);   /* low_delay_hrd_flag */
 
         bitstream_put_ui(bs, 0, 1); /* pic_struct_present_flag */
         bitstream_put_ui(bs, 0, 1); /* bitstream_restriction_flag */
@@ -1326,7 +1324,7 @@ static void pps_rbsp(bitstream *bs)
     bitstream_put_ue(bs, pic_param->num_ref_idx_l1_active_minus1);      /* num_ref_idx_l1_active_minus1 1 */
 
     bitstream_put_ui(bs, pic_param->pic_fields.bits.weighted_pred_flag, 1);     /* weighted_pred_flag: 0 */
-    bitstream_put_ui(bs, pic_param->pic_fields.bits.weighted_bipred_idc, 2);	/* weighted_bipred_idc: 0 */
+    bitstream_put_ui(bs, pic_param->pic_fields.bits.weighted_bipred_idc, 2);    /* weighted_bipred_idc: 0 */
 
     bitstream_put_se(bs, pic_param->pic_init_qp - 26);  /* pic_init_qp_minus26 */
     bitstream_put_se(bs, 0);                            /* pic_init_qs_minus26 */
@@ -1335,11 +1333,11 @@ static void pps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, pic_param->pic_fields.bits.deblocking_filter_control_present_flag, 1); /* deblocking_filter_control_present_flag */
     bitstream_put_ui(bs, 0, 1);                         /* constrained_intra_pred_flag */
     bitstream_put_ui(bs, 0, 1);                         /* redundant_pic_cnt_present_flag */
-    
+
     /* more_rbsp_data */
     bitstream_put_ui(bs, pic_param->pic_fields.bits.transform_8x8_mode_flag, 1);    /*transform_8x8_mode_flag */
     bitstream_put_ui(bs, 0, 1);                         /* pic_scaling_matrix_present_flag */
-    bitstream_put_se(bs, pic_param->second_chroma_qp_index_offset );    /*second_chroma_qp_index_offset */
+    bitstream_put_se(bs, pic_param->second_chroma_qp_index_offset);     /*second_chroma_qp_index_offset */
 
     rbsp_trailing_bits(bs);
 }
@@ -1356,7 +1354,7 @@ static void build_nal_pps(FILE *avc_fp)
     bitstream_end(&bs, avc_fp);
 }
 
-static void 
+static void
 build_header(FILE *avc_fp)
 {
     build_nal_sps(avc_fp);
@@ -1364,13 +1362,13 @@ build_header(FILE *avc_fp)
 }
 #endif
 
-static void nal_delimiter(bitstream *bs,int slice_type)
+static void nal_delimiter(bitstream *bs, int slice_type)
 {
-    if(slice_type == SLICE_TYPE_I || slice_type == FRAME_IDR)
+    if (slice_type == SLICE_TYPE_I || slice_type == FRAME_IDR)
         bitstream_put_ui(bs, 0, 3);
-    else if(slice_type == SLICE_TYPE_P)
+    else if (slice_type == SLICE_TYPE_P)
         bitstream_put_ui(bs, 1, 3);
-    else if(slice_type == SLICE_TYPE_B)
+    else if (slice_type == SLICE_TYPE_B)
         bitstream_put_ui(bs, 2, 3);
     else
         assert(0);
@@ -1385,7 +1383,7 @@ static int build_nal_delimiter(unsigned char **header_buffer)
     bitstream_start(&bs);
     nal_start_code_prefix(&bs);
     nal_header(&bs, NAL_REF_IDC_NONE, NAL_DELIMITER);
-    nal_delimiter(&bs,current_frame_type);
+    nal_delimiter(&bs, current_frame_type);
     bitstream_end(&bs);
     *header_buffer = (unsigned char *)bs.buffer;
     return bs.bit_offset;
@@ -1422,11 +1420,11 @@ build_packed_seq_buffer(unsigned char **header_buffer)
     return bs.bit_offset;
 }
 
-static int 
+static int
 build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
-				unsigned int cpb_removal_length,
-				unsigned int dpb_output_length,
-				unsigned char **sei_buffer)
+                                   unsigned int cpb_removal_length,
+                                   unsigned int dpb_output_length,
+                                   unsigned char **sei_buffer)
 {
     unsigned char *byte_buf;
     int bp_byte_size, i, pic_byte_size;
@@ -1443,12 +1441,12 @@ build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
                      init_cpb_removal_delay_length);
     bitstream_put_ui(&sei_bp_bs, avcenc_context.i_initial_cpb_removal_delay_offset,
                      init_cpb_removal_delay_length);
-    if ( sei_bp_bs.bit_offset & 0x7) {
+    if (sei_bp_bs.bit_offset & 0x7) {
         bitstream_put_ui(&sei_bp_bs, 1, 1);
     }
     bitstream_end(&sei_bp_bs);
     bp_byte_size = (sei_bp_bs.bit_offset + 7) / 8;
-    
+
     /* SEI pic timing info */
     bitstream_start(&sei_pic_bs);
     /* The info of CPB and DPB delay is controlled by CpbDpbDelaysPresentFlag,
@@ -1457,10 +1455,10 @@ build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
      * vcl_hrd_parameters_present_flag is present in the bitstream and is equal to 1,
      */
     cpb_removal_delay = (avcenc_context.current_cpb_removal - avcenc_context.prev_idr_cpb_removal);
-    bitstream_put_ui(&sei_pic_bs, cpb_removal_delay, cpb_removal_length); 
+    bitstream_put_ui(&sei_pic_bs, cpb_removal_delay, cpb_removal_length);
     bitstream_put_ui(&sei_pic_bs, avcenc_context.current_dpb_removal_delta,
                      dpb_output_length);
-    if ( sei_pic_bs.bit_offset & 0x7) {
+    if (sei_pic_bs.bit_offset & 0x7) {
         bitstream_put_ui(&sei_pic_bs, 1, 1);
     }
     /* The pic_structure_present_flag determines whether the pic_structure
@@ -1469,26 +1467,26 @@ build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
      */
     bitstream_end(&sei_pic_bs);
     pic_byte_size = (sei_pic_bs.bit_offset + 7) / 8;
-    
+
     bitstream_start(&nal_bs);
     nal_start_code_prefix(&nal_bs);
     nal_header(&nal_bs, NAL_REF_IDC_NONE, NAL_SEI);
 
-	/* Write the SEI buffer period data */    
+    /* Write the SEI buffer period data */
     bitstream_put_ui(&nal_bs, 0, 8);
     bitstream_put_ui(&nal_bs, bp_byte_size, 8);
-    
+
     byte_buf = (unsigned char *)sei_bp_bs.buffer;
-    for(i = 0; i < bp_byte_size; i++) {
+    for (i = 0; i < bp_byte_size; i++) {
         bitstream_put_ui(&nal_bs, byte_buf[i], 8);
     }
     free(byte_buf);
-	/* write the SEI pic timing data */
+    /* write the SEI pic timing data */
     bitstream_put_ui(&nal_bs, 0x01, 8);
     bitstream_put_ui(&nal_bs, pic_byte_size, 8);
-    
+
     byte_buf = (unsigned char *)sei_pic_bs.buffer;
-    for(i = 0; i < pic_byte_size; i++) {
+    for (i = 0; i < pic_byte_size; i++) {
         bitstream_put_ui(&nal_bs, byte_buf[i], 8);
     }
     free(byte_buf);
@@ -1496,15 +1494,15 @@ build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
     rbsp_trailing_bits(&nal_bs);
     bitstream_end(&nal_bs);
 
-    *sei_buffer = (unsigned char *)nal_bs.buffer; 
-   
+    *sei_buffer = (unsigned char *)nal_bs.buffer;
+
     return nal_bs.bit_offset;
 }
 
 static int
 build_packed_sei_pic_timing(unsigned int cpb_removal_length,
-				unsigned int dpb_output_length,
-				unsigned char **sei_buffer)
+                            unsigned int dpb_output_length,
+                            unsigned char **sei_buffer)
 {
     unsigned char *byte_buf;
     int i, pic_byte_size;
@@ -1523,7 +1521,7 @@ build_packed_sei_pic_timing(unsigned int cpb_removal_length,
     bitstream_put_ui(&sei_pic_bs, cpb_removal_delay, cpb_removal_length);
     bitstream_put_ui(&sei_pic_bs, avcenc_context.current_dpb_removal_delta,
                      dpb_output_length);
-    if ( sei_pic_bs.bit_offset & 0x7) {
+    if (sei_pic_bs.bit_offset & 0x7) {
         bitstream_put_ui(&sei_pic_bs, 1, 1);
     }
 
@@ -1538,12 +1536,12 @@ build_packed_sei_pic_timing(unsigned int cpb_removal_length,
     nal_start_code_prefix(&nal_bs);
     nal_header(&nal_bs, NAL_REF_IDC_NONE, NAL_SEI);
 
-	/* write the SEI Pic timing data */
+    /* write the SEI Pic timing data */
     bitstream_put_ui(&nal_bs, 0x01, 8);
     bitstream_put_ui(&nal_bs, pic_byte_size, 8);
 
     byte_buf = (unsigned char *)sei_pic_bs.buffer;
-    for(i = 0; i < pic_byte_size; i++) {
+    for (i = 0; i < pic_byte_size; i++) {
         bitstream_put_ui(&nal_bs, byte_buf[i], 8);
     }
     free(byte_buf);
@@ -1557,7 +1555,7 @@ build_packed_sei_pic_timing(unsigned int cpb_removal_length,
 }
 
 #if 0
-static void 
+static void
 slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, int nal_ref_idc, int is_idr)
 {
     VAEncSequenceParameterBufferH264 *seq_param = &avcenc_context.seq_param;
@@ -1576,10 +1574,10 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     }
 
     if (is_idr)
-        bitstream_put_ue(bs, 0);		/* idr_pic_id: 0 */
+        bitstream_put_ue(bs, 0);        /* idr_pic_id: 0 */
 
     if (seq_param->seq_fields.bits.pic_order_cnt_type == 0) {
-        bitstream_put_ui(bs, (display_frame*2) & 0x3F, seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 + 4);
+        bitstream_put_ui(bs, (display_frame * 2) & 0x3F, seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 + 4);
         /* only support frame */
     } else {
         /* FIXME: */
@@ -1587,7 +1585,7 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     }
 
     /* redundant_pic_cnt_present_flag == 0 */
-    
+
     /* slice type */
     if (slice_type == SLICE_TYPE_P) {
         bitstream_put_ui(bs, 0, 1);            /* num_ref_idx_active_override_flag: 0 */
@@ -1599,13 +1597,13 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
         /* ref_pic_list_reordering */
         bitstream_put_ui(bs, 0, 1);            /* ref_pic_list_reordering_flag_l0: 0 */
         bitstream_put_ui(bs, 0, 1);            /* ref_pic_list_reordering_flag_l1: 0 */
-    } 
+    }
 
     /* weighted_pred_flag == 0 */
 
     /* dec_ref_pic_marking */
     if (nal_ref_idc != 0) {
-        if ( is_idr) {
+        if (is_idr) {
             bitstream_put_ui(bs, 0, 1);            /* no_output_of_prior_pics_flag: 0 */
             bitstream_put_ui(bs, 0, 1);            /* long_term_reference_flag: 0 */
         } else {
@@ -1625,7 +1623,7 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     }
 }
 
-static void 
+static void
 slice_data(bitstream *bs)
 {
     VACodedBufferSegment *coded_buffer_segment;
@@ -1635,14 +1633,14 @@ slice_data(bitstream *bs)
     VASurfaceStatus surface_status;
 
     va_status = vaSyncSurface(va_dpy, surface_ids[avcenc_context.current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaSyncSurface");
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     surface_status = 0;
     va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[avcenc_context.current_input_surface], &surface_status);
-    CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
+    CHECK_VASTATUS(va_status, "vaQuerySurfaceStatus");
 
     va_status = vaMapBuffer(va_dpy, avcenc_context.codedbuf_buf_id, (void **)(&coded_buffer_segment));
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
     slice_data_length = get_coded_bitsteam_length(coded_mem, codedbuf_size);
@@ -1655,7 +1653,7 @@ slice_data(bitstream *bs)
     vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
 }
 
-static void 
+static void
 build_nal_slice(FILE *avc_fp, int frame_num, int display_frame, int slice_type, int is_idr)
 {
     bitstream bs;
@@ -1678,14 +1676,14 @@ store_coded_buffer(FILE *avc_fp, int slice_type)
     size_t w_items;
 
     va_status = vaSyncSurface(va_dpy, surface_ids[avcenc_context.current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaSyncSurface");
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     surface_status = 0;
     va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[avcenc_context.current_input_surface], &surface_status);
-    CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
+    CHECK_VASTATUS(va_status, "vaQuerySurfaceStatus");
 
     va_status = vaMapBuffer(va_dpy, avcenc_context.codedbuf_buf_id, (void **)(&coded_buffer_segment));
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
     if (coded_buffer_segment->status & VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK) {
@@ -1719,7 +1717,7 @@ store_coded_buffer(FILE *avc_fp, int slice_type)
  */
 
 static void encoding2display_order(
-    unsigned long long encoding_order,int gop_size,
+    unsigned long long encoding_order, int gop_size,
     int ip_period,
     unsigned long long *displaying_order,
     int *frame_type)
@@ -1762,10 +1760,10 @@ static void encoding2display_order(
 
         if (((encoding_order_gop - gop_delta) % ip_period) == 0) { /* P frames */
             *frame_type = SLICE_TYPE_P;
-	    *displaying_order = encoding_order + ip_period - 1;
+            *displaying_order = encoding_order + ip_period - 1;
         } else {
-	    *frame_type = SLICE_TYPE_B;
-	    *displaying_order = encoding_order - 1;
+            *frame_type = SLICE_TYPE_B;
+            *displaying_order = encoding_order - 1;
         }
     }
 }
@@ -1780,7 +1778,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
 {
     VAStatus va_status;
     int ret = 0, codedbuf_size;
-    
+
     begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
 
     //if (next_display_num < frame_number) {
@@ -1792,7 +1790,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
             index = SID_INPUT_PICTURE_1;
         else
             index = SID_INPUT_PICTURE_0;
-        if ( next_display_num >= frame_number )
+        if (next_display_num >= frame_number)
             next_display_num = frame_number - 1;
         fseeko(yuv_fp, (off_t)frame_size * next_display_num, SEEK_SET);
 
@@ -1800,9 +1798,9 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         avcenc_context.upload_thread_param.surface_id = surface_ids[index];
 
         avcenc_context.upload_thread_value = pthread_create(&avcenc_context.upload_thread_id,
-                                                            NULL,
-                                                            upload_thread_function, 
-                                                            (void*)&avcenc_context.upload_thread_param);
+                                             NULL,
+                                             upload_thread_function,
+                                             (void*)&avcenc_context.upload_thread_param);
     }
 
     do {
@@ -1822,7 +1820,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
                                    VAEncCodedBufferType,
                                    codedbuf_size, 1, NULL,
                                    &avcenc_context.codedbuf_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         /* Update the RefPicList */
         update_RefPicList();
@@ -1833,8 +1831,8 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         /* slice parameter */
         avcenc_update_slice_parameter(slice_type);
 
-	if (avcenc_context.rate_control_method == VA_RC_CBR)
-		avcenc_update_sei_param(is_idr);
+        if (avcenc_context.rate_control_method == VA_RC_CBR)
+            avcenc_update_sei_param(is_idr);
 
         avcenc_render_picture();
 
@@ -1850,7 +1848,7 @@ static void show_help()
 }
 
 static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_param,
-                                          int width, int height)
+        int width, int height)
 
 {
     int width_in_mbs = (width + 15) / 16;
@@ -1869,18 +1867,18 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     seq_param->seq_fields.bits.frame_mbs_only_flag = 1;
     seq_param->seq_fields.bits.chroma_format_idc = 1;
 
-    
+
     if (frame_bit_rate > 0)
         seq_param->bits_per_second = 1000 * frame_bit_rate; /* use kbps as input */
     else
         seq_param->bits_per_second = 0;
-    
+
     seq_param->time_scale = frame_rate * 2;
-    seq_param->num_units_in_tick = 1;			/* Tc = num_units_in_tick / time_sacle */
+    seq_param->num_units_in_tick = 1;           /* Tc = num_units_in_tick / time_sacle */
 
     if (height_in_mbs * 16 - height) {
         frame_cropping_flag = 1;
-        frame_crop_bottom_offset = 
+        frame_crop_bottom_offset =
             (height_in_mbs * 16 - height) / (2 * (!seq_param->seq_fields.bits.frame_mbs_only_flag + 1));
     }
 
@@ -1892,12 +1890,12 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
 
     seq_param->seq_fields.bits.pic_order_cnt_type = 0;
     seq_param->seq_fields.bits.direct_8x8_inference_flag = 0;
-    
+
     seq_param->seq_fields.bits.log2_max_frame_num_minus4 = Log2MaxFrameNum - 4;
     seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = Log2MaxPicOrderCntLsb - 4;
-	
+
     if (frame_bit_rate > 0)
-        seq_param->vui_parameters_present_flag = 1;	//HRD info located in vui
+        seq_param->vui_parameters_present_flag = 1; //HRD info located in vui
     else
         seq_param->vui_parameters_present_flag = 0;
 }
@@ -1909,7 +1907,7 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
 
     pic_param->last_picture = 0;
     pic_param->frame_num = 0;
-    
+
     pic_param->pic_init_qp = (qp_value >= 0 ?  qp_value : 26);
     pic_param->num_ref_idx_l0_active_minus1 = 0;
     pic_param->num_ref_idx_l1_active_minus1 = 0;
@@ -1919,7 +1917,7 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
     pic_param->pic_fields.bits.entropy_coding_mode_flag = ENTROPY_MODE_CABAC;
     pic_param->pic_fields.bits.weighted_pred_flag = 0;
     pic_param->pic_fields.bits.weighted_bipred_idc = 0;
-    
+
     if (avcenc_context.constraint_set_flag & 0x7)
         pic_param->pic_fields.bits.transform_8x8_mode_flag = 0;
     else
@@ -1932,20 +1930,20 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
 
 static void avcenc_context_sei_init()
 {
-	/* it comes for the bps defined in SPS */
-	avcenc_context.i_initial_cpb_removal_delay = 2 * 90000;
-	avcenc_context.i_initial_cpb_removal_delay_offset = 2 * 90000;
+    /* it comes for the bps defined in SPS */
+    avcenc_context.i_initial_cpb_removal_delay = 2 * 90000;
+    avcenc_context.i_initial_cpb_removal_delay_offset = 2 * 90000;
 
-	avcenc_context.i_cpb_removal_delay = 2;
-	avcenc_context.i_initial_cpb_removal_delay_length = 24;
-	avcenc_context.i_cpb_removal_delay_length = 24;
-	avcenc_context.i_dpb_output_delay_length = 24;
-	avcenc_context.time_offset_length = 24;
+    avcenc_context.i_cpb_removal_delay = 2;
+    avcenc_context.i_initial_cpb_removal_delay_length = 24;
+    avcenc_context.i_cpb_removal_delay_length = 24;
+    avcenc_context.i_dpb_output_delay_length = 24;
+    avcenc_context.time_offset_length = 24;
 
-        avcenc_context.prev_idr_cpb_removal = avcenc_context.i_initial_cpb_removal_delay / 90000;
-        avcenc_context.current_idr_cpb_removal = avcenc_context.prev_idr_cpb_removal;
-        avcenc_context.current_cpb_removal = 0;
-        avcenc_context.idr_frame_num = 0;
+    avcenc_context.prev_idr_cpb_removal = avcenc_context.i_initial_cpb_removal_delay / 90000;
+    avcenc_context.current_idr_cpb_removal = avcenc_context.prev_idr_cpb_removal;
+    avcenc_context.current_cpb_removal = 0;
+    avcenc_context.idr_frame_num = 0;
 }
 
 static void avcenc_context_init(int width, int height)
@@ -1968,11 +1966,11 @@ static void avcenc_context_init(int width, int height)
     case VAProfileH264High:
         avcenc_context.constraint_set_flag |= (1 << 3); /* Annex A.2.4 */
         break;
-        
+
     default:
         break;
     }
-        
+
     avcenc_context.seq_param_buf_id = VA_INVALID_ID;
     avcenc_context.pic_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_seq_header_param_buf_id = VA_INVALID_ID;
@@ -2007,7 +2005,7 @@ static void avcenc_context_init(int width, int height)
     avcenc_context_seq_param_init(&avcenc_context.seq_param, width, height);
     avcenc_context_pic_param_init(&avcenc_context.pic_param);
     if (avcenc_context.rate_control_method == VA_RC_CBR)
-	avcenc_context_sei_init();
+        avcenc_context_sei_init();
 }
 
 int main(int argc, char *argv[])
@@ -2017,13 +2015,13 @@ int main(int argc, char *argv[])
     FILE *avc_fp;
     off_t file_size;
     int mode_value;
-    struct timeval tpstart,tpend; 
+    struct timeval tpstart, tpend;
     float  timeuse;
     int frame_num_value = 0;
 
     va_init_display_args(&argc, argv);
 
-    if(argc < 5) {
+    if (argc < 5) {
         show_help();
         return -1;
     }
@@ -2101,16 +2099,16 @@ int main(int argc, char *argv[])
     } else
         qp_value = 28;                          //default const QP mode
 
-    yuv_fp = fopen(argv[3],"rb");
-    if ( yuv_fp == NULL){
+    yuv_fp = fopen(argv[3], "rb");
+    if (yuv_fp == NULL) {
         printf("Can't open input YUV file\n");
         return -1;
     }
     fseeko(yuv_fp, (off_t)0, SEEK_END);
     file_size = ftello(yuv_fp);
-    frame_size = picture_width * picture_height +  ((picture_width * picture_height) >> 1) ;
+    frame_size = picture_width * picture_height + ((picture_width * picture_height) >> 1) ;
 
-    if ( (file_size < frame_size) || (file_size % frame_size) ) {
+    if ((file_size < frame_size) || (file_size % frame_size)) {
         fclose(yuv_fp);
         printf("The YUV file's size is not correct\n");
         return -1;
@@ -2118,22 +2116,22 @@ int main(int argc, char *argv[])
     frame_number = file_size / frame_size;
     fseeko(yuv_fp, (off_t)0, SEEK_SET);
 
-    avc_fp = fopen(argv[4], "wb");	
-    if ( avc_fp == NULL) {
+    avc_fp = fopen(argv[4], "wb");
+    if (avc_fp == NULL) {
         fclose(yuv_fp);
         printf("Can't open output avc file\n");
         return -1;
-    }	
-    gettimeofday(&tpstart,NULL);	
+    }
+    gettimeofday(&tpstart, NULL);
     avcenc_context_init(picture_width, picture_height);
     create_encode_pipe();
     alloc_encode_resource(yuv_fp);
 
     enc_frame_number = 0;
-    if(frame_num_value <= 0)
+    if (frame_num_value <= 0)
         frame_num_value = frame_number;
 
-    for ( f = 0; f < frame_num_value; f++) {           //picture level loop
+    for (f = 0; f < frame_num_value; f++) {            //picture level loop
         unsigned long long next_frame_display;
         int next_frame_type;
 
@@ -2160,7 +2158,7 @@ int main(int argc, char *argv[])
                  * the removal time of previous IDR unit + Tc * cpb_removal_delay(n)
                  */
                 avcenc_context.current_cpb_removal = avcenc_context.prev_idr_cpb_removal +
-				frame_interval * 2;
+                                                     frame_interval * 2;
                 avcenc_context.idr_frame_num = enc_frame_number;
                 avcenc_context.current_idr_cpb_removal = avcenc_context.current_cpb_removal;
                 if (ip_period)
@@ -2179,7 +2177,7 @@ int main(int argc, char *argv[])
                  * the removal time of current IDR unit + Tc * cpb_removal_delay(n)
                  */
                 avcenc_context.current_cpb_removal = avcenc_context.current_idr_cpb_removal +
-				frame_interval * 2;
+                                                     frame_interval * 2;
                 if (current_frame_type == SLICE_TYPE_I ||
                     current_frame_type == SLICE_TYPE_P) {
                     if (ip_period)
@@ -2187,7 +2185,7 @@ int main(int argc, char *argv[])
                     else
                         avcenc_context.current_dpb_removal_delta = 2;
                 } else
-                   avcenc_context.current_dpb_removal_delta = 2;
+                    avcenc_context.current_dpb_removal_delta = 2;
             }
         }
 
@@ -2195,26 +2193,26 @@ int main(int argc, char *argv[])
         current_poc = (current_frame_display - current_IDR_display) * 2;
 
         encode_picture(yuv_fp, avc_fp, frame_number, current_frame_display,
-                      (current_frame_type == FRAME_IDR) ? 1 : 0,
-                      (current_frame_type == FRAME_IDR) ? SLICE_TYPE_I : current_frame_type,
-                      (next_frame_type == SLICE_TYPE_B) ? 1 : 0,
-                next_frame_display);
+                       (current_frame_type == FRAME_IDR) ? 1 : 0,
+                       (current_frame_type == FRAME_IDR) ? SLICE_TYPE_I : current_frame_type,
+                       (next_frame_type == SLICE_TYPE_B) ? 1 : 0,
+                       next_frame_display);
         if ((current_frame_type == FRAME_IDR) &&
             (avcenc_context.rate_control_method == VA_RC_CBR)) {
-           /* after one IDR frame is written, it needs to update the
-            * prev_idr_cpb_removal for next IDR
-            */
-           avcenc_context.prev_idr_cpb_removal = avcenc_context.current_idr_cpb_removal;
+            /* after one IDR frame is written, it needs to update the
+             * prev_idr_cpb_removal for next IDR
+             */
+            avcenc_context.prev_idr_cpb_removal = avcenc_context.current_idr_cpb_removal;
         }
         printf("\r %d/%d ...", f, frame_number);
         fflush(stdout);
     }
 
-    gettimeofday(&tpend,NULL);
-    timeuse=1000000*(tpend.tv_sec-tpstart.tv_sec)+ tpend.tv_usec-tpstart.tv_usec;
-    timeuse/=1000000;
+    gettimeofday(&tpend, NULL);
+    timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec;
+    timeuse /= 1000000;
     printf("\ndone!\n");
-    printf("encode %d frames in %f secondes, FPS is %.1f\n",frame_number, timeuse, frame_number/timeuse);
+    printf("encode %d frames in %f secondes, FPS is %.1f\n", frame_number, timeuse, frame_number / timeuse);
     release_encode_resource();
     destory_encode_pipe();
 

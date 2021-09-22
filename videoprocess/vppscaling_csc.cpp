@@ -111,7 +111,7 @@ read_value_string(FILE *fp, const char* field_name, char* value)
         while (*str == ' ')
             str++;
 
-        *(str + strlen(str)-1) = '\0';
+        *(str + strlen(str) - 1) = '\0';
         strcpy(value, str);
 
         return 0;
@@ -126,8 +126,8 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
     char str[MAX_LEN];
 
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find integer field: %s", field_name);
-       return -1;
+        printf("Failed to find integer field: %s", field_name);
+        return -1;
     }
 
     *value = (uint32_t)atoi(str);
@@ -148,19 +148,19 @@ create_surface(VASurfaceID * p_surface_id,
 
     va_status = vaCreateSurfaces(va_dpy,
                                  format,
-                                 width ,
+                                 width,
                                  height,
                                  p_surface_id,
                                  1,
                                  &surface_attrib,
                                  1);
-   return va_status;
+    return va_status;
 }
 
 /* Load yuv frame to NV12/YV12/I420 surface*/
 static VAStatus
 upload_yuv_frame_to_yuv_surface(FILE *fp,
-                                 VASurfaceID surface_id)
+                                VASurfaceID surface_id)
 {
     VAStatus va_status;
     VAImage surface_image;
@@ -174,9 +174,9 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
     uint32_t frame_size, row, col;
     size_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
-    
+
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
     CHECK_VASTATUS(va_status, "vaDeriveImage");
 
@@ -185,7 +185,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         frame_size = surface_image.width * surface_image.height * 3 / 2;
         newImageBuffer = (unsigned char*)malloc(frame_size);
@@ -213,13 +213,13 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 
         y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
 
-        if(surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        }else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        }else {
+        } else {
             u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_dst = u_dst;
         }
@@ -232,16 +232,16 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         }
 
         /* UV plane */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height /2; row ++){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
                 if (g_src_file_fourcc == VA_FOURCC_I420 ||
                     g_src_file_fourcc == VA_FOURCC_YV12) {
-                    memcpy(v_dst, v_src, surface_image.width/2);
-                    memcpy(u_dst, u_src, surface_image.width/2);
+                    memcpy(v_dst, v_src, surface_image.width / 2);
+                    memcpy(u_dst, u_src, surface_image.width / 2);
 
-                    v_src += surface_image.width/2;
-                    u_src += surface_image.width/2;
+                    v_src += surface_image.width / 2;
+                    u_src += surface_image.width / 2;
                 } else {
                     for (col = 0; col < surface_image.width / 2; col++) {
                         u_dst[col] = u_src[col * 2];
@@ -252,7 +252,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                     v_src = u_src;
                 }
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_dst += surface_image.pitches[1];
                     u_dst += surface_image.pitches[2];
                 } else {
@@ -260,7 +260,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                     u_dst += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
                 if (g_src_file_fourcc == VA_FOURCC_I420 ||
                     g_src_file_fourcc == VA_FOURCC_YV12) {
@@ -343,7 +343,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 u_dst += surface_image.pitches[1];
                 v_dst += surface_image.pitches[2];
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_P010){
+        } else if (surface_image.format.fourcc == VA_FOURCC_P010) {
             assert(g_src_file_fourcc == VA_FOURCC_P010);
 
             u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
@@ -362,14 +362,14 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 v_dst = u_dst;
             }
         }
-     }  else if ((surface_image.format.fourcc == VA_FOURCC_RGBA &&
-                  g_src_file_fourcc == VA_FOURCC_RGBA) ||
-                 (surface_image.format.fourcc == VA_FOURCC_RGBX &&
-                  g_src_file_fourcc == VA_FOURCC_RGBX) ||
-                 (surface_image.format.fourcc == VA_FOURCC_BGRA &&
-                  g_src_file_fourcc == VA_FOURCC_BGRA) ||
-                 (surface_image.format.fourcc == VA_FOURCC_BGRX &&
-                  g_src_file_fourcc == VA_FOURCC_BGRX)) {
+    }  else if ((surface_image.format.fourcc == VA_FOURCC_RGBA &&
+                 g_src_file_fourcc == VA_FOURCC_RGBA) ||
+                (surface_image.format.fourcc == VA_FOURCC_RGBX &&
+                 g_src_file_fourcc == VA_FOURCC_RGBX) ||
+                (surface_image.format.fourcc == VA_FOURCC_BGRA &&
+                 g_src_file_fourcc == VA_FOURCC_BGRA) ||
+                (surface_image.format.fourcc == VA_FOURCC_BGRX &&
+                 g_src_file_fourcc == VA_FOURCC_BGRX)) {
         frame_size = surface_image.width * surface_image.height * 4;
         newImageBuffer = (unsigned char*)malloc(frame_size);
         assert(newImageBuffer);
@@ -388,19 +388,19 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             y_dst += surface_image.pitches[0];
         }
     } else {
-         printf("Not supported YUV surface fourcc !!! \n");
-         return VA_STATUS_ERROR_INVALID_SURFACE;
-     }
+        printf("Not supported YUV surface fourcc !!! \n");
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+    }
 
-     if (newImageBuffer){
-         free(newImageBuffer);
-         newImageBuffer = NULL;
-     }
+    if (newImageBuffer) {
+        free(newImageBuffer);
+        newImageBuffer = NULL;
+    }
 
-     vaUnmapBuffer(va_dpy, surface_image.buf);
-     vaDestroyImage(va_dpy, surface_image.image_id);
+    vaUnmapBuffer(va_dpy, surface_image.buf);
+    vaDestroyImage(va_dpy, surface_image.image_id);
 
-     return VA_STATUS_SUCCESS;
+    return VA_STATUS_SUCCESS;
 }
 
 /* Store NV12/YV12/I420 surface to yv12 file */
@@ -420,7 +420,7 @@ store_yuv_surface_to_yv12_file(FILE *fp,
     uint32_t row, col;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -432,10 +432,10 @@ store_yuv_surface_to_yv12_file(FILE *fp,
     /* store the surface to one YV12 file or one bmp file*/
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         uint32_t y_size = surface_image.width * surface_image.height;
-        uint32_t u_size = y_size/4;
+        uint32_t u_size = y_size / 4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
         assert(newImageBuffer);
@@ -446,13 +446,13 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         u_dst = newImageBuffer + y_size + u_size;
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
-        if (surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
@@ -465,16 +465,16 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         }
 
         /* UV plane copy */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height /2; row ++){
-                memcpy(v_dst, v_src, surface_image.width/2);
-                memcpy(u_dst, u_src, surface_image.width/2);
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
+                memcpy(v_dst, v_src, surface_image.width / 2);
+                memcpy(u_dst, u_src, surface_image.width / 2);
 
-                v_dst += surface_image.width/2;
-                u_dst += surface_image.width/2;
+                v_dst += surface_image.width / 2;
+                u_dst += surface_image.width / 2;
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_src += surface_image.pitches[1];
                     u_src += surface_image.pitches[2];
                 } else {
@@ -482,9 +482,9 @@ store_yuv_surface_to_yv12_file(FILE *fp,
                     u_src += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
-                for (col = 0; col < surface_image.width /2; col++) {
+                for (col = 0; col < surface_image.width / 2; col++) {
                     u_dst[col] = u_src[col * 2];
                     v_dst[col] = u_src[col * 2 + 1];
                 }
@@ -505,7 +505,7 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -532,7 +532,7 @@ store_yuv_surface_to_i420_file(FILE *fp,
     uint32_t row, col;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -544,10 +544,10 @@ store_yuv_surface_to_i420_file(FILE *fp,
     /* store the surface to one i420 file */
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         uint32_t y_size = surface_image.width * surface_image.height;
-        uint32_t u_size = y_size/4;
+        uint32_t u_size = y_size / 4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
         assert(newImageBuffer);
@@ -558,13 +558,13 @@ store_yuv_surface_to_i420_file(FILE *fp,
         v_dst = newImageBuffer + y_size + u_size;
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
-        if (surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
@@ -577,16 +577,16 @@ store_yuv_surface_to_i420_file(FILE *fp,
         }
 
         /* UV plane copy */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height /2; row ++){
-                memcpy(v_dst, v_src, surface_image.width/2);
-                memcpy(u_dst, u_src, surface_image.width/2);
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
+                memcpy(v_dst, v_src, surface_image.width / 2);
+                memcpy(u_dst, u_src, surface_image.width / 2);
 
-                v_dst += surface_image.width/2;
-                u_dst += surface_image.width/2;
+                v_dst += surface_image.width / 2;
+                u_dst += surface_image.width / 2;
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_src += surface_image.pitches[1];
                     u_src += surface_image.pitches[2];
                 } else {
@@ -594,9 +594,9 @@ store_yuv_surface_to_i420_file(FILE *fp,
                     u_src += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
-                for (col = 0; col < surface_image.width /2; col++) {
+                for (col = 0; col < surface_image.width / 2; col++) {
                     u_dst[col] = u_src[col * 2];
                     v_dst[col] = u_src[col * 2 + 1];
                 }
@@ -617,7 +617,7 @@ store_yuv_surface_to_i420_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -644,7 +644,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
     uint32_t row, col;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -656,7 +656,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
     /* store the surface to one nv12 file */
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         uint32_t y_size = surface_image.width * surface_image.height;
 
@@ -669,13 +669,13 @@ store_yuv_surface_to_nv12_file(FILE *fp,
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
 
-        if (surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
@@ -688,9 +688,9 @@ store_yuv_surface_to_nv12_file(FILE *fp,
         }
 
         /* UV plane copy */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height / 2; row ++){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
                 for (col = 0; col < surface_image.width / 2; col++) {
                     u_dst[col * 2] = u_src[col];
                     u_dst[col * 2 + 1] = v_src[col];
@@ -698,7 +698,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
 
                 u_dst += surface_image.width;
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_src += surface_image.pitches[1];
                     u_src += surface_image.pitches[2];
                 } else {
@@ -706,7 +706,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
                     u_src += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
                 memcpy(u_dst, u_src, surface_image.width);
                 u_dst += surface_image.width;
@@ -724,7 +724,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -747,7 +747,7 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
     uint32_t row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -787,7 +787,7 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -813,7 +813,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
     uint32_t row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -846,7 +846,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
         u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
         v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
 
-        for (row = 0; row < surface_image.height / 2; row++){
+        for (row = 0; row < surface_image.height / 2; row++) {
             memcpy(u_dst, u_src, surface_image.width);
             memcpy(v_dst, v_src, surface_image.width);
 
@@ -879,7 +879,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
         n_items = fwrite(newImageBuffer, y_size * 3 / 2, 1, fp);
     } while (n_items != 1);
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -901,7 +901,7 @@ store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
     uint32_t frame_size, row;
     int32_t n_items;
     unsigned char * newImageBuffer = NULL;
-    va_status = vaSyncSurface (va_dpy,surface_id);
+    va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
@@ -928,7 +928,7 @@ store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
         n_items = fwrite(newImageBuffer, frame_size, 1, fp);
     } while (n_items != 1);
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -982,7 +982,7 @@ store_yuv_surface_to_file(FILE *fp,
 }
 
 static VAStatus
-video_frame_process(       VASurfaceID in_surface_id,
+video_frame_process(VASurfaceID in_surface_id,
                     VASurfaceID out_surface_id)
 {
     VAStatus va_status;
@@ -1028,7 +1028,7 @@ video_frame_process(       VASurfaceID in_surface_id,
     CHECK_VASTATUS(va_status, "vaEndPicture");
 
     if (pipeline_param_buf_id != VA_INVALID_ID)
-        vaDestroyBuffer(va_dpy,pipeline_param_buf_id);
+        vaDestroyBuffer(va_dpy, pipeline_param_buf_id);
 
     return va_status;
 }
@@ -1072,20 +1072,20 @@ vpp_context_create()
                                       VAProfileNone,
                                       VAEntrypointVideoProc,
                                       &attrib,
-                                     1);
+                                      1);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     if (!(attrib.value & g_out_format)) {
-        printf("RT format %d is not supported by VPP !\n",g_out_format);
+        printf("RT format %d is not supported by VPP !\n", g_out_format);
         assert(0);
     }
 
     /* Create surface/config/context for VPP pipeline */
     va_status = create_surface(&g_in_surface_id, g_in_pic_width, g_in_pic_height,
-                                g_in_fourcc, g_in_format);
+                               g_in_fourcc, g_in_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for input");
 
     va_status = create_surface(&g_out_surface_id, g_out_pic_width, g_out_pic_height,
-                                g_out_fourcc, g_out_format);
+                               g_out_fourcc, g_out_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for output");
 
     va_status = vaCreateConfig(va_dpy,
@@ -1127,15 +1127,15 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     uint32_t tfourcc = VA_FOURCC('N', 'V', '1', '2');
     uint32_t tformat = VA_RT_FORMAT_YUV420;
 
-    if (!strcmp(str, "YV12")){
+    if (!strcmp(str, "YV12")) {
         tfourcc = VA_FOURCC('Y', 'V', '1', '2');
-    } else if(!strcmp(str, "I420")){
+    } else if (!strcmp(str, "I420")) {
         tfourcc = VA_FOURCC('I', '4', '2', '0');
-    } else if(!strcmp(str, "NV12")){
+    } else if (!strcmp(str, "NV12")) {
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
-    } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
+    } else if (!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
         tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
-    } else if(!strcmp(str, "UYVY")){
+    } else if (!strcmp(str, "UYVY")) {
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
     } else if (!strcmp(str, "P010")) {
         tfourcc = VA_FOURCC('P', '0', '1', '0');
@@ -1149,7 +1149,7 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
         tfourcc = VA_FOURCC_BGRA;
     } else if (!strcmp(str, "BGRX")) {
         tfourcc = VA_FOURCC_BGRX;
-    } else{
+    } else {
         printf("Not supported format: %s! Currently only support following format: %s\n",
                str, "YV12, I420, NV12, YUY2(YUYV), UYVY, P010, I010, RGBA, RGBX, BGRA or BGRX");
         assert(0);
@@ -1179,7 +1179,7 @@ parse_basic_parameters()
     /* Read dst frame file information */
     read_value_string(g_config_file_fd, "DST_FILE_NAME", g_dst_file_name);
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_out_pic_width);
-    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT",&g_out_pic_height);
+    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT", &g_out_pic_height);
     read_value_string(g_config_file_fd, "DST_FRAME_FORMAT", str);
     parse_fourcc_and_format(str, &g_out_fourcc, &g_out_format);
 
@@ -1194,8 +1194,8 @@ parse_basic_parameters()
     if (g_in_pic_width != g_out_pic_width ||
         g_in_pic_height != g_out_pic_height)
         printf("Scaling will be done : from %4d x %4d to %4d x %4d \n",
-                g_in_pic_width, g_in_pic_height,
-                g_out_pic_width, g_out_pic_height);
+               g_in_pic_width, g_in_pic_height,
+               g_out_pic_width, g_out_pic_height);
 
     if (g_in_fourcc != g_out_fourcc)
         printf("Format conversion will be done: from %d to %d \n",
@@ -1217,7 +1217,7 @@ int32_t main(int32_t argc, char *argv[])
     VAStatus va_status;
     uint32_t i;
 
-    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")){
+    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
         print_help();
         return -1;
     }
@@ -1226,13 +1226,13 @@ int32_t main(int32_t argc, char *argv[])
     strncpy(g_config_file_name, argv[1], MAX_LEN);
     g_config_file_name[MAX_LEN - 1] = '\0';
 
-    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))){
-        printf("Open configure file %s failed!\n",g_config_file_name);
+    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))) {
+        printf("Open configure file %s failed!\n", g_config_file_name);
         assert(0);
     }
 
     /* Parse basic parameters */
-    if (parse_basic_parameters()){
+    if (parse_basic_parameters()) {
         printf("Parse parameters in configure file error\n");
         assert(0);
     }
@@ -1244,13 +1244,13 @@ int32_t main(int32_t argc, char *argv[])
     }
 
     /* Video frame fetch, process and store */
-    if (NULL == (g_src_file_fd = fopen(g_src_file_name, "r"))){
+    if (NULL == (g_src_file_fd = fopen(g_src_file_name, "r"))) {
         printf("Open SRC_FILE_NAME: %s failed, please specify it in config file: %s !\n",
-                g_src_file_name, g_config_file_name);
+               g_src_file_name, g_config_file_name);
         assert(0);
     }
 
-    if (NULL == (g_dst_file_fd = fopen(g_dst_file_name, "w"))){
+    if (NULL == (g_dst_file_fd = fopen(g_dst_file_name, "w"))) {
         printf("Open DST_FILE_NAME: %s failed, please specify it in config file: %s !\n",
                g_dst_file_name, g_config_file_name);
         assert(0);
@@ -1262,7 +1262,7 @@ int32_t main(int32_t argc, char *argv[])
     unsigned int duration = 0;
     clock_gettime(CLOCK_MONOTONIC, &Pre_time);
 
-    for (i = 0; i < g_frame_count; i ++){
+    for (i = 0; i < g_frame_count; i ++) {
         upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_in_surface_id);
         video_frame_process(g_in_surface_id, g_out_surface_id);
         store_yuv_surface_to_file(g_dst_file_fd, g_out_surface_id);
@@ -1276,17 +1276,17 @@ int32_t main(int32_t argc, char *argv[])
         duration += (Cur_time.tv_nsec + 1000000000 - Pre_time.tv_nsec) / 1000000 - 1000;
     }
 
-    printf("Finish processing, performance: \n" );
-    printf("%d frames processed in: %d ms, ave time = %d ms\n",g_frame_count, duration, duration/g_frame_count);
+    printf("Finish processing, performance: \n");
+    printf("%d frames processed in: %d ms, ave time = %d ms\n", g_frame_count, duration, duration / g_frame_count);
 
     if (g_src_file_fd)
-       fclose(g_src_file_fd);
+        fclose(g_src_file_fd);
 
     if (g_dst_file_fd)
-       fclose(g_dst_file_fd);
+        fclose(g_dst_file_fd);
 
     if (g_config_file_fd)
-       fclose(g_config_file_fd);
+        fclose(g_config_file_fd);
 
     vpp_context_destroy();
 

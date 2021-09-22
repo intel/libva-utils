@@ -24,7 +24,7 @@
 /*
  * Simple MPEG-2 encoder based on libVA.
  *
- */  
+ */
 
 #include <getopt.h>
 #include <unistd.h>
@@ -81,20 +81,19 @@ static VAProfile mpeg2_va_profiles[] = {
     VAProfileMPEG2Main
 };
 
-static struct _mpeg2_sampling_density
-{
+static struct _mpeg2_sampling_density {
     int samplers_per_line;
     int line_per_frame;
     int frame_per_sec;
 } mpeg2_upper_samplings[2][3] = {
-    { { 0, 0, 0 },
-      { 720, 576, 30 },
-      { 0, 0, 0 },
+    {   { 0, 0, 0 },
+        { 720, 576, 30 },
+        { 0, 0, 0 },
     },
 
-    { { 352, 288, 30 },
-      { 720, 576, 30 },
-      { 1920, 1152, 60 },
+    {   { 352, 288, 30 },
+        { 720, 576, 30 },
+        { 1920, 1152, 60 },
     }
 };
 
@@ -162,7 +161,7 @@ struct __bitstream {
 
 typedef struct __bitstream bitstream;
 
-static unsigned int 
+static unsigned int
 swap32(unsigned int val)
 {
     unsigned char *pval = (unsigned char *)&val;
@@ -193,7 +192,7 @@ bitstream_end(bitstream *bs)
         bs->buffer[pos] = swap32((bs->buffer[pos] << bit_left));
     }
 }
- 
+
 static void
 bitstream_put_ui(bitstream *bs, unsigned int val, int size_in_bits)
 {
@@ -265,9 +264,9 @@ find_frame_rate_code(const VAEncSequenceParameterBufferMPEG2 *seq_param)
 {
     unsigned int delta = -1;
     int code = 1, i;
-    float frame_rate_value = seq_param->frame_rate * 
-        (seq_param->sequence_extension.bits.frame_rate_extension_d + 1) / 
-        (seq_param->sequence_extension.bits.frame_rate_extension_n + 1);
+    float frame_rate_value = seq_param->frame_rate *
+                             (seq_param->sequence_extension.bits.frame_rate_extension_d + 1) /
+                             (seq_param->sequence_extension.bits.frame_rate_extension_n + 1);
 
     for (i = 0; i < sizeof(frame_rate_tab) / sizeof(frame_rate_tab[0]); i++) {
 
@@ -280,7 +279,7 @@ find_frame_rate_code(const VAEncSequenceParameterBufferMPEG2 *seq_param)
     return code;
 }
 
-static void 
+static void
 sps_rbsp(struct mpeg2enc_context *ctx,
          const VAEncSequenceParameterBufferMPEG2 *seq_param,
          bitstream *bs)
@@ -329,7 +328,7 @@ sps_rbsp(struct mpeg2enc_context *ctx,
     }
 }
 
-static void 
+static void
 pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
          const VAEncPictureParameterBufferMPEG2 *pic_param,
          bitstream *bs)
@@ -348,7 +347,7 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
                      pic_param->picture_type == VAEncPictureTypePredictive ? 2 : 3,
                      3);
     bitstream_put_ui(bs, 0xFFFF, 16); /* vbv_delay, always 0xFFFF */
-    
+
     if (pic_param->picture_type == VAEncPictureTypePredictive ||
         pic_param->picture_type == VAEncPictureTypeBidirectional) {
         bitstream_put_ui(bs, 0, 1); /* full_pel_forward_vector, always 0 for MPEG-2 */
@@ -359,7 +358,7 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
         bitstream_put_ui(bs, 0, 1); /* full_pel_backward_vector, always 0 for MPEG-2 */
         bitstream_put_ui(bs, 7, 3); /* backward_f_code, always 7 for MPEG-2 */
     }
-     
+
     bitstream_put_ui(bs, 0, 1); /* extra_bit_picture, 0 */
 
     bitstream_byte_aligning(bs, 0);
@@ -451,11 +450,11 @@ upload_yuv_to_surface(void *data)
     } while (n_items != 1);
 
     va_status = vaDeriveImage(ctx->va_dpy, surface_ids[ctx->current_upload_surface], &surface_image);
-    CHECK_VASTATUS(va_status,"vaDeriveImage");
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
 
     vaMapBuffer(ctx->va_dpy, surface_image.buf, &surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
-        
+
     y_src = ctx->frame_data_buffer;
     u_src = ctx->frame_data_buffer + y_size; /* UV offset for NV12 */
     v_src = ctx->frame_data_buffer + y_size + u_size;
@@ -502,7 +501,7 @@ upload_yuv_to_surface(void *data)
     return NULL;
 }
 
-static void 
+static void
 mpeg2enc_exit(struct mpeg2enc_context *ctx, int exit_code)
 {
     if (ctx->frame_data_buffer) {
@@ -523,9 +522,9 @@ mpeg2enc_exit(struct mpeg2enc_context *ctx, int exit_code)
     exit(exit_code);
 }
 
-static void 
+static void
 usage(char *program)
-{   
+{
     fprintf(stderr, "Usage: %s --help\n", program);
     fprintf(stderr, "\t--help   print this message\n");
     fprintf(stderr, "Usage: %s <width> <height> <ifile> <ofile> [options]\n", program);
@@ -538,7 +537,7 @@ usage(char *program)
     fprintf(stderr, "\t--fps <FPS>      specify the frame rate\n");
     fprintf(stderr, "\t--mode <MODE>    specify the mode 0 (I), 1 (I/P) and 2 (I/P/B)\n");
     fprintf(stderr, "\t--profile <PROFILE>      specify the profile 0(Simple), or 1(Main, default)\n");
-    fprintf(stderr, "\t--level <LEVEL>  specify the level 0(Low), 1(Main, default) or 2(High)\n");    
+    fprintf(stderr, "\t--level <LEVEL>  specify the level 0(Low), 1(Main, default) or 2(High)\n");
 }
 
 void
@@ -553,7 +552,7 @@ mpeg2_profile_level(struct mpeg2enc_context *ctx,
             if (ctx->width <= mpeg2_upper_samplings[p][l].samplers_per_line &&
                 ctx->height <= mpeg2_upper_samplings[p][l].line_per_frame &&
                 ctx->fps <= mpeg2_upper_samplings[p][l].frame_per_sec) {
-                
+
                 goto __find;
                 break;
             }
@@ -566,12 +565,12 @@ mpeg2_profile_level(struct mpeg2enc_context *ctx,
         l = 2;
     }
 
-__find:    
+__find:
     ctx->profile = mpeg2_va_profiles[p];
     ctx->level = l;
 }
 
-static void 
+static void
 parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 {
     int c, tmp;
@@ -620,9 +619,9 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
     ctx->num_pictures = file_size / ctx->frame_size;
     fseek(ctx->ifp, 0l, SEEK_SET);
-    
+
     ctx->ofp = fopen(argv[4], "wb");
-    
+
     if (ctx->ofp == NULL) {
         fprintf(stderr, "Can't create the output file\n");
         goto err_exit;
@@ -638,11 +637,11 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
     optind = 5;
 
-    while((c = getopt_long(argc, argv,
-                           "",
-                           long_options, 
-                           &option_index)) != -1) {
-        switch(c) {
+    while ((c = getopt_long(argc, argv,
+                            "",
+                            long_options,
+                            &option_index)) != -1) {
+        switch (c) {
         case 'c':
             tmp = atoi(optarg);
 
@@ -676,7 +675,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
         case 'm':
             tmp = atoi(optarg);
-            
+
             if (tmp < MPEG2_MODE_I || tmp > MPEG2_MODE_IPB)
                 fprintf(stderr, "Waning: MODE must be 0, 1, or 2\n");
             else
@@ -686,7 +685,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
         case 'p':
             tmp = atoi(optarg);
-            
+
             if (tmp < 0 || tmp > 1)
                 fprintf(stderr, "Waning: PROFILE must be 0 or 1\n");
             else
@@ -696,7 +695,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
         case 'l':
             tmp = atoi(optarg);
-            
+
             if (tmp < MPEG2_LEVEL_LOW || tmp > MPEG2_LEVEL_HIGH)
                 fprintf(stderr, "Waning: LEVEL must be 0, 1, or 2\n");
             else
@@ -716,7 +715,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
     return;
 
-print_usage:    
+print_usage:
     usage(argv[0]);
 err_exit:
     mpeg2enc_exit(ctx, 1);
@@ -727,7 +726,7 @@ err_exit:
  */
 void
 mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
-                                VAEncSequenceParameterBufferMPEG2 *seq_param)
+                                 VAEncSequenceParameterBufferMPEG2 *seq_param)
 {
     int profile = 4, level = 8;
 
@@ -762,7 +761,7 @@ mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
         assert(0);
         break;
     }
-        
+
     seq_param->intra_period = ctx->intra_period;
     seq_param->ip_period = ctx->ip_period;   /* FIXME: ??? */
     seq_param->picture_width = ctx->width;
@@ -786,12 +785,12 @@ mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
 
     seq_param->gop_header.bits.time_code = (1 << 12); /* bit12: marker_bit */
     seq_param->gop_header.bits.closed_gop = 0;
-    seq_param->gop_header.bits.broken_link = 0;    
+    seq_param->gop_header.bits.broken_link = 0;
 }
 
 static void
 mpeg2enc_init_picture_parameter(struct mpeg2enc_context *ctx,
-                               VAEncPictureParameterBufferMPEG2 *pic_param)
+                                VAEncPictureParameterBufferMPEG2 *pic_param)
 {
     pic_param->forward_reference_picture = VA_INVALID_ID;
     pic_param->backward_reference_picture = VA_INVALID_ID;
@@ -807,7 +806,7 @@ mpeg2enc_init_picture_parameter(struct mpeg2enc_context *ctx,
 
     pic_param->picture_coding_extension.bits.intra_dc_precision = 0; /* 8bits */
     pic_param->picture_coding_extension.bits.picture_structure = 3; /* frame picture */
-    pic_param->picture_coding_extension.bits.top_field_first = 0; 
+    pic_param->picture_coding_extension.bits.top_field_first = 0;
     pic_param->picture_coding_extension.bits.frame_pred_frame_dct = 1; /* FIXME */
     pic_param->picture_coding_extension.bits.concealment_motion_vectors = 0;
     pic_param->picture_coding_extension.bits.q_scale_type = 0;
@@ -818,7 +817,7 @@ mpeg2enc_init_picture_parameter(struct mpeg2enc_context *ctx,
     pic_param->picture_coding_extension.bits.composite_display_flag = 0;
 }
 
-static void 
+static void
 mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
 {
     VAEntrypoint *entrypoint_list;
@@ -841,7 +840,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
                              entrypoint_list,
                              &num_entrypoints);
 
-    for	(entrypoint = 0; entrypoint < num_entrypoints; entrypoint++) {
+    for (entrypoint = 0; entrypoint < num_entrypoints; entrypoint++) {
         if (entrypoint_list[entrypoint] == VAEntrypointEncSlice)
             break;
     }
@@ -889,7 +888,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
                                 ctx->config_id,
                                 ctx->width,
                                 ctx->height,
-                                VA_PROGRESSIVE, 
+                                VA_PROGRESSIVE,
                                 0,
                                 0,
                                 &ctx->context_id);
@@ -906,7 +905,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 }
 
-static void 
+static void
 mpeg2enc_init(struct mpeg2enc_context *ctx)
 {
     int i;
@@ -955,12 +954,12 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
     ctx->current_input_surface = SID_INPUT_PICTURE_0;
     ctx->current_upload_surface = SID_INPUT_PICTURE_1;
     ctx->upload_thread_value = pthread_create(&ctx->upload_thread_id,
-                                              NULL,
-                                              upload_yuv_to_surface,
-                                              ctx);
+                               NULL,
+                               upload_yuv_to_surface,
+                               ctx);
 }
 
-static int 
+static int
 mpeg2enc_time_code(VAEncSequenceParameterBufferMPEG2 *seq_param,
                    int num_frames)
 {
@@ -1028,18 +1027,18 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
     f_code_x = 0xf;
     f_code_y = 0xf;
     if (pic_param->picture_type != VAEncPictureTypeIntra) {
-	if (ctx->level == MPEG2_LEVEL_LOW) {
-		f_code_x = 7;
-		f_code_y = 4;
-	} else if (ctx->level == MPEG2_LEVEL_MAIN) {
-		f_code_x = 8;
-		f_code_y = 5;
-	} else {
-		f_code_x = 9;
-		f_code_y = 5;
-	}
+        if (ctx->level == MPEG2_LEVEL_LOW) {
+            f_code_x = 7;
+            f_code_y = 4;
+        } else if (ctx->level == MPEG2_LEVEL_MAIN) {
+            f_code_x = 8;
+            f_code_y = 5;
+        } else {
+            f_code_x = 9;
+            f_code_y = 5;
+        }
     }
-    
+
     if (pic_param->picture_type == VAEncPictureTypeIntra) {
         pic_param->f_code[0][0] = 0xf;
         pic_param->f_code[0][1] = 0xf;
@@ -1069,9 +1068,9 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
 
 static void
 mpeg2enc_update_picture_parameter_buffer(struct mpeg2enc_context *ctx,
-                                         VAEncPictureType picture_type,
-                                         int coded_order,
-                                         int display_order)
+        VAEncPictureType picture_type,
+        int coded_order,
+        int display_order)
 {
     VAEncPictureParameterBufferMPEG2 *pic_param = &ctx->pic_param;
     VAStatus va_status;
@@ -1088,7 +1087,7 @@ mpeg2enc_update_picture_parameter_buffer(struct mpeg2enc_context *ctx,
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 }
 
-static void 
+static void
 mpeg2enc_update_slice_parameter(struct mpeg2enc_context *ctx, VAEncPictureType picture_type)
 {
     VAEncSequenceParameterBufferMPEG2 *seq_param;
@@ -1123,7 +1122,7 @@ mpeg2enc_update_slice_parameter(struct mpeg2enc_context *ctx, VAEncPictureType p
     CHECK_VASTATUS(va_status, "vaCreateBuffer");;
 }
 
-static int 
+static int
 begin_picture(struct mpeg2enc_context *ctx,
               int coded_order,
               int display_order,
@@ -1139,7 +1138,7 @@ begin_picture(struct mpeg2enc_context *ctx,
         fprintf(stderr, "FATAL error!!!\n");
         exit(1);
     }
-    
+
     pthread_join(ctx->upload_thread_id, NULL);
 
     ctx->upload_thread_value = -1;
@@ -1161,14 +1160,14 @@ begin_picture(struct mpeg2enc_context *ctx,
                                    VAEncPackedHeaderParameterBufferType,
                                    sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
                                    &ctx->packed_seq_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(ctx->va_dpy,
                                    ctx->context_id,
                                    VAEncPackedHeaderDataBufferType,
                                    (length_in_bits + 7) / 8, 1, packed_seq_buffer,
                                    &ctx->packed_seq_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         free(packed_seq_buffer);
     }
@@ -1183,14 +1182,14 @@ begin_picture(struct mpeg2enc_context *ctx,
                                VAEncPackedHeaderParameterBufferType,
                                sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
                                &ctx->packed_pic_header_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     va_status = vaCreateBuffer(ctx->va_dpy,
                                ctx->context_id,
                                VAEncPackedHeaderDataBufferType,
                                (length_in_bits + 7) / 8, 1, packed_pic_buffer,
                                &ctx->packed_pic_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     free(packed_pic_buffer);
 
@@ -1203,7 +1202,7 @@ begin_picture(struct mpeg2enc_context *ctx,
                                1,
                                seq_param,
                                &ctx->seq_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");;
 
     /* slice parameter */
     mpeg2enc_update_slice_parameter(ctx, picture_type);
@@ -1211,7 +1210,7 @@ begin_picture(struct mpeg2enc_context *ctx,
     return 0;
 }
 
-static int 
+static int
 mpeg2enc_render_picture(struct mpeg2enc_context *ctx)
 {
     VAStatus va_status;
@@ -1236,27 +1235,27 @@ mpeg2enc_render_picture(struct mpeg2enc_context *ctx)
     va_status = vaBeginPicture(ctx->va_dpy,
                                ctx->context_id,
                                surface_ids[ctx->current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaBeginPicture");
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
 
     va_status = vaRenderPicture(ctx->va_dpy,
                                 ctx->context_id,
                                 va_buffers,
                                 num_va_buffers);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     va_status = vaRenderPicture(ctx->va_dpy,
                                 ctx->context_id,
                                 &ctx->slice_param_buf_id[0],
                                 ctx->num_slice_groups);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     va_status = vaEndPicture(ctx->va_dpy, ctx->context_id);
-    CHECK_VASTATUS(va_status,"vaEndPicture");
+    CHECK_VASTATUS(va_status, "vaEndPicture");
 
     return 0;
 }
 
-static int 
+static int
 mpeg2enc_destroy_buffers(struct mpeg2enc_context *ctx, VABufferID *va_buffers, unsigned int num_va_buffers)
 {
     VAStatus va_status;
@@ -1265,7 +1264,7 @@ mpeg2enc_destroy_buffers(struct mpeg2enc_context *ctx, VABufferID *va_buffers, u
     for (i = 0; i < num_va_buffers; i++) {
         if (va_buffers[i] != VA_INVALID_ID) {
             va_status = vaDestroyBuffer(ctx->va_dpy, va_buffers[i]);
-            CHECK_VASTATUS(va_status,"vaDestroyBuffer");
+            CHECK_VASTATUS(va_status, "vaDestroyBuffer");
             va_buffers[i] = VA_INVALID_ID;
         }
     }
@@ -1279,19 +1278,19 @@ end_picture(struct mpeg2enc_context *ctx, VAEncPictureType picture_type, int nex
     VABufferID tempID;
 
     /* Prepare for next picture */
-    tempID = surface_ids[SID_RECON_PICTURE];  
+    tempID = surface_ids[SID_RECON_PICTURE];
 
     if (picture_type != VAEncPictureTypeBidirectional) {
         if (next_is_bpic) {
-            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L1]; 
-            surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;	
+            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L1];
+            surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;
         } else {
-            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0]; 
+            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0];
             surface_ids[SID_REFERENCE_PICTURE_L0] = tempID;
         }
     } else {
         if (!next_is_bpic) {
-            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0]; 
+            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0];
             surface_ids[SID_REFERENCE_PICTURE_L0] = surface_ids[SID_REFERENCE_PICTURE_L1];
             surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;
         }
@@ -1320,14 +1319,14 @@ store_coded_buffer(struct mpeg2enc_context *ctx, VAEncPictureType picture_type)
     size_t w_items;
 
     va_status = vaSyncSurface(ctx->va_dpy, surface_ids[ctx->current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaSyncSurface");
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     surface_status = 0;
     va_status = vaQuerySurfaceStatus(ctx->va_dpy, surface_ids[ctx->current_input_surface], &surface_status);
-    CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
+    CHECK_VASTATUS(va_status, "vaQuerySurfaceStatus");
 
     va_status = vaMapBuffer(ctx->va_dpy, ctx->codedbuf_buf_id, (void **)(&coded_buffer_segment));
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
     if (coded_buffer_segment->status & VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK) {
@@ -1350,7 +1349,7 @@ store_coded_buffer(struct mpeg2enc_context *ctx, VAEncPictureType picture_type)
         if (ctx->codedbuf_i_size > slice_data_length * 3 / 2) {
             ctx->codedbuf_i_size = slice_data_length * 3 / 2;
         }
-        
+
         if (ctx->codedbuf_pb_size < slice_data_length) {
             ctx->codedbuf_pb_size = slice_data_length;
         }
@@ -1375,7 +1374,7 @@ encode_picture(struct mpeg2enc_context *ctx,
 {
     VAStatus va_status;
     int ret = 0, codedbuf_size;
-    
+
     begin_picture(ctx, coded_order, display_order, picture_type);
 
     if (1) {
@@ -1385,9 +1384,9 @@ encode_picture(struct mpeg2enc_context *ctx,
 
         fseek(ctx->ifp, ctx->frame_size * next_display_order, SEEK_SET);
         ctx->upload_thread_value = pthread_create(&ctx->upload_thread_id,
-                                                  NULL,
-                                                  upload_yuv_to_surface,
-                                                  ctx);
+                                   NULL,
+                                   upload_yuv_to_surface,
+                                   ctx);
     }
 
     do {
@@ -1407,7 +1406,7 @@ encode_picture(struct mpeg2enc_context *ctx,
                                    VAEncCodedBufferType,
                                    codedbuf_size, 1, NULL,
                                    &ctx->codedbuf_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         /* picture parameter set */
         mpeg2enc_update_picture_parameter_buffer(ctx, picture_type, coded_order, display_order);
@@ -1429,7 +1428,7 @@ update_next_frame_info(struct mpeg2enc_context *ctx,
     if (((curr_coded_order + 1) % ctx->intra_period) == 0) {
         ctx->next_type = VAEncPictureTypeIntra;
         ctx->next_display_order = curr_coded_order + 1;
-        
+
         return;
     }
 
@@ -1509,7 +1508,7 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
 static void
 mpeg2enc_release_va_resources(struct mpeg2enc_context *ctx)
 {
-    vaDestroySurfaces(ctx->va_dpy, surface_ids, SID_NUMBER);	
+    vaDestroySurfaces(ctx->va_dpy, surface_ids, SID_NUMBER);
     vaDestroyContext(ctx->va_dpy, ctx->context_id);
     vaDestroyConfig(ctx->va_dpy, ctx->config_id);
     vaTerminate(ctx->va_dpy);
@@ -1523,11 +1522,11 @@ mpeg2enc_end(struct mpeg2enc_context *ctx)
     mpeg2enc_release_va_resources(ctx);
 }
 
-int 
+int
 main(int argc, char *argv[])
 {
     struct mpeg2enc_context ctx;
-    struct timeval tpstart, tpend; 
+    struct timeval tpstart, tpend;
     float timeuse;
 
     gettimeofday(&tpstart, NULL);

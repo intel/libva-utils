@@ -122,7 +122,7 @@ read_value_string(FILE *fp, const char* field_name, char* value)
         while (*str == ' ')
             str++;
 
-        *(str + strlen(str)-1) = '\0';
+        *(str + strlen(str) - 1) = '\0';
         strcpy(value, str);
 
         return 0;
@@ -151,8 +151,8 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
     char str[MAX_LEN];
 
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find integer field: %s", field_name);
-       return -1;
+        printf("Failed to find integer field: %s", field_name);
+        return -1;
     }
 
     *value = (uint32_t)atoi(str);
@@ -164,8 +164,8 @@ read_value_float(FILE *fp, const char* field_name, float* value)
 {
     char str[MAX_LEN];
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find float field: %s \n",field_name);
-       return -1;
+        printf("Failed to find float field: %s \n", field_name);
+        return -1;
     }
 
     *value = atof(str);
@@ -175,9 +175,9 @@ read_value_float(FILE *fp, const char* field_name, float* value)
 static float
 adjust_to_range(VAProcFilterValueRange *range, float value)
 {
-    if (value < range->min_value || value > range->max_value){
+    if (value < range->min_value || value > range->max_value) {
         printf("Value: %f exceed range: (%f ~ %f), force to use default: %f \n",
-                value, range->min_value, range->max_value, range->default_value);
+               value, range->min_value, range->max_value, range->default_value);
         return range->default_value;
     }
 
@@ -198,13 +198,13 @@ create_surface(VASurfaceID * p_surface_id,
 
     va_status = vaCreateSurfaces(va_dpy,
                                  format,
-                                 width ,
+                                 width,
                                  height,
                                  p_surface_id,
                                  1,
                                  &surface_attrib,
                                  1);
-   return va_status;
+    return va_status;
 }
 
 static VAStatus
@@ -237,16 +237,16 @@ construct_nv12_mask_surface(VASurfaceID surface_id,
             memset(y_dst, (min_luma + max_luma) / 2, surface_image.pitches[0]);
 
         y_dst += surface_image.pitches[0];
-     }
+    }
 
-     /* fill UV plane */
-     for (row = 0; row < surface_image.height / 2; row++) {
-         for (col = 0; col < surface_image.width / 2; col++) {
-             u_dst[col * 2] = 128;
-             u_dst[col * 2 + 1] = 128;
+    /* fill UV plane */
+    for (row = 0; row < surface_image.height / 2; row++) {
+        for (col = 0; col < surface_image.width / 2; col++) {
+            u_dst[col * 2] = 128;
+            u_dst[col * 2 + 1] = 128;
         }
         u_dst += surface_image.pitches[1];
-     }
+    }
 
     vaUnmapBuffer(va_dpy, surface_image.buf);
     vaDestroyImage(va_dpy, surface_image.image_id);
@@ -257,7 +257,7 @@ construct_nv12_mask_surface(VASurfaceID surface_id,
 /* Load yuv frame to NV12/YV12/I420 surface*/
 static VAStatus
 upload_yuv_frame_to_yuv_surface(FILE *fp,
-                                 VASurfaceID surface_id)
+                                VASurfaceID surface_id)
 {
     VAStatus va_status;
     VAImage surface_image;
@@ -276,7 +276,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         frame_size = surface_image.width * surface_image.height * 3 / 2;
         newImageBuffer = (unsigned char*)malloc(frame_size);
@@ -304,13 +304,13 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
 
         y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
 
-        if(surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        }else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        }else {
+        } else {
             u_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_dst = u_dst;
         }
@@ -323,16 +323,16 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
         }
 
         /* UV plane */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height /2; row ++){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
                 if (g_src_file_fourcc == VA_FOURCC_I420 ||
                     g_src_file_fourcc == VA_FOURCC_YV12) {
-                    memcpy(v_dst, v_src, surface_image.width/2);
-                    memcpy(u_dst, u_src, surface_image.width/2);
+                    memcpy(v_dst, v_src, surface_image.width / 2);
+                    memcpy(u_dst, u_src, surface_image.width / 2);
 
-                    v_src += surface_image.width/2;
-                    u_src += surface_image.width/2;
+                    v_src += surface_image.width / 2;
+                    u_src += surface_image.width / 2;
                 } else {
                     for (col = 0; col < surface_image.width / 2; col++) {
                         u_dst[col] = u_src[col * 2];
@@ -343,7 +343,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                     v_src = u_src;
                 }
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_dst += surface_image.pitches[1];
                     u_dst += surface_image.pitches[2];
                 } else {
@@ -351,7 +351,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                     u_dst += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
                 if (g_src_file_fourcc == VA_FOURCC_I420 ||
                     g_src_file_fourcc == VA_FOURCC_YV12) {
@@ -438,7 +438,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 u_dst += surface_image.pitches[1];
                 v_dst += surface_image.pitches[2];
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_P010){
+        } else if (surface_image.format.fourcc == VA_FOURCC_P010) {
             assert(g_src_file_fourcc == VA_FOURCC_P010);
 
             u_src = newImageBuffer + surface_image.width * surface_image.height * 2;
@@ -457,14 +457,14 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
                 v_dst = u_dst;
             }
         }
-     }  else if ((surface_image.format.fourcc == VA_FOURCC_RGBA &&
-                  g_src_file_fourcc == VA_FOURCC_RGBA) ||
-                 (surface_image.format.fourcc == VA_FOURCC_RGBX &&
-                  g_src_file_fourcc == VA_FOURCC_RGBX) ||
-                 (surface_image.format.fourcc == VA_FOURCC_BGRA &&
-                  g_src_file_fourcc == VA_FOURCC_BGRA) ||
-                 (surface_image.format.fourcc == VA_FOURCC_BGRX &&
-                  g_src_file_fourcc == VA_FOURCC_BGRX)) {
+    }  else if ((surface_image.format.fourcc == VA_FOURCC_RGBA &&
+                 g_src_file_fourcc == VA_FOURCC_RGBA) ||
+                (surface_image.format.fourcc == VA_FOURCC_RGBX &&
+                 g_src_file_fourcc == VA_FOURCC_RGBX) ||
+                (surface_image.format.fourcc == VA_FOURCC_BGRA &&
+                 g_src_file_fourcc == VA_FOURCC_BGRA) ||
+                (surface_image.format.fourcc == VA_FOURCC_BGRX &&
+                 g_src_file_fourcc == VA_FOURCC_BGRX)) {
         frame_size = surface_image.width * surface_image.height * 4;
         newImageBuffer = (unsigned char*)malloc(frame_size);
         assert(newImageBuffer);
@@ -483,7 +483,7 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             y_dst += surface_image.pitches[0];
         }
     } else if (surface_image.format.fourcc == VA_FOURCC_RGBP &&
-                g_src_file_fourcc == VA_FOURCC_RGBP) {
+               g_src_file_fourcc == VA_FOURCC_RGBP) {
         int i;
 
         frame_size = surface_image.width * surface_image.height * 3;
@@ -506,19 +506,19 @@ upload_yuv_frame_to_yuv_surface(FILE *fp,
             }
         }
     } else {
-         printf("Not supported YUV surface fourcc !!! \n");
-         return VA_STATUS_ERROR_INVALID_SURFACE;
-     }
+        printf("Not supported YUV surface fourcc !!! \n");
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+    }
 
-     if (newImageBuffer){
-         free(newImageBuffer);
-         newImageBuffer = NULL;
-     }
+    if (newImageBuffer) {
+        free(newImageBuffer);
+        newImageBuffer = NULL;
+    }
 
-     vaUnmapBuffer(va_dpy, surface_image.buf);
-     vaDestroyImage(va_dpy, surface_image.image_id);
+    vaUnmapBuffer(va_dpy, surface_image.buf);
+    vaDestroyImage(va_dpy, surface_image.image_id);
 
-     return VA_STATUS_SUCCESS;
+    return VA_STATUS_SUCCESS;
 }
 
 /* Store NV12/YV12/I420 surface to yv12 file */
@@ -544,10 +544,10 @@ store_yuv_surface_to_yv12_file(FILE *fp,
     /* store the surface to one YV12 file or one bmp file*/
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         uint32_t y_size = surface_image.width * surface_image.height;
-        uint32_t u_size = y_size/4;
+        uint32_t u_size = y_size / 4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
         assert(newImageBuffer);
@@ -558,13 +558,13 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         u_dst = newImageBuffer + y_size + u_size;
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
-        if (surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
@@ -577,16 +577,16 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         }
 
         /* UV plane copy */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height /2; row ++){
-                memcpy(v_dst, v_src, surface_image.width/2);
-                memcpy(u_dst, u_src, surface_image.width/2);
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
+                memcpy(v_dst, v_src, surface_image.width / 2);
+                memcpy(u_dst, u_src, surface_image.width / 2);
 
-                v_dst += surface_image.width/2;
-                u_dst += surface_image.width/2;
+                v_dst += surface_image.width / 2;
+                u_dst += surface_image.width / 2;
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_src += surface_image.pitches[1];
                     u_src += surface_image.pitches[2];
                 } else {
@@ -594,9 +594,9 @@ store_yuv_surface_to_yv12_file(FILE *fp,
                     u_src += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
-                for (col = 0; col < surface_image.width /2; col++) {
+                for (col = 0; col < surface_image.width / 2; col++) {
                     u_dst[col] = u_src[col * 2];
                     v_dst[col] = u_src[col * 2 + 1];
                 }
@@ -617,7 +617,7 @@ store_yuv_surface_to_yv12_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -650,10 +650,10 @@ store_yuv_surface_to_i420_file(FILE *fp,
     /* store the surface to one i420 file */
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         uint32_t y_size = surface_image.width * surface_image.height;
-        uint32_t u_size = y_size/4;
+        uint32_t u_size = y_size / 4;
 
         newImageBuffer = (unsigned char*)malloc(y_size * 3 / 2);
         assert(newImageBuffer);
@@ -664,13 +664,13 @@ store_yuv_surface_to_i420_file(FILE *fp,
         v_dst = newImageBuffer + y_size + u_size;
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
-        if (surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
@@ -683,16 +683,16 @@ store_yuv_surface_to_i420_file(FILE *fp,
         }
 
         /* UV plane copy */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height /2; row ++){
-                memcpy(v_dst, v_src, surface_image.width/2);
-                memcpy(u_dst, u_src, surface_image.width/2);
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
+                memcpy(v_dst, v_src, surface_image.width / 2);
+                memcpy(u_dst, u_src, surface_image.width / 2);
 
-                v_dst += surface_image.width/2;
-                u_dst += surface_image.width/2;
+                v_dst += surface_image.width / 2;
+                u_dst += surface_image.width / 2;
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_src += surface_image.pitches[1];
                     u_src += surface_image.pitches[2];
                 } else {
@@ -700,9 +700,9 @@ store_yuv_surface_to_i420_file(FILE *fp,
                     u_src += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
-                for (col = 0; col < surface_image.width /2; col++) {
+                for (col = 0; col < surface_image.width / 2; col++) {
                     u_dst[col] = u_src[col * 2];
                     v_dst[col] = u_src[col * 2 + 1];
                 }
@@ -723,7 +723,7 @@ store_yuv_surface_to_i420_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -756,7 +756,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
     /* store the surface to one nv12 file */
     if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
         surface_image.format.fourcc == VA_FOURCC_I420 ||
-        surface_image.format.fourcc == VA_FOURCC_NV12){
+        surface_image.format.fourcc == VA_FOURCC_NV12) {
 
         uint32_t y_size = surface_image.width * surface_image.height;
 
@@ -769,13 +769,13 @@ store_yuv_surface_to_nv12_file(FILE *fp,
 
         y_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
 
-        if (surface_image.format.fourcc == VA_FOURCC_YV12){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12) {
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_I420){
+        } else if (surface_image.format.fourcc == VA_FOURCC_I420) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
-        } else if(surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
             v_src = u_src;
         }
@@ -788,9 +788,9 @@ store_yuv_surface_to_nv12_file(FILE *fp,
         }
 
         /* UV plane copy */
-        if (surface_image.format.fourcc == VA_FOURCC_YV12||
-            surface_image.format.fourcc == VA_FOURCC_I420){
-            for (row = 0; row < surface_image.height / 2; row ++){
+        if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+            surface_image.format.fourcc == VA_FOURCC_I420) {
+            for (row = 0; row < surface_image.height / 2; row ++) {
                 for (col = 0; col < surface_image.width / 2; col++) {
                     u_dst[col * 2] = u_src[col];
                     u_dst[col * 2 + 1] = v_src[col];
@@ -798,7 +798,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
 
                 u_dst += surface_image.width;
 
-                if (surface_image.format.fourcc == VA_FOURCC_YV12){
+                if (surface_image.format.fourcc == VA_FOURCC_YV12) {
                     v_src += surface_image.pitches[1];
                     u_src += surface_image.pitches[2];
                 } else {
@@ -806,7 +806,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
                     u_src += surface_image.pitches[1];
                 }
             }
-        } else if (surface_image.format.fourcc == VA_FOURCC_NV12){
+        } else if (surface_image.format.fourcc == VA_FOURCC_NV12) {
             for (row = 0; row < surface_image.height / 2; row++) {
                 memcpy(u_dst, u_src, surface_image.width);
                 u_dst += surface_image.width;
@@ -824,7 +824,7 @@ store_yuv_surface_to_nv12_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -887,7 +887,7 @@ store_packed_yuv_surface_to_packed_file(FILE *fp,
         return VA_STATUS_ERROR_INVALID_SURFACE;
     }
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -940,7 +940,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
         u_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[1]);
         v_src = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[2]);
 
-        for (row = 0; row < surface_image.height / 2; row++){
+        for (row = 0; row < surface_image.height / 2; row++) {
             memcpy(u_dst, u_src, surface_image.width);
             memcpy(v_dst, v_src, surface_image.width);
 
@@ -973,7 +973,7 @@ store_yuv_surface_to_10bit_file(FILE *fp, VASurfaceID surface_id)
         n_items = fwrite(newImageBuffer, y_size * 3 / 2, 1, fp);
     } while (n_items != 1);
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -1020,7 +1020,7 @@ store_rgb_surface_to_rgb_file(FILE *fp, VASurfaceID surface_id)
         n_items = fwrite(newImageBuffer, frame_size, 1, fp);
     } while (n_items != 1);
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -1070,7 +1070,7 @@ store_rgbp_surface_to_rgbp_file(FILE *fp, VASurfaceID surface_id)
         n_items = fwrite(newImageBuffer, frame_size, 1, fp);
     } while (n_items != 1);
 
-    if (newImageBuffer){
+    if (newImageBuffer) {
         free(newImageBuffer);
         newImageBuffer = NULL;
     }
@@ -1141,7 +1141,7 @@ denoise_filter_init(VABufferID *filter_param_buf_id)
     va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
                                            VAProcFilterNoiseReduction,
                                            &denoise_caps, &num_denoise_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcFilterCaps");
 
     if (read_value_float(g_config_file_fd, "DENOISE_INTENSITY", &intensity)) {
         printf("Read denoise intensity failed, use default value");
@@ -1157,7 +1157,7 @@ denoise_filter_init(VABufferID *filter_param_buf_id)
     va_status = vaCreateBuffer(va_dpy, context_id,
                                VAProcFilterParameterBufferType, sizeof(denoise_param), 1,
                                &denoise_param, &denoise_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     *filter_param_buf_id = denoise_param_buf_id;
 
@@ -1171,29 +1171,29 @@ denoise_filter_init(VABufferID *filter_param_buf_id)
 static VAStatus
 skintone_filter_init(VABufferID *filter_param_buf_id)
 {
-     VAStatus va_status = VA_STATUS_SUCCESS;
-     VAProcFilterParameterBuffer stde_param;
-     VABufferID stde_param_buf_id;
-     uint8_t stde_factor = 0;
+    VAStatus va_status = VA_STATUS_SUCCESS;
+    VAProcFilterParameterBuffer stde_param;
+    VABufferID stde_param_buf_id;
+    uint8_t stde_factor = 0;
 
-     if (read_value_uint8(g_config_file_fd, "STDE_FACTOR", &stde_factor)) {
+    if (read_value_uint8(g_config_file_fd, "STDE_FACTOR", &stde_factor)) {
         printf("Read STDE Factor failed, use default value");
         stde_factor = 0;
     }
 
     printf("Applying STDE factor: %d\n", stde_factor);
 
-     stde_param.type  = VAProcFilterSkinToneEnhancement;
-     stde_param.value = stde_factor;
+    stde_param.type  = VAProcFilterSkinToneEnhancement;
+    stde_param.value = stde_factor;
 
-     va_status = vaCreateBuffer(va_dpy, context_id,
-                                VAProcFilterParameterBufferType, sizeof(stde_param), 1,
-                                &stde_param, &stde_param_buf_id);
-     CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    va_status = vaCreateBuffer(va_dpy, context_id,
+                               VAProcFilterParameterBufferType, sizeof(stde_param), 1,
+                               &stde_param, &stde_param_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-     *filter_param_buf_id = stde_param_buf_id;
+    *filter_param_buf_id = stde_param_buf_id;
 
-     return va_status;
+    return va_status;
 }
 
 static VAStatus
@@ -1227,17 +1227,17 @@ deinterlace_filter_init(VABufferID *filter_param_buf_id)
     va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
                                            VAProcFilterDeinterlacing,
                                            &deinterlacing_caps, &num_deinterlacing_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcFilterCaps");
 
     for (i = 0; i < VAProcDeinterlacingCount; i ++)
-       if (deinterlacing_caps[i].type == deinterlacing_param.algorithm)
-         break;
+        if (deinterlacing_caps[i].type == deinterlacing_param.algorithm)
+            break;
 
     if (i == VAProcDeinterlacingCount) {
         printf("Deinterlacing algorithm: %d is not supported by driver, \
                 use defautl algorithm :%d \n",
-                deinterlacing_param.algorithm,
-                VAProcDeinterlacingBob);
+               deinterlacing_param.algorithm,
+               VAProcDeinterlacingBob);
         deinterlacing_param.algorithm = VAProcDeinterlacingBob;
     }
 
@@ -1276,11 +1276,11 @@ sharpening_filter_init(VABufferID *filter_param_buf_id)
     VAProcFilterCap sharpening_caps;
     uint32_t num_sharpening_caps = 1;
     va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
-                VAProcFilterSharpening,
-                &sharpening_caps, &num_sharpening_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+                                           VAProcFilterSharpening,
+                                           &sharpening_caps, &num_sharpening_caps);
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcFilterCaps");
 
-    if(read_value_float(g_config_file_fd, "SHARPENING_INTENSITY", &intensity)) {
+    if (read_value_float(g_config_file_fd, "SHARPENING_INTENSITY", &intensity)) {
         printf("Read sharpening intensity failed, use default value.");
         intensity = sharpening_caps.range.default_value;
     }
@@ -1316,7 +1316,7 @@ color_balance_filter_init(VABufferID *filter_param_buf_id)
     va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
                                            VAProcFilterColorBalance,
                                            &color_balance_caps, &num_color_balance_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcFilterCaps");
 
     count = 0;
     printf("Color balance params: ");
@@ -1375,14 +1375,14 @@ blending_state_init(VABlendState *state)
 
     /* read and check blend state */
     state->flags = 0;
-    if (!read_value_string(g_config_file_fd, "BLENDING_FLAGS", blending_flags_str)){
+    if (!read_value_string(g_config_file_fd, "BLENDING_FLAGS", blending_flags_str)) {
         if (strstr(blending_flags_str, "VA_BLEND_GLOBAL_ALPHA")) {
-           if (read_value_float(g_config_file_fd, "BLENDING_GLOBAL_ALPHA", &global_alpha)) {
-               global_alpha = 1.0  ;
-               printf("Use default global alpha : %4f \n", global_alpha);
-           }
-           state->flags |= VA_BLEND_GLOBAL_ALPHA;
-           state->global_alpha = global_alpha;
+            if (read_value_float(g_config_file_fd, "BLENDING_GLOBAL_ALPHA", &global_alpha)) {
+                global_alpha = 1.0  ;
+                printf("Use default global alpha : %4f \n", global_alpha);
+            }
+            state->flags |= VA_BLEND_GLOBAL_ALPHA;
+            state->global_alpha = global_alpha;
         }
         if (strstr(blending_flags_str, "VA_BLEND_LUMA_KEY")) {
             if (read_value_uint8(g_config_file_fd, "BLENDING_MIN_LUMA", &g_blending_min_luma)) {
@@ -1399,20 +1399,20 @@ blending_state_init(VABlendState *state)
         }
 
         printf("Blending type = %s, alpha = %f, min_luma = %3d, max_luma = %3d \n",
-              blending_flags_str, global_alpha, min_luma, max_luma);
+               blending_flags_str, global_alpha, min_luma, max_luma);
     }
 
     VAProcPipelineCaps pipeline_caps;
     va_status = vaQueryVideoProcPipelineCaps(va_dpy, context_id,
                 NULL, 0, &pipeline_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcPipelineCaps");
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcPipelineCaps");
 
-    if (!pipeline_caps.blend_flags){
+    if (!pipeline_caps.blend_flags) {
         printf("Blending is not supported in driver! \n");
         return VA_STATUS_ERROR_UNIMPLEMENTED;
     }
 
-    if (! (pipeline_caps.blend_flags & state->flags)) {
+    if (!(pipeline_caps.blend_flags & state->flags)) {
         printf("Driver do not support current blending flags: %d", state->flags);
         return VA_STATUS_ERROR_UNIMPLEMENTED;
     }
@@ -1439,25 +1439,25 @@ video_frame_process(VAProcFilterType filter_type,
     uint32_t filter_count = 1;
 
     /* create denoise_filter buffer id */
-    switch(filter_type){
-      case VAProcFilterNoiseReduction:
-           denoise_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterDeinterlacing:
-           deinterlace_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterSharpening:
-           sharpening_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterColorBalance:
-           color_balance_filter_init(&filter_param_buf_id);
-           break;
-      case VAProcFilterSkinToneEnhancement:
-            skintone_filter_init(&filter_param_buf_id);
-            break;
-      default :
-           filter_count = 0;
-         break;
+    switch (filter_type) {
+    case VAProcFilterNoiseReduction:
+        denoise_filter_init(&filter_param_buf_id);
+        break;
+    case VAProcFilterDeinterlacing:
+        deinterlace_filter_init(&filter_param_buf_id);
+        break;
+    case VAProcFilterSharpening:
+        sharpening_filter_init(&filter_param_buf_id);
+        break;
+    case VAProcFilterColorBalance:
+        color_balance_filter_init(&filter_param_buf_id);
+        break;
+    case VAProcFilterSkinToneEnhancement:
+        skintone_filter_init(&filter_param_buf_id);
+        break;
+    default :
+        filter_count = 0;
+        break;
     }
 
     /* Fill pipeline buffer */
@@ -1481,7 +1481,7 @@ video_frame_process(VAProcFilterType filter_type,
 
 #if BLEND_ON
     /* Blending related state */
-    if (g_blending_enabled){
+    if (g_blending_enabled) {
         blending_state_init(&state);
         pipeline_param.blend_state = &state;
     }
@@ -1511,10 +1511,10 @@ video_frame_process(VAProcFilterType filter_type,
     CHECK_VASTATUS(va_status, "vaEndPicture");
 
     if (filter_param_buf_id != VA_INVALID_ID)
-        vaDestroyBuffer(va_dpy,filter_param_buf_id);
+        vaDestroyBuffer(va_dpy, filter_param_buf_id);
 
     if (pipeline_param_buf_id != VA_INVALID_ID)
-        vaDestroyBuffer(va_dpy,pipeline_param_buf_id);
+        vaDestroyBuffer(va_dpy, pipeline_param_buf_id);
 
     return va_status;
 }
@@ -1559,20 +1559,20 @@ vpp_context_create()
                                       VAProfileNone,
                                       VAEntrypointVideoProc,
                                       &attrib,
-                                     1);
+                                      1);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     if (!(attrib.value & g_out_format)) {
-        printf("RT format %d is not supported by VPP !\n",g_out_format);
+        printf("RT format %d is not supported by VPP !\n", g_out_format);
         assert(0);
     }
 
     /* Create surface/config/context for VPP pipeline */
     va_status = create_surface(&g_in_surface_id, g_in_pic_width, g_in_pic_height,
-                                g_in_fourcc, g_in_format);
+                               g_in_fourcc, g_in_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for input");
 
     va_status = create_surface(&g_out_surface_id, g_out_pic_width, g_out_pic_height,
-                                g_out_fourcc, g_out_format);
+                               g_out_fourcc, g_out_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for output");
 
     va_status = vaCreateConfig(va_dpy,
@@ -1586,24 +1586,24 @@ vpp_context_create()
     /* Source surface format check */
     uint32_t num_surf_attribs = VASurfaceAttribCount;
     VASurfaceAttrib * surf_attribs = (VASurfaceAttrib*)
-              malloc(sizeof(VASurfaceAttrib) * num_surf_attribs);
+                                     malloc(sizeof(VASurfaceAttrib) * num_surf_attribs);
     if (!surf_attribs)
-       assert(0);
+        assert(0);
 
     va_status = vaQuerySurfaceAttributes(va_dpy,
-                                        config_id,
-                                        surf_attribs,
-                                        &num_surf_attribs);
+                                         config_id,
+                                         surf_attribs,
+                                         &num_surf_attribs);
 
     if (va_status == VA_STATUS_ERROR_MAX_NUM_EXCEEDED) {
         surf_attribs = (VASurfaceAttrib*)realloc(surf_attribs,
-                        sizeof(VASurfaceAttrib) * num_surf_attribs);
-         if (!surf_attribs)
-             assert(0);
-         va_status = vaQuerySurfaceAttributes(va_dpy,
-                                              config_id,
-                                              surf_attribs,
-                                              &num_surf_attribs);
+                       sizeof(VASurfaceAttrib) * num_surf_attribs);
+        if (!surf_attribs)
+            assert(0);
+        va_status = vaQuerySurfaceAttributes(va_dpy,
+                                             config_id,
+                                             surf_attribs,
+                                             &num_surf_attribs);
     }
     CHECK_VASTATUS(va_status, "vaQuerySurfaceAttributes");
 
@@ -1642,7 +1642,7 @@ vpp_context_create()
 
         CHECK_VASTATUS(va_status, "vaQueryVideoProcFilters");
 
-        for (i = 0; i < supported_filter_num; i++){
+        for (i = 0; i < supported_filter_num; i++) {
             if (supported_filter_types[i] == g_filter_type)
                 break;
         }
@@ -1675,19 +1675,19 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     uint32_t tfourcc = VA_FOURCC('N', 'V', '1', '2');
     uint32_t tformat = VA_RT_FORMAT_YUV420;
 
-    if (!strcmp(str, "YV12")){
+    if (!strcmp(str, "YV12")) {
         tfourcc = VA_FOURCC('Y', 'V', '1', '2');
         tformat = VA_RT_FORMAT_YUV420;
-    } else if(!strcmp(str, "I420")){
+    } else if (!strcmp(str, "I420")) {
         tfourcc = VA_FOURCC('I', '4', '2', '0');
         tformat = VA_RT_FORMAT_YUV420;
-    } else if(!strcmp(str, "NV12")){
+    } else if (!strcmp(str, "NV12")) {
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
         tformat = VA_RT_FORMAT_YUV420;
-    } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
+    } else if (!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
         tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
         tformat = VA_RT_FORMAT_YUV422;
-    } else if(!strcmp(str, "UYVY")){
+    } else if (!strcmp(str, "UYVY")) {
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
         tformat = VA_RT_FORMAT_YUV422;
     } else if (!strcmp(str, "P010")) {
@@ -1748,7 +1748,7 @@ parse_basic_parameters()
     /* Read dst frame file information */
     read_value_string(g_config_file_fd, "DST_FILE_NAME", g_dst_file_name);
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_out_pic_width);
-    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT",&g_out_pic_height);
+    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT", &g_out_pic_height);
     read_value_string(g_config_file_fd, "DST_FRAME_FORMAT", str);
     parse_fourcc_and_format(str, &g_out_fourcc, &g_out_format);
 
@@ -1761,7 +1761,7 @@ parse_basic_parameters()
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
 
     /* Read filter type */
-    if (read_value_string(g_config_file_fd, "FILTER_TYPE", g_filter_type_name)){
+    if (read_value_string(g_config_file_fd, "FILTER_TYPE", g_filter_type_name)) {
         printf("Read filter type error !\n");
         assert(0);
     }
@@ -1775,7 +1775,7 @@ parse_basic_parameters()
     else if (!strcmp(g_filter_type_name, "VAProcFilterColorBalance"))
         g_filter_type = VAProcFilterColorBalance;
     else if (!strcmp(g_filter_type_name, "VAProcFilterSkinToneEnhancement"))
-         g_filter_type = VAProcFilterSkinToneEnhancement;
+        g_filter_type = VAProcFilterSkinToneEnhancement;
     else if (!strcmp(g_filter_type_name, "VAProcFilterNone"))
         g_filter_type = VAProcFilterNone;
     else {
@@ -1793,8 +1793,8 @@ parse_basic_parameters()
     if (g_in_pic_width != g_out_pic_width ||
         g_in_pic_height != g_out_pic_height)
         printf("Scaling will be done : from %4d x %4d to %4d x %4d \n",
-                g_in_pic_width, g_in_pic_height,
-                g_out_pic_width, g_out_pic_height);
+               g_in_pic_width, g_in_pic_height,
+               g_out_pic_width, g_out_pic_height);
 
     if (g_in_fourcc != g_out_fourcc)
         printf("Format conversion will be done: from %d to %d \n",
@@ -1808,7 +1808,7 @@ int32_t main(int32_t argc, char *argv[])
     VAStatus va_status;
     uint32_t i;
 
-    if (argc != 2){
+    if (argc != 2) {
         printf("Input error! please specify the configure file \n");
         return -1;
     }
@@ -1817,13 +1817,13 @@ int32_t main(int32_t argc, char *argv[])
     strncpy(g_config_file_name, argv[1], MAX_LEN);
     g_config_file_name[MAX_LEN - 1] = '\0';
 
-    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))){
-        printf("Open configure file %s failed!\n",g_config_file_name);
+    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))) {
+        printf("Open configure file %s failed!\n", g_config_file_name);
         assert(0);
     }
 
     /* Parse basic parameters */
-    if (parse_basic_parameters()){
+    if (parse_basic_parameters()) {
         printf("Parse parameters in configure file error\n");
         assert(0);
     }
@@ -1835,13 +1835,13 @@ int32_t main(int32_t argc, char *argv[])
     }
 
     /* Video frame fetch, process and store */
-    if (NULL == (g_src_file_fd = fopen(g_src_file_name, "r"))){
+    if (NULL == (g_src_file_fd = fopen(g_src_file_name, "r"))) {
         printf("Open SRC_FILE_NAME: %s failed, please specify it in config file: %s !\n",
-                g_src_file_name, g_config_file_name);
+               g_src_file_name, g_config_file_name);
         assert(0);
     }
 
-    if (NULL == (g_dst_file_fd = fopen(g_dst_file_name, "w"))){
+    if (NULL == (g_dst_file_fd = fopen(g_dst_file_name, "w"))) {
         printf("Open DST_FILE_NAME: %s failed, please specify it in config file: %s !\n",
                g_dst_file_name, g_config_file_name);
         assert(0);
@@ -1851,7 +1851,7 @@ int32_t main(int32_t argc, char *argv[])
     struct timeval start_time, end_time;
     gettimeofday(&start_time, NULL);
 
-    for (i = 0; i < g_frame_count; i ++){
+    for (i = 0; i < g_frame_count; i ++) {
         if (g_blending_enabled) {
             construct_nv12_mask_surface(g_in_surface_id, g_blending_min_luma, g_blending_max_luma);
             upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_out_surface_id);
@@ -1865,18 +1865,18 @@ int32_t main(int32_t argc, char *argv[])
 
     gettimeofday(&end_time, NULL);
     float duration = (end_time.tv_sec - start_time.tv_sec) +
-                     (end_time.tv_usec - start_time.tv_usec)/1000000.0;
-    printf("Finish processing, performance: \n" );
-    printf("%d frames processed in: %f s, ave time = %.6fs \n",g_frame_count, duration, duration/g_frame_count);
+                     (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+    printf("Finish processing, performance: \n");
+    printf("%d frames processed in: %f s, ave time = %.6fs \n", g_frame_count, duration, duration / g_frame_count);
 
     if (g_src_file_fd)
-       fclose(g_src_file_fd);
+        fclose(g_src_file_fd);
 
     if (g_dst_file_fd)
-       fclose(g_dst_file_fd);
+        fclose(g_dst_file_fd);
 
     if (g_config_file_fd)
-       fclose(g_config_file_fd);
+        fclose(g_config_file_fd);
 
     vpp_context_destroy();
 

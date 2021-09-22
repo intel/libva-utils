@@ -75,12 +75,12 @@ protected:
     virtual bool    is_config_compatible(DecodeDesc& desc);
     virtual bool    is_rt_foramt_supported(DecodeDesc& desc);
     virtual void    prepare_config_attribs(
-                        DecodeDesc& desc,
-                        VAConfigAttribArray& attribs);
+        DecodeDesc& desc,
+        VAConfigAttribArray& attribs);
     virtual void    prepare_surface_attribs(
-                        DecodeDesc& desc,
-                        VASurfaceAttribArray& attribs,
-                        bool bDecodeDownsamplingHinted);
+        DecodeDesc& desc,
+        VASurfaceAttribArray& attribs,
+        bool bDecodeDownsamplingHinted);
 
     // Member fucntions NOT inherit by children
     bool        is_slice_mode_supported(DecodeDesc& desc);
@@ -89,10 +89,10 @@ protected:
     VAStatus    render_picture(VAContextID& vaContextID);
     VAStatus    query_status();
     VAStatus    create_surface(
-                    uint32_t width,
-                    uint32_t height,
-                    VASurfaceAttribArray& vaAttribs,
-                    VASurfaceID& vaID);
+        uint32_t width,
+        uint32_t height,
+        VASurfaceAttribArray& vaAttribs,
+        VASurfaceID& vaID);
     void        delete_surface(VASurfaceID& vaID);
     void        create_decode_desc();
     int         check_process_pipeline_caps(DecodeDesc& desc);
@@ -116,8 +116,7 @@ protected:
     // Gfx surface access management
     std::map<VASurfaceID, VAImage>      m_images;   /**< @brief buf pointer */
 
-    enum SFC
-    {
+    enum SFC {
         MAX_IN_W,
         MAX_IN_H,
         MIN_IN_W,
@@ -135,7 +134,7 @@ protected:
     VARectangle                   m_rectSFC{};        /**< @brief Rectangle for SFC output */
     std::vector<uint32_t>         m_in4CC{};          /**< @brief input FOURCC */
     std::vector<uint32_t>         m_out4CC{};         /**< @brief output FOURCC */
-    std::map<SFC,uint32_t>        m_sfcSize{};        /**< @brief SFC sizes */
+    std::map<SFC, uint32_t>        m_sfcSize{};       /**< @brief SFC sizes */
     std::vector<VASurfaceID>      m_sfcIDs{};         /**< @brief sfc surfaces */
     VAProcPipelineParameterBuffer m_vaProcBuffer{};   /**< @brief sfc pipeline buffer */
 };

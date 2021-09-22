@@ -35,21 +35,21 @@ inline std::ostream&
 operator<<(std::ostream& os, const VAProfile& profile)
 {
     return os << static_cast<int>(profile)
-        << ":" << vaProfileStr(profile);
+           << ":" << vaProfileStr(profile);
 }
 
 inline std::ostream&
 operator<<(std::ostream& os, const VAEntrypoint& entrypoint)
 {
     return os << static_cast<int>(entrypoint)
-        << ":" << vaEntrypointStr(entrypoint);
+           << ":" << vaEntrypointStr(entrypoint);
 }
 
 inline std::ostream&
 operator<<(std::ostream& os, const VABufferType& type)
 {
     return os << static_cast<int>(type)
-        << ":" << vaBufferTypeStr(type);
+           << ":" << vaBufferTypeStr(type);
 }
 
 inline std::ostream&
@@ -60,7 +60,8 @@ operator<<(std::ostream& os, const VAGenericValueType& type)
         CASE_ENUM_TO_STREAM(VAGenericValueTypeFloat)
         CASE_ENUM_TO_STREAM(VAGenericValueTypePointer)
         CASE_ENUM_TO_STREAM(VAGenericValueTypeFunc)
-        default: break;
+    default:
+        break;
     }
     return os << "(" << static_cast<int>(type) << ")";
 }
@@ -75,7 +76,8 @@ operator<<(std::ostream& os, const VAGenericValue& value)
         TOSTR(VAGenericValueTypeFloat, f);
         TOSTR(VAGenericValueTypePointer, p);
         TOSTR(VAGenericValueTypeFunc, fn);
-        default: return os << "?";
+    default:
+        return os << "?";
     }
 #undef TOSTR
 }
@@ -94,7 +96,8 @@ operator <<(std::ostream& os, const VASurfaceAttribType& type)
         CASE_ENUM_TO_STREAM(VASurfaceAttribExternalBufferDescriptor)
         CASE_ENUM_TO_STREAM(VASurfaceAttribUsageHint)
         CASE_ENUM_TO_STREAM(VASurfaceAttribCount)
-        default: break;
+    default:
+        break;
     }
     return os << "(" << static_cast<int>(type) << ")";
 }
@@ -103,13 +106,13 @@ inline std::ostream&
 operator<<(std::ostream& os, const VASurfaceAttrib& attrib)
 {
     return os << "VASurfaceAttrib("
-              << "type = " << attrib.type
-              << ", "
-              << "flags = " << attrib.flags
-              << ", "
-              << "value = " << attrib.value
-              << ")"
-    ;
+           << "type = " << attrib.type
+           << ", "
+           << "flags = " << attrib.flags
+           << ", "
+           << "value = " << attrib.value
+           << ")"
+           ;
 }
 
 inline std::ostream&
@@ -154,7 +157,8 @@ operator <<(std::ostream& os, const VAConfigAttribType& type)
         CASE_ENUM_TO_STREAM(VAConfigAttribMaxFrameSize)
         CASE_ENUM_TO_STREAM(VAConfigAttribPredictionDirection)
         CASE_ENUM_TO_STREAM(VAConfigAttribTypeMax)
-        default: break;
+    default:
+        break;
     }
     return os << "(" << static_cast<int>(type) << ")";
 }
@@ -163,11 +167,11 @@ inline std::ostream&
 operator <<(std::ostream& os, const VAConfigAttrib& attrib)
 {
     return os << "VAConfigAttrib("
-              << "type = " << attrib.type
-              << ", "
-              << "value = 0x" << std::hex << attrib.value << std::dec
-              << ")"
-    ;
+           << "type = " << attrib.type
+           << ", "
+           << "value = 0x" << std::hex << attrib.value << std::dec
+           << ")"
+           ;
 }
 
 #undef CASE_ENUM_TO_STREAM

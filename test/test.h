@@ -70,7 +70,7 @@ class VaapiStatus
 {
 public:
     explicit VaapiStatus(VAStatus status)
-      : m_status(status)
+        : m_status(status)
     { }
 
     bool operator ==(const VaapiStatus& other) const
@@ -81,69 +81,100 @@ public:
     friend std::ostream& operator <<(std::ostream& os, const VaapiStatus& t)
     {
         std::string status;
-        switch(t.m_status) {
+        switch (t.m_status) {
         case VA_STATUS_SUCCESS:
-            status = "VA_STATUS_SUCCESS"; break;
+            status = "VA_STATUS_SUCCESS";
+            break;
         case VA_STATUS_ERROR_OPERATION_FAILED:
-            status = "VA_STATUS_ERROR_OPERATION_FAILED"; break;
+            status = "VA_STATUS_ERROR_OPERATION_FAILED";
+            break;
         case VA_STATUS_ERROR_ALLOCATION_FAILED:
-            status = "VA_STATUS_ERROR_ALLOCATION_FAILED"; break;
+            status = "VA_STATUS_ERROR_ALLOCATION_FAILED";
+            break;
         case VA_STATUS_ERROR_INVALID_DISPLAY:
-            status = "VA_STATUS_ERROR_INVALID_DISPLAY"; break;
+            status = "VA_STATUS_ERROR_INVALID_DISPLAY";
+            break;
         case VA_STATUS_ERROR_INVALID_CONFIG:
-            status = "VA_STATUS_ERROR_INVALID_CONFIG"; break;
+            status = "VA_STATUS_ERROR_INVALID_CONFIG";
+            break;
         case VA_STATUS_ERROR_INVALID_CONTEXT:
-            status = "VA_STATUS_ERROR_INVALID_CONTEXT"; break;
+            status = "VA_STATUS_ERROR_INVALID_CONTEXT";
+            break;
         case VA_STATUS_ERROR_INVALID_SURFACE:
-            status = "VA_STATUS_ERROR_INVALID_SURFACE"; break;
+            status = "VA_STATUS_ERROR_INVALID_SURFACE";
+            break;
         case VA_STATUS_ERROR_INVALID_BUFFER:
-            status = "VA_STATUS_ERROR_INVALID_BUFFER"; break;
+            status = "VA_STATUS_ERROR_INVALID_BUFFER";
+            break;
         case VA_STATUS_ERROR_INVALID_IMAGE:
-            status = "VA_STATUS_ERROR_INVALID_IMAGE"; break;
+            status = "VA_STATUS_ERROR_INVALID_IMAGE";
+            break;
         case VA_STATUS_ERROR_INVALID_SUBPICTURE:
-            status = "VA_STATUS_ERROR_INVALID_SUBPICTURE"; break;
+            status = "VA_STATUS_ERROR_INVALID_SUBPICTURE";
+            break;
         case VA_STATUS_ERROR_ATTR_NOT_SUPPORTED:
-            status = "VA_STATUS_ERROR_ATTR_NOT_SUPPORTED"; break;
+            status = "VA_STATUS_ERROR_ATTR_NOT_SUPPORTED";
+            break;
         case VA_STATUS_ERROR_MAX_NUM_EXCEEDED:
-            status = "VA_STATUS_ERROR_MAX_NUM_EXCEEDED"; break;
+            status = "VA_STATUS_ERROR_MAX_NUM_EXCEEDED";
+            break;
         case VA_STATUS_ERROR_UNSUPPORTED_PROFILE:
-            status = "VA_STATUS_ERROR_UNSUPPORTED_PROFILE"; break;
+            status = "VA_STATUS_ERROR_UNSUPPORTED_PROFILE";
+            break;
         case VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT:
-            status = "VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT"; break;
+            status = "VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT";
+            break;
         case VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT:
-            status = "VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT"; break;
+            status = "VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT";
+            break;
         case VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE:
-            status = "VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE"; break;
+            status = "VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE";
+            break;
         case VA_STATUS_ERROR_SURFACE_BUSY:
-            status = "VA_STATUS_ERROR_SURFACE_BUSY"; break;
+            status = "VA_STATUS_ERROR_SURFACE_BUSY";
+            break;
         case VA_STATUS_ERROR_FLAG_NOT_SUPPORTED:
-            status = "VA_STATUS_ERROR_FLAG_NOT_SUPPORTED"; break;
+            status = "VA_STATUS_ERROR_FLAG_NOT_SUPPORTED";
+            break;
         case VA_STATUS_ERROR_INVALID_PARAMETER:
-            status = "VA_STATUS_ERROR_INVALID_PARAMETER"; break;
+            status = "VA_STATUS_ERROR_INVALID_PARAMETER";
+            break;
         case VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED:
-            status = "VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED"; break;
+            status = "VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED";
+            break;
         case VA_STATUS_ERROR_UNIMPLEMENTED:
-            status = "VA_STATUS_ERROR_UNIMPLEMENTED"; break;
+            status = "VA_STATUS_ERROR_UNIMPLEMENTED";
+            break;
         case VA_STATUS_ERROR_SURFACE_IN_DISPLAYING:
-            status = "VA_STATUS_ERROR_SURFACE_IN_DISPLAYING"; break;
+            status = "VA_STATUS_ERROR_SURFACE_IN_DISPLAYING";
+            break;
         case VA_STATUS_ERROR_INVALID_IMAGE_FORMAT:
-            status = "VA_STATUS_ERROR_INVALID_IMAGE_FORMAT"; break;
+            status = "VA_STATUS_ERROR_INVALID_IMAGE_FORMAT";
+            break;
         case VA_STATUS_ERROR_DECODING_ERROR:
-            status = "VA_STATUS_ERROR_DECODING_ERROR"; break;
+            status = "VA_STATUS_ERROR_DECODING_ERROR";
+            break;
         case VA_STATUS_ERROR_ENCODING_ERROR:
-            status = "VA_STATUS_ERROR_ENCODING_ERROR"; break;
+            status = "VA_STATUS_ERROR_ENCODING_ERROR";
+            break;
         case VA_STATUS_ERROR_INVALID_VALUE:
-            status = "VA_STATUS_ERROR_INVALID_VALUE"; break;
+            status = "VA_STATUS_ERROR_INVALID_VALUE";
+            break;
         case VA_STATUS_ERROR_UNSUPPORTED_FILTER:
-            status = "VA_STATUS_ERROR_UNSUPPORTED_FILTER"; break;
+            status = "VA_STATUS_ERROR_UNSUPPORTED_FILTER";
+            break;
         case VA_STATUS_ERROR_INVALID_FILTER_CHAIN:
-            status = "VA_STATUS_ERROR_INVALID_FILTER_CHAIN"; break;
+            status = "VA_STATUS_ERROR_INVALID_FILTER_CHAIN";
+            break;
         case VA_STATUS_ERROR_HW_BUSY:
-            status = "VA_STATUS_ERROR_HW_BUSY"; break;
+            status = "VA_STATUS_ERROR_HW_BUSY";
+            break;
         case VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:
-            status = "VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE"; break;
+            status = "VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE";
+            break;
         case VAStatus(VA_STATUS_ERROR_UNKNOWN):
-            status = "VA_STATUS_ERROR_UNKNOWN"; break;
+            status = "VA_STATUS_ERROR_UNKNOWN";
+            break;
         default:
             status = "Unknown VAStatus";
         }

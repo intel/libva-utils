@@ -32,7 +32,8 @@
 #include <unistd.h> // for close()
 #include <va/va_drm.h>
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 VAAPIFixture::VAAPIFixture()
     : ::testing::Test::Test()
@@ -62,7 +63,7 @@ VAAPIFixture::~VAAPIFixture()
 
     if (not m_skip.empty()) {
         EXPECT_FALSE(HasFailure())
-            << "skip message is set, but something failed";
+                << "skip message is set, but something failed";
         if (not HasFailure()) {
             RecordProperty("skipped", true);
             std::cout << "[ SKIPPED ] " << m_skip << std::endl;
@@ -132,7 +133,7 @@ void VAAPIFixture::queryConfigProfiles(Profiles& profiles) const
 }
 
 void VAAPIFixture::queryConfigEntrypoints(const VAProfile& profile,
-    Entrypoints& entrypoints, const VAStatus& expectation) const
+        Entrypoints& entrypoints, const VAStatus& expectation) const
 {
     const int maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
     ASSERT_GT(maxEntrypoints, 0);
@@ -142,7 +143,7 @@ void VAAPIFixture::queryConfigEntrypoints(const VAProfile& profile,
     EXPECT_STATUS_EQ(
         expectation,
         vaQueryConfigEntrypoints(m_vaDisplay, profile, entrypoints.data(),
-            &numEntrypoints));
+                                 &numEntrypoints));
 
     if ((VA_STATUS_SUCCESS == expectation) and not HasFailure()) {
         ASSERT_LE(numEntrypoints, maxEntrypoints);
@@ -154,7 +155,7 @@ void VAAPIFixture::queryConfigEntrypoints(const VAProfile& profile,
 }
 
 VAStatus VAAPIFixture::getSupportStatus(const VAProfile& profile,
-    const VAEntrypoint& entrypoint) const
+                                        const VAEntrypoint& entrypoint) const
 {
     Profiles profiles;
     queryConfigProfiles(profiles);
@@ -168,31 +169,31 @@ VAStatus VAAPIFixture::getSupportStatus(const VAProfile& profile,
         const auto eBegin(entrypoints.begin());
         const auto eEnd(entrypoints.end());
         return (std::find(eBegin, eEnd, entrypoint) != eEnd) ?
-            VA_STATUS_SUCCESS : VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+               VA_STATUS_SUCCESS : VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
     }
 
     return VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
 }
 
 bool VAAPIFixture::isSupported(const VAProfile& profile,
-    const VAEntrypoint& entrypoint) const
+                               const VAEntrypoint& entrypoint) const
 {
     return VA_STATUS_SUCCESS == getSupportStatus(profile, entrypoint);
 }
 
 void VAAPIFixture::getConfigAttributes(const VAProfile& profile,
-    const VAEntrypoint& entrypoint, ConfigAttributes& attribs,
-    const VAStatus& expectation) const
+                                       const VAEntrypoint& entrypoint, ConfigAttributes& attribs,
+                                       const VAStatus& expectation) const
 {
     const bool defaults(attribs.empty());
 
     if (defaults) {
         // fill config attributes with default config attributes
-        const auto op = [](const VAConfigAttribType& t) {
+        const auto op = [](const VAConfigAttribType & t) {
             return VAConfigAttrib{type: t, value: VA_ATTRIB_NOT_SUPPORTED};
         };
         std::transform(g_vaConfigAttribTypes.begin(),
-            g_vaConfigAttribTypes.end(), std::back_inserter(attribs), op);
+                       g_vaConfigAttribTypes.end(), std::back_inserter(attribs), op);
     }
 
     ASSERT_FALSE(attribs.empty());
@@ -206,7 +207,7 @@ void VAAPIFixture::getConfigAttributes(const VAProfile& profile,
         // remove unsupported config attributes
         const auto begin(attribs.begin());
         const auto end(attribs.end());
-        const auto predicate = [](const VAConfigAttrib& a) {
+        const auto predicate = [](const VAConfigAttrib & a) {
             return a.value == VA_ATTRIB_NOT_SUPPORTED;
         };
         attribs.erase(std::remove_if(begin, end, predicate), end);
@@ -214,21 +215,21 @@ void VAAPIFixture::getConfigAttributes(const VAProfile& profile,
 }
 
 void VAAPIFixture::createConfig(const VAProfile& profile,
-    const VAEntrypoint& entrypoint, const ConfigAttributes& attribs,
-    const VAStatus& expectation)
+                                const VAEntrypoint& entrypoint, const ConfigAttributes& attribs,
+                                const VAStatus& expectation)
 {
     ASSERT_INVALID_ID(m_configID)
-        << "test logic error: did you forget to call destroyConfig?";
+            << "test logic error: did you forget to call destroyConfig?";
 
     EXPECT_STATUS_EQ(
         expectation,
         vaCreateConfig(m_vaDisplay, profile, entrypoint,
-            (attribs.size() != 0 ?
-                const_cast<VAConfigAttrib*>(attribs.data()) : NULL),
-            attribs.size(), &m_configID))
-        << "profile    = " << profile << std::endl
-        << "entrypoint = " << entrypoint << std::endl
-        << "numAttribs = " << attribs.size();
+                       (attribs.size() != 0 ?
+                        const_cast<VAConfigAttrib*>(attribs.data()) : NULL),
+                       attribs.size(), &m_configID))
+            << "profile    = " << profile << std::endl
+            << "entrypoint = " << entrypoint << std::endl
+            << "numAttribs = " << attribs.size();
 
     if (expectation == VA_STATUS_SUCCESS) {
         EXPECT_ID(m_configID);
@@ -246,7 +247,7 @@ void VAAPIFixture::queryConfigAttributes(
     int numAttributes(0);
 
     ASSERT_TRUE(attributes.empty())
-        << "test logic error: attributes must be empty";
+            << "test logic error: attributes must be empty";
 
     const int maxAttributes = vaMaxNumConfigAttributes(m_vaDisplay);
 
@@ -257,7 +258,7 @@ void VAAPIFixture::queryConfigAttributes(
     EXPECT_STATUS_EQ(
         expectedStatus,
         vaQueryConfigAttributes(m_vaDisplay, m_configID, &actualProfile,
-            &actualEntrypoint, attributes.data(), &numAttributes));
+                                &actualEntrypoint, attributes.data(), &numAttributes));
 
     if (expectedStatus == VA_STATUS_SUCCESS) {
         EXPECT_EQ(expectedProfile, actualProfile);
@@ -285,19 +286,19 @@ void VAAPIFixture::destroyConfig(const VAStatus& expectation)
 void VAAPIFixture::querySurfaceAttributes(SurfaceAttributes& attribs) const
 {
     ASSERT_TRUE(attribs.empty())
-        << "test logic error: surface attributes must be empty";
+            << "test logic error: surface attributes must be empty";
 
     unsigned numAttribs(0);
 
     ASSERT_STATUS(vaQuerySurfaceAttributes(m_vaDisplay, m_configID, NULL,
-        &numAttribs));
+                                           &numAttribs));
 
     ASSERT_GT(numAttribs, 0u);
 
     attribs.resize(numAttribs);
 
     ASSERT_STATUS(vaQuerySurfaceAttributes(m_vaDisplay, m_configID,
-        attribs.data(), &numAttribs));
+                                           attribs.data(), &numAttribs));
 
     ASSERT_GT(numAttribs, 0u);
     EXPECT_GE(attribs.size(), numAttribs);
@@ -305,11 +306,11 @@ void VAAPIFixture::querySurfaceAttributes(SurfaceAttributes& attribs) const
     attribs.resize(numAttribs);
 
     const uint32_t flags = 0x0 | VA_SURFACE_ATTRIB_GETTABLE
-        | VA_SURFACE_ATTRIB_SETTABLE;
+                           | VA_SURFACE_ATTRIB_SETTABLE;
 
     for (const auto& attrib : attribs) {
         EXPECT_NE(attrib.flags & flags,
-            (uint32_t)VA_SURFACE_ATTRIB_NOT_SUPPORTED);
+                  (uint32_t)VA_SURFACE_ATTRIB_NOT_SUPPORTED);
         EXPECT_GE(attrib.value.type, VAGenericValueTypeInteger);
         EXPECT_LE(attrib.value.type, VAGenericValueTypeFunc);
     }
@@ -335,8 +336,9 @@ void VAAPIFixture::getMinMaxSurfaceResolution(
     const SurfaceAttributes::const_iterator end(attribs.end());
 
     // minimum surface width
-    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
-        {return a.type == VASurfaceAttribMinWidth;});
+    match = std::find_if(begin, end, [](const VASurfaceAttrib & a) {
+        return a.type == VASurfaceAttribMinWidth;
+    });
     if (match != end) {
         EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
         ASSERT_GE(match->value.value.i, 1);
@@ -345,8 +347,9 @@ void VAAPIFixture::getMinMaxSurfaceResolution(
     }
 
     // minimum surface height
-    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
-        {return a.type == VASurfaceAttribMinHeight;});
+    match = std::find_if(begin, end, [](const VASurfaceAttrib & a) {
+        return a.type == VASurfaceAttribMinHeight;
+    });
     if (match != end) {
         EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
         ASSERT_GE(match->value.value.i, 1);
@@ -355,8 +358,9 @@ void VAAPIFixture::getMinMaxSurfaceResolution(
     }
 
     // maximum surface width
-    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
-        {return a.type == VASurfaceAttribMaxWidth;});
+    match = std::find_if(begin, end, [](const VASurfaceAttrib & a) {
+        return a.type == VASurfaceAttribMaxWidth;
+    });
     if (match != end) {
         EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
         ASSERT_GE(match->value.value.i, 1);
@@ -365,8 +369,9 @@ void VAAPIFixture::getMinMaxSurfaceResolution(
     }
 
     // maximum surface height
-    match = std::find_if(begin, end, [](const VASurfaceAttrib& a)
-        {return a.type == VASurfaceAttribMaxHeight;});
+    match = std::find_if(begin, end, [](const VASurfaceAttrib & a) {
+        return a.type == VASurfaceAttribMaxHeight;
+    });
     if (match != end) {
         EXPECT_EQ(VAGenericValueTypeInteger, match->value.type);
         ASSERT_GE(match->value.value.i, 1);
@@ -378,23 +383,23 @@ void VAAPIFixture::getMinMaxSurfaceResolution(
 }
 
 void VAAPIFixture::createSurfaces(Surfaces& surfaces, const unsigned format,
-    const Resolution& resolution, const SurfaceAttributes& attribs,
-    const VAStatus& expectation) const
+                                  const Resolution& resolution, const SurfaceAttributes& attribs,
+                                  const VAStatus& expectation) const
 {
     ASSERT_GT(surfaces.size(), 0u)
-        << "test logic error: surfaces must not be emtpy";
+            << "test logic error: surfaces must not be emtpy";
     for (const auto& surface : surfaces) {
         ASSERT_INVALID_ID(surface)
-            << "test logic error: surfaces must all be VA_INVALID_SURFACE";
+                << "test logic error: surfaces must all be VA_INVALID_SURFACE";
     }
 
     ASSERT_STATUS_EQ(
         expectation,
         vaCreateSurfaces(m_vaDisplay, format, resolution.width,
-            resolution.height, surfaces.data(), surfaces.size(),
-            (attribs.size() != 0 ?
-                const_cast<VASurfaceAttrib*>(attribs.data()) : NULL),
-            attribs.size()));
+                         resolution.height, surfaces.data(), surfaces.size(),
+                         (attribs.size() != 0 ?
+                          const_cast<VASurfaceAttrib*>(attribs.data()) : NULL),
+                         attribs.size()));
 
     if (expectation == VA_STATUS_SUCCESS) {
         for (const auto& surface : surfaces) {
@@ -407,20 +412,20 @@ void VAAPIFixture::destroySurfaces(Surfaces& surfaces) const
 {
     if (surfaces.size() != 0) {
         EXPECT_STATUS(vaDestroySurfaces(m_vaDisplay, surfaces.data(),
-            surfaces.size()));
+                                        surfaces.size()));
     }
 }
 
 void VAAPIFixture::createBuffer(const VABufferType& bufferType,
-    const size_t bufferSize, const VAStatus& expectation)
+                                const size_t bufferSize, const VAStatus& expectation)
 {
     ASSERT_INVALID_ID(m_bufferID)
-        << "test logic error: did you forget to call destroyBuffer?";
+            << "test logic error: did you forget to call destroyBuffer?";
 
     EXPECT_STATUS_EQ(
         expectation,
         vaCreateBuffer(m_vaDisplay, m_contextID, bufferType, bufferSize,
-            1, NULL, &m_bufferID));
+                       1, NULL, &m_bufferID));
 }
 
 void VAAPIFixture::destroyBuffer(const VAStatus& expectation)
@@ -430,7 +435,7 @@ void VAAPIFixture::destroyBuffer(const VAStatus& expectation)
 }
 
 void VAAPIFixture::doCreateContext(const Resolution& resolution,
-    const VAStatus& expectation)
+                                   const VAStatus& expectation)
 {
     m_contextID = 0;
     ASSERT_STATUS_EQ(expectation,
@@ -452,15 +457,15 @@ void VAAPIFixture::doTerminate()
 void VAAPIFixture::skipTest(const std::string& message)
 {
     ASSERT_FALSE(message.empty())
-        << "test logic error: skip message cannot be empty";
+            << "test logic error: skip message cannot be empty";
     ASSERT_TRUE(m_skip.empty())
-        << "test logic error: test already marked as skipped";
+            << "test logic error: test already marked as skipped";
 
     m_skip = message;
 }
 
 void VAAPIFixture::skipTest(const VAProfile& profile,
-    const VAEntrypoint& entrypoint)
+                            const VAEntrypoint& entrypoint)
 {
     std::ostringstream oss;
     oss << profile << " / " << entrypoint << " not supported on this hardware";

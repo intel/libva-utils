@@ -145,8 +145,7 @@ struct vp9enc_bit_buffer {
     int bit_offset;
 };
 
-struct upload_thread_param
-{
+struct upload_thread_param {
     FILE *yuv_fp;
     VASurfaceID surface_id;
 };
@@ -231,7 +230,7 @@ vp9enc_wb_write_literal(struct vp9enc_bit_buffer *wb, int data, int bits)
 
 static void
 vp9enc_write_bitdepth_colorspace_sampling(int codec_profile,
-                                          struct vp9enc_bit_buffer *wb)
+        struct vp9enc_bit_buffer *wb)
 {
     if (codec_profile >= 2) {
         /* the bit-depth will be added for VP9Profile2/3 */
@@ -428,7 +427,7 @@ vp9enc_write_uncompressed_header(struct vp9encode_context *enc_context,
 
             vp9enc_wb_write_bit(wb, 1);
             mode_flag = pic_param->ref_lf_delta[i];
-            if (mode_flag >=0) {
+            if (mode_flag >= 0) {
                 vp9enc_wb_write_literal(wb, mode_flag & (0x3F), 6);
                 vp9enc_wb_write_bit(wb, 0);
             } else {
@@ -449,7 +448,7 @@ vp9enc_write_uncompressed_header(struct vp9encode_context *enc_context,
              */
             vp9enc_wb_write_bit(wb, 1);
             mode_flag = pic_param->mode_lf_delta[i];
-            if (mode_flag >=0) {
+            if (mode_flag >= 0) {
                 vp9enc_wb_write_literal(wb, mode_flag & (0x3F), 6);
                 vp9enc_wb_write_bit(wb, 0);
             } else {
@@ -501,7 +500,7 @@ vp9enc_write_uncompressed_header(struct vp9encode_context *enc_context,
         max_log2_tile_cols = vp9enc_get_max_log2_tile_cols(sb_cols);
 
         col_data = pic_param->log2_tile_columns - min_log2_tile_cols;
-        while(col_data--) {
+        while (col_data--) {
             vp9enc_wb_write_bit(wb, 1);
         }
         if (pic_param->log2_tile_columns < max_log2_tile_cols)
@@ -540,7 +539,7 @@ vp9enc_upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
     } while (n_items != 1);
 
     va_status = vaDeriveImage(va_dpy, surface_id, &surface_image);
-    CHECK_VASTATUS(va_status,"vaDeriveImage");
+    CHECK_VASTATUS(va_status, "vaDeriveImage");
 
     vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
@@ -617,21 +616,21 @@ vp9enc_alloc_encode_resource(FILE *yuv_fp)
 
     // Create surface
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, picture_width, picture_height,
-        surface_ids, SID_NUMBER,
-        &attrib, 1
-    );
+                    va_dpy,
+                    VA_RT_FORMAT_YUV420, picture_width, picture_height,
+                    surface_ids, SID_NUMBER,
+                    &attrib, 1
+                );
 
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     // Create surface
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, picture_width, picture_height,
-        ref_surfaces, SURFACE_NUM,
-        &attrib, 1
-    );
+                    va_dpy,
+                    VA_RT_FORMAT_YUV420, picture_width, picture_height,
+                    ref_surfaces, SURFACE_NUM,
+                    &attrib, 1
+                );
 
     for (i = 0; i < SID_NUMBER; i++)
         ref_surfaces[i + SURFACE_NUM] = surface_ids[i];
@@ -645,16 +644,16 @@ vp9enc_alloc_encode_resource(FILE *yuv_fp)
     vp9enc_context.upload_thread_param.surface_id = surface_ids[SID_INPUT_PICTURE_0];
 
     vp9enc_context.upload_thread_value = pthread_create(&vp9enc_context.upload_thread_id,
-                                                        NULL,
-                                                        vp9enc_upload_thread_function,
-                                                        (void*)&vp9enc_context.upload_thread_param);
+                                         NULL,
+                                         vp9enc_upload_thread_function,
+                                         (void*)&vp9enc_context.upload_thread_param);
 }
 
 static void
 vp9enc_create_encode_pipe(FILE *yuv_fp)
 {
     VAEntrypoint entrypoints[5];
-    int num_entrypoints,slice_entrypoint;
+    int num_entrypoints, slice_entrypoint;
     VAConfigAttrib attrib[2];
     int major_ver, minor_ver;
     VAStatus va_status;
@@ -712,7 +711,7 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
     attrib[1].value = vp9enc_context.rate_control_method; /* set to desired RC mode */
 
     va_status = vaCreateConfig(va_dpy, vp9enc_context.profile, vp9enc_entrypoint_lists[select_entrypoint],
-                               &attrib[0], 2,&vp9enc_context.config_id);
+                               &attrib[0], 2, &vp9enc_context.config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
     vp9enc_alloc_encode_resource(yuv_fp);
@@ -730,8 +729,8 @@ vp9enc_create_encode_pipe(FILE *yuv_fp)
 static void
 vp9enc_destory_encode_pipe()
 {
-    vaDestroyContext(va_dpy,vp9enc_context.context_id);
-    vaDestroyConfig(va_dpy,vp9enc_context.config_id);
+    vaDestroyContext(va_dpy, vp9enc_context.context_id);
+    vaDestroyConfig(va_dpy, vp9enc_context.config_id);
     vaTerminate(va_dpy);
     va_close_display(va_dpy);
 }
@@ -800,7 +799,7 @@ vp9enc_update_reference_list(void)
     if (last_slot != -1) {
         int used_flag = 0;
 
-        for (i = 1; i < SURFACE_NUM;i++) {
+        for (i = 1; i < SURFACE_NUM; i++) {
             if (vp9_ref_list[i] == last_surf) {
                 used_flag = 1;
                 break;
@@ -841,7 +840,7 @@ vp9enc_update_picture_parameter(int frame_type)
         pic_param->pic_flags.bits.frame_context_idx = 0;
         pic_param->ref_flags.bits.ref_frame_ctrl_l0 = 0;
 
-        for (i = 0;i < ref_num;i++)
+        for (i = 0; i < ref_num; i++)
             pic_param->reference_frames[i] = VA_INVALID_ID;
     } else {
         pic_param->refresh_frame_flags = 0x01;
@@ -868,7 +867,7 @@ vp9enc_create_picture_parameter_buf()
                                sizeof(vp9enc_context.pic_param), 1,
                                &vp9enc_context.pic_param,
                                &vp9enc_context.pic_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 }
 
 static void
@@ -892,7 +891,7 @@ vp9enc_begin_picture(FILE *yuv_fp, int frame_num, int frame_type)
                                VAEncSequenceParameterBufferType,
                                sizeof(*seq_param), 1, seq_param,
                                &vp9enc_context.seq_param_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     /* hrd parameter */
     VAEncMiscParameterBuffer *misc_param;
@@ -928,11 +927,11 @@ vp9enc_begin_picture(FILE *yuv_fp, int frame_num, int frame_type)
     memset(&seg_param, 0, sizeof(seg_param));
 
     va_status = vaCreateBuffer(va_dpy,
-                           vp9enc_context.context_id,
-                           VAQMatrixBufferType,
-                           sizeof(seg_param), 1, &seg_param,
-                           &vp9enc_context.qmatrix_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+                               vp9enc_context.context_id,
+                               VAQMatrixBufferType,
+                               sizeof(seg_param), 1, &seg_param,
+                               &vp9enc_context.qmatrix_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     /* Create the Misc FR/RC buffer under non-CQP mode */
     if (rc_mode != VA_RC_CQP && frame_type == KEY_FRAME) {
@@ -940,34 +939,34 @@ vp9enc_begin_picture(FILE *yuv_fp, int frame_num, int frame_type)
         VAEncMiscParameterRateControl *misc_rc;
 
         vaCreateBuffer(va_dpy,
-                   vp9enc_context.context_id,
-                   VAEncMiscParameterBufferType,
-                   sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterFrameRate),
-                   1,
-                   NULL,
-                   &vp9enc_context.misc_fr_buf_id);
+                       vp9enc_context.context_id,
+                       VAEncMiscParameterBufferType,
+                       sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterFrameRate),
+                       1,
+                       NULL,
+                       &vp9enc_context.misc_fr_buf_id);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         vaMapBuffer(va_dpy,
-                vp9enc_context.misc_fr_buf_id,
-                (void **)&misc_param);
+                    vp9enc_context.misc_fr_buf_id,
+                    (void **)&misc_param);
         misc_param->type = VAEncMiscParameterTypeFrameRate;
         misc_fr = (VAEncMiscParameterFrameRate *)misc_param->data;
         misc_fr->framerate = frame_rate;
         vaUnmapBuffer(va_dpy, vp9enc_context.misc_fr_buf_id);
 
         vaCreateBuffer(va_dpy,
-                   vp9enc_context.context_id,
-                   VAEncMiscParameterBufferType,
-                   sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
-                   1,
-                   NULL,
-                   &vp9enc_context.misc_rc_buf_id);
+                       vp9enc_context.context_id,
+                       VAEncMiscParameterBufferType,
+                       sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
+                       1,
+                       NULL,
+                       &vp9enc_context.misc_rc_buf_id);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         vaMapBuffer(va_dpy,
-                vp9enc_context.misc_rc_buf_id,
-                (void **)&misc_param);
+                    vp9enc_context.misc_rc_buf_id,
+                    (void **)&misc_param);
         misc_param->type = VAEncMiscParameterTypeRateControl;
         misc_rc = (VAEncMiscParameterRateControl *)misc_param->data;
 
@@ -1018,16 +1017,16 @@ vp9enc_render_picture()
     va_status = vaBeginPicture(va_dpy,
                                vp9enc_context.context_id,
                                surface_ids[vp9enc_context.current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaBeginPicture");
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
 
     va_status = vaRenderPicture(va_dpy,
                                 vp9enc_context.context_id,
                                 va_buffers,
                                 num_va_buffers);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     va_status = vaEndPicture(va_dpy, vp9enc_context.context_id);
-    CHECK_VASTATUS(va_status,"vaEndPicture");
+    CHECK_VASTATUS(va_status, "vaEndPicture");
 }
 
 static void
@@ -1039,7 +1038,7 @@ vp9enc_destroy_buffers(VABufferID *va_buffers, uint32_t num_va_buffers)
     for (i = 0; i < num_va_buffers; i++) {
         if (va_buffers[i] != VA_INVALID_ID) {
             va_status = vaDestroyBuffer(va_dpy, va_buffers[i]);
-            CHECK_VASTATUS(va_status,"vaDestroyBuffer");
+            CHECK_VASTATUS(va_status, "vaDestroyBuffer");
             va_buffers[i] = VA_INVALID_ID;
         }
     }
@@ -1068,14 +1067,14 @@ vp9enc_store_coded_buffer(FILE *vp9_fp, int frame_type)
     size_t w_items;
 
     va_status = vaSyncSurface(va_dpy, surface_ids[vp9enc_context.current_input_surface]);
-    CHECK_VASTATUS(va_status,"vaSyncSurface");
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     surface_status = 0;
     va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[vp9enc_context.current_input_surface], &surface_status);
-    CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
+    CHECK_VASTATUS(va_status, "vaQuerySurfaceStatus");
 
     va_status = vaMapBuffer(va_dpy, vp9enc_context.codedbuf_buf_id, (void **)(&coded_buffer_segment));
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    CHECK_VASTATUS(va_status, "vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
     if (coded_buffer_segment->status & VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK) {
@@ -1189,9 +1188,9 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
         vp9enc_context.upload_thread_param.surface_id = surface_ids[index];
 
         vp9enc_context.upload_thread_value = pthread_create(&vp9enc_context.upload_thread_id,
-                                                            NULL,
-                                                            vp9enc_upload_thread_function,
-                                                            (void*)&vp9enc_context.upload_thread_param);
+                                             NULL,
+                                             vp9enc_upload_thread_function,
+                                             (void*)&vp9enc_context.upload_thread_param);
     }
 
     do {
@@ -1209,7 +1208,7 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
                                    VAEncCodedBufferType,
                                    codedbuf_size, 1, NULL,
                                    &vp9enc_context.codedbuf_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         /* picture parameter set */
         vp9enc_update_picture_parameter(current_frame_type);
@@ -1217,28 +1216,28 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
         if (opt_header) {
             char raw_data[64];
             int raw_data_length;
-	        VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+            VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
 
             memset(raw_data, 0, sizeof(raw_data));
             vp9enc_write_uncompressed_header(&vp9enc_context,
-                                            raw_data,
-                                            &raw_data_length);
+                                             raw_data,
+                                             &raw_data_length);
 
             packed_header_param_buffer.type = VAEncPackedHeaderRawData;
             packed_header_param_buffer.bit_length = raw_data_length * 8;
             packed_header_param_buffer.has_emulation_bytes = 0;
 
             vaCreateBuffer(va_dpy,
-                               vp9enc_context.context_id,
-                               VAEncPackedHeaderParameterBufferType,
-                               sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
-                               &vp9enc_context.raw_data_header_buf_id);
+                           vp9enc_context.context_id,
+                           VAEncPackedHeaderParameterBufferType,
+                           sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                           &vp9enc_context.raw_data_header_buf_id);
 
             vaCreateBuffer(va_dpy,
-                               vp9enc_context.context_id,
-                               VAEncPackedHeaderDataBufferType,
-                                raw_data_length, 1, raw_data,
-                               &vp9enc_context.raw_data_buf_id);
+                           vp9enc_context.context_id,
+                           VAEncPackedHeaderDataBufferType,
+                           raw_data_length, 1, raw_data,
+                           &vp9enc_context.raw_data_buf_id);
         }
 
         vp9enc_create_picture_parameter_buf();
@@ -1369,7 +1368,7 @@ main(int argc, char *argv[])
     FILE *yuv_fp;
     FILE *vp9_fp;
     off_t file_size;
-    struct timeval tpstart,tpend;
+    struct timeval tpstart, tpend;
     float  timeuse;
     int ip_period;
     int fn_num;
@@ -1378,7 +1377,7 @@ main(int argc, char *argv[])
     va_init_display_args(&argc, argv);
 
     //TODO may be we should using option analytics library
-    if(argc < 5) {
+    if (argc < 5) {
         vp9enc_show_help();
         exit(0);
     }
@@ -1414,12 +1413,12 @@ main(int argc, char *argv[])
     if (argc > 5) {
         int c, long_index, tmp_input;
         while (1) {
-            c = getopt_long_only(argc - 4,argv + 4,"hf:?",long_opts,&long_index);
+            c = getopt_long_only(argc - 4, argv + 4, "hf:?", long_opts, &long_index);
 
             if (c == -1)
                 break;
 
-            switch(c) {
+            switch (c) {
             case 'h':
             case 0:
                 vp9enc_show_help();
@@ -1511,28 +1510,28 @@ main(int argc, char *argv[])
         }
 
         if (vbr_max < frame_bit_rate) {
-             printf("Under VBR, the max bit rate should be greater than or equal to fb\n");
-             vp9enc_show_help();
-             exit(0);
+            printf("Under VBR, the max bit rate should be greater than or equal to fb\n");
+            vp9enc_show_help();
+            exit(0);
         }
 
         if (vbr_max > (frame_bit_rate * 2)) {
-             printf("under VBR, the max bit rate is too much greater than the average bit\n");
-             vp9enc_show_help();
-             exit(0);
+            printf("under VBR, the max bit rate is too much greater than the average bit\n");
+            vp9enc_show_help();
+            exit(0);
         }
     }
 
-    yuv_fp = fopen(yuv_input,"rb");
-    if ( yuv_fp == NULL){
+    yuv_fp = fopen(yuv_input, "rb");
+    if (yuv_fp == NULL) {
         printf("Can't open input YUV file\n");
         return -1;
     }
     fseeko(yuv_fp, (off_t)0, SEEK_END);
     file_size = ftello(yuv_fp);
-    frame_size = picture_width * picture_height +  ((picture_width * picture_height) >> 1) ;
+    frame_size = picture_width * picture_height + ((picture_width * picture_height) >> 1) ;
 
-    if ( (file_size < frame_size) || (file_size % frame_size) ) {
+    if ((file_size < frame_size) || (file_size % frame_size)) {
         fclose(yuv_fp);
         printf("The YUV file's size is not correct\n");
         return -1;
@@ -1544,7 +1543,7 @@ main(int argc, char *argv[])
         frame_number = fn_num;
 
     vp9_fp = fopen(vp9_output, "wb");
-    if ( vp9_fp == NULL) {
+    if (vp9_fp == NULL) {
         fclose(yuv_fp);
         printf("Can't open output avc file\n");
         return -1;
@@ -1557,7 +1556,7 @@ main(int argc, char *argv[])
     if (intra_period == 1)
         ip_period = 0;
 
-    gettimeofday(&tpstart,NULL);
+    gettimeofday(&tpstart, NULL);
 
     vp9enc_write_ivf_header(vp9_fp, picture_width, picture_height,
                             frame_number, frame_rate);
@@ -1575,12 +1574,12 @@ main(int argc, char *argv[])
         fflush(stdout);
     }
 
-    gettimeofday(&tpend,NULL);
-    timeuse = 1000000 * (tpend.tv_sec-tpstart.tv_sec) + tpend.tv_usec-tpstart.tv_usec;
+    gettimeofday(&tpend, NULL);
+    timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec;
     timeuse /= 1000000;
 
     printf("\ndone!\n");
-    printf("encode %d frames in %f secondes, FPS is %.1f\n",frame_number, timeuse, frame_number/timeuse);
+    printf("encode %d frames in %f secondes, FPS is %.1f\n", frame_number, timeuse, frame_number / timeuse);
 
     vp9enc_release_encode_resource();
     vp9enc_destory_encode_pipe();

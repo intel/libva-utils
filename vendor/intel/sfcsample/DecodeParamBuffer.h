@@ -2472,8 +2472,7 @@ const uint8_t g_Bitstream_AVC[] = {
 };
 
 // format and resolution
-struct DecodeDesc
-{
+struct DecodeDesc {
     VA_RT_Format format = VA_RT_FORMAT_YUV420;
     VA_RT_Format sfcformat = VA_RT_FORMAT_YUV420;
     uint32_t    width;

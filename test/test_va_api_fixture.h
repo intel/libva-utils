@@ -30,10 +30,12 @@
 #include "test_defs.h"
 #include "test_streamable.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 // The fixture for testing class Foo.
-class VAAPIFixture : public ::testing::Test {
+class VAAPIFixture : public ::testing::Test
+{
 public:
     VAAPIFixture();
 
@@ -44,33 +46,33 @@ public:
     void doTerminate();
 
     void doCreateContext(const Resolution&,
-        const VAStatus& expectation = VA_STATUS_SUCCESS);
+                         const VAStatus& expectation = VA_STATUS_SUCCESS);
     void doDestroyContext(const VAStatus& expectation = VA_STATUS_SUCCESS);
 
     void queryConfigProfiles(Profiles&) const;
     void queryConfigEntrypoints(const VAProfile&, Entrypoints&,
-        const VAStatus& = VA_STATUS_SUCCESS) const;
+                                const VAStatus& = VA_STATUS_SUCCESS) const;
     VAStatus getSupportStatus(const VAProfile&, const VAEntrypoint&) const;
     bool isSupported(const VAProfile&, const VAEntrypoint&) const;
 
     void getConfigAttributes(const VAProfile&, const VAEntrypoint&,
-        ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
+                             ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
     void createConfig(const VAProfile&, const VAEntrypoint&,
-        const ConfigAttributes& = ConfigAttributes(),
-        const VAStatus& = VA_STATUS_SUCCESS);
+                      const ConfigAttributes& = ConfigAttributes(),
+                      const VAStatus& = VA_STATUS_SUCCESS);
     void queryConfigAttributes(const VAProfile&, const VAEntrypoint&,
-        ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
+                               ConfigAttributes&, const VAStatus& = VA_STATUS_SUCCESS) const;
     void destroyConfig(const VAStatus& = VA_STATUS_SUCCESS);
 
     void querySurfaceAttributes(SurfaceAttributes&) const;
     void getMinMaxSurfaceResolution(Resolution&, Resolution&) const;
     void createSurfaces(Surfaces&, const unsigned format, const Resolution&,
-        const SurfaceAttributes& = SurfaceAttributes(),
-        const VAStatus& = VA_STATUS_SUCCESS) const;
+                        const SurfaceAttributes& = SurfaceAttributes(),
+                        const VAStatus& = VA_STATUS_SUCCESS) const;
     void destroySurfaces(Surfaces&) const;
 
     void createBuffer(const VABufferType&, const size_t,
-        const VAStatus& = VA_STATUS_SUCCESS);
+                      const VAStatus& = VA_STATUS_SUCCESS);
     void destroyBuffer(const VAStatus& = VA_STATUS_SUCCESS);
 
     void skipTest(const std::string& message);
@@ -85,14 +87,14 @@ protected:
 
     virtual void SetUp()
     {
-	// Code here will be called immediately after the constructor (right
-	// before each test).
+        // Code here will be called immediately after the constructor (right
+        // before each test).
     }
 
     virtual void TearDown()
     {
-	// Code here will be called immediately after each test (right
-	// before the destructor).
+        // Code here will be called immediately after each test (right
+        // before the destructor).
     }
 
     // Objects declared here can be used by all tests in the test case for

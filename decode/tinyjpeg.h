@@ -6,7 +6,7 @@
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice,
  *  this list of conditions and the following disclaimer.
  *
@@ -17,7 +17,7 @@
  * - Neither the name of the author nor the names of its contributors may be
  *  used to endorse or promote products derived from this software without
  *  specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,14 +43,14 @@ extern "C" {
 struct jdec_private;
 
 /* Flags that can be set by any applications */
-#define TINYJPEG_FLAGS_MJPEG_TABLE	(1<<1)
+#define TINYJPEG_FLAGS_MJPEG_TABLE  (1<<1)
 
 /* Format accepted in outout */
 enum tinyjpeg_fmt {
-   TINYJPEG_FMT_GREY = 1,
-   TINYJPEG_FMT_BGR24,
-   TINYJPEG_FMT_RGB24,
-   TINYJPEG_FMT_YUV420P,
+    TINYJPEG_FMT_GREY = 1,
+    TINYJPEG_FMT_BGR24,
+    TINYJPEG_FMT_RGB24,
+    TINYJPEG_FMT_YUV420P,
 };
 
 struct jdec_private *tinyjpeg_init(void);

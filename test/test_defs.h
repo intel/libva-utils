@@ -30,7 +30,8 @@
 #include <va/va.h>
 #include <vector>
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 typedef std::vector<VAProfile>            Profiles;
 typedef std::vector<VAEntrypoint>         Entrypoints;

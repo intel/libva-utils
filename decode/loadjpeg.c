@@ -6,7 +6,7 @@
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * - Redistributions of source code must retain the above copyright notice,
  *  this list of conditions and the following disclaimer.
  *
@@ -17,7 +17,7 @@
  * - Neither the name of the author nor the names of its contributors may be
  *  used to endorse or promote products derived from this software without
  *  specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,17 +42,17 @@
 static void exitmessage(const char *message) __attribute__((noreturn));
 static void exitmessage(const char *message)
 {
-  printf("%s\n", message);
-  exit(0);
+    printf("%s\n", message);
+    exit(0);
 }
 
 static int filesize(FILE *fp)
 {
-  long pos;
-  fseek(fp, 0, SEEK_END);
-  pos = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-  return pos;
+    long pos;
+    fseek(fp, 0, SEEK_END);
+    pos = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    return pos;
 }
 
 /**
@@ -60,47 +60,47 @@ static int filesize(FILE *fp)
  */
 int convert_one_image(const char *infilename)
 {
-  FILE *fp;
-  unsigned int length_of_file;
-  unsigned int width, height;
-  unsigned char *buf;
-  struct jdec_private *jdec;
-  size_t n_items;
+    FILE *fp;
+    unsigned int length_of_file;
+    unsigned int width, height;
+    unsigned char *buf;
+    struct jdec_private *jdec;
+    size_t n_items;
 
-  /* Load the Jpeg into memory */
-  fp = fopen(infilename, "rb");
-  if (fp == NULL)
-    exitmessage("Cannot open filename\n");
-  length_of_file = filesize(fp);
-  buf = (unsigned char *)malloc(length_of_file + 4);
-  if (buf == NULL)
-    exitmessage("Not enough memory for loading file\n");
-  n_items = fread(buf, length_of_file, 1, fp);
-  fclose(fp);
-  if (n_items != 1) {
-      free(buf);
-      exitmessage("Reading file fail\n");
-  }
+    /* Load the Jpeg into memory */
+    fp = fopen(infilename, "rb");
+    if (fp == NULL)
+        exitmessage("Cannot open filename\n");
+    length_of_file = filesize(fp);
+    buf = (unsigned char *)malloc(length_of_file + 4);
+    if (buf == NULL)
+        exitmessage("Not enough memory for loading file\n");
+    n_items = fread(buf, length_of_file, 1, fp);
+    fclose(fp);
+    if (n_items != 1) {
+        free(buf);
+        exitmessage("Reading file fail\n");
+    }
 
-  /* Decompress it */
-  jdec = tinyjpeg_init();
-  if (jdec == NULL)
-    exitmessage("Not enough memory to alloc the structure need for decompressing\n");
+    /* Decompress it */
+    jdec = tinyjpeg_init();
+    if (jdec == NULL)
+        exitmessage("Not enough memory to alloc the structure need for decompressing\n");
 
-  if (tinyjpeg_parse_header(jdec, buf, length_of_file)<0)
-    exitmessage(tinyjpeg_get_errorstring(jdec));
+    if (tinyjpeg_parse_header(jdec, buf, length_of_file) < 0)
+        exitmessage(tinyjpeg_get_errorstring(jdec));
 
-  /* Get the size of the image */
-  tinyjpeg_get_size(jdec, &width, &height);
+    /* Get the size of the image */
+    tinyjpeg_get_size(jdec, &width, &height);
 
-  printf("Decoding JPEG image %dx%d...\n", width, height);
-  if (tinyjpeg_decode(jdec) < 0)
-    exitmessage(tinyjpeg_get_errorstring(jdec));
+    printf("Decoding JPEG image %dx%d...\n", width, height);
+    if (tinyjpeg_decode(jdec) < 0)
+        exitmessage(tinyjpeg_get_errorstring(jdec));
 
-  tinyjpeg_free(jdec);
+    tinyjpeg_free(jdec);
 
-  free(buf);
-  return 0;
+    free(buf);
+    return 0;
 }
 
 static void usage(void)
@@ -115,26 +115,26 @@ static void usage(void)
  */
 int main(int argc, char *argv[])
 {
-  char *input_filename;
-  clock_t start_time, finish_time;
-  unsigned int duration;
-  int current_argument;
+    char *input_filename;
+    clock_t start_time, finish_time;
+    unsigned int duration;
+    int current_argument;
 
-  va_init_display_args(&argc, argv);
+    va_init_display_args(&argc, argv);
 
-  if (argc < 2)
-    usage();
+    if (argc < 2)
+        usage();
 
-  current_argument = 1;
-  input_filename = argv[current_argument];
+    current_argument = 1;
+    input_filename = argv[current_argument];
 
-  start_time = clock();
-  convert_one_image(input_filename);
-  finish_time = clock();
-  duration = finish_time - start_time;
-  printf("Decoding finished in %u ticks\n", duration);
+    start_time = clock();
+    convert_one_image(input_filename);
+    finish_time = clock();
+    duration = finish_time - start_time;
+    printf("Decoding finished in %u ticks\n", duration);
 
-  return 0;
+    return 0;
 }
 
 

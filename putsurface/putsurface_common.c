@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -102,10 +102,10 @@ fourcc_map va_fourcc_map[] = {
     {"BGRX", VA_FOURCC_BGRX},
     {"RGBX", VA_FOURCC_RGBX},
 };
-unsigned int map_str_to_vafourcc (char * str)
+unsigned int map_str_to_vafourcc(char * str)
 {
     int i;
-    for (i=0; i< sizeof(va_fourcc_map)/sizeof(fourcc_map); i++) {
+    for (i = 0; i < sizeof(va_fourcc_map) / sizeof(fourcc_map); i++) {
         if (!strcmp(va_fourcc_map[i].fmt_str, str)) {
             return va_fourcc_map[i].fourcc;
         }
@@ -114,11 +114,11 @@ unsigned int map_str_to_vafourcc (char * str)
     return 0;
 
 }
-char* map_vafourcc_to_str (unsigned int format)
+char* map_vafourcc_to_str(unsigned int format)
 {
     static char unknown_format[] = "unknown-format";
     int i;
-    for (i=0; i< sizeof(va_fourcc_map)/sizeof(fourcc_map); i++) {
+    for (i = 0; i < sizeof(va_fourcc_map) / sizeof(fourcc_map); i++) {
         if (va_fourcc_map[i].fourcc == format) {
             return va_fourcc_map[i].fmt_str;
         }
@@ -204,7 +204,7 @@ ensure_surface_attribs(void)
         return 0;
 
     va_status = vaCreateConfig(va_dpy, VAProfileNone, VAEntrypointVideoProc,
-        NULL, 0, &vpp_config_id);
+                               NULL, 0, &vpp_config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig()");
 
     /* Guess the number of surface attributes, thus including any
@@ -215,18 +215,18 @@ ensure_surface_attribs(void)
         return 0;
 
     va_status = vaQuerySurfaceAttributes(va_dpy, vpp_config_id,
-        surface_attribs, &num_surface_attribs);
+                                         surface_attribs, &num_surface_attribs);
     if (va_status == VA_STATUS_SUCCESS)
         va_surface_attribs =  surface_attribs;
     else if (va_status == VA_STATUS_ERROR_MAX_NUM_EXCEEDED) {
         va_surface_attribs = (VASurfaceAttrib *)realloc(surface_attribs,
-            num_surface_attribs * sizeof(*va_surface_attribs));
+                             num_surface_attribs * sizeof(*va_surface_attribs));
         if (!va_surface_attribs) {
             free(surface_attribs);
             return 0;
         }
         va_status = vaQuerySurfaceAttributes(va_dpy, vpp_config_id,
-            va_surface_attribs, &num_surface_attribs);
+                                             va_surface_attribs, &num_surface_attribs);
     }
     CHECK_VASTATUS(va_status, "vaQuerySurfaceAttributes()");
     va_num_surface_attribs = num_surface_attribs;
@@ -253,10 +253,10 @@ lookup_surface_attrib(VASurfaceAttribType type, const VAGenericValue *value)
     return NULL;
 }
 
-int csc_preparation ()
+int csc_preparation()
 {
     VAStatus va_status;
-    
+
     // 1. make sure dst fourcc is supported for vaImage
     if (!lookup_image_format(csc_dst_fourcc)) {
         test_color_conversion = 0;
@@ -280,32 +280,32 @@ int csc_preparation ()
     // 3 create all objs required by csc
     // 3.1 vaSurface with src fourcc
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, surface_width, surface_height,
-        &surface_id[0], SURFACE_NUM,
-        surface_attribs, 1
-    );
-    CHECK_VASTATUS(va_status,"vaCreateSurfaces");
+                    va_dpy,
+                    VA_RT_FORMAT_YUV420, surface_width, surface_height,
+                    &surface_id[0], SURFACE_NUM,
+                    surface_attribs, 1
+                );
+    CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     // 3.2 vaImage with dst fourcc
     VAImageFormat image_format;
     image_format.fourcc = csc_dst_fourcc;
     image_format.byte_order = VA_LSB_FIRST;
     image_format.bits_per_pixel = 16;
-    
+
     va_status = vaCreateImage(va_dpy, &image_format,
-                    surface_width, surface_height,
-                    &csc_dst_fourcc_image);
-    CHECK_VASTATUS(va_status,"vaCreateImage");
-    
+                              surface_width, surface_height,
+                              &csc_dst_fourcc_image);
+    CHECK_VASTATUS(va_status, "vaCreateImage");
+
 
     // 3.3 create a temp VASurface for final rendering(vaPutSurface)
     s_attrib->value.value.i = VA_FOURCC_NV12;
-    va_status = vaCreateSurfaces(va_dpy, VA_RT_FORMAT_YUV420, 
+    va_status = vaCreateSurfaces(va_dpy, VA_RT_FORMAT_YUV420,
                                  surface_width, surface_height,
-                                 &csc_render_surface, 1, 
+                                 &csc_render_surface, 1,
                                  surface_attribs, 1);
-    CHECK_VASTATUS(va_status,"vaCreateSurfaces");
+    CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
 
 cleanup:
@@ -328,21 +328,19 @@ static VASurfaceID get_next_free_surface(int *index)
 
         return surface_id[i];
     }
-    
-    for (i=0; i<SURFACE_NUM; i++) {
+
+    for (i = 0; i < SURFACE_NUM; i++) {
         surface_status = (VASurfaceStatus)0;
         vaQuerySurfaceStatus(va_dpy, surface_id[i], &surface_status);
-        if (surface_status == VASurfaceReady)
-        {
-            if (0 == pthread_mutex_trylock(&surface_mutex[i]))
-            {
+        if (surface_status == VASurfaceReady) {
+            if (0 == pthread_mutex_trylock(&surface_mutex[i])) {
                 *index = i;
                 break;
             }
         }
     }
 
-    if (i==SURFACE_NUM)
+    if (i == SURFACE_NUM)
         return VA_INVALID_SURFACE;
     else
         return surface_id[i];
@@ -350,16 +348,16 @@ static VASurfaceID get_next_free_surface(int *index)
 
 static int upload_source_YUV_once_for_all()
 {
-    int box_width_loc=8;
-    int row_shift_loc=0;
+    int box_width_loc = 8;
+    int row_shift_loc = 0;
     int i;
-    
-    for (i=0; i<SURFACE_NUM; i++) {
+
+    for (i = 0; i < SURFACE_NUM; i++) {
         printf("\rLoading data into surface %d.....", i);
         upload_surface(va_dpy, surface_id[i], box_width_loc, row_shift_loc, 0);
-        
+
         row_shift_loc++;
-        if (row_shift_loc==(2*box_width_loc)) row_shift_loc= 0;
+        if (row_shift_loc == (2 * box_width_loc)) row_shift_loc = 0;
     }
     printf("\n");
 
@@ -374,16 +372,16 @@ static unsigned long get_tick_count(void)
     struct timeval tv;
     if (gettimeofday(&tv, NULL))
         return 0;
-    return tv.tv_usec/1000+tv.tv_sec*1000;
+    return tv.tv_usec / 1000 + tv.tv_sec * 1000;
 }
 
 static void update_clipbox(VARectangle *cliprects, int width, int height)
 {
     if (test_clip == 0)
         return;
-            
+
     srand((unsigned)time(NULL));
-                
+
     cliprects[0].x = (rand() % width);
     cliprects[0].y = (rand() % height);
     cliprects[0].width = (rand() % (width - cliprects[0].x));
@@ -400,25 +398,25 @@ static void update_clipbox(VARectangle *cliprects, int width, int height)
 
 static void* putsurface_thread(void *data)
 {
-    int width=win_width, height=win_height;
+    int width = win_width, height = win_height;
     void *drawable = data;
     int quit = 0;
     VAStatus vaStatus;
     int row_shift = 0;
     int index = 0;
-    unsigned int frame_num=0, start_time, putsurface_time;
+    unsigned int frame_num = 0, start_time, putsurface_time;
     VARectangle cliprects[2]; /* client supplied clip list */
     int continue_display = 0;
-    
+
     if (drawable == drawable_thread0)
         printf("Enter into thread0\n\n");
     if (drawable == drawable_thread1)
         printf("Enter into thread1\n\n");
-    
+
     putsurface_time = 0;
     while (!quit) {
         VASurfaceID surface_id = VA_INVALID_SURFACE;
-        
+
         while (surface_id == VA_INVALID_SURFACE)
             surface_id = get_next_free_surface(&index);
 
@@ -429,9 +427,9 @@ static void* putsurface_thread(void *data)
 
         if (check_event)
             pthread_mutex_lock(&gmutex);
-        
+
         start_time = get_tick_count();
-	if ((continue_display == 0) && getenv("FRAME_STOP")) {
+        if ((continue_display == 0) && getenv("FRAME_STOP")) {
             char c;
             printf("Press any key to display frame %d...(c/C to continue)\n", frame_num);
             c = getchar();
@@ -440,75 +438,74 @@ static void* putsurface_thread(void *data)
         }
         if (test_color_conversion) {
             static int _put_surface_count = 0;
-            if (_put_surface_count++ %50 == 0) {
+            if (_put_surface_count++ % 50 == 0) {
                 printf("do additional colorcoversion from %s to %s\n", map_vafourcc_to_str(csc_src_fourcc), map_vafourcc_to_str(csc_dst_fourcc));
             }
             // get image from surface, csc_src_fourcc to csc_dst_fourcc conversion happens
-            vaStatus = vaGetImage(va_dpy, surface_id, 0, 0, 
-                surface_width, surface_height, csc_dst_fourcc_image.image_id);
-            CHECK_VASTATUS(vaStatus,"vaGetImage");
-            
+            vaStatus = vaGetImage(va_dpy, surface_id, 0, 0,
+                                  surface_width, surface_height, csc_dst_fourcc_image.image_id);
+            CHECK_VASTATUS(vaStatus, "vaGetImage");
+
             // render csc_dst_fourcc image to temp surface
             vaStatus = vaPutImage(va_dpy, csc_render_surface, csc_dst_fourcc_image.image_id,
-                                    0, 0, surface_width, surface_height, 
-                                    0, 0, surface_width, surface_height);
-            CHECK_VASTATUS(vaStatus,"vaPutImage");
-            
+                                  0, 0, surface_width, surface_height,
+                                  0, 0, surface_width, surface_height);
+            CHECK_VASTATUS(vaStatus, "vaPutImage");
+
             // render the temp surface, it should be same with original surface without color conversion test
             vaStatus = vaPutSurface(va_dpy, csc_render_surface, CAST_DRAWABLE(drawable),
-                                    0,0,surface_width,surface_height,
-                                    0,0,width,height,
-                                    (test_clip==0)?NULL:&cliprects[0],
-                                    (test_clip==0)?0:2,
+                                    0, 0, surface_width, surface_height,
+                                    0, 0, width, height,
+                                    (test_clip == 0) ? NULL : &cliprects[0],
+                                    (test_clip == 0) ? 0 : 2,
                                     display_field);
-            CHECK_VASTATUS(vaStatus,"vaPutSurface");
-    
-        }
-        else {
+            CHECK_VASTATUS(vaStatus, "vaPutSurface");
+
+        } else {
             vaStatus = vaPutSurface(va_dpy, surface_id, CAST_DRAWABLE(drawable),
-                                    0,0,surface_width,surface_height,
-                                    0,0,width,height,
-                                    (test_clip==0)?NULL:&cliprects[0],
-                                    (test_clip==0)?0:2,
+                                    0, 0, surface_width, surface_height,
+                                    0, 0, width, height,
+                                    (test_clip == 0) ? NULL : &cliprects[0],
+                                    (test_clip == 0) ? 0 : 2,
                                     display_field);
-            CHECK_VASTATUS(vaStatus,"vaPutSurface");
+            CHECK_VASTATUS(vaStatus, "vaPutSurface");
         }
-    
+
         putsurface_time += (get_tick_count() - start_time);
-        
+
         if (check_event)
             pthread_mutex_unlock(&gmutex);
-        
+
         pthread_mutex_unlock(&surface_mutex[index]); /* locked in get_next_free_surface */
-        
+
         if ((frame_num % 0xff) == 0) {
             fprintf(stderr, "%.2f FPS             \r", 256000.0 / (float)putsurface_time);
             putsurface_time = 0;
             update_clipbox(cliprects, width, height);
         }
-        
+
         if (check_event)
             check_window_event(win_display, drawable, &width, &height, &quit);
 
         if (multi_thread) { /* reload surface content */
             row_shift++;
-            if (row_shift==(2*box_width)) row_shift= 0;
+            if (row_shift == (2 * box_width)) row_shift = 0;
         }
-        
+
         if (frame_rate != 0) /* rough framerate control */
-            usleep(1000/frame_rate*1000);
+            usleep(1000 / frame_rate * 1000);
 
         frame_num++;
         if (frame_num >= frame_num_total)
             quit = 1;
     }
-    
-    if (drawable == drawable_thread1)    
+
+    if (drawable == drawable_thread1)
         pthread_exit(NULL);
-    
+
     return 0;
 }
-int main(int argc,char **argv)
+int main(int argc, char **argv)
 {
     int major_ver, minor_ver;
     VAStatus va_status;
@@ -518,107 +515,106 @@ int main(int argc,char **argv)
     int i;
     char str_src_fmt[5], str_dst_fmt[5];
 
-    static struct option long_options[] =
-                 {
-                   {"fmt1",  required_argument,       NULL, '1'},
-                   {"fmt2",  required_argument,       NULL, '2'},
-                   {0, 0, 0, 0}
-                 };
+    static struct option long_options[] = {
+        {"fmt1",  required_argument,       NULL, '1'},
+        {"fmt2",  required_argument,       NULL, '2'},
+        {0, 0, 0, 0}
+    };
 
-    while ((c =getopt_long(argc,argv,"w:h:g:r:d:f:tcep?n:1:2:v", long_options, NULL)) != EOF) {
+    while ((c = getopt_long(argc, argv, "w:h:g:r:d:f:tcep?n:1:2:v", long_options, NULL)) != EOF) {
         switch (c) {
-            case '?':
-                printf("putsurface <options>\n");
-                printf("           -g <widthxheight+x_location+y_location> window geometry\n");
-                printf("           -w/-h resolution of surface\n");
-                printf("           -r <framerate>\n");
-                printf("           -d the dimension of black/write square box, default is 32\n");
-                printf("           -t multi-threads\n");
-                printf("           -c test clipbox\n");
-                printf("           -f <1/2> top field, or bottom field\n");
-                printf("           -1 source format (fourcc) for color conversion test\n");
-                printf("           -2 dest   format (fourcc) for color conversion test\n");
-                printf("           --fmt1 same to -1\n");
-                printf("           --fmt2 same to -2\n");
-                printf("           -v verbose output\n");
+        case '?':
+            printf("putsurface <options>\n");
+            printf("           -g <widthxheight+x_location+y_location> window geometry\n");
+            printf("           -w/-h resolution of surface\n");
+            printf("           -r <framerate>\n");
+            printf("           -d the dimension of black/write square box, default is 32\n");
+            printf("           -t multi-threads\n");
+            printf("           -c test clipbox\n");
+            printf("           -f <1/2> top field, or bottom field\n");
+            printf("           -1 source format (fourcc) for color conversion test\n");
+            printf("           -2 dest   format (fourcc) for color conversion test\n");
+            printf("           --fmt1 same to -1\n");
+            printf("           --fmt2 same to -2\n");
+            printf("           -v verbose output\n");
+            exit(0);
+            break;
+        case 'g':
+            ret = sscanf(optarg, "%dx%d+%d+%d", &win_width, &win_height, &win_x, &win_y);
+            if (ret != 4) {
+                printf("invalid window geometry, must be widthxheight+x_location+y_location\n");
                 exit(0);
-                break;
-            case 'g':
-                ret = sscanf(optarg, "%dx%d+%d+%d", &win_width, &win_height, &win_x, &win_y);
-                if (ret != 4) {
-                    printf("invalid window geometry, must be widthxheight+x_location+y_location\n");
-                    exit(0);
-                } else
-                    printf("Create window at (%d, %d), width = %d, height = %d\n",
-                           win_x, win_y, win_width, win_height);
-                break;
-            case 'r':
-                frame_rate = atoi(optarg);
-                break;
-            case 'w':
-                surface_width = atoi(optarg);
-                break;
-            case 'h':
-                surface_height = atoi(optarg);
-                break;
-            case 'n':
-                frame_num_total = atoi(optarg);
-                break;
-            case 'd':
-                box_width = atoi(optarg);
-                break;
-            case 't':
-                multi_thread = 1;
-                printf("Two threads to do vaPutSurface\n");
-                break;
-            case 'e':
-                check_event = 0;
-                break;
-            case 'p':
-                put_pixmap = 1;
-                break;
-            case 'c':
-                test_clip = 1;
-                break;
-            case 'f':
-                if (atoi(optarg) == 1) {
-                    printf("Display TOP field\n");
-                    display_field = VA_TOP_FIELD;
-                } else if (atoi(optarg) == 2) {
-                    printf("Display BOTTOM field\n");
-                    display_field = VA_BOTTOM_FIELD;
-                } else
-                    printf("The validate input for -f is: 1(top field)/2(bottom field)\n");
-                break;
-            case '1':
-                sscanf(optarg, "%5s", str_src_fmt);
-                csc_src_fourcc = map_str_to_vafourcc (str_src_fmt);
-                
-				if (!csc_src_fourcc) {
-                    printf("invalid fmt1: %s\n", str_src_fmt );
-                    exit(0);
-                }
-                break;
-            case '2':
-                sscanf(optarg, "%5s", str_dst_fmt);
-                csc_dst_fourcc = map_str_to_vafourcc (str_dst_fmt);
-                
-				if (!csc_dst_fourcc) {
-                    printf("invalid fmt1: %s\n", str_dst_fmt );
-                    exit(0);
-                }
-                break;
-            case 'v':
-                verbose = 1;
-                printf("Enable verbose output\n");
-                break;
+            } else
+                printf("Create window at (%d, %d), width = %d, height = %d\n",
+                       win_x, win_y, win_width, win_height);
+            break;
+        case 'r':
+            frame_rate = atoi(optarg);
+            break;
+        case 'w':
+            surface_width = atoi(optarg);
+            break;
+        case 'h':
+            surface_height = atoi(optarg);
+            break;
+        case 'n':
+            frame_num_total = atoi(optarg);
+            break;
+        case 'd':
+            box_width = atoi(optarg);
+            break;
+        case 't':
+            multi_thread = 1;
+            printf("Two threads to do vaPutSurface\n");
+            break;
+        case 'e':
+            check_event = 0;
+            break;
+        case 'p':
+            put_pixmap = 1;
+            break;
+        case 'c':
+            test_clip = 1;
+            break;
+        case 'f':
+            if (atoi(optarg) == 1) {
+                printf("Display TOP field\n");
+                display_field = VA_TOP_FIELD;
+            } else if (atoi(optarg) == 2) {
+                printf("Display BOTTOM field\n");
+                display_field = VA_BOTTOM_FIELD;
+            } else
+                printf("The validate input for -f is: 1(top field)/2(bottom field)\n");
+            break;
+        case '1':
+            sscanf(optarg, "%5s", str_src_fmt);
+            csc_src_fourcc = map_str_to_vafourcc(str_src_fmt);
+
+            if (!csc_src_fourcc) {
+                printf("invalid fmt1: %s\n", str_src_fmt);
+                exit(0);
+            }
+            break;
+        case '2':
+            sscanf(optarg, "%5s", str_dst_fmt);
+            csc_dst_fourcc = map_str_to_vafourcc(str_dst_fmt);
+
+            if (!csc_dst_fourcc) {
+                printf("invalid fmt1: %s\n", str_dst_fmt);
+                exit(0);
+            }
+            break;
+        case 'v':
+            verbose = 1;
+            printf("Enable verbose output\n");
+            break;
         }
     }
 
     if (csc_src_fourcc && csc_dst_fourcc) {
         test_color_conversion = 1;
     }
-    
+
     win_display = (void *)open_display();
     if (win_display == NULL) {
         fprintf(stderr, "Can't open the connection of display!\n");
@@ -633,53 +629,53 @@ int main(int argc,char **argv)
     if (test_color_conversion) {
         ret = csc_preparation();
     }
-    if (!test_color_conversion || !ret ) {
+    if (!test_color_conversion || !ret) {
         va_status = vaCreateSurfaces(
-            va_dpy,
-            VA_RT_FORMAT_YUV420, surface_width, surface_height,
-            &surface_id[0], SURFACE_NUM,
-            NULL, 0
-        );
-	}
+                        va_dpy,
+                        VA_RT_FORMAT_YUV420, surface_width, surface_height,
+                        &surface_id[0], SURFACE_NUM,
+                        NULL, 0
+                    );
+    }
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
     if (multi_thread == 0) /* upload the content for all surfaces */
         upload_source_YUV_once_for_all();
-    
+
     if (check_event)
         pthread_mutex_init(&gmutex, NULL);
-   
-    for(i = 0; i< SURFACE_NUM; i++)
+
+    for (i = 0; i < SURFACE_NUM; i++)
         pthread_mutex_init(&surface_mutex[i], NULL);
-    
-    if (multi_thread == 1) 
+
+    if (multi_thread == 1)
         ret = pthread_create(&thread1, NULL, putsurface_thread, (void*)drawable_thread1);
 
     putsurface_thread((void *)drawable_thread0);
 
-    if (multi_thread == 1) 
+    if (multi_thread == 1)
         pthread_join(thread1, (void **)&ret);
     printf("thread1 is free\n");
 
     if (test_color_conversion) {
         // destroy temp surface/image
         va_status = vaDestroySurfaces(va_dpy, &csc_render_surface, 1);
-        CHECK_VASTATUS(va_status,"vaDestroySurfaces");
-        
+        CHECK_VASTATUS(va_status, "vaDestroySurfaces");
+
         va_status = vaDestroyImage(va_dpy, csc_dst_fourcc_image.image_id);
-        CHECK_VASTATUS(va_status,"vaDestroyImage");
+        CHECK_VASTATUS(va_status, "vaDestroyImage");
     }
 
     if (vpp_config_id != VA_INVALID_ID) {
-        vaDestroyConfig (va_dpy, vpp_config_id);
+        vaDestroyConfig(va_dpy, vpp_config_id);
         vpp_config_id = VA_INVALID_ID;
     }
 
-    vaDestroySurfaces(va_dpy,&surface_id[0],SURFACE_NUM);    
+    vaDestroySurfaces(va_dpy, &surface_id[0], SURFACE_NUM);
     vaTerminate(va_dpy);
 
     free(va_image_formats);
     free(va_surface_attribs);
     close_display(win_display);
-    
+
     return 0;
 }

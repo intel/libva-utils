@@ -26,7 +26,8 @@
 
 #include <functional>
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 class VAAPIDisplayAttribs
     : public VAAPIFixture
@@ -49,7 +50,7 @@ protected:
     {
         const DisplayAttributes::const_iterator begin = m_attribs.begin();
         const DisplayAttributes::const_iterator end = m_attribs.end();
-        auto predicate = [&](const VADisplayAttribute& a) {
+        auto predicate = [&](const VADisplayAttribute & a) {
             return a.type == type;
         };
 
@@ -107,7 +108,7 @@ TEST_F(VAAPIDisplayAttribs, QueryDisplayAttribs)
     } else {
         m_attribs.resize(maxAttribs);
         EXPECT_STATUS(vaQueryDisplayAttributes(m_vaDisplay, m_attribs.data(),
-            &numAttribs));
+                                               &numAttribs));
         EXPECT_GT(numAttribs, 0);
         EXPECT_LE(numAttribs, maxAttribs);
     }
@@ -119,7 +120,7 @@ TEST_F(VAAPIDisplayAttribs, GetDisplayAttribs)
 
     if (maxAttribs <= 0) {
         EXPECT_STATUS_EQ(VA_STATUS_ERROR_UNIMPLEMENTED,
-            vaGetDisplayAttributes(m_vaDisplay, NULL, 0));
+                         vaGetDisplayAttributes(m_vaDisplay, NULL, 0));
         return;
     }
 
@@ -127,7 +128,7 @@ TEST_F(VAAPIDisplayAttribs, GetDisplayAttribs)
 
     int numAttribs(0);
     ASSERT_STATUS(vaQueryDisplayAttributes(m_vaDisplay, m_attribs.data(),
-        &numAttribs));
+                                           &numAttribs));
 
     ASSERT_GT(numAttribs, 0);
     ASSERT_LE(numAttribs, maxAttribs);
@@ -139,7 +140,7 @@ TEST_F(VAAPIDisplayAttribs, GetDisplayAttribs)
 
         if (findDisplayAttribInQueryList(attrib.type)) {
             EXPECT_TRUE((attrib.flags & VA_DISPLAY_ATTRIB_GETTABLE)
-                || (attrib.flags & VA_DISPLAY_ATTRIB_SETTABLE));
+                        || (attrib.flags & VA_DISPLAY_ATTRIB_SETTABLE));
         } else {
             EXPECT_FALSE(attrib.flags & VA_DISPLAY_ATTRIB_NOT_SUPPORTED);
         }
@@ -152,7 +153,7 @@ TEST_F(VAAPIDisplayAttribs, SetDisplayAttribs)
 
     if (maxAttribs <= 0) {
         EXPECT_STATUS_EQ(VA_STATUS_ERROR_UNIMPLEMENTED,
-            vaSetDisplayAttributes(m_vaDisplay, NULL, 0));
+                         vaSetDisplayAttributes(m_vaDisplay, NULL, 0));
         return;
     }
 
@@ -160,14 +161,14 @@ TEST_F(VAAPIDisplayAttribs, SetDisplayAttribs)
 
     int numAttribs(0);
     ASSERT_STATUS(vaQueryDisplayAttributes(m_vaDisplay, m_attribs.data(),
-        &numAttribs));
+                                           &numAttribs));
 
     ASSERT_GT(numAttribs, 0);
     ASSERT_LE(numAttribs, maxAttribs);
     m_attribs.resize(numAttribs);
 
     ASSERT_STATUS(vaGetDisplayAttributes(m_vaDisplay, m_attribs.data(),
-        m_attribs.size()));
+                                         m_attribs.size()));
 
     for (auto attrib : m_attribs) {
         if (attrib.flags & VA_DISPLAY_ATTRIB_SETTABLE) {
@@ -178,11 +179,11 @@ TEST_F(VAAPIDisplayAttribs, SetDisplayAttribs)
 
             attrib.value = attrib.min_value - 1;
             EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER,
-                vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
+                             vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
             attrib.value = attrib.max_value + 1;
             EXPECT_STATUS_EQ(VA_STATUS_ERROR_INVALID_PARAMETER,
-                vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
+                             vaSetDisplayAttributes(m_vaDisplay, &attrib, 1));
         }
     }
 }

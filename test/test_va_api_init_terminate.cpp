@@ -24,7 +24,8 @@
 
 #include "test_va_api_fixture.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 class VAAPIInitTerminate
     : public VAAPIFixture
@@ -41,9 +42,9 @@ protected:
         ASSERT_STATUS(vaInitialize(display, &major, &minor));
 
         EXPECT_EQ(VA_MAJOR_VERSION, major)
-            << "Check installed driver version";
+                << "Check installed driver version";
         EXPECT_LE(VA_MINOR_VERSION, minor)
-            << "Check installed driver version";
+                << "Check installed driver version";
 
         ASSERT_STATUS(vaTerminate(display));
     }
@@ -78,26 +79,29 @@ TEST_F(VAAPIInitTerminate, vaInitialize_vaTerminate_Bad_vaSetDriverName)
     VADisplay display = getDisplay();
     ASSERT_TRUE(display);
 
-    { // driver name length == 0 invalid
-      char driver[1] = "";
-      EXPECT_STATUS_EQ(
-          VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
+    {
+        // driver name length == 0 invalid
+        char driver[1] = "";
+        EXPECT_STATUS_EQ(
+            VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
     }
 
-    { // driver name length >= 256 invalid
-      char driver[257];
-      driver[256] = '\0';
-      std::string(256, 'x').copy(driver, 256);
-      EXPECT_STATUS_EQ(
-          VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
+    {
+        // driver name length >= 256 invalid
+        char driver[257];
+        driver[256] = '\0';
+        std::string(256, 'x').copy(driver, 256);
+        EXPECT_STATUS_EQ(
+            VA_STATUS_ERROR_INVALID_PARAMETER, vaSetDriverName(display, driver));
     }
 
-    { // acceptable driver name, but does not exist
-      char driver[4] = "bad";
-      EXPECT_STATUS(vaSetDriverName(display, driver));
+    {
+        // acceptable driver name, but does not exist
+        char driver[4] = "bad";
+        EXPECT_STATUS(vaSetDriverName(display, driver));
 
-      EXPECT_STATUS_EQ(
-          VA_STATUS_ERROR_UNKNOWN, vaInitialize(display, &major, &minor));
+        EXPECT_STATUS_EQ(
+            VA_STATUS_ERROR_UNKNOWN, vaInitialize(display, &major, &minor));
     }
 
     EXPECT_STATUS(vaTerminate(display));

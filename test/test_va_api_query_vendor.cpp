@@ -24,7 +24,8 @@
 
 #include "test_va_api_fixture.h"
 
-namespace VAAPI {
+namespace VAAPI
+{
 
 // Inheriting from VAAPIFixture is not necessary as this test is not
 // overriding or extending any functionality defined in fixture.
