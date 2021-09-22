@@ -1,5 +1,5 @@
 #!/bin/bash
-file=$(find . -name "*.[ch]" -o -name "*.cpp")
+file=$(find . -path ./test/gtest/ -prune -name "*.[ch]" -o -name "*.cpp")
 for i in $file
 do 
     echo $i 
