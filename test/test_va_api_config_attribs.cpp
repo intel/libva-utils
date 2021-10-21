@@ -138,7 +138,7 @@ TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
     validateConfigAttributes(actual, supported);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     Attributes, VAAPIConfigAttribs,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
                        ::testing::ValuesIn(g_vaEntrypoints)));

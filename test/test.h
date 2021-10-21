@@ -26,6 +26,7 @@
 #define TESTVAAPI_test_h
 
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <va/va.h>

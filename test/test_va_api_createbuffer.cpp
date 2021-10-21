@@ -258,7 +258,7 @@ std::vector<CreateBufferParamInterface::ParamType> generateInput()
     return inputs;
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CreateBuffer, VAAPICreateBuffer,
     ::testing::ValuesIn(generateInput()));
 
