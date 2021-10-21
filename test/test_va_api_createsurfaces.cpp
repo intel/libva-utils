@@ -34,11 +34,11 @@ namespace VAAPI
 // combinations that the driver does support.
 
 class VAAPISurfaceFixture
-    : public VAAPIFixture
+    : public VAAPIFixtureSharedDisplay
 {
 public:
     VAAPISurfaceFixture(const VAProfile& p, const VAEntrypoint& e)
-        : VAAPIFixture()
+        : VAAPIFixtureSharedDisplay()
         , profile(p)
         , entrypoint(e)
     { }
@@ -46,19 +46,6 @@ public:
 protected:
     const VAProfile& profile;
     const VAEntrypoint& entrypoint;
-
-    virtual void SetUp()
-    {
-        VAAPIFixture::SetUp();
-        doInitialize();
-        ASSERT_FALSE(HasFailure());
-    }
-
-    virtual void TearDown()
-    {
-        doTerminate();
-        VAAPIFixture::TearDown();
-    }
 
     void testWithSupportedConfigAttributes(
         const std::function<void (const ConfigAttributes&)>& test)
