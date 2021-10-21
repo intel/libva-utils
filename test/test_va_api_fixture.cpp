@@ -35,6 +35,10 @@
 namespace VAAPI
 {
 
+int VAAPIFixtureSharedDisplay::s_drmHandle = -1;
+VADisplay VAAPIFixtureSharedDisplay::s_vaDisplay = nullptr;
+VAStatus VAAPIFixtureSharedDisplay::s_initStatus = VA_STATUS_SUCCESS;
+
 VAAPIFixture::VAAPIFixture()
     : ::testing::Test::Test()
     , m_vaDisplay(NULL)
@@ -71,7 +75,7 @@ VAAPIFixture::~VAAPIFixture()
     }
 }
 
-VADisplay VAAPIFixture::getDisplay()
+static VADisplay getDrmDisplay(int &fd)
 {
     typedef std::vector<std::string> DevicePaths;
     typedef DevicePaths::const_iterator DevicePathsIterator;
@@ -80,16 +84,25 @@ VADisplay VAAPIFixture::getDisplay()
 
     const DevicePathsIterator endIt(paths.end());
     for (DevicePathsIterator it(paths.begin()); it != endIt; ++it) {
-        m_drmHandle = open(it->c_str(), O_RDWR);
-        if (m_drmHandle < 0)
+        fd = open(it->c_str(), O_RDWR);
+        if (fd < 0)
             continue;
-        m_vaDisplay = vaGetDisplayDRM(m_drmHandle);
+        VADisplay disp = vaGetDisplayDRM(fd);
 
-        if (m_vaDisplay)
-            return m_vaDisplay;
+        if (disp)
+            return disp;
+
+        close(fd);
     }
 
     return NULL;
+}
+
+VADisplay VAAPIFixture::getDisplay()
+{
+    m_vaDisplay = getDrmDisplay(m_drmHandle);
+
+    return m_vaDisplay;
 }
 
 VADisplay VAAPIFixture::doInitialize()
@@ -479,6 +492,40 @@ TEST_F(VAAPIFixture, getDisplay)
     vaDisplay = getDisplay();
     ASSERT_TRUE(vaDisplay);
     EXPECT_STATUS(vaTerminate(vaDisplay));
+}
+
+VAAPIFixtureSharedDisplay::VAAPIFixtureSharedDisplay() : VAAPIFixture() { }
+
+void VAAPIFixtureSharedDisplay::SetUpTestSuite()
+{
+    if (s_drmHandle < 0) {
+        s_vaDisplay = getDrmDisplay(s_drmHandle);
+
+        int majorVersion, minorVersion;
+        s_initStatus = vaInitialize(s_vaDisplay, &majorVersion, &minorVersion);
+    }
+}
+
+void VAAPIFixtureSharedDisplay::TearDownTestSuite()
+{
+    if (s_drmHandle >= 0) {
+        if (s_initStatus == VA_STATUS_SUCCESS) {
+            vaTerminate(s_vaDisplay);
+            s_vaDisplay = nullptr;
+        } else {
+            s_initStatus = VA_STATUS_SUCCESS;
+        }
+
+        close(s_drmHandle);
+        s_drmHandle = -1;
+    }
+}
+
+void VAAPIFixtureSharedDisplay::SetUp()
+{
+    EXPECT_STATUS(s_initStatus) << "failed to initialize vaapi";
+
+    m_vaDisplay = s_vaDisplay;
 }
 
 } // namespace VAAPI
