@@ -91,7 +91,7 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     QueryConfig, VAAPIQueryConfig, ::testing::ValuesIn(g_vaProfiles));
 
 } // namespace VAAPI

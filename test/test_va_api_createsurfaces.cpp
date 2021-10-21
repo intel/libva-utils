@@ -186,7 +186,7 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
     destroyConfig();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     QuerySurfaces, VAAPIQuerySurfaces,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
                        ::testing::ValuesIn(g_vaEntrypoints)));
@@ -277,7 +277,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
     destroyConfig();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CreateSurfaces, VAAPICreateSurfaces,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
                        ::testing::ValuesIn(g_vaEntrypoints),

@@ -105,7 +105,7 @@ TEST_P(VAAPICreateContext, CreateContext)
     destroyConfig();
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CreateContext, VAAPICreateContext,
     ::testing::Combine(::testing::ValuesIn(g_vaProfiles),
                        ::testing::ValuesIn(g_vaEntrypoints),
