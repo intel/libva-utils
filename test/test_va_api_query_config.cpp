@@ -28,22 +28,9 @@ namespace VAAPI
 {
 
 class VAAPIQueryConfig
-    : public VAAPIFixture
+    : public VAAPIFixtureSharedDisplay
     , public ::testing::WithParamInterface<VAProfile>
 {
-protected:
-    virtual void SetUp()
-    {
-        VAAPIFixture::SetUp();
-        doInitialize();
-        ASSERT_FALSE(HasFailure());
-    }
-
-    virtual void TearDown()
-    {
-        doTerminate();
-        VAAPIFixture::TearDown();
-    }
 };
 
 TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)

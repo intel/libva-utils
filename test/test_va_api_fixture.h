@@ -112,6 +112,25 @@ private:
     std::string m_skip;
 };
 
+/* Test fixture that initializes a shared display once per test suite, and
+ * provides it to you in m_vaDisplay from its SetUp() routine.
+ */
+class VAAPIFixtureSharedDisplay : public VAAPIFixture
+{
+public:
+    VAAPIFixtureSharedDisplay();
+
+    virtual void SetUp();
+
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+
+private:
+    static int s_drmHandle;
+    static VADisplay s_vaDisplay;
+    static VAStatus s_initStatus;
+};
+
 } // namespace VAAPI
 
 #endif

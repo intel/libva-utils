@@ -28,7 +28,7 @@ namespace VAAPI
 {
 
 class VAAPIConfigAttribs
-    : public VAAPIFixture
+    : public VAAPIFixtureSharedDisplay
     , public ::testing::WithParamInterface<std::tuple<VAProfile, VAEntrypoint> >
 {
 public:
@@ -40,19 +40,6 @@ public:
 protected:
     const VAProfile& profile;
     const VAEntrypoint& entrypoint;
-
-    virtual void SetUp()
-    {
-        VAAPIFixture::SetUp();
-        doInitialize();
-        ASSERT_FALSE(HasFailure());
-    }
-
-    virtual void TearDown()
-    {
-        doTerminate();
-        VAAPIFixture::TearDown();
-    }
 
     void validateConfigAttributes(const ConfigAttributes& actual,
                                   const ConfigAttributes& supported) const
