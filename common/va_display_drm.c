@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #ifdef IN_LIBVA
@@ -31,6 +32,7 @@
 #else
 # include <va/va_drm.h>
 #endif
+#include <xf86drm.h>
 #include "va_display.h"
 
 static int drm_fd = -1;
@@ -41,10 +43,12 @@ va_open_display_drm(void)
 {
     VADisplay va_dpy;
     int i;
-
+    drmVersionPtr version;
     static const char *drm_device_paths[] = {
         "/dev/dri/renderD128",
         "/dev/dri/card0",
+        "/dev/dri/renderD129",
+        "/dev/dri/card1",
         NULL
     };
 
@@ -71,6 +75,18 @@ va_open_display_drm(void)
         drm_fd = open(drm_device_paths[i], O_RDWR);
         if (drm_fd < 0)
             continue;
+
+        version = drmGetVersion(drm_fd);
+        if (!version) {
+            close(drm_fd);
+            continue;
+        }
+        if (!strncmp(version->name, "vgem", 4)) {
+            drmFreeVersion(version);
+            close(drm_fd);
+            continue;
+        }
+        drmFreeVersion(version);
 
         va_dpy = vaGetDisplayDRM(drm_fd);
         if (va_dpy)
