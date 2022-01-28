@@ -21,6 +21,7 @@ if get_option('drm') != 'false'
   require_drm = get_option('drm') == 'true'
   drm_deps = [
     dependency('libva-drm', required: require_drm),
+    dependency('drm', required: require_drm),
   ]
   use_drm = true
   foreach d : drm_deps
