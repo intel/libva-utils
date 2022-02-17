@@ -1,5 +1,9 @@
-libva-utils NEWS -- summary of changes.  2021-9-30
-Copyright (C) 2009-2020 Intel Corporation
+libva-utils NEWS -- summary of changes.  2022-2-16
+Copyright (C) 2009-2022 Intel Corporation
+
+Version 2.14.0 - 16.Feb.2022
+* test: Use test suite setup/teardown to reduce test overhead
+* ci: fix freebsd build
 
 Version 2.13.0 - 30.Sep.2020
 * code style:unify the code styles using the style_unify script
