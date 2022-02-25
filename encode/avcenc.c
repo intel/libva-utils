@@ -859,7 +859,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     va_status = vaCreateBuffer(va_dpy,
                    avcenc_context.context_id,
                    VAEncMiscParameterBufferType,
-                   sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
+                   sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterHRD),
                    1,
                    NULL,
                    &avcenc_context.misc_parameter_hrd_buf_id);
