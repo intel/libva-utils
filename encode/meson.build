@@ -1,4 +1,3 @@
-threads = dependency('threads')
 m = c.find_library('m')
 
 
