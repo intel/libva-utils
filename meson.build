@@ -10,6 +10,8 @@ project('libva-utils', 'c', 'cpp',
 
 c = meson.get_compiler('c')
 
+threads = dependency('threads')
+
 libva_dep = dependency('libva', version: '>= 1.1.0')
 
 libva_utils_flags = [ '-Wno-unused-parameter',
