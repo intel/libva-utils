@@ -78,7 +78,7 @@ enum {
 #define PROFILE_IDC_MAIN10      2
 
 #define BITSTREAM_ALLOCATE_STEPPING     4096
-#define LCU_SIZE 32
+static  int LCU_SIZE = 32;
 
 #define SURFACE_NUM 16 /* 16 surfaces for source YUV */
 #define SURFACE_NUM 16 /* 16 surfaces for reference */
@@ -374,7 +374,9 @@ static  struct SliceHeader ssh;
 static  VADisplay va_dpy;
 static  VAProfile hevc_profile = ~0;
 static  int real_hevc_profile = 0;
+static  VAEntrypoint entryPoint = VAEntrypointEncSlice;
 static  int p2b = 1;
+static  int lowpower = 0;
 static  VAConfigAttrib attrib[VAConfigAttribTypeMax];
 static  VAConfigAttrib config_attrib[VAConfigAttribTypeMax];
 static  int config_attrib_num = 0, enc_packed_header_idx;
@@ -1746,7 +1748,7 @@ static int print_help(void)
     printf("   --intra_period <number>\n");
     printf("   --idr_period <number>\n");
     printf("   --ip_period <number>\n");
-    printf("   --bitrate <bitrate>\n");
+    printf("   --bitrate <bitrate> Kbits per second\n");
     printf("   --initialqp <number>\n");
     printf("   --minqp <number>\n");
     printf("   --rcmode <NONE|CBR|VBR|VCM|CQP|VBR_CONTRAINED>\n");
@@ -1757,6 +1759,7 @@ static int print_help(void)
     printf("   --enablePSNR calculate PSNR of recyuv vs. srcyuv\n");
     printf("   --profile 1: main 2 : main10\n");
     printf("   --p2b 1: enable 0 : disalbe(defalut)\n");
+    printf("   --lowpower 1: enable 0 : disalbe(defalut)\n");
     return 0;
 }
 
@@ -1782,6 +1785,7 @@ static int process_cmdline(int argc, char *argv[])
         {"framecount", required_argument, NULL, 16 },
         {"profile", required_argument, NULL, 17 },
         {"p2b", required_argument, NULL, 18 },
+        {"lowpower", required_argument, NULL, 19 },
         {NULL, no_argument, NULL, 0 }
     };
     int long_index;
@@ -1808,7 +1812,7 @@ static int process_cmdline(int argc, char *argv[])
             print_help();
             exit(0);
         case 1:
-            frame_bitrate = atoi(optarg);
+            frame_bitrate = atoi(optarg)*1000;
             break;
         case 2:
             minimal_qp = atoi(optarg);
@@ -1869,6 +1873,9 @@ static int process_cmdline(int argc, char *argv[])
             break;
         case 18:
             p2b = atoi(optarg);
+            break;
+        case 19:
+            lowpower = atoi(optarg);
             break;
 
         case ':':
@@ -1987,7 +1994,8 @@ static int init_va(void)
         hevc_profile = profile_list[i];
         vaQueryConfigEntrypoints(va_dpy, hevc_profile, entrypoints, &num_entrypoints);
         for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
-            if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice) {
+            if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice ||
+                entrypoints[slice_entrypoint] == VAEntrypointEncSliceLP ) {
                 support_encode = 1;
                 break;
             }
@@ -2023,7 +2031,7 @@ static int init_va(void)
     for (i = 0; i < VAConfigAttribTypeMax; i++)
         attrib[i].type = i;
 
-    va_status = vaGetConfigAttributes(va_dpy, hevc_profile, VAEntrypointEncSlice,
+    va_status = vaGetConfigAttributes(va_dpy, hevc_profile, entryPoint,
                                       &attrib[0], VAConfigAttribTypeMax);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     /* check the interested configattrib */
@@ -2165,7 +2173,12 @@ static int setup_encode()
     VASurfaceID *tmp_surfaceid;
     int codedbuf_size, i;
 
-    va_status = vaCreateConfig(va_dpy, hevc_profile, VAEntrypointEncSlice,
+    if (lowpower)
+    {
+        entryPoint = VAEntrypointEncSliceLP;
+        LCU_SIZE = 64;
+    }
+    va_status = vaCreateConfig(va_dpy, hevc_profile, entryPoint,
                                &config_attrib[0], config_attrib_num, &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
@@ -2325,7 +2338,7 @@ static int render_sequence(struct SeqParamSet *sps)
     seq_param.intra_idr_period = intra_idr_period;
     seq_param.ip_period = ip_period;
 
-    seq_param.bits_per_second = 400000;
+    seq_param.bits_per_second = frame_bitrate;
     seq_param.pic_width_in_luma_samples = sps->pic_width_in_luma_samples;
     seq_param.pic_height_in_luma_samples = sps->pic_height_in_luma_samples;
 
@@ -3171,6 +3184,7 @@ static int print_input()
     printf("INPUT: Initial QP   : %d\n", initial_qp);
     printf("INPUT: Min QP       : %d\n", minimal_qp);
     printf("INPUT: P As B       : %d\n", p2b);
+    printf("INPUT: lowpower     : %d\n", lowpower);
     printf("INPUT: Source YUV   : %s", srcyuv_fp ? "FILE" : "AUTO generated");
     if (srcyuv_fp)
         printf(":%s (fourcc %s)\n", srcyuv_fn, fourcc_to_string(srcyuv_fourcc));
