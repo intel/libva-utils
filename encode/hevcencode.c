@@ -662,7 +662,7 @@ static void fill_profile_tier_level(
     ptps->general_frame_only_constraint_flag = 1;
 
     ptps->general_level_idc = 30;
-    ptps->general_level_idc = ptps->general_level_idc * 3;
+    ptps->general_level_idc = ptps->general_level_idc * 4;
 
 }
 static void fill_vps_header(struct VideoParamSet *vps)
@@ -798,7 +798,7 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
     sps->scaling_list_enabled_flag = 0;
     //sps->sps_scaling_list_data_present_flag; // ignore since scaling_list_enabled_flag equal to 0
     sps->amp_enabled_flag = 1;
-    sps->sample_adaptive_offset_enabled_flag = 0;
+    sps->sample_adaptive_offset_enabled_flag = 1;
     sps->pcm_enabled_flag = 0;
     /* ignore below parameters seting since pcm_enabled_flag equal to 0
     pcm_sample_bit_depth_luma_minus1;
@@ -853,9 +853,9 @@ static void fill_pps_header(
     pps->init_qp_minus26 = initial_qp - 26;
     pps->constrained_intra_pred_flag = 0;
     pps->transform_skip_enabled_flag = 0;
-    pps->cu_qp_delta_enabled_flag = 0;
+    pps->cu_qp_delta_enabled_flag = 1;
     if (pps->cu_qp_delta_enabled_flag)
-        pps->diff_cu_qp_delta_depth = 0;
+        pps->diff_cu_qp_delta_depth = 2;
     pps->pps_cb_qp_offset = 0;
     pps->pps_cr_qp_offset = 0;
     pps->pps_slice_chroma_qp_offsets_present_flag = 0;
