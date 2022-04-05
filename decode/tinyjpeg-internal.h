@@ -87,7 +87,7 @@ struct jpeg_sos {
         unsigned int component_id;
         unsigned int dc_selector;
         unsigned int ac_selector;
-    } components[4];
+    } components[COMPONENTS];
 };
 
 struct jdec_private {
