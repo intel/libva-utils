@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation. All Rights Reserved.
+# Copyright (c) 2022 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vppblending vppscaling_n_out_usrptr vacopy vpp3dlut
+bin_PROGRAMS = vavpp vppscaling_csc vppdenoise vppsharpness vppchromasitting vppblending vppscaling_n_out_usrptr vacopy vpp3dlut vpphdr_tm
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -63,6 +63,9 @@ vacopy_LDADD = $(TEST_LIBS)
 
 vpp3dlut_SOURCES = vpp3dlut.cpp
 vpp3dlut_LDADD   = $(TEST_LIBS)
+
+vpphdr_tm_SOURCES = vpphdr_tm.cpp
+vpphdr_tm_LDADD   = $(TEST_LIBS)
 
 valgrind:(bin_PROGRAMS)
 	for a in(bin_PROGRAMS); do \
