@@ -320,7 +320,7 @@ static int show_config_attributes(VADisplay va_dpy, VAProfile profile, VAEntrypo
     if (attrib_list[VAConfigAttribEncJPEG].value & (~VA_ATTRIB_NOT_SUPPORTED)) {
         VAConfigAttribValEncJPEG *config = (VAConfigAttribValEncJPEG*)&attrib_list[VAConfigAttribEncJPEG].value;
         printf("    %-39s: ", vaConfigAttribTypeStr(attrib_list[VAConfigAttribEncJPEG].type));
-        printf("rithmatic_coding_mode=%d\n", config->bits.arithmatic_coding_mode);
+        printf("arithmatic_coding_mode=%d\n", config->bits.arithmatic_coding_mode);
         printf("%-*sprogressive_dct_mode=%d\n", 45, "", config->bits.progressive_dct_mode);
         printf("%-*snon_interleaved_mode=%d\n", 45, "", config->bits.non_interleaved_mode);
         printf("%-*sdifferential_mode=%d\n", 45, "", config->bits.differential_mode);
