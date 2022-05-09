@@ -199,7 +199,7 @@ hdrtm_filter_init(VABufferID *filter_param_buf_id, uint32_t tm_type)
 
     VAHdrMetaDataHDR10 in_hdr10_metadata = {};
 
-	// The input is HDR content
+    // The input is HDR content
     in_hdr10_metadata.max_display_mastering_luminance = g_in_max_display_luminance;
     in_hdr10_metadata.min_display_mastering_luminance = g_in_min_display_luminance;
     in_hdr10_metadata.max_content_light_level         = g_in_max_content_luminance;
@@ -217,18 +217,17 @@ hdrtm_filter_init(VABufferID *filter_param_buf_id, uint32_t tm_type)
     hdrtm_param.data.metadata_type = VAProcHighDynamicRangeMetadataHDR10;
     hdrtm_param.data.metadata= &in_hdr10_metadata;
     hdrtm_param.data.metadata_size = sizeof(VAHdrMetaDataHDR10);   
-	
+
     va_status = vaCreateBuffer(va_dpy, context_id, VAProcFilterParameterBufferType, sizeof(hdrtm_param), 1, (void *)&hdrtm_param, filter_param_buf_id);
 
     return va_status;
 }
 
 static VAStatus
-hdrtm_metadata_init(VAHdrMetaData &out_metadata, uint32_t tm_type)
+hdrtm_metadata_init(VAHdrMetaData &out_metadata, uint32_t tm_type, VAHdrMetaDataHDR10 &out_hdr10_metadata)
 {
     VAStatus va_status = VA_STATUS_SUCCESS;
 
-    VAHdrMetaDataHDR10 out_hdr10_metadata = {}; 
 
     out_hdr10_metadata.max_display_mastering_luminance = g_out_max_display_luminance;
     out_hdr10_metadata.min_display_mastering_luminance = g_out_min_display_luminance;
@@ -282,21 +281,22 @@ video_frame_process(VASurfaceID in_surface_id,
     VABufferID filter_param_buf_id = VA_INVALID_ID;
     VAHdrMetaData out_metadata = {};
 
-	/*Query Filter's Caps: The return value will be HDR10 and H2S, H2H, H2E. */
-	VAProcFilterCapHighDynamicRange hdrtm_caps[VAProcHighDynamicRangeMetadataTypeCount];
-	uint32_t num_hdrtm_caps = VAProcHighDynamicRangeMetadataTypeCount;
-	memset(&hdrtm_caps, 0, sizeof(VAProcFilterCapHighDynamicRange)*num_hdrtm_caps);
-	va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
-										   VAProcFilterHighDynamicRangeToneMapping,
-										   (void *)hdrtm_caps, &num_hdrtm_caps);
-	CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    /*Query Filter's Caps: The return value will be HDR10 and H2S, H2H, H2E. */
+    VAProcFilterCapHighDynamicRange hdrtm_caps[VAProcHighDynamicRangeMetadataTypeCount];
+    uint32_t num_hdrtm_caps = VAProcHighDynamicRangeMetadataTypeCount;
+    memset(&hdrtm_caps, 0, sizeof(VAProcFilterCapHighDynamicRange)*num_hdrtm_caps);
+    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
+                                           VAProcFilterHighDynamicRangeToneMapping,
+                                           (void *)hdrtm_caps, &num_hdrtm_caps);
+    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
     printf("vaQueryVideoProcFilterCaps num_hdrtm_caps %d\n", num_hdrtm_caps);
     for (int i = 0; i < num_hdrtm_caps; ++i)    {
        printf("vaQueryVideoProcFilterCaps hdrtm_caps[%d]: metadata type %d, flag %d\n", i, hdrtm_caps[i].metadata_type, hdrtm_caps[i].caps_flag);
     }
 
     hdrtm_filter_init(&filter_param_buf_id, g_tm_type);
-    hdrtm_metadata_init(out_metadata, g_tm_type);
+    VAHdrMetaDataHDR10 out_hdr10_metadata = {};
+    hdrtm_metadata_init(out_metadata, g_tm_type, out_hdr10_metadata);
 
     /* Fill pipeline buffer */
     surface_region.x = 0;
@@ -557,6 +557,7 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
         u_size = (va_image.width / 2 * bytes_per_pixel) * (va_image.height >> 1);
 
         src_buffer = (unsigned char*)malloc(frame_size);
+        assert(src_buffer);
         fread(src_buffer, 1, frame_size, fp);
 
         y_src = src_buffer;
@@ -657,6 +658,7 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         bytes_per_pixel = (va_image.format.fourcc == VA_FOURCC_P010) ? 2 : 1;
         frame_size = va_image.width * va_image.height * bytes_per_pixel * 3 / 2;
         dst_buffer = (unsigned char*)malloc(frame_size);
+        assert(dst_buffer);
         y_size = va_image.width * va_image.height * bytes_per_pixel;
         u_size = (va_image.width / 2 * bytes_per_pixel) * (va_image.height >> 1);
         y_dst = dst_buffer;
@@ -681,7 +683,8 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
     case VA_FOURCC_A2B10G10R10:
     case VA_FOURCC_A2R10G10B10:
         frame_size = va_image.width * va_image.height * 4;
-        dst_buffer = (unsigned char*)malloc(frame_size);        
+        dst_buffer = (unsigned char*)malloc(frame_size);
+        assert(dst_buffer);
         y_dst = dst_buffer;
         y_src = (unsigned char*)in_buf + va_image.offsets[0];         
 
@@ -745,22 +748,22 @@ parse_basic_parameters()
 
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
 
-	read_value_uint32(g_config_file_fd, "SRC_MAX_DISPLAY_MASTERING_LUMINANCE", &g_in_max_display_luminance);
-	read_value_uint32(g_config_file_fd, "SRC_MIN_DISPLAY_MASTERING_LUMINANCE", &g_in_min_display_luminance);
-	read_value_uint32(g_config_file_fd, "SRC_MAX_CONTENT_LIGHT_LEVEL",         &g_in_max_content_luminance);
-	read_value_uint32(g_config_file_fd, "SRC_MAX_PICTURE_AVERAGE_LIGHT_LEVEL", &g_in_pic_average_luminance);
+    read_value_uint32(g_config_file_fd, "SRC_MAX_DISPLAY_MASTERING_LUMINANCE", &g_in_max_display_luminance);
+    read_value_uint32(g_config_file_fd, "SRC_MIN_DISPLAY_MASTERING_LUMINANCE", &g_in_min_display_luminance);
+    read_value_uint32(g_config_file_fd, "SRC_MAX_CONTENT_LIGHT_LEVEL",         &g_in_max_content_luminance);
+    read_value_uint32(g_config_file_fd, "SRC_MAX_PICTURE_AVERAGE_LIGHT_LEVEL", &g_in_pic_average_luminance);
 
-	read_value_uint32(g_config_file_fd, "DST_MAX_DISPLAY_MASTERING_LUMINANCE", &g_out_max_display_luminance);
-	read_value_uint32(g_config_file_fd, "DST_MIN_DISPLAY_MASTERING_LUMINANCE", &g_out_min_display_luminance);
-	read_value_uint32(g_config_file_fd, "DST_MAX_CONTENT_LIGHT_LEVEL",         &g_out_max_content_luminance);
-	read_value_uint32(g_config_file_fd, "DST_MAX_PICTURE_AVERAGE_LIGHT_LEVEL", &g_out_pic_average_luminance);
+    read_value_uint32(g_config_file_fd, "DST_MAX_DISPLAY_MASTERING_LUMINANCE", &g_out_max_display_luminance);
+    read_value_uint32(g_config_file_fd, "DST_MIN_DISPLAY_MASTERING_LUMINANCE", &g_out_min_display_luminance);
+    read_value_uint32(g_config_file_fd, "DST_MAX_CONTENT_LIGHT_LEVEL",         &g_out_max_content_luminance);
+    read_value_uint32(g_config_file_fd, "DST_MAX_PICTURE_AVERAGE_LIGHT_LEVEL", &g_out_pic_average_luminance);
 
-	read_value_uint32(g_config_file_fd, "SRC_FRAME_COLOUR_PRIMARIES",         &g_in_colour_primaries);
-	read_value_uint32(g_config_file_fd, "SRC_FRAME_TRANSFER_CHARACTERISTICS", &g_in_transfer_characteristic);
-	read_value_uint32(g_config_file_fd, "DST_FRAME_COLOUR_PRIMARIES",         &g_out_colour_primaries);
-	read_value_uint32(g_config_file_fd, "DST_FRAME_TRANSFER_CHARACTERISTICS", &g_out_transfer_characteristic);
+    read_value_uint32(g_config_file_fd, "SRC_FRAME_COLOUR_PRIMARIES",         &g_in_colour_primaries);
+    read_value_uint32(g_config_file_fd, "SRC_FRAME_TRANSFER_CHARACTERISTICS", &g_in_transfer_characteristic);
+    read_value_uint32(g_config_file_fd, "DST_FRAME_COLOUR_PRIMARIES",         &g_out_colour_primaries);
+    read_value_uint32(g_config_file_fd, "DST_FRAME_TRANSFER_CHARACTERISTICS", &g_out_transfer_characteristic);
 
-	read_value_uint32(g_config_file_fd, "TM_TYPE", &g_tm_type);
+    read_value_uint32(g_config_file_fd, "TM_TYPE", &g_tm_type);
 
     return 0;
 }
