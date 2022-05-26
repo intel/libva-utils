@@ -2031,6 +2031,12 @@ static int init_va(void)
     for (i = 0; i < VAConfigAttribTypeMax; i++)
         attrib[i].type = i;
 
+    if (lowpower)
+    {
+        entryPoint = VAEntrypointEncSliceLP;
+        LCU_SIZE = 64;
+    }
+
     va_status = vaGetConfigAttributes(va_dpy, hevc_profile, entryPoint,
                                       &attrib[0], VAConfigAttribTypeMax);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
@@ -2173,11 +2179,6 @@ static int setup_encode()
     VASurfaceID *tmp_surfaceid;
     int codedbuf_size, i;
 
-    if (lowpower)
-    {
-        entryPoint = VAEntrypointEncSliceLP;
-        LCU_SIZE = 64;
-    }
     va_status = vaCreateConfig(va_dpy, hevc_profile, entryPoint,
                                &config_attrib[0], config_attrib_num, &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
