@@ -236,6 +236,8 @@ static int parse_SOF(struct jdec_private *priv, const unsigned char *stream)
     height = be16_to_cpu(stream + 3);
     width  = be16_to_cpu(stream + 5);
     nr_components = stream[7];
+    if(nr_components > COMPONENTS-1)
+        error("Components exceed the value specified by the Jpeg spec\n");
     priv->nf_components = nr_components;
 #if SANITY_CHECK
     if (stream[2] != 8)
@@ -277,7 +279,7 @@ static int parse_SOS(struct jdec_private *priv, const unsigned char *stream)
 {
     unsigned int i, cid, table;
     unsigned int nr_components = stream[2];
-    if(nr_components > COMPONENTS)
+    if(nr_components > COMPONENTS-1)
         error("Components exceed the value specified by the Jpeg spec\n");
     trace("> SOS marker\n");
 
