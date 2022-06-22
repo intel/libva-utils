@@ -585,6 +585,7 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
     case VA_FOURCC_A2B10G10R10:
         frame_size = va_image.width * va_image.height * 4;
         src_buffer = (unsigned char*)malloc(frame_size);
+        assert(src_buffer);
         fread(src_buffer, 1, frame_size, fp);
         y_src = src_buffer;
         y_dst = (unsigned char*)out_buf + va_image.offsets[0];         
@@ -701,7 +702,7 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         va_status = VA_STATUS_ERROR_INVALID_IMAGE_FORMAT;
         break;
     }
-
+    assert(dst_buffer);
     fwrite(dst_buffer, 1, frame_size, fp);
 
     if (dst_buffer)  {
