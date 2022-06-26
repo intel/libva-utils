@@ -59,6 +59,20 @@ static const Profiles g_vaProfiles = {
     VAProfileVP9Profile1,
     VAProfileVP9Profile2,
     VAProfileVP9Profile3,
+    VAProfileHEVCMain12,
+    VAProfileHEVCMain422_10,
+    VAProfileHEVCMain422_12,
+    VAProfileHEVCMain444,
+    VAProfileHEVCMain444_10,
+    VAProfileHEVCMain444_12,
+    VAProfileHEVCSccMain,
+    VAProfileHEVCSccMain10,
+    VAProfileHEVCSccMain444,
+    VAProfileAV1Profile0,
+    VAProfileAV1Profile1,
+    VAProfileHEVCSccMain444_10,
+    VAProfileProtected,
+    
 };
 
 static const Profiles g_vaNoneProfiles = {
