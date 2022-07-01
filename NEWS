@@ -1,5 +1,16 @@
-libva-utils NEWS -- summary of changes.  2022-2-16
+libva-utils NEWS -- summary of changes.  2022-7-1
 Copyright (C) 2009-2022 Intel Corporation
+
+Version 2.15.0 - 1.Jul.2022
+* add: Added HDR10 Tone Mapping sample code including H2H and H2S config files.
+* add: Support lowpower for HEVC Encoding
+* fix: Set correct entrypoint for lowpower
+* fix: Components exceed the value specified by jpeg spec
+* fix: hdr local variable pointer access issue
+* fix: Fix issue incorrect color for EU based hevcencode
+* fix: exclude vgem node and invalid drm node in vainfo
+* ci:Disable travis build
+* meson: check the dependency of libdrm
 
 Version 2.14.0 - 16.Feb.2022
 * test: Use test suite setup/teardown to reduce test overhead
