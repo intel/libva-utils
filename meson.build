@@ -17,6 +17,8 @@ libva_dep = dependency('libva', version: '>= 1.1.0')
 libva_utils_flags = [ '-Wno-unused-parameter',
                       '-Wno-sign-compare' ]
 
+backends = ''
+
 # DRM
 use_drm = false
 if get_option('drm') != 'false'
@@ -32,6 +34,7 @@ if get_option('drm') != 'false'
     endif
   endforeach
   if use_drm
+    backends += ' drm'
     libva_utils_flags += [ '-DHAVE_VA_DRM=1' ]
   endif
 endif
@@ -51,6 +54,7 @@ if get_option('x11') != 'false'
     endif
   endforeach
   if use_x11
+    backends += ' x11'
     libva_utils_flags += [ '-DHAVE_VA_X11=1' ]
   endif
 endif
@@ -70,6 +74,7 @@ if get_option('wayland') != 'false'
     endif
   endforeach
   if use_wayland
+    backends += ' wayland'
     libva_utils_flags += [ '-DHAVE_VA_WAYLAND=1' ]
   endif
 endif
@@ -88,4 +93,13 @@ subdir('vendor/intel/sfcsample')
 
 if get_option('tests')
   subdir('test')
+endif
+
+if meson.version().version_compare('>= 0.53')
+  summary({
+    'Libva VA-API version' : libva_dep.version(),
+    'Installation prefix' : get_option('prefix'),
+    'Extra window systems' : backends,
+    'Enable Unit-tests': get_option('tests')
+  }, bool_yn: true)
 endif
