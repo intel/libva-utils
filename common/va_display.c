@@ -151,6 +151,7 @@ va_open_display(void)
             continue;
         if (!g_display_hooks->open_display)
             continue;
+        printf("Trying display: %s\n", g_display_hooks->name);
         va_dpy = g_display_hooks->open_display();
     }
 
