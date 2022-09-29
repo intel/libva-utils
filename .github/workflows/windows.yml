@@ -1,0 +1,101 @@
+name: windows
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/windows.yml'
+    - '!.github/workflows/EnterDevShell.ps1'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/windows.yml'
+    - '!.github/workflows/EnterDevShell.ps1'
+
+jobs:
+  windows-msvc:
+    runs-on: windows-2022
+    steps:
+    - name: checkout libva
+      uses: actions/checkout@v2
+      with:
+        repository: intel/libva
+        path: libva
+    - name: checkout libva-utils
+      uses: actions/checkout@v2
+      with:
+        path: libva-utils
+    - name: 'Setup Python'
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install Meson
+      run: pip install meson
+    - name: Install pkg-config
+      shell: pwsh
+      run: |
+        Invoke-RestMethod -Uri https://download.gnome.org/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip -OutFile pkg-config_0.26-1_win32.zip
+        Expand-Archive pkg-config_0.26-1_win32.zip
+        Invoke-RestMethod -Uri http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip -OutFile glib_2.28.8-1_win32.zip
+        Expand-Archive glib_2.28.8-1_win32.zip
+        Invoke-RestMethod -Uri http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip -OutFile gettext-runtime_0.18.1.1-2_win32.zip
+        Expand-Archive gettext-runtime_0.18.1.1-2_win32.zip
+        mkdir pkg-config
+        cp pkg-config_0.26-1_win32\bin\* pkg-config\
+        cp gettext-runtime_0.18.1.1-2_win32\bin\* pkg-config\
+        cp glib_2.28.8-1_win32\bin\* pkg-config\
+    - name: Enter DevShell
+      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+      shell: pwsh
+    - name: Build libva
+      run: |
+        cd libva
+        meson build
+        ninja -C build install
+    - name: Build libva-utils
+      run: |
+        $env:Path += ";"
+        $env:Path += Resolve-Path pkg-config\
+        $env:Path += ";c:\bin\;c:\lib\"
+        $env:PKG_CONFIG_PATH = "C:\lib\pkgconfig"
+        del C:\Strawberry\perl\bin\pkg-config*
+        cd libva-utils
+        meson build -Dtests=true
+        ninja -C build install
+
+  windows-mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - name: checkout libva
+      uses: actions/checkout@v2
+      with:
+        repository: intel/libva
+        path: libva
+    - name: checkout libva-utils
+      uses: actions/checkout@v2
+      with:
+        path: libva-utils
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        update: false
+        pacboy: >-
+          toolchain:p
+          meson:p
+    - name: Enter DevShell
+      run: 'libva-utils\.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+      shell: pwsh
+    - name: Build libva
+      run: |
+        cd libva
+        CC=gcc meson build
+        CC=gcc ninja -C build install
+    - name: Build libva-utils
+      run: |
+        cd libva-utils
+        CC=gcc meson build -Dtests=true
+        CC=gcc ninja -C build install
