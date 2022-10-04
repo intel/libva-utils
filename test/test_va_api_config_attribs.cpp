@@ -95,7 +95,7 @@ TEST_P(VAAPIConfigAttribs, GetConfigAttribs)
     // should be consistent with supported attribute values returned by
     // vaGetConfigAttributes.
 
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }

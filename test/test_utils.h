@@ -39,18 +39,18 @@ struct Resolution {
 
     inline bool operator <=(const Resolution& other) const
     {
-        return (width <= other.width) and (height <= other.height);
+        return (width <= other.width) && (height <= other.height);
     }
 
     inline bool operator >=(const Resolution& other) const
     {
-        return (width >= other.width) and (height >= other.height);
+        return (width >= other.width) && (height >= other.height);
     }
 
     inline bool isWithin(
         const Resolution& minRes, const Resolution& maxRes) const
     {
-        return (*this >= minRes) and (*this <= maxRes);
+        return (*this >= minRes) && (*this <= maxRes);
     }
 
     friend std::ostream& operator <<(std::ostream& os, const Resolution& res)

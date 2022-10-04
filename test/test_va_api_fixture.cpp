@@ -65,10 +65,10 @@ VAAPIFixture::~VAAPIFixture()
     if (m_restoreDriverName)
         setenv("LIBVA_DRIVER_NAME", m_restoreDriverName, 1);
 
-    if (not m_skip.empty()) {
+    if (!m_skip.empty()) {
         EXPECT_FALSE(HasFailure())
                 << "skip message is set, but something failed";
-        if (not HasFailure()) {
+        if (!HasFailure()) {
             RecordProperty("skipped", true);
             std::cout << "[ SKIPPED ] " << m_skip << std::endl;
         }
@@ -136,7 +136,7 @@ void VAAPIFixture::queryConfigProfiles(Profiles& profiles) const
     EXPECT_STATUS(
         vaQueryConfigProfiles(m_vaDisplay, profiles.data(), &numProfiles));
 
-    if (not HasFailure()) {
+    if (!HasFailure()) {
         ASSERT_LE(numProfiles, maxProfiles);
         ASSERT_GT(numProfiles, 0);
         profiles.resize(numProfiles);
@@ -158,7 +158,7 @@ void VAAPIFixture::queryConfigEntrypoints(const VAProfile& profile,
         vaQueryConfigEntrypoints(m_vaDisplay, profile, entrypoints.data(),
                                  &numEntrypoints));
 
-    if ((VA_STATUS_SUCCESS == expectation) and not HasFailure()) {
+    if ((VA_STATUS_SUCCESS == expectation) && !HasFailure()) {
         ASSERT_LE(numEntrypoints, maxEntrypoints);
         ASSERT_GT(numEntrypoints, 0);
         entrypoints.resize(numEntrypoints);
@@ -203,7 +203,7 @@ void VAAPIFixture::getConfigAttributes(const VAProfile& profile,
     if (defaults) {
         // fill config attributes with default config attributes
         const auto op = [](const VAConfigAttribType & t) {
-            return VAConfigAttrib{type: t, value: VA_ATTRIB_NOT_SUPPORTED};
+            return VAConfigAttrib{/*type:*/ t, /*value:*/ VA_ATTRIB_NOT_SUPPORTED};
         };
         std::transform(g_vaConfigAttribTypes.begin(),
                        g_vaConfigAttribTypes.end(), std::back_inserter(attribs), op);

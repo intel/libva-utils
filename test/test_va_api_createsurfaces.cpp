@@ -62,7 +62,7 @@ protected:
                 for (const auto mask : masks) { // for all bitmasks
                     if ((attrib.value & mask) == mask) { // supported value
                         const ConfigAttributes attribs(
-                            1, {type : attrib.type, value : mask });
+                            1, {/*type :*/ attrib.type, /*value :*/ mask });
                         SCOPED_TRACE(attribs.front());
                         createConfig(profile, entrypoint, attribs);
                         test(attribs);
@@ -104,7 +104,7 @@ protected:
                         bitfield |= mask;
 
                         if ((attrib.type == VASurfaceAttribMemoryType)
-                            and (drmMemMask & mask) == mask) {
+                            && (drmMemMask & mask) == mask) {
                             // skip drm memory types for now as it requires much
                             // more setup
                             continue;
@@ -147,7 +147,7 @@ public:
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
 {
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }
@@ -162,7 +162,7 @@ TEST_P(VAAPIQuerySurfaces, QuerySurfacesWithConfigAttribs)
 
 TEST_P(VAAPIQuerySurfaces, QuerySurfacesNoConfigAttribs)
 {
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }
@@ -200,7 +200,7 @@ protected:
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
 {
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }
@@ -234,7 +234,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesWithConfigAttribs)
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 {
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }
@@ -252,7 +252,7 @@ TEST_P(VAAPICreateSurfaces, CreateSurfacesNoConfigAttrib)
 
 TEST_P(VAAPICreateSurfaces, CreateSurfacesNoAttrib)
 {
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }
