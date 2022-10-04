@@ -78,7 +78,7 @@ TEST_P(VAAPICreateContext, CreateContext)
     // vaCreateContext requires a valid VAConfigID, vaCreateConfig requires a
     // supported profile and entrypoint
 
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }
@@ -94,7 +94,7 @@ TEST_P(VAAPICreateContext, CreateContext)
         << "; current=" << resolution;
     SCOPED_TRACE(oss.str());
 
-    if (not resolution.isWithin(minRes, maxRes)) {
+    if (!resolution.isWithin(minRes, maxRes)) {
         doCreateContext(resolution, VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED);
         doDestroyContext(VA_STATUS_ERROR_INVALID_CONTEXT);
     } else {

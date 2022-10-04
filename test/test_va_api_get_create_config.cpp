@@ -92,7 +92,7 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigWithAttributes)
                     bitfield |= mask;
                     createConfig(profile, entrypoint,
                                  ConfigAttributes(
-                                     1, {type : attrib.type, value : mask }));
+                                     1, {/*type :*/ attrib.type, /*value :*/ mask }));
                     destroyConfig();
                 } else {
                     // unsupported value
@@ -102,7 +102,7 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigWithAttributes)
                         VA_STATUS_ERROR_INVALID_VALUE);
                     createConfig(profile, entrypoint,
                                  ConfigAttributes(
-                                     1, {type : attrib.type, value : mask}),
+                                     1, {/*type :*/ attrib.type, /*value :*/ mask}),
                                  expectation);
                     destroyConfig(VA_STATUS_ERROR_INVALID_CONFIG);
                 }
@@ -139,7 +139,7 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigNoAttributes)
 
 TEST_P(VAAPIGetCreateConfig, CreateConfigPackedHeaders)
 {
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }

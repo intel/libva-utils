@@ -206,7 +206,7 @@ TEST_P(VAAPICreateBuffer, CreateBufferWithOutData)
     // the minimum requirements.  There's no need to create surfaces or attach
     // them to a VAConfigID.
 
-    if (not isSupported(profile, entrypoint)) {
+    if (!isSupported(profile, entrypoint)) {
         skipTest(profile, entrypoint);
         return;
     }

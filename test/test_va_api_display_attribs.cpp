@@ -99,7 +99,7 @@ TEST_F(VAAPIDisplayAttribs, QueryDisplayAttribs)
             vaQueryDisplayAttributes(m_vaDisplay, NULL, &numAttribs));
 
         EXPECT_TRUE(
-            status == VaapiStatus(VA_STATUS_SUCCESS) or
+            status == VaapiStatus(VA_STATUS_SUCCESS) ||
             status == VaapiStatus(VA_STATUS_ERROR_UNIMPLEMENTED));
 
         if (status == VaapiStatus(VA_STATUS_SUCCESS)) {
@@ -135,7 +135,7 @@ TEST_F(VAAPIDisplayAttribs, GetDisplayAttribs)
     m_attribs.resize(numAttribs);
 
     for (const auto& type : types) {
-        VADisplayAttribute attrib{type: type};
+        VADisplayAttribute attrib{/*type:*/ type};
         ASSERT_STATUS(vaGetDisplayAttributes(m_vaDisplay, &attrib, 1));
 
         if (findDisplayAttribInQueryList(attrib.type)) {
