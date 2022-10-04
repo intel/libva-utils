@@ -108,9 +108,10 @@ if not use_win32
   subdir('videoprocess')
   subdir('vendor/intel')
   subdir('vendor/intel/sfcsample')
-  if get_option('tests')
-    subdir('test')
-  endif
+endif
+
+if get_option('tests')
+  subdir('test')
 endif
 
 if meson.version().version_compare('>= 0.53')

@@ -5,13 +5,18 @@ gtest_src = [
 gtest_inc = include_directories('gtest', 'gtest/include')
 
 test_flags = [
-  '-DGTEST_HAS_PTHREAD=1',
   '-DGTEST_USE_OWN_TR1_TUPLE=0',
   '-DGTEST_LANG_CXX11=1',
   '-DGTEST_HAS_TR1_TUPLE=1',
-  '-DPTHREADS',
   '-std=c++11',
 ]
+
+if not use_win32
+  test_flags += [
+    '-DGTEST_HAS_PTHREAD=1',
+    '-DPTHREADS',
+  ]
+endif
 
 gtest = static_library('gtest', gtest_src,
                        cpp_args: test_flags,
@@ -35,9 +40,17 @@ test_src = [
   'test_va_api_query_vendor.cpp',
 ]
 
+tests_deps = [gtest_dep, dependency('threads')]
+
+if use_win32
+  tests_deps += [ win32_deps ]
+else
+  tests_deps += [ drm_deps ]
+endif
+
 tests = executable('test_va_api', test_src,
                    cpp_args: test_flags,
-                   dependencies: [ gtest_dep, drm_deps, dependency('threads'), ],
+                   dependencies: tests_deps,
                    install: true)
 
 test('test_va', tests)
