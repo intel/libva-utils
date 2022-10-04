@@ -23,6 +23,12 @@
  */
 
 #include "test_va_api_fixture.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+#if defined(_WIN32)
+#include<compat_win32.h>
+#endif
 
 namespace VAAPI
 {

@@ -102,7 +102,7 @@ protected:
     VADisplay m_vaDisplay;
 
 private:
-    char *m_restoreDriverName;
+    std::string m_restoreDriverName;
     int m_drmHandle;
 
     VAConfigID m_configID;
