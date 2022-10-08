@@ -1,5 +1,11 @@
-libva-utils NEWS -- summary of changes.  2022-7-1
+libva-utils NEWS -- summary of changes.  2022-10-8
 Copyright (C) 2009-2022 Intel Corporation
+
+Version 2.16.0 - 8.Oct.2022
+* trace: print the display being attempted
+* ci: upgrade FreeBSD to 13.1
+* meson: Search for threads in top-level meson.build
+* meson: produce summary() when 0.53.0 is present
 
 Version 2.15.0 - 1.Jul.2022
 * add: Added HDR10 Tone Mapping sample code including H2H and H2S config files.
