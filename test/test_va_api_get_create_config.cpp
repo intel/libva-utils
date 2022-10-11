@@ -144,13 +144,13 @@ TEST_P(VAAPIGetCreateConfig, CreateConfigPackedHeaders)
         return;
     }
 
-    ConfigAttributes packedHeaders{{.type = VAConfigAttribEncPackedHeaders}};
+    ConfigAttributes packedHeaders{{/*.type = */VAConfigAttribEncPackedHeaders}};
     getConfigAttributes(profile, entrypoint, packedHeaders);
 
     for (uint32_t v(0x00); v < 0xff; ++v) {
         ConfigAttributes attribs = {{
-                .type = VAConfigAttribEncPackedHeaders,
-                .value = v
+                /*.type = */VAConfigAttribEncPackedHeaders,
+                /*.value = */v
             }
         };
         if ((VA_ATTRIB_NOT_SUPPORTED == packedHeaders.front().value)
