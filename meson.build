@@ -21,6 +21,7 @@ backends = ''
 
 # DRM
 use_drm = false
+drm_deps=[]
 if get_option('drm') != 'false'
   require_drm = get_option('drm') == 'true'
   drm_deps = [
@@ -79,20 +80,37 @@ if get_option('wayland') != 'false'
   endif
 endif
 
+# WIN32
+use_win32 = false
+if get_option('win32') != 'false'
+  require_win32 = get_option('win32') == 'true'
+  use_win32 = dependency('libva-win32', required: require_win32).found()
+  if use_win32
+    libva_utils_flags = [ '-DHAVE_VA_WIN32=1', '-DNOMINMAX']
+  endif
+endif
+
 add_project_arguments(libva_utils_flags,
                       language: ['c', 'cpp'])
 
-subdir('common')
-subdir('decode')
-subdir('encode')
-subdir('putsurface')
-subdir('vainfo')
-subdir('videoprocess')
-subdir('vendor/intel')
-subdir('vendor/intel/sfcsample')
+if use_win32
+  subdir('getopt')
+  win32_deps = [ dependency('libva-win32', required: require_win32), idep_getopt ]
+endif
 
-if get_option('tests')
-  subdir('test')
+subdir('common') # Uses win32_deps
+subdir('vainfo')
+
+if not use_win32
+  subdir('decode')
+  subdir('encode')
+  subdir('putsurface')
+  subdir('videoprocess')
+  subdir('vendor/intel')
+  subdir('vendor/intel/sfcsample')
+  if get_option('tests')
+    subdir('test')
+  endif
 endif
 
 if meson.version().version_compare('>= 0.53')

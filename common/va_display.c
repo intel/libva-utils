@@ -36,12 +36,16 @@ extern const VADisplayHooks va_display_hooks_android;
 extern const VADisplayHooks va_display_hooks_wayland;
 extern const VADisplayHooks va_display_hooks_x11;
 extern const VADisplayHooks va_display_hooks_drm;
+extern const VADisplayHooks va_display_hooks_win32;
 
 static const VADisplayHooks *g_display_hooks;
 static const VADisplayHooks *g_display_hooks_available[] = {
 #ifdef ANDROID
     &va_display_hooks_android,
 #else
+#ifdef HAVE_VA_WIN32
+    &va_display_hooks_win32,
+#endif
 #ifdef HAVE_VA_WAYLAND
     &va_display_hooks_wayland,
 #endif
