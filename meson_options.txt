@@ -10,6 +10,10 @@ option('wayland',
        type : 'combo',
        value : 'auto',
        choices: [ 'auto', 'true', 'false' ])
+option('win32',
+       type : 'combo',
+       value : 'auto',
+       choices: [ 'auto', 'true', 'false' ])
 option('tests',
        type : 'boolean',
        value : false)

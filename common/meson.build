@@ -16,6 +16,11 @@ if use_wayland
   libva_display_deps += wayland_deps
 endif
 
+if use_win32
+  libva_display_src += [ 'va_display_win32.c' ]
+  libva_display_deps += win32_deps
+endif
+
 libva_display_lib = static_library('common', libva_display_src,
                                    dependencies: libva_display_deps,
                                    include_directories: include_directories('.'))
