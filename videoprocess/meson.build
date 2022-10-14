@@ -1,4 +1,10 @@
+executable('vacopy', [ 'vacopy.cpp' ],
+           dependencies: libva_display_dep,
+           install: true)
 executable('vavpp', [ 'vavpp.cpp' ],
+           dependencies: libva_display_dep,
+           install: true)
+executable('vpp3dlut', [ 'vpp3dlut.cpp' ],
            dependencies: libva_display_dep,
            install: true)
 executable('vppblending', [ 'vppblending.cpp' ],
@@ -8,6 +14,9 @@ executable('vppchromasitting', [ 'vppchromasitting.cpp' ],
            dependencies: libva_display_dep,
            install: true)
 executable('vppdenoise', [ 'vppdenoise.cpp' ],
+           dependencies: libva_display_dep,
+           install: true)
+executable('vpphdr_tm', [ 'vpphdr_tm.cpp' ],
            dependencies: libva_display_dep,
            install: true)
 executable('vppscaling_csc', [ 'vppscaling_csc.cpp' ],
