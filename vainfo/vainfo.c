@@ -283,7 +283,7 @@ static int show_config_attributes(VADisplay va_dpy, VAProfile profile, VAEntrypo
 
     if (attrib_list[VAConfigAttribEncMaxSlices].value & (~VA_ATTRIB_NOT_SUPPORTED)) {
         printf("    %-39s: %d\n", vaConfigAttribTypeStr(attrib_list[VAConfigAttribEncMaxSlices].type),
-               attrib_list[VAConfigAttribEncMaxRefFrames].value);
+               attrib_list[VAConfigAttribEncMaxSlices].value);
     }
 
     if (attrib_list[VAConfigAttribEncSliceStructure].value != VA_ATTRIB_NOT_SUPPORTED) {
