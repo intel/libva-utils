@@ -87,6 +87,14 @@ if get_option('win32') != 'false'
   use_win32 = dependency('libva-win32', required: require_win32).found()
   if use_win32
     libva_utils_flags = [ '-DHAVE_VA_WIN32=1', '-DNOMINMAX']
+    dep_dxheaders = dependency('directx-headers', required : false)
+    if not dep_dxheaders.found()
+      dep_dxheaders = dependency('DirectX-Headers',
+        version : '>= v1.0.2',
+        fallback : ['DirectX-Headers', 'dep_dxheaders'],
+        required : use_win32
+      )
+    endif
   endif
 endif
 
@@ -95,7 +103,7 @@ add_project_arguments(libva_utils_flags,
 
 if use_win32
   subdir('getopt')
-  win32_deps = [ dependency('libva-win32', required: require_win32), idep_getopt ]
+  win32_deps = [ dependency('libva-win32', required: require_win32), idep_getopt, dep_dxheaders]
 endif
 
 subdir('common') # Uses win32_deps

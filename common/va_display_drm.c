@@ -36,7 +36,7 @@
 #include "va_display.h"
 
 static int drm_fd = -1;
-extern const char *g_drm_device_name;
+extern const char *g_device_name;
 
 static VADisplay
 va_open_display_drm(void)
@@ -52,8 +52,8 @@ va_open_display_drm(void)
         NULL
     };
 
-    if (g_drm_device_name) {
-        drm_fd = open(g_drm_device_name, O_RDWR);
+    if (g_device_name) {
+        drm_fd = open(g_device_name, O_RDWR);
         if (drm_fd < 0) {
             printf("Failed to open the given device!\n");
             exit(1);

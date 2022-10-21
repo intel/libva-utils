@@ -17,7 +17,7 @@ if use_wayland
 endif
 
 if use_win32
-  libva_display_src += [ 'va_display_win32.c' ]
+  libva_display_src += [ 'va_display_win32.cpp' ]
   libva_display_deps += win32_deps
 endif
 
