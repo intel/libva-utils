@@ -60,7 +60,7 @@ static const VADisplayHooks *g_display_hooks_available[] = {
 };
 
 static const char *g_display_name;
-const char *g_drm_device_name;
+const char *g_device_name;
 
 static const char *
 get_display_name(int argc, char *argv[])
@@ -82,7 +82,7 @@ get_display_name(int argc, char *argv[])
 }
 
 static const char *
-get_drm_device_name(int argc, char *argv[])
+get_device_name(int argc, char *argv[])
 {
     const char *device_name = NULL;
     int i;
@@ -136,8 +136,10 @@ va_init_display_args(int *argc, char *argv[])
     }
     g_display_name = display_name;
 
-    if (g_display_name && strcmp(g_display_name, "drm") == 0)
-        g_drm_device_name = get_drm_device_name(*argc, argv);
+    if (g_display_name &&
+        ((strcmp(g_display_name, "drm") == 0)
+        || (strcmp(g_display_name, "win32") == 0)))
+        g_device_name = get_device_name(*argc, argv);
 
     sanitize_args(argc, argv);
 }
@@ -200,5 +202,5 @@ va_print_display_options(FILE *stream)
 {
     fprintf(stream, "Display options:\n");
     fprintf(stream, "\t--display display | help         Show information for the specified display, or the available display list \n");
-    fprintf(stream, "\t--device device                  Set device name, only available under drm display\n");
+    fprintf(stream, "\t--device device                  Set device name, only available under drm and win32 displays\n");
 }
