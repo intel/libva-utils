@@ -50,6 +50,8 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
     EXPECT_TRUE(numProfiles > 0)
             << numProfiles << " profiles are supported by driver";
 
+    profiles.resize(numProfiles);
+
     const int maxEntrypoints = vaMaxNumEntrypoints(m_vaDisplay);
     EXPECT_TRUE(maxEntrypoints > 0)
             << maxEntrypoints << " entrypoints are reported";
