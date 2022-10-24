@@ -15,12 +15,12 @@ jobs:
     runs-on: macos-12
     steps:
     - name: checkout libva
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: intel/libva
         path: libva
     - name: checkout libva-utils
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: libva-utils
     - name: test
