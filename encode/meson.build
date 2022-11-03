@@ -24,3 +24,6 @@ executable('vp9enc', [ 'vp9enc.c' ],
 executable('vp8enc', [ 'vp8enc.c' ],
            dependencies: [libva_display_dep, threads, m ],
            install: true)
+executable('av1encode', [ 'av1encode.c' ],
+           dependencies: [ libva_display_dep, threads, m ],
+           install: true)
