@@ -29,6 +29,7 @@
 
 #include <fcntl.h> // for O_RDWR
 #include <limits>
+#include <string.h>
 
 #if defined(_WIN32)
 #include <va/va_win32.h>
@@ -36,6 +37,7 @@
 #else
 #include <unistd.h> // for close()
 #include <va/va_drm.h>
+#include <xf86drm.h>
 #endif
 
 namespace VAAPI
@@ -91,22 +93,45 @@ static VADisplay getWin32Display(LUID* adapter)
 #else
 static VADisplay getDrmDisplay(int &fd)
 {
-    typedef std::vector<std::string> DevicePaths;
-    typedef DevicePaths::const_iterator DevicePathsIterator;
+    drmDevicePtr devices[32];
+    int ret, max_devices = sizeof(devices) / sizeof(devices[0]);
 
-    static DevicePaths paths({"/dev/dri/renderD128", "/dev/dri/card0"});
+    ret = drmGetDevices2(0, devices, max_devices);
+    EXPECT_TRUE(ret >= 0);
+    if (ret < 0)
+        return NULL;
+    max_devices = ret;
 
-    const DevicePathsIterator endIt(paths.end());
-    for (DevicePathsIterator it(paths.begin()); it != endIt; ++it) {
-        fd = open(it->c_str(), O_RDWR);
-        if (fd < 0)
-            continue;
-        VADisplay disp = vaGetDisplayDRM(fd);
+    for (int i = 0; i < max_devices; i++) {
+        for (int j = DRM_NODE_MAX - 1; j >= 0; j--) {
+            drmVersionPtr version;
 
-        if (disp)
-            return disp;
+            if (!(devices[i]->available_nodes & 1 << j))
+                continue;
 
-        close(fd);
+            fd = open(devices[i]->nodes[j], O_RDWR);
+            if (fd < 0)
+                continue;
+
+            version = drmGetVersion(fd);
+            if (!version) {
+                close(fd);
+                continue;
+            }
+            if (!strncmp(version->name, "vgem", 4)) {
+                drmFreeVersion(version);
+                close(fd);
+                continue;
+            }
+            drmFreeVersion(version);
+
+            VADisplay disp = vaGetDisplayDRM(fd);
+
+            if (disp)
+                return disp;
+
+            close(fd);
+        }
     }
 
     return NULL;
