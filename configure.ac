@@ -143,8 +143,7 @@ fi
 AM_CONDITIONAL(USE_SSP, test "$ssp_cc" = "yes")
 
 # Check for DRM (mandatory)
-PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm])
-PKG_CHECK_MODULES([DRM], [libdrm])
+PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm libdrm])
 
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version

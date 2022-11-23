@@ -41,8 +41,8 @@ endif
 
 if USE_DRM
 source_c		+= va_display_drm.c
-libva_display_cflags	+= $(DRM_CFLAGS) $(LIBVA_DRM_CFLAGS) $(DRM_CFLAGS)
-libva_display_libs	+= $(DRM_LIBS) $(LIBVA_DRM_LIBS)
+libva_display_cflags	+= $(LIBVA_DRM_CFLAGS)
+libva_display_libs	+= $(LIBVA_DRM_LIBS)
 endif
 
 if USE_WAYLAND
