@@ -42,7 +42,7 @@ TEST_P(VAAPIQueryConfig, CheckEntrypointsForProfile)
     EXPECT_TRUE(maxProfiles > 0)
             << maxProfiles << " profiles are reported";
 
-    Profiles profiles(maxProfiles);
+    Profiles profiles(maxProfiles, VAProfileNone);
 
     EXPECT_STATUS(
         vaQueryConfigProfiles(m_vaDisplay, profiles.data(), &numProfiles));
