@@ -74,12 +74,14 @@ static uint32_t g_src_file_fourcc = VA_FOURCC('I', '4', '2', '0');
 static uint32_t g_dst_file_fourcc = VA_FOURCC('Y', 'V', '1', '2');
 
 static uint32_t g_frame_count = 1;
-static uint32_t g_in_max_display_luminance = 1000;
-static uint32_t g_in_min_display_luminance = 1;
+// The maximum display luminace is 1000 nits by default.
+static uint32_t g_in_max_display_luminance = 10000000;
+static uint32_t g_in_min_display_luminance = 100;
 static uint32_t g_in_max_content_luminance = 4000;
 static uint32_t g_in_pic_average_luminance = 1000;
-static uint32_t g_out_max_display_luminance = 1000;
-static uint32_t g_out_min_display_luminance = 1;
+// The maximum display luminace is 1000 nits by default.
+static uint32_t g_out_max_display_luminance = 10000000;
+static uint32_t g_out_min_display_luminance = 100;
 static uint32_t g_out_max_content_luminance = 4000;
 static uint32_t g_out_pic_average_luminance = 1000;
 
@@ -667,13 +669,13 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         y_src = (unsigned char*)in_buf + va_image.offsets[0];
         u_src = (unsigned char*)in_buf + va_image.offsets[1]; // U offset for P010                                                        
         for (i = 0; i < va_image.height; i++)  {
-            memcpy(y_dst, y_src, va_image.width * 2);
-            y_dst += va_image.width * 2;
+            memcpy(y_dst, y_src, va_image.width * bytes_per_pixel);
+            y_dst += va_image.width * bytes_per_pixel;
             y_src += va_image.pitches[0];
         }
         for (i = 0; i < va_image.height >> 1; i++)  {
-            memcpy(u_dst, u_src, va_image.width * 2);
-            u_dst += va_image.width * 2;
+            memcpy(u_dst, u_src, va_image.width * bytes_per_pixel);
+            u_dst += va_image.width * bytes_per_pixel;
             u_src += va_image.pitches[1];
         }
         printf("read_frame_to_surface: P010 \n");
