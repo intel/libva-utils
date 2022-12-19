@@ -59,6 +59,7 @@ static const Profiles g_vaProfiles = {
     VAProfileVP9Profile1,
     VAProfileVP9Profile2,
     VAProfileVP9Profile3,
+    VAProfileH264High10,
 };
 
 static const Profiles g_vaNoneProfiles = {
@@ -81,6 +82,7 @@ static const Profiles g_vaH263Profiles = {
 static const Profiles g_vaH264Profiles = {
     VAProfileH264Main, VAProfileH264High, VAProfileH264ConstrainedBaseline,
     VAProfileH264MultiviewHigh, VAProfileH264StereoHigh,
+    VAProfileH264High10,
 };
 
 static const Profiles g_vaVC1Profiles = {
