@@ -660,7 +660,7 @@ static void print_help()
 
 }
 
-static int process_cmdline(int argc, char *argv[])
+static void process_cmdline(int argc, char *argv[])
 {
 
     int c;
@@ -1140,7 +1140,7 @@ fill_pps_header(uint64_t displaying_order)
     fh.RenderWidth = fh.FrameWidth;
     fh.RenderHeight = fh.FrameHeight;
     fh.allow_intrabc = 0;
-    for(uint8_t i = 0; i < 8; i++)
+    for(uint8_t i = 0; i < REFS_PER_FRAME; i++)
         fh.ref_frame_idx[i] = 0;
     fh.allow_high_precision_mv = 0;
     fh.interpolation_filter = 0; 
@@ -2246,7 +2246,7 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
     //bitstream
     pps->coded_buf = coded_buf[current_slot];
     
-    for(int k = 0; k < 7;k++)
+    for(int k = 0; k < REFS_PER_FRAME; k++)
         pps->ref_frame_idx[k] = 0;
 
     pps->picture_flags.bits.use_ref_frame_mvs = fh.use_ref_frame_mvs;
