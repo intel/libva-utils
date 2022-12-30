@@ -2955,6 +2955,11 @@ int main(int argc, char **argv)
     release_encode();
     deinit_va();
 
+    //free memory
+    if(ips.output) free(ips.output);
+    if(ips.srcyuv) free(ips.srcyuv);
+    if(ips.recyuv) free(ips.recyuv);
+
     TotalTicks += GetTickCount() - start;
     print_performance(ips.frame_count);
 
