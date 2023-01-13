@@ -330,6 +330,8 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
 
         Tc = index & 0xf0; // it is not important to <<4
         Th = index & 0x0f;
+        if (Th >= HUFFMAN_TABLES)
+            error("No more than %d Huffman tables is supported (got %d)\n", HUFFMAN_TABLES, Th);
         if (Tc) {
             memcpy(priv->HTAC[Th].bits, stream, 16);
         } else {
@@ -344,8 +346,6 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
 #if SANITY_CHECK
         if (count >= HUFFMAN_BITS_SIZE)
             error("No more than %d bytes is allowed to describe a huffman table", HUFFMAN_BITS_SIZE);
-        if (Th >= HUFFMAN_TABLES)
-            error("No more than %d Huffman tables is supported (got %d)\n", HUFFMAN_TABLES, Th);
         trace("Huffman table %s[%d] length=%d\n", Tc ? "AC" : "DC", Th, count);
 #endif
 
