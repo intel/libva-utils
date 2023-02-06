@@ -1513,6 +1513,45 @@ render_fr_buffer()
 }
 
 static void
+render_quality_buffer()
+{
+    VABufferID param_buf = VA_INVALID_ID;
+    VAStatus va_status;
+    VABufferID render_id = VA_INVALID_ID;
+
+    VAEncMiscParameterBuffer *misc_param;
+    VAEncMiscParameterBufferQualityLevel *misc_quality;
+
+    va_status = vaCreateBuffer(va_dpy, context_id,
+                            VAEncMiscParameterBufferType,
+                            sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterBufferQualityLevel),
+                            1, NULL, &param_buf);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+    vaMapBuffer(va_dpy, param_buf, (void **)&misc_param);
+    misc_param->type = VAEncMiscParameterTypeQualityLevel;
+    misc_quality = (VAEncMiscParameterBufferQualityLevel *)misc_param->data;
+    memset(misc_quality, 0, sizeof(*misc_quality));
+
+    //quality_level range {1...7}, 1 is best quality, 7 is best performance
+    // 7 is default setting
+    misc_quality->quality_level = 7;
+
+    vaUnmapBuffer(va_dpy, param_buf);
+
+    render_id = param_buf;
+
+    va_status = vaRenderPicture(va_dpy, context_id, &render_id, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+
+    if (param_buf != VA_INVALID_ID) 
+    {
+        vaDestroyBuffer(va_dpy, param_buf);
+        param_buf = VA_INVALID_ID;
+    }
+}
+
+static void
 render_misc_buffer()
 {
     render_rc_buffer();
@@ -2821,6 +2860,9 @@ static int encode_frames(void)
             render_misc_buffer();
         }
         
+        // setting qulity-performance trade-off
+        if(current_frame_encoding == 0)
+            render_quality_buffer();
 
         render_packedpicture(); //render packed frame header 
         render_picture(); //render frame PPS buffer
