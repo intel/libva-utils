@@ -30,14 +30,27 @@
 extern "C" {
 #endif
 
+/* The setenv() function returns zero on success, or -1 on error, with
+* errno set to indicate the cause of the error.
+*
+* SetEnvironmentVariableA Return value
+* If the function succeeds, the return value is nonzero.
+* If the function fails, the return value is zero.
+*/
 inline int setenv(const char *varname, const char *value_string, int overwrite)
 {
-    return SetEnvironmentVariableA(varname, value_string);
+    return SetEnvironmentVariableA(varname, value_string) ? 0 : -1;
 }
 
+/* The unsetenv() function returns zero on success, or -1 on error,
+* with errno set to indicate the cause of the error.
+* SetEnvironmentVariableA Return value
+* If the function succeeds, the return value is nonzero.
+* If the function fails, the return value is zero.
+*/
 inline int unsetenv(const char *varname)
 {
-    return SetEnvironmentVariableA(varname, NULL);
+    return SetEnvironmentVariableA(varname, NULL) ? 0 : -1;
 }
 
 #ifdef __cplusplus
