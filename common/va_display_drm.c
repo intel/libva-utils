@@ -34,6 +34,7 @@
 #endif
 #include <xf86drm.h>
 #include "va_display.h"
+#include <sys/utsname.h>
 
 static int drm_fd = -1;
 extern const char *g_device_name;
@@ -81,7 +82,14 @@ va_open_display_drm(void)
             close(drm_fd);
             continue;
         }
-        if (!strncmp(version->name, "vgem", 4)) {
+        /* On normal Linux platforms we do not want vgem.
+        *  Yet Windows subsystem for linux uses vgem,
+        *  while also providing a fallback VA driver.
+        *  See https://github.com/intel/libva/pull/688
+        */
+        struct utsname sysinfo = {};
+        if (!strncmp(version->name, "vgem", 4) && (uname(&sysinfo) >= 0) &&
+            !strstr(sysinfo.release, "WSL")) {
             drmFreeVersion(version);
             close(drm_fd);
             continue;
