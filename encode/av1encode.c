@@ -2293,6 +2293,7 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
     pps->ref_frame_ctrl_l0.value = 0;
     pps->ref_frame_ctrl_l1.value = 0;
     fill_ref_params(pps);
+    pps->refresh_frame_flags = fh.refresh_frame_flags;
 
     // //loop filter  
     // auto& lf = fh.loop_filter_params;
