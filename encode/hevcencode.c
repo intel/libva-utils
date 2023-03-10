@@ -367,10 +367,46 @@ struct SliceHeader {
     uint8_t     *slice_segment_header_extension_data_byte;                      //u(8)
 };
 
+struct BlockSizes {
+    uint32_t log2_max_coding_tree_block_size_minus3;
+    uint32_t log2_min_coding_tree_block_size_minus3;
+    uint32_t log2_min_luma_coding_block_size_minus3;
+    uint32_t log2_max_luma_transform_block_size_minus2;
+    uint32_t log2_min_luma_transform_block_size_minus2;
+    uint32_t log2_max_pcm_coding_block_size_minus3;
+    uint32_t log2_min_pcm_coding_block_size_minus3;
+    uint32_t max_max_transform_hierarchy_depth_inter;
+    uint32_t min_max_transform_hierarchy_depth_inter;
+    uint32_t max_max_transform_hierarchy_depth_intra;
+    uint32_t min_max_transform_hierarchy_depth_intra;
+};
+
+struct Features {
+    uint32_t amp; //sps->amp_enable_flag
+    uint32_t constrained_intra_pred;
+    uint32_t cu_qp_delta; // pps->cu_qp_delta_enabled_flag
+    uint32_t deblocking_filter_disable;
+    uint32_t dependent_slices;
+    uint32_t pcm; // sps->pcm_enable_flag
+    uint32_t sao; //sps->sample_adaptive_offset_enabled_flag
+    uint32_t scaling_lists;
+    uint32_t separate_colour_planes;
+    uint32_t sign_data_hiding;
+    uint32_t strong_intra_smoothing;
+    uint32_t temporal_mvp; //sps->sps_temporal_mvp_enabled_flag
+    uint32_t transform_skip; // pps->transform_skip_enabled_flag
+    uint32_t transquant_bypass;
+    uint32_t weighted_prediction;
+};
+
 static  struct VideoParamSet vps;
 static  struct SeqParamSet sps;
 static  struct PicParamSet pps;
 static  struct SliceHeader ssh;
+static  struct BlockSizes block_sizes;
+static  int use_block_sizes = 0;
+static  struct Features features;
+static  int use_features = 0;
 static  VADisplay va_dpy;
 static  VAProfile hevc_profile = ~0;
 static  int real_hevc_profile = 0;
@@ -746,7 +782,7 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
     sps->sps_seq_parameter_set_id = id;
     sps->chroma_format_idc = 1;
     if (sps->chroma_format_idc == 3) {
-        sps->separate_colour_plane_flag = 0;
+        sps->separate_colour_plane_flag = use_features ? features.separate_colour_planes : 0;
     }
     frame_width_aligned = ALIGN16(frame_width);
     frame_height_aligned = ALIGN16(frame_height);
@@ -788,20 +824,21 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
         sps->sps_max_num_reorder_pics[i] = ip_period != 0 ? ip_period - 1 : 0;
         sps->sps_max_latency_increase_plus1[i] = 0;
     }
-    sps->log2_min_luma_coding_block_size_minus3 = 0;
-    int log2_max_luma_coding_block_size = log2(LCU_SIZE);
+    sps->log2_min_luma_coding_block_size_minus3 = use_block_sizes ? block_sizes.log2_min_luma_coding_block_size_minus3 : 0;
+    int log2_max_luma_coding_block_size = use_block_sizes ? block_sizes.log2_max_coding_tree_block_size_minus3 + 3 : log2(LCU_SIZE);
     int log2_min_luma_coding_block_size = sps->log2_min_luma_coding_block_size_minus3 + 3;
     sps->log2_diff_max_min_luma_coding_block_size = log2_max_luma_coding_block_size -
             log2_min_luma_coding_block_size;
-    sps->log2_min_luma_transform_block_size_minus2 = 0;
-    sps->log2_diff_max_min_luma_transform_block_size = 3;
-    sps->max_transform_hierarchy_depth_inter = 2;
-    sps->max_transform_hierarchy_depth_intra = 2;
-    sps->scaling_list_enabled_flag = 0;
-    //sps->sps_scaling_list_data_present_flag; // ignore since scaling_list_enabled_flag equal to 0
-    sps->amp_enabled_flag = 1;
-    sps->sample_adaptive_offset_enabled_flag = 1;
-    sps->pcm_enabled_flag = 0;
+    sps->log2_min_luma_transform_block_size_minus2 = use_block_sizes ? block_sizes.log2_min_luma_transform_block_size_minus2 : 0;
+    sps->log2_diff_max_min_luma_transform_block_size = use_block_sizes ? (block_sizes.log2_max_luma_transform_block_size_minus2 - 
+                                                                          sps->log2_min_luma_transform_block_size_minus2) : 3;
+    sps->max_transform_hierarchy_depth_inter = use_block_sizes ? block_sizes.max_max_transform_hierarchy_depth_inter : 2;
+    sps->max_transform_hierarchy_depth_intra = use_block_sizes ? block_sizes.max_max_transform_hierarchy_depth_intra : 2;
+    sps->scaling_list_enabled_flag = use_features ? features.scaling_lists : 0;
+    sps->sps_scaling_list_data_present_flag = 0;
+    sps->amp_enabled_flag = use_features ? features.amp : 1;
+    sps->sample_adaptive_offset_enabled_flag = use_features ? features.sao : 1;
+    sps->pcm_enabled_flag = use_features ? features.pcm : 0;
     /* ignore below parameters seting since pcm_enabled_flag equal to 0
     pcm_sample_bit_depth_luma_minus1;
     pcm_sample_bit_depth_chroma_minus1;
@@ -820,9 +857,9 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
     lt_ref_pic_poc_lsb_sps[kMaxLongTermRefPic];
     used_by_curr_pic_lt_sps_flag[kMaxLongTermRefPic];
     */
-    sps->sps_temporal_mvp_enabled_flag = 1;
-    sps->strong_intra_smoothing_enabled_flag = 0;
-
+    sps->sps_temporal_mvp_enabled_flag = use_features ? features.temporal_mvp : 1;
+    sps->strong_intra_smoothing_enabled_flag = use_features ? features.strong_intra_smoothing : 0;
+    
     sps->vui_parameters_present_flag = 0;
     sps->sps_extension_present_flag = 0;
     /* ignore below parameters seting since sps_extension_present_flag equal to 0
@@ -843,34 +880,34 @@ static void fill_pps_header(
 
     pps->pps_pic_parameter_set_id = pps_id;
     pps->pps_seq_parameter_set_id = sps_id;
-    pps->dependent_slice_segments_enabled_flag = 0;
+    pps->dependent_slice_segments_enabled_flag = use_features ? features.dependent_slices : 0;
     pps->output_flag_present_flag = 0;
     pps->num_extra_slice_header_bits = 0;
-    pps->sign_data_hiding_enabled_flag = 0;
+    pps->sign_data_hiding_enabled_flag = use_features ? features.sign_data_hiding : 0;
     pps->cabac_init_present_flag = 1;
 
     pps->num_ref_idx_l0_default_active_minus1 = 0;
     pps->num_ref_idx_l1_default_active_minus1 = 0;
 
     pps->init_qp_minus26 = initial_qp - 26;
-    pps->constrained_intra_pred_flag = 0;
-    pps->transform_skip_enabled_flag = 0;
-    pps->cu_qp_delta_enabled_flag = 1;
+    pps->constrained_intra_pred_flag = use_features ? features.constrained_intra_pred : 0;
+    pps->transform_skip_enabled_flag = use_features ? features.transform_skip : 0;
+    pps->cu_qp_delta_enabled_flag = use_features ? features.cu_qp_delta : 1;
     if (pps->cu_qp_delta_enabled_flag)
         pps->diff_cu_qp_delta_depth = 2;
     pps->pps_cb_qp_offset = 0;
     pps->pps_cr_qp_offset = 0;
     pps->pps_slice_chroma_qp_offsets_present_flag = 0;
-    pps->weighted_pred_flag = 0;
+    pps->weighted_pred_flag = use_features ? features.weighted_prediction : 0;
     pps->weighted_bipred_flag = 0;
-    pps->transquant_bypass_enabled_flag = 0;
+    pps->transquant_bypass_enabled_flag = use_features ? features.transquant_bypass : 0;
     pps->entropy_coding_sync_enabled_flag = 0;
     pps->tiles_enabled_flag = 0;
 
     pps->pps_loop_filter_across_slices_enabled_flag = 0;
     pps->deblocking_filter_control_present_flag = 1;
     pps->deblocking_filter_override_enabled_flag = 0,
-         pps->pps_deblocking_filter_disabled_flag = 0,
+         pps->pps_deblocking_filter_disabled_flag = use_features ? features.deblocking_filter_disable : 0,
               pps->pps_beta_offset_div2 = 2,
                    pps->pps_tc_offset_div2 = 0,
                         pps->pps_scaling_list_data_present_flag = 0;
@@ -893,8 +930,9 @@ static void fill_slice_header(
     slice->pic_order_cnt_lsb = calc_poc((current_frame_display - current_IDR_display) % MaxPicOrderCntLsb);
 
     //slice_segment_address (u(v))
-    slice->picture_height_in_ctus = (frame_height + LCU_SIZE - 1) / LCU_SIZE;
-    slice->picture_width_in_ctus = (frame_width + LCU_SIZE - 1) / LCU_SIZE;
+    int lcu_size = use_block_sizes ? (1 << (block_sizes.log2_max_coding_tree_block_size_minus3 + 3)) : LCU_SIZE;
+    slice->picture_height_in_ctus = (frame_height + lcu_size - 1) / lcu_size;
+    slice->picture_width_in_ctus = (frame_width + lcu_size - 1) / lcu_size;
     slice->slice_segment_address = 0;
     slice->first_slice_segment_in_pic_flag = ((slice->slice_segment_address == 0) ? 1 : 0);
     slice->slice_type = current_frame_type == FRAME_P ? (p2b ? SLICE_B : SLICE_P) :
@@ -908,7 +946,7 @@ static void fill_slice_header(
     slice->strp.num_positive_pics = 0;
     slice->slice_sao_luma_flag = 0;
     slice->slice_sao_chroma_flag = 0;
-    slice->slice_temporal_mvp_enabled_flag = 1;
+    slice->slice_temporal_mvp_enabled_flag = use_features ? features.temporal_mvp : 1;
 
     slice->num_ref_idx_l0_active_minus1 = pps->num_ref_idx_l0_default_active_minus1;
     slice->num_ref_idx_l1_active_minus1 = pps->num_ref_idx_l1_default_active_minus1;
@@ -1386,7 +1424,7 @@ static void sliceHeader_rbsp(
                 put_ue(bs, slice_header->num_long_term_pics);
             }
 
-            if (slice_header->slice_temporal_mvp_enabled_flag)
+            if (sps->sps_temporal_mvp_enabled_flag)
                 put_ui(bs, slice_header->slice_temporal_mvp_enabled_flag, 1);
 
         }
@@ -2167,6 +2205,52 @@ static int init_va(void)
     }
     if (attrib[VAConfigAttribEncMacroblockInfo].value != VA_ATTRIB_NOT_SUPPORTED) {
         printf("Support VAConfigAttribEncMacroblockInfo\n");
+    }
+    if (attrib[VAConfigAttribEncHEVCBlockSizes].value != VA_ATTRIB_NOT_SUPPORTED) {
+        printf("Support VAConfigAttribEncHEVCBlockSizes\n");
+        uint32_t tmp = attrib[VAConfigAttribEncHEVCBlockSizes].value;
+        VAConfigAttribValEncHEVCBlockSizes bs = { .value = tmp };
+        block_sizes.log2_max_coding_tree_block_size_minus3 = bs.bits.log2_max_coding_tree_block_size_minus3;
+        block_sizes.log2_min_coding_tree_block_size_minus3 = bs.bits.log2_min_coding_tree_block_size_minus3;
+        block_sizes.log2_min_luma_coding_block_size_minus3 = bs.bits.log2_min_luma_coding_block_size_minus3;
+        block_sizes.log2_max_luma_transform_block_size_minus2 = bs.bits.log2_max_luma_transform_block_size_minus2;
+        block_sizes.log2_min_luma_transform_block_size_minus2 = bs.bits.log2_min_luma_transform_block_size_minus2;
+        block_sizes.log2_max_pcm_coding_block_size_minus3 = bs.bits.log2_max_pcm_coding_block_size_minus3;
+        block_sizes.log2_min_pcm_coding_block_size_minus3 = bs.bits.log2_min_pcm_coding_block_size_minus3;
+        block_sizes.max_max_transform_hierarchy_depth_inter = bs.bits.max_max_transform_hierarchy_depth_inter;
+        block_sizes.min_max_transform_hierarchy_depth_inter = bs.bits.min_max_transform_hierarchy_depth_inter;
+        block_sizes.max_max_transform_hierarchy_depth_intra = bs.bits.max_max_transform_hierarchy_depth_intra;
+        block_sizes.min_max_transform_hierarchy_depth_intra = bs.bits.min_max_transform_hierarchy_depth_intra;
+
+        use_block_sizes = 1;
+        config_attrib[config_attrib_num].type = VAConfigAttribEncHEVCBlockSizes;
+        config_attrib[config_attrib_num].value = tmp;
+        config_attrib_num++;
+    }
+    if (attrib[VAConfigAttribEncHEVCFeatures].value != VA_ATTRIB_NOT_SUPPORTED) {
+        printf("Support VAConfigAttribEncHEVCFeatures\n");
+        uint32_t tmp = attrib[VAConfigAttribEncHEVCFeatures].value;
+        VAConfigAttribValEncHEVCFeatures f = { .value = tmp };
+        features.amp = f.bits.amp;
+        features.constrained_intra_pred = f.bits.constrained_intra_pred;
+        features.cu_qp_delta = f.bits.cu_qp_delta;
+        features.deblocking_filter_disable = f.bits.deblocking_filter_disable;
+        features.dependent_slices = f.bits.dependent_slices;
+        features.pcm = f.bits.pcm;
+        features.sao = f.bits.sao;
+        features.scaling_lists = f.bits.scaling_lists;
+        features.separate_colour_planes = f.bits.separate_colour_planes;
+        features.sign_data_hiding = f.bits.sign_data_hiding;
+        features.strong_intra_smoothing = f.bits.strong_intra_smoothing;
+        features.temporal_mvp = f.bits.temporal_mvp;
+        features.transform_skip = f.bits.transform_skip;
+        features.transquant_bypass = f.bits.transquant_bypass;
+        features.weighted_prediction = f.bits.weighted_prediction;
+
+        use_features = 1;
+        config_attrib[config_attrib_num].type = VAConfigAttribEncHEVCFeatures;
+        config_attrib[config_attrib_num].value = attrib[VAConfigAttribEncHEVCFeatures].value;
+        config_attrib_num++;
     }
 
     free(entrypoints);
@@ -3296,6 +3380,7 @@ int main(int argc, char **argv)
 {
     unsigned int start;
 
+    va_init_display_args(&argc, argv);
     process_cmdline(argc, argv);
 
     print_input();
