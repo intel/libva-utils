@@ -1165,6 +1165,7 @@ static int init_va(void)
     /* check the interested configattrib */
     if ((attrib[VAConfigAttribRTFormat].value & VA_RT_FORMAT_YUV420) == 0) {
         printf("Not find desired YUV420 RT format\n");
+	free(entrypoints);
         exit(1);
     } else {
         config_attrib[config_attrib_num].type = VAConfigAttribRTFormat;
