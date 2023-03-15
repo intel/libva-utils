@@ -486,6 +486,13 @@ static int parse_JFIF(struct jdec_private *priv, const unsigned char *stream)
         printf("ERROR:Sampling other than 1x1 for Cr and Cb is not supported");
 #endif
     findEOI(priv, stream);
+
+    if (priv->stream_scan > priv->stream_end)
+    {
+        error("stream_scan cannot exceed stream_end\n");
+        return -1;
+    }
+
     return next_image_found;
 }
 
