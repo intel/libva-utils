@@ -1,5 +1,20 @@
-libva-utils NEWS -- summary of changes.  2022-12-26
-Copyright (C) 2009-2022 Intel Corporation
+libva-utils NEWS -- summary of changes.  2023-03-17
+Copyright (C) 2009-2023 Intel Corporation
+
+Version 2.18.0 - 17.Mar.2023
+* doc:Add build and install libva-utils steps
+* test: Add VAProfileH264High10
+* test: Don't assume our DRM node is first
+* add: va_display_drm: Allow VGEM for WSL2
+* win: win32 compat: Fix setenv/unsetenv return values
+* fix: Add Th limitation by HUFFMAN_TABLES Count
+* fix: Add refresh_frame_flags in PPS
+* fix: Add checking of stream_scan size
+* fix: Add Scan Num limitation
+* fix: Changed H2S configuration template.
+* fix: Correct maximum display luminance per VAAPI definition.
+* fix: Fix possible memory leak
+* fix: Fix coding issues of function return type & ref_frame_idx idx too large
 
 Version 2.17.0 - 26.Dec.2022
 * add: Upload a security disclaimer
