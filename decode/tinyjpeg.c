@@ -823,7 +823,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
         vaDestroyConfig(va_dpy, config_id);
         vaDestroyContext(va_dpy, context_id);
 
-        if (scan_num > JPEG_SCAN_MAX)
+        if (scan_num >= JPEG_SCAN_MAX)
             break;
         parse_JFIF(priv, priv->stream);
         if (priv->width[scan_num] == 0 && priv->height[scan_num] == 0)
