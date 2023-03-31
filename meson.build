@@ -25,7 +25,7 @@ drm_deps=[]
 if get_option('drm') != 'false'
   require_drm = get_option('drm') == 'true'
   drm_deps = [
-    dependency('libva-drm', required: require_drm),
+    dependency('libva-drm', version: libva_dep.version(), required: require_drm),
     dependency('libdrm', required: require_drm),
   ]
   use_drm = true
@@ -46,7 +46,7 @@ if get_option('x11') != 'false'
   require_x11 = get_option('x11') == 'true'
   x11_deps = [
     dependency('x11', required: require_x11),
-    dependency('libva-x11', required: require_x11),
+    dependency('libva-x11', version: libva_dep.version(), required: require_x11),
   ]
   use_x11 = true
   foreach d : x11_deps
@@ -66,7 +66,7 @@ if get_option('wayland') != 'false'
   require_wayland = get_option('wayland') == 'true'
   wayland_deps = [
     dependency('wayland-client', version: '>= 1.0.0', required: require_wayland),
-    dependency('libva-wayland', required: require_wayland),
+    dependency('libva-wayland', version: libva_dep.version(), required: require_wayland),
   ]
   use_wayland = true
   foreach d : wayland_deps
@@ -84,7 +84,7 @@ endif
 use_win32 = false
 if get_option('win32') != 'false'
   require_win32 = get_option('win32') == 'true'
-  use_win32 = dependency('libva-win32', required: require_win32).found()
+  use_win32 = dependency('libva-win32', version: libva_dep.version(), required: require_win32).found()
   if use_win32
     libva_utils_flags = [ '-DHAVE_VA_WIN32=1', '-DNOMINMAX']
     dep_dxheaders = dependency('directx-headers', required : false)
