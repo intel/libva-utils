@@ -142,9 +142,6 @@ if test "X$CC-cc" != "X"; then
 fi
 AM_CONDITIONAL(USE_SSP, test "$ssp_cc" = "yes")
 
-# Check for DRM (mandatory)
-PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm libdrm])
-
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version
 PKG_CHECK_MODULES([LIBVA], [libva >= $LIBVA_API_MIN_VERSION])
@@ -155,7 +152,8 @@ VA_MAJOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f1`
 VA_MINOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f2`
 VA_MICRO_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f3`
 
-
+# Check for DRM (mandatory)
+PKG_CHECK_MODULES([LIBVA_DRM], [libdrm libva-drm = $LIBVA_API_VERSION])
 
 USE_DRM="no"
 if test "$enable_drm" = "yes"; then
@@ -167,7 +165,7 @@ AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 # Check for X11
 USE_X11="no"
 if test "x$enable_x11" != "xno"; then
-    PKG_CHECK_MODULES([X11],    [x11 libva-x11],
+    PKG_CHECK_MODULES([X11],    [x11 libva-x11 = $LIBVA_API_VERSION],
         [USE_X11="yes"], [:])
 
     if test "x$USE_X11" = "xno" -a "x$enable_x11" = "xyes"; then
@@ -186,7 +184,7 @@ AC_SUBST(WAYLAND_API_VERSION)
 
 USE_WAYLAND="no"
 if test "x$enable_wayland" != "xno"; then
-    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version libva-wayland],
+    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version libva-wayland = $LIBVA_API_VERSION],
         [USE_WAYLAND="yes"], [:])
 
     if test "x$USE_WAYLAND" = "xno" -a "x$enable_wayland" = "xyes"; then
