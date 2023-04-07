@@ -28,6 +28,10 @@ FRAME_SUM: 1
 3DLUT_MUL_SIZE: 128
 3DLUT_CHANNEL_MAPPING: 1
 
-#5. Pipeline Configuration(3DLUT->Scaling: 1, Scaling->3DLUT: 0, Scaling only: 2)
-PIPELINE: 1
+#5.1DLUT configuration file
+1DLUT_FILE_NAME: ./1dlut_256.dat
+1DLUT_SEG_SIZE: 256
+
+#5. pipeline(3DLUT->Scaling: 1, Scaling->3DLUT: 0, Scaling only: 2, 1DLUT_3DLUT: 3)
+PIPELINE: 3
 

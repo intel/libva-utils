@@ -52,6 +52,7 @@
 /* indicate the pipleine is 3dlut -> scaling, by default in one call */
 #define VA_3DLUT_SCALING 1
 #define VA_SCALING_ONLY  2
+#define VA_1DLUT_3DLUT   3
 
 static VADisplay va_dpy = NULL;
 static VAContextID context_id = 0;
@@ -89,6 +90,13 @@ static char g_3dlut_file_name[MAX_LEN];
 static uint16_t g_3dlut_seg_size = 65;
 static uint16_t g_3dlut_mul_size = 128;
 static uint32_t g_3dlut_channel_mapping = 1;
+
+static char g_1dlut_file_name[MAX_LEN];
+static uint16_t g_1dlut_seg_size = 256;
+static uint8_t* g_1dlut_buffer = NULL;
+static uint8_t g_1dlut_bit_depth = 16;
+static uint8_t g_1dlut_channel_num = 4;
+static uint32_t g_1dlut_buffer_size = g_1dlut_seg_size * (g_1dlut_bit_depth / 8) * g_1dlut_channel_num;
 
 #if VA_CHECK_VERSION(1, 12, 0)
 
@@ -990,6 +998,45 @@ store_yuv_surface_to_file(FILE *fp,
 }
 
 static VAStatus
+upload_data_to_1dlut(FILE *fp)
+{
+    VAStatus va_status;
+    uint32_t real_size  = 0;
+    uint16_t *p1dlut_buffer = NULL;
+
+    if (g_1dlut_buffer == NULL) {
+        g_1dlut_buffer = (unsigned char*)malloc(g_1dlut_seg_size * g_1dlut_bit_depth / 8 * g_1dlut_channel_num);
+        assert(g_1dlut_buffer);
+    }
+
+    p1dlut_buffer = (uint16_t*)g_1dlut_buffer;
+
+    if (0 /*fp*/) {
+        fseek(fp, 0L, SEEK_END);
+        real_size = ftell(fp);
+        rewind(fp);
+
+        if (real_size != g_1dlut_buffer_size) {
+            printf("1DLUT file size error!\n");
+        }
+
+        if (fread(g_1dlut_buffer, real_size, 1, fp) != 0) {
+            printf("upload_data_to_1dlut %d\n");
+            va_status = VA_STATUS_SUCCESS;
+        }
+    } else { // default test 1dlut
+        for (uint32_t index = 0; index < g_1dlut_seg_size; index++) {
+            p1dlut_buffer[index *4 + 0]     = index * 257;
+            p1dlut_buffer[index *4 + 1]     = index * 257;
+            p1dlut_buffer[index *4 + 2]     = index * 257;
+            p1dlut_buffer[index *4 + 3]     = index * 257;
+        }
+    }
+
+    return va_status;
+}
+
+static VAStatus
 upload_data_to_3dlut(FILE *fp,
                      VASurfaceID &surface_id)
 {
@@ -1007,12 +1054,12 @@ upload_data_to_3dlut(FILE *fp,
     va_status = vaMapBuffer(va_dpy, surface_image.buf, &surface_p);
     CHECK_VASTATUS(va_status, "vaMapBuffer");
 
-    if (surface_image.format.fourcc == VA_FOURCC_RGBA  && fp) {
-        /* 3DLUT surface is allocated to 32 bit RGB */
-        frame_size = surface_image.width * surface_image.height * 4;
-        newImageBuffer = (unsigned char*)malloc(frame_size);
-        assert(newImageBuffer);
+    /* 3DLUT surface is allocated to 32 bit RGB */
+    frame_size = surface_image.width * surface_image.height * 4;
+    newImageBuffer = (unsigned char*)malloc(frame_size);
+    assert(newImageBuffer);
 
+    if (0 /*surface_image.format.fourcc == VA_FOURCC_RGBA  && fp*/) {
         fseek(fp, 0L, SEEK_END);
         lut3d_size = ftell(fp);
         rewind(fp);
@@ -1023,6 +1070,10 @@ upload_data_to_3dlut(FILE *fp,
             memcpy(surface_p, newImageBuffer, real_size);
             printf("upload_data_to_3dlut: 3DLUT surface width %d, height %d, pitch %d, frame size %d, 3dlut file size: %d\n", surface_image.width, surface_image.height, surface_image.pitches[0], frame_size, lut3d_size);
         }
+    }
+    else { // default 3dlut
+        memset(newImageBuffer, 0xff, frame_size);
+        memcpy(surface_p, newImageBuffer, frame_size);
     }
 
     if (newImageBuffer)  {
@@ -1060,6 +1111,50 @@ create_surface(VASurfaceID * p_surface_id,
 }
 
 static VAStatus
+lut1D_filter_init(VABufferID &filter_param_buf_id)
+{
+    VAStatus va_status;
+    VAProcFilterParameterBuffer1DLUT lut1d_param;
+    VABufferID lut1d_param_buf_id;
+    uint32_t num_caps = 10;
+    bool bSupported = false;
+
+    VAProcFilterCap1DLUT caps[num_caps];
+    memset(&caps, 0, sizeof(VAProcFilterCap1DLUT)*num_caps);
+    va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
+                                           VAProcFilter1DLUT,
+                                           (void *)caps, &num_caps);
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcFilterCaps");
+    printf("vaQueryVideoProcFilterCaps num_caps %d\n", num_caps);
+
+    /* check if the input parameters are supported */
+    for (uint32_t index = 0; index < num_caps; index++) {
+        // check lut_size and lut_stride
+        if (caps[index].lut_size == g_1dlut_seg_size) {
+            bSupported = true;
+        }
+    }
+
+    if (bSupported) {
+        lut1d_param.type  = VAProcFilter1DLUT;
+        lut1d_param.buffer_size   = g_1dlut_buffer_size;
+        lut1d_param.lut_buffer    = g_1dlut_buffer;
+        lut1d_param.lut_size      = g_1dlut_seg_size;
+        lut1d_param.bit_depth     = g_1dlut_bit_depth;
+        lut1d_param.num_channel   = g_1dlut_channel_num;
+
+        /* create 3dlut fitler buffer */
+        va_status = vaCreateBuffer(va_dpy, context_id,
+                                   VAProcFilterParameterBufferType, sizeof(lut1d_param), 1,
+                                   &lut1d_param, &lut1d_param_buf_id);
+
+        filter_param_buf_id = lut1d_param_buf_id;
+    }
+
+    return va_status;
+}
+
+static VAStatus
 lut3D_filter_init(VABufferID &filter_param_buf_id)
 {
     VAStatus va_status;
@@ -1079,7 +1174,7 @@ lut3D_filter_init(VABufferID &filter_param_buf_id)
     /* check if the input parameters are supported */
     for (uint32_t index = 0; index < num_caps; index++) {
         // check lut_size and lut_stride
-        if ((caps[index].lut_size = g_3dlut_seg_size) &&
+        if ((caps[index].lut_size == g_3dlut_seg_size) &&
             (caps[index].lut_stride[0] == g_3dlut_seg_size) &&
             (caps[index].lut_stride[1] == g_3dlut_seg_size) &&
             (caps[index].lut_stride[2] == g_3dlut_mul_size)) {
@@ -1104,6 +1199,83 @@ lut3D_filter_init(VABufferID &filter_param_buf_id)
                                    &lut3d_param, &lut3d_param_buf_id);
 
         filter_param_buf_id = lut3d_param_buf_id;
+    }
+
+    return va_status;
+}
+
+static VAStatus
+video_frame_process_1dlut_3dlut(
+        VASurfaceID in_surface_id,
+        VASurfaceID out_surface_id)
+
+{
+    VAStatus va_status;
+    VAProcPipelineParameterBuffer pipeline_param;
+    VARectangle surface_region, output_region;
+    VABufferID pipeline_param_buf_id = VA_INVALID_ID;
+    VABufferID filter_param_buf_id[2];
+
+    /*Create 1DLUT Filter*/
+    lut1D_filter_init(filter_param_buf_id[0]);
+
+    /*Create 3DLUT Filter*/
+    lut3D_filter_init(filter_param_buf_id[1]);
+
+    /* Fill pipeline buffer */
+    surface_region.x = 0;
+    surface_region.y = 0;
+    surface_region.width = g_in_pic_width;
+    surface_region.height = g_in_pic_height;
+    output_region.x = 0;
+    output_region.y = 0;
+    output_region.width = g_out_pic_width;
+    output_region.height = g_out_pic_height;
+
+    memset(&pipeline_param, 0, sizeof(pipeline_param));
+    pipeline_param.surface = in_surface_id;
+    pipeline_param.surface_region = &surface_region;
+    pipeline_param.output_region = &output_region;
+    pipeline_param.filter_flags = 0;
+    pipeline_param.filters = filter_param_buf_id;
+    pipeline_param.num_filters  = 2;
+    /* input is bt2020 */
+    pipeline_param.surface_color_standard = VAProcColorStandardBT2020;
+    pipeline_param.output_color_standard = VAProcColorStandardBT2020;
+
+    va_status = vaCreateBuffer(va_dpy,
+                               context_id,
+                               VAProcPipelineParameterBufferType,
+                               sizeof(pipeline_param),
+                               1,
+                               &pipeline_param,
+                               &pipeline_param_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+    va_status = vaBeginPicture(va_dpy,
+                               context_id,
+                               out_surface_id);
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
+
+    va_status = vaRenderPicture(va_dpy,
+                                context_id,
+                                &pipeline_param_buf_id,
+                                1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+
+    va_status = vaEndPicture(va_dpy, context_id);
+    CHECK_VASTATUS(va_status, "vaEndPicture");
+
+    if (pipeline_param_buf_id != VA_INVALID_ID) {
+        vaDestroyBuffer(va_dpy, pipeline_param_buf_id);
+    }
+
+    if (filter_param_buf_id[0] != VA_INVALID_ID) {
+        vaDestroyBuffer(va_dpy, filter_param_buf_id[0]);
+    }
+
+    if (filter_param_buf_id[1] != VA_INVALID_ID) {
+        vaDestroyBuffer(va_dpy, filter_param_buf_id[1]);
     }
 
     return va_status;
@@ -1322,6 +1494,12 @@ vpp_context_create()
         }
     }
 
+    if (g_pipeline_sequence == VA_1DLUT_3DLUT) {
+        FILE *lut1d_file = NULL;
+        lut1d_file = fopen(g_1dlut_file_name, "rb");
+        upload_data_to_1dlut(lut1d_file);
+    }
+
     va_status = vaCreateConfig(va_dpy,
                                VAProfileNone,
                                VAEntrypointVideoProc,
@@ -1438,7 +1616,9 @@ parse_basic_parameters()
 
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
 
-    read_value_uint32(g_config_file_fd, "3DLUT_SCALING", &g_pipeline_sequence);
+    if (read_value_uint32(g_config_file_fd, "PIPELINE", &g_pipeline_sequence)) {
+        printf("Read Pipeline Oonfiguration failed, exit.");
+    }
 
     if (read_value_string(g_config_file_fd, "3DLUT_FILE_NAME", g_3dlut_file_name)) {
         printf("Read 3DLUT file failed, exit.");
@@ -1454,6 +1634,14 @@ parse_basic_parameters()
 
     if (read_value_uint32(g_config_file_fd, "3DLUT_CHANNEL_MAPPING", &g_3dlut_channel_mapping)) {
         printf("Read channel_mapping failed, exit.");
+    }
+
+    if (read_value_string(g_config_file_fd, "1DLUT_FILE_NAME", g_1dlut_file_name)) {
+        printf("Read 1DLUT file failed, exit.");
+    }
+
+    if (read_value_uint16(g_config_file_fd, "1DLUT_SEG_SIZE", &g_1dlut_seg_size)) {
+        printf("Read segment_size failed, exit.");
     }
 
     if (g_in_pic_width != g_out_pic_width ||
@@ -1534,6 +1722,8 @@ int32_t main(int32_t argc, char *argv[])
         } else if (g_pipeline_sequence == VA_SCALING_ONLY) {
             printf("process frame #%d in VA_SCALING_ONLY\n", i);
             video_frame_process_scaling(g_in_surface_id, g_out_surface_id);
+        } else if (g_pipeline_sequence == VA_1DLUT_3DLUT) {
+            video_frame_process_1dlut_3dlut(g_in_surface_id, g_out_surface_id);
         } else {
             printf("Unknown pipeline sequence, default is 3DLUT->scaling!\n");
         }
@@ -1548,6 +1738,11 @@ int32_t main(int32_t argc, char *argv[])
 
     if (g_config_file_fd)
         fclose(g_config_file_fd);
+
+    if (g_1dlut_buffer) {
+        free(g_1dlut_buffer);
+        g_1dlut_buffer = NULL;
+    }
 
     vpp_context_destroy();
 
