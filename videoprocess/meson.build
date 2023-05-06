@@ -4,9 +4,11 @@ executable('vacopy', [ 'vacopy.cpp' ],
 executable('vavpp', [ 'vavpp.cpp' ],
            dependencies: libva_display_dep,
            install: true)
-executable('vpp3dlut', [ 'vpp3dlut.cpp' ],
-           dependencies: libva_display_dep,
-           install: true)
+if libva_dep.version().version_compare('>= 1.12.0')
+    executable('vpp3dlut', [ 'vpp3dlut.cpp' ],
+            dependencies: libva_display_dep,
+            install: true)
+endif
 executable('vppblending', [ 'vppblending.cpp' ],
            dependencies: libva_display_dep,
            install: true)
