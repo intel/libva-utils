@@ -529,6 +529,7 @@ static  struct storage_task_t *storage_task_header = NULL, *storage_task_tail = 
 static  int srcsurface_status[SURFACE_NUM];
 //static  int encode_syncmode = 0; moved to input pars
 static  pthread_mutex_t encode_mutex = PTHREAD_MUTEX_INITIALIZER;
+static  pthread_mutex_t vaapi_lock = PTHREAD_MUTEX_INITIALIZER;
 static  pthread_cond_t  encode_cond = PTHREAD_COND_INITIALIZER;
 static  pthread_t encode_thread;
 
@@ -1244,6 +1245,8 @@ va_render_packed_data(bitstream* bs)
     unsigned char *packedpic_buffer = bs->buffer;
     VAStatus va_status;
 
+    pthread_mutex_lock(&vaapi_lock);
+
     packedheader_param_buffer.type = VAEncPackedHeaderPicture; 
     packedheader_param_buffer.bit_length = length_in_bits;
     packedheader_param_buffer.has_emulation_bytes = 0;
@@ -1278,6 +1281,7 @@ va_render_packed_data(bitstream* bs)
         packed_data_bufid = VA_INVALID_ID;
     }
 
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 static void
@@ -1385,6 +1389,8 @@ render_sequence()
     memset(&sps_buffer, 0, sizeof(sps_buffer));
     build_sps_buffer(&sps_buffer);
 
+    pthread_mutex_lock(&vaapi_lock);
+
     va_status = vaCreateBuffer(va_dpy, context_id, VAEncSequenceParameterBufferType,
                                sizeof(sps_buffer), 1, &sps_buffer, &seq_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");;
@@ -1397,6 +1403,7 @@ render_sequence()
         seq_param_buf_id = VA_INVALID_ID;
     }
 
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 static void
@@ -1408,6 +1415,8 @@ render_rc_buffer()
 
     VAEncMiscParameterBuffer *misc_param;
     VAEncMiscParameterRateControl *misc_rate_ctrl;
+
+    pthread_mutex_lock(&vaapi_lock);
 
     va_status = vaCreateBuffer(va_dpy, context_id,
                             VAEncMiscParameterBufferType,
@@ -1433,6 +1442,8 @@ render_rc_buffer()
         vaDestroyBuffer(va_dpy, rc_param_buf);
         rc_param_buf = VA_INVALID_ID;
     }
+
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 
@@ -1445,6 +1456,8 @@ render_hrd_buffer()
 
     VAEncMiscParameterBuffer *misc_param;
     VAEncMiscParameterHRD *misc_hrd;
+
+    pthread_mutex_lock(&vaapi_lock);
 
     va_status = vaCreateBuffer(va_dpy, context_id,
                             VAEncMiscParameterBufferType,
@@ -1472,6 +1485,8 @@ render_hrd_buffer()
         vaDestroyBuffer(va_dpy, param_buf);
         param_buf = VA_INVALID_ID;
     }
+
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 
@@ -1484,6 +1499,8 @@ render_fr_buffer()
 
     VAEncMiscParameterBuffer *misc_param;
     VAEncMiscParameterFrameRate *misc_fr;
+
+    pthread_mutex_lock(&vaapi_lock);
 
     va_status = vaCreateBuffer(va_dpy, context_id,
                             VAEncMiscParameterBufferType,
@@ -1510,6 +1527,8 @@ render_fr_buffer()
         vaDestroyBuffer(va_dpy, param_buf);
         param_buf = VA_INVALID_ID;
     }
+
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 static void
@@ -1530,6 +1549,8 @@ render_tile_group()
 
     VAEncTileGroupBufferAV1 tile_group_buffer = {0}; //default setting
 
+    pthread_mutex_lock(&vaapi_lock);
+
     va_status = vaCreateBuffer(va_dpy, context_id, VAEncSliceParameterBufferType,
                                sizeof(tile_group_buffer), 1, &tile_group_buffer, &tile_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");;
@@ -1541,7 +1562,7 @@ render_tile_group()
         vaDestroyBuffer(va_dpy, tile_param_buf_id);
         tile_param_buf_id = VA_INVALID_ID;
     }
-
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 
@@ -2398,6 +2419,7 @@ render_picture()
     memset(&pps_buffer, 0, sizeof(pps_buffer));
     build_pps_buffer(&pps_buffer);
 
+    pthread_mutex_lock(&vaapi_lock);
     va_status = vaCreateBuffer(va_dpy, context_id, VAEncPictureParameterBufferType,
                                sizeof(pps_buffer), 1, &pps_buffer, &pic_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");;
@@ -2409,7 +2431,7 @@ render_picture()
         vaDestroyBuffer(va_dpy, pic_param_buf_id);
         pic_param_buf_id = VA_INVALID_ID;
     }
-
+    pthread_mutex_unlock(&vaapi_lock);
 }
 
 static int upload_source_YUV_once_for_all()
@@ -2506,8 +2528,10 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     VAStatus va_status;
     unsigned int coded_size = 0;
 
+    pthread_mutex_lock(&vaapi_lock);
     va_status = vaMapBuffer(va_dpy, coded_buf[display_order % SURFACE_NUM], (void **)(&buf_list));
     CHECK_VASTATUS(va_status, "vaMapBuffer");
+    pthread_mutex_unlock(&vaapi_lock);
 
     long frame_start = ftell(coded_fp);
 
@@ -2519,7 +2543,10 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     }
 
     long frame_end = ftell(coded_fp);
+
+    pthread_mutex_lock(&vaapi_lock);
     vaUnmapBuffer(va_dpy, coded_buf[display_order % SURFACE_NUM]);
+    pthread_mutex_unlock(&vaapi_lock);
 
     if(encode_order == 0)
     {
@@ -2622,9 +2649,11 @@ static int save_recyuv(VASurfaceID surface_id,
         exit(1);
     }
 
+    pthread_mutex_lock(&vaapi_lock);
     download_surface_yuv(va_dpy, surface_id,
                          srcyuv_fourcc, ips.width, ips.height,
                          dst_Y, dst_U, dst_V);
+    pthread_mutex_unlock(&vaapi_lock);
     fseek(recyuv_fp, display_order * ips.width * ips.height * 1.5, SEEK_SET);
 
     if (srcyuv_fourcc == VA_FOURCC_NV12) {
@@ -2663,7 +2692,9 @@ static void storage_task(unsigned long long display_order, unsigned long long en
     VAStatus va_status;
 
     tmp = GetTickCount();
+    pthread_mutex_lock(&vaapi_lock);
     va_status = vaSyncSurface(va_dpy, src_surface[display_order % SURFACE_NUM]);
+    pthread_mutex_unlock(&vaapi_lock);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
     SyncPictureTicks += GetTickCount() - tmp;
     tmp = GetTickCount();
@@ -2773,7 +2804,9 @@ static int encode_frames(void)
         }
 
         tmp = GetTickCount();
+        pthread_mutex_lock(&vaapi_lock);
         va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_slot]);
+        pthread_mutex_unlock(&vaapi_lock);
         CHECK_VASTATUS(va_status, "vaBeginPicture");
         BeginPictureTicks += GetTickCount() - tmp;
 
@@ -2829,7 +2862,9 @@ static int encode_frames(void)
         RenderPictureTicks += GetTickCount() - tmp;
 
         tmp = GetTickCount();
+        pthread_mutex_lock(&vaapi_lock);
         va_status = vaEndPicture(va_dpy, context_id);
+        pthread_mutex_unlock(&vaapi_lock);
         CHECK_VASTATUS(va_status, "vaEndPicture");
         EndPictureTicks += GetTickCount() - tmp;
 
