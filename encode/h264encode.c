@@ -1485,6 +1485,10 @@ static int render_sequence(void)
     seq_param.num_units_in_tick = 15; /* Tc = num_units_in_tick / time_sacle */
     Log2MaxPicOrderCntLsb = ceil(log2(intra_idr_period*2));
     seq_param.seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = Log2MaxPicOrderCntLsb - 4;
+    if(seq_param.seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 > 12)
+    {
+        seq_param.seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = 12;
+    }
     seq_param.seq_fields.bits.log2_max_frame_num_minus4 = Log2MaxFrameNum - 4;;
     seq_param.seq_fields.bits.frame_mbs_only_flag = 1;
     seq_param.seq_fields.bits.chroma_format_idc = 1;
