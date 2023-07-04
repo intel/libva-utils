@@ -1,5 +1,14 @@
-libva-utils NEWS -- summary of changes.  2023-03-17
+libva-utils NEWS -- summary of changes.  2023-07-04
 Copyright (C) 2009-2023 Intel Corporation
+
+Version 2.19.0 - 04.Jul.2023
+* add: Add support for VAConfigAttribEncHEVCBlockSizes & VAConfigAttribEncHEVCFeatures for hevcencode.
+* ci:Update ubuntu.yml to remove ubuntu 18.04
+* meson: guard code introduced after libva 1.xx release
+* meson: libva-xyz should be same version as detected libva
+* configure: libva-xyz should be same version as detected libva
+* fix: scan num limitation.
+* fix: pic_order_cnt_lsb to accept larger GOP
 
 Version 2.18.0 - 17.Mar.2023
 * doc:Add build and install libva-utils steps
