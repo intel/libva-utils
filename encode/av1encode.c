@@ -511,6 +511,8 @@ static  FH fh;
 static  SH sh;
 struct BitOffsets offsets;
 
+//Default entrypoint for Encode
+static VAEntrypoint requested_entrypoint = -1;
 
 static  unsigned long long current_frame_encoding = 0;
 static  unsigned long long current_frame_display = 0;
@@ -653,9 +655,11 @@ static void print_help()
     printf("   --height <number>\n");
     printf("   --width <number>\n");
     printf("   --base_q_idx <number> 1-255\n");
+    printf("   --normal_mode select VAEntrypointEncSlice as entrypoint\n");
+    printf("   --low_power_mode select VAEntrypointEncSliceLP as entrypoint\n");
 
     printf(" sample usage");
-    printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8  --height 1080 --width 1920 --base_q_idx 128 -o ./out.av1 -t 3360000  -u 210 -d 420 --LDB");
+    printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8  --height 1080 --width 1920 --base_q_idx 128 -o ./out.av1 -t 3360000  -u 210 -d 420 --LDB --low_power_mode");
 
 
 }
@@ -679,6 +683,8 @@ static void process_cmdline(int argc, char *argv[])
         {"width",           required_argument,  NULL, 11 },
         {"base_q_idx",      required_argument,  NULL, 12},
         {"LDB",             no_argument,        NULL, 13},
+        {"normal_mode",     no_argument,        NULL, 14},
+        {"low_power_mode",  no_argument,        NULL, 15},
         {NULL,              no_argument,        NULL, 0 }
 
     };
@@ -738,6 +744,12 @@ static void process_cmdline(int argc, char *argv[])
                 break;
             case 13:
                 ips.LDB = 1;
+                break;
+            case 14:
+                requested_entrypoint = VAEntrypointEncSlice;
+                break;
+            case 15:
+                requested_entrypoint = VAEntrypointEncSliceLP;
                 break;
             case 't':
                 ips.target_bitrate = atoi(optarg);
@@ -875,7 +887,43 @@ static int init_va(void)
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
     av1_profile = VAProfileAV1Profile0;
-    entryPoint = VAEntrypointEncSliceLP;
+
+    // select entrypoint
+
+    int num_entrypoints = vaMaxNumEntrypoints(va_dpy);
+    VAEntrypoint* entrypoints = malloc(num_entrypoints * sizeof(*entrypoints));
+    if (!entrypoints) {
+        fprintf(stderr, "error: failed to initialize VA entrypoints array\n");
+        exit(1);
+    }
+
+    vaQueryConfigEntrypoints(va_dpy, av1_profile, entrypoints, &num_entrypoints);
+    int support_encode = 0;
+    for (int slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) 
+    {
+        if (requested_entrypoint == -1) {
+            //Select the entry point based on what is avaiable
+            if ((entrypoints[slice_entrypoint] == VAEntrypointEncSlice) ||
+                (entrypoints[slice_entrypoint] == VAEntrypointEncSliceLP)) {
+                support_encode = 1;
+                entryPoint = entrypoints[slice_entrypoint];
+                break;
+            }
+        } else if ((entrypoints[slice_entrypoint] == requested_entrypoint)) {
+            //Select the entry point based on what was requested in cmd line option
+            support_encode = 1;
+            entryPoint = entrypoints[slice_entrypoint];
+            break;
+        }
+    }
+
+    if(entrypoints)
+        free(entrypoints);
+
+    if (support_encode == 0) {
+        printf("Can't find avaiable or request entrypoints for AV1 profiles\n");
+        exit(1);
+    }
 
     unsigned int i;
     for (i = 0; i < VAConfigAttribTypeMax; i++)
