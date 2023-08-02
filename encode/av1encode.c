@@ -921,7 +921,7 @@ static int init_va(void)
         free(entrypoints);
 
     if (support_encode == 0) {
-        printf("Can't find avaiable or request entrypoints for AV1 profiles\n");
+        printf("Can't find avaiable or requested entrypoints for AV1 profiles\n");
         exit(1);
     }
 
