@@ -283,6 +283,18 @@ static int show_config_attributes(VADisplay va_dpy, VAProfile profile, VAEntrypo
         printf("%-*sl1=%d\n", 45, "", (attrib_list[VAConfigAttribEncMaxRefFrames].value >> 16) & 0xffff);
     }
 
+ #if VA_CHECK_VERSION(1, 21, 0)
+    if (attrib_list[VAConfigAttribEncMaxTileRows].value & (~VA_ATTRIB_NOT_SUPPORTED)) {
+        printf("    %-39s: %d\n", vaConfigAttribTypeStr(attrib_list[VAConfigAttribEncMaxTileRows].type),
+               attrib_list[VAConfigAttribEncMaxTileRows].value);
+    }
+
+    if (attrib_list[VAConfigAttribEncMaxTileCols].value & (~VA_ATTRIB_NOT_SUPPORTED)) {
+        printf("    %-39s: %d\n", vaConfigAttribTypeStr(attrib_list[VAConfigAttribEncMaxTileCols].type),
+               attrib_list[VAConfigAttribEncMaxTileCols].value);
+    }
+#endif
+
     if (attrib_list[VAConfigAttribEncMaxSlices].value & (~VA_ATTRIB_NOT_SUPPORTED)) {
         printf("    %-39s: %d\n", vaConfigAttribTypeStr(attrib_list[VAConfigAttribEncMaxSlices].type),
                attrib_list[VAConfigAttribEncMaxSlices].value);
