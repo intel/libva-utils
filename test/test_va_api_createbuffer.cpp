@@ -84,6 +84,8 @@ static const BufferSpecsMap decodeBufferSpecs = {
             make_tuple(g_vaVP8Profiles, sizeof(VAPictureParameterBufferVP8)),
             make_tuple(g_vaHEVCProfiles, sizeof(VAPictureParameterBufferHEVC)),
             make_tuple(g_vaVP9Profiles, sizeof(VADecPictureParameterBufferVP9)),
+            make_tuple(g_vaAVSProfiles, sizeof(VAPictureParameterBufferAVS)),
+            make_tuple(g_vaAVS2Profiles, sizeof(VAPictureParameterBufferAVS2)),
         }
     },
     {
@@ -107,6 +109,8 @@ static const BufferSpecsMap decodeBufferSpecs = {
             make_tuple(g_vaVP8Profiles, sizeof(VASliceParameterBufferVP8)),
             make_tuple(g_vaHEVCProfiles, sizeof(VASliceParameterBufferHEVC)),
             make_tuple(g_vaVP9Profiles, sizeof(VASliceParameterBufferVP9)),
+            make_tuple(g_vaAVSProfiles, sizeof(VASliceParameterBufferAVS)),
+            make_tuple(g_vaAVS2Profiles, sizeof(VASliceParameterBufferAVS2)),
         }
     },
     {
