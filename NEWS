@@ -1,7 +1,7 @@
 libva-utils NEWS -- summary of changes.  2023-09-14
 Copyright (C) 2009-2023 Intel Corporation
 
-Version 2.2020.0 - 14.Sep.2023
+Version 2.20.0 - 14.Sep.2023
 * test: Enable AV1 encode test
 
 Version 2.19.0 - 04.Jul.2023
