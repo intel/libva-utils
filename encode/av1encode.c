@@ -475,6 +475,8 @@ struct Av1InputParameters
     int bit_depth;
     int target_bitrate;
     int vbr_max_bitrate;
+    int buffer_size;
+    int initial_buffer_fullness;
 };
 
 
@@ -739,12 +741,20 @@ static void process_cmdline(int argc, char *argv[])
             case 15:
                 requested_entrypoint = VAEntrypointEncSliceLP;
                 break;
+            case 't':
             case 16:
                 ips.target_bitrate = atoi(optarg);
                 break;
+            case 'm':
             case 17:
                 ips.vbr_max_bitrate = atoi(optarg);
-                break;                
+                break;
+            case 'u':
+                ips.buffer_size = atoi(optarg) * 8000;
+                break;
+            case 'd':
+                ips.initial_buffer_fullness = atoi(optarg) * 8000;
+                break;
             case 0:
             case ':':
             case '?':
@@ -1489,6 +1499,44 @@ render_rc_buffer()
 }
 
 static void
+render_hrd_buffer()
+{
+    VABufferID param_buf = VA_INVALID_ID;
+    VAStatus va_status;
+    VABufferID render_id = VA_INVALID_ID;
+
+    VAEncMiscParameterBuffer *misc_param;
+    VAEncMiscParameterHRD *misc_hrd;
+
+    va_status = vaCreateBuffer(va_dpy, context_id,
+                            VAEncMiscParameterBufferType,
+                            sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterHRD),
+                            1, NULL, &param_buf);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+    vaMapBuffer(va_dpy, param_buf, (void **)&misc_param);
+    misc_param->type = VAEncMiscParameterTypeHRD;
+    misc_hrd = (VAEncMiscParameterHRD *)misc_param->data;
+    memset(misc_hrd, 0, sizeof(*misc_hrd));
+
+    misc_hrd->initial_buffer_fullness = ips.initial_buffer_fullness;
+    misc_hrd->buffer_size = ips.buffer_size;
+
+    vaUnmapBuffer(va_dpy, param_buf);
+
+    render_id = param_buf;
+
+    va_status = vaRenderPicture(va_dpy, context_id, &render_id, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+
+    if (param_buf != VA_INVALID_ID) 
+    {
+        vaDestroyBuffer(va_dpy, param_buf);
+        param_buf = VA_INVALID_ID;
+    }
+}
+
+static void
 render_fr_buffer()
 {
     VABufferID param_buf = VA_INVALID_ID;
@@ -1529,6 +1577,10 @@ static void
 render_misc_buffer()
 {
     render_rc_buffer();
+    if (ips.buffer_size != 0 || ips.initial_buffer_fullness != 0)
+    {
+        render_hrd_buffer();
+    }
     render_fr_buffer();
 }
 
