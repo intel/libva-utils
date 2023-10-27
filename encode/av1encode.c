@@ -680,7 +680,7 @@ static void process_cmdline(int argc, char *argv[])
     };
 
     int long_index;
-    while ((c = getopt_long_only(argc, argv, "n:f:o:?", long_opts, &long_index)) != EOF)
+    while ((c = getopt_long_only(argc, argv, "n:f:o:t:m:u:d:?", long_opts, &long_index)) != EOF)
     {
         switch (c) 
         {
