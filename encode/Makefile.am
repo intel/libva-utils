@@ -90,11 +90,22 @@ vp8enc_LDADD       = \
 	-lpthread -lm
 
 av1encode_SOURCES	= av1encode.c
-av1encode_CFLAGS	= -I$(top_srcdir)/common -g
+av1encode_SOURCES	+= rate_control_interface.cc
+
+#av1encode_LDADD	= \
+#       	$(LIBVA_LIBS) \
+#		$(top_builddir)/common/libva-display.la \
+#		-lpthread -lm \
+#		-L$(top_builddir)/encode/rate_control/libs/ -laom_av1_rc 
+#		-L$(top_builddir)/encode/rate_control/libs/ -ljsoncpp
+
 av1encode_LDADD	= \
        	$(LIBVA_LIBS) \
-	$(top_builddir)/common/libva-display.la \
-	-lpthread -lm
+		$(top_builddir)/common/libva-display.la \
+		-lpthread -lm \
+		-laom_av1_rc 
+
+av1encode_CFLAGS	= -I$(top_srcdir)/common -g
 
 valgrind:	$(bin_PROGRAMS) $(noinst_PROGRAMS)
 	for a in $(bin_PROGRAMS) $(noinst_PROGRAMS); do \

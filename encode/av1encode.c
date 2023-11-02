@@ -17,6 +17,8 @@
 #include <math.h>
 #include <va/va.h>
 #include "va_display.h"
+#include "rate_ctrl_interface.h"
+#include "av1encode.h"
 
 #define ALIGN16(x)  ((x+15)&~15)
 #define CHECK_VASTATUS(va_status,func)                                  \
@@ -448,46 +450,6 @@ struct BitOffsets
     uint32_t CDEFParamsSizeInBits;
 };
 
-struct Av1InputParameters
-{
-    char* srcyuv;
-    char* recyuv;
-    char* output;
-    uint32_t profile;
-    
-    uint32_t order_hint_bits;
-    uint32_t enable_cdef;
-    uint32_t width;
-    uint32_t height;
-    uint32_t LDB;
-    uint32_t frame_rate_extN;
-    uint32_t frame_rate_extD;
-    uint32_t level;
-
-    // for brc
-    uint32_t bit_rate;
-    uint8_t MinBaseQIndex;
-    uint8_t MaxBaseQIndex;
-
-    uint32_t intra_period;
-    uint32_t ip_period;
-    uint32_t RateControlMethod;
-    uint32_t BRefType;
-    int encode_syncmode;
-    int calc_psnr;
-    int frame_count;
-    int frame_width_aligned;
-    int frame_height_aligned;
-    uint32_t base_qindex;
-    int bit_depth;
-    int target_bitrate;
-    int max_bitrate;
-    int buffer_size;
-    int initial_buffer_fullness;
-
-};
-
-
 static  VADisplay va_dpy;
 static  VAProfile av1_profile;
 static  VAEntrypoint entryPoint;
@@ -506,7 +468,7 @@ static  VAEncPictureParameterBufferAV1 pic_param;
 static  VAEncTileGroupBufferAV1 tile_group_param;
 
 // sh fh ips
-static  struct Av1InputParameters ips;
+struct Av1InputParameters ips;
 static  FH fh;
 static  SH sh;
 struct BitOffsets offsets;
@@ -657,10 +619,10 @@ static void print_help()
     printf("   --base_q_idx <number> 1-255\n");
     printf("   --normal_mode select VAEntrypointEncSlice as entrypoint\n");
     printf("   --low_power_mode select VAEntrypointEncSliceLP as entrypoint\n");
-
+    printf("   --en_sw_brc <number> 0-1\n");
+    
     printf(" sample usage");
-    printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8  --height 1080 --width 1920 --base_q_idx 128 -o ./out.av1 -t 3360000  -u 210 -d 420 --LDB --low_power_mode");
-
+    printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8  --height 1080 --width 1920 --base_q_idx 128 -o ./out.av1 -t 3360000  -u 210 -d 420 --LDB --low_power_mode --en_sw_brc 0 or 1 \n");
 
 }
 
@@ -685,6 +647,7 @@ static void process_cmdline(int argc, char *argv[])
         {"LDB",             no_argument,        NULL, 13},
         {"normal_mode",     no_argument,        NULL, 14},
         {"low_power_mode",  no_argument,        NULL, 15},
+	    {"en_sw_brc",       required_argument,  NULL, 16},
         {NULL,              no_argument,        NULL, 0 }
 
     };
@@ -749,8 +712,15 @@ static void process_cmdline(int argc, char *argv[])
                 requested_entrypoint = VAEntrypointEncSlice;
                 break;
             case 15:
-                requested_entrypoint = VAEntrypointEncSliceLP;
+		        requested_entrypoint = VAEntrypointEncSliceLP;
                 break;
+	        case 16:
+                ips.en_sw_brc = atoi(optarg);
+                if(1 == ips.en_sw_brc)
+                { 
+                    ips.RateControlMethod = VA_RC_CQP;
+                }
+		        break;
             case 't':
                 ips.target_bitrate = atoi(optarg);
                 break;
@@ -2343,12 +2313,23 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
     fill_ref_params(pps);
     pps->refresh_frame_flags = fh.refresh_frame_flags;
 
-    // //loop filter  
-    // auto& lf = fh.loop_filter_params;
-    pps->filter_level[0] = (uint8_t)(fh.loop_filter_params.loop_filter_level[0]);
-    pps->filter_level[1] = (uint8_t)(fh.loop_filter_params.loop_filter_level[1]);
-    pps->filter_level_u  = (uint8_t)(fh.loop_filter_params.loop_filter_level[2]);
-    pps->filter_level_v  = (uint8_t)(fh.loop_filter_params.loop_filter_level[3]);
+    
+    if(1 == ips.en_sw_brc)
+    {
+        int lfdata[4] ;
+        getLoopfilterfromRc(lfdata);
+        pps->filter_level[0] =  lfdata[0] ;
+        pps->filter_level[1] =  lfdata[1] ;
+        pps->filter_level_u  =  lfdata[2] ;
+        pps->filter_level_v  =  lfdata[3] ;
+    }
+    else
+    {
+        pps->filter_level[0] = (uint8_t)(fh.loop_filter_params.loop_filter_level[0]);
+        pps->filter_level[1] = (uint8_t)(fh.loop_filter_params.loop_filter_level[1]);
+        pps->filter_level_u  = (uint8_t)(fh.loop_filter_params.loop_filter_level[2]);
+        pps->filter_level_v  = (uint8_t)(fh.loop_filter_params.loop_filter_level[3]);
+    }
     pps->loop_filter_flags.bits.sharpness_level        = fh.loop_filter_params.loop_filter_sharpness;
     pps->loop_filter_flags.bits.mode_ref_delta_enabled = fh.loop_filter_params.loop_filter_delta_enabled;
     pps->loop_filter_flags.bits.mode_ref_delta_update  = fh.loop_filter_params.loop_filter_delta_update;
@@ -2547,7 +2528,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
 
     return 0;
 }
-
+unsigned int consumed_bytes = 0;
 static int save_codeddata(unsigned long long display_order, unsigned long long encode_order)
 {
     VACodedBufferSegment *buf_list = NULL;
@@ -2606,7 +2587,11 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     }
     printf("%08lld", encode_order);
     printf("(%06d bytes coded)\n", coded_size);
-
+    if(1 == ips.en_sw_brc)
+    {
+        consumed_bytes = coded_size;
+        updateRatecontrolAfterEncode(consumed_bytes);
+    }
     fflush(coded_fp);
 
     return 0;
@@ -2790,7 +2775,10 @@ static int encode_frames(void)
     unsigned int i, tmp;
     VAStatus va_status;
     //VASurfaceStatus surface_status;
-
+    if(1 == ips.en_sw_brc)
+    {
+        create_ratectrl(ips);
+    }
     /* upload RAW YUV data into all surfaces */
     tmp = GetTickCount();
     if (srcyuv_fp != NULL) {
@@ -2806,7 +2794,7 @@ static int encode_frames(void)
     memset(&seq_param, 0, sizeof(seq_param));
     memset(&pic_param, 0, sizeof(pic_param));
     memset(&tile_group_param, 0, sizeof(tile_group_param));
-
+    unsigned  int baseqp =45;
     if (ips.encode_syncmode == 0)
         pthread_create(&encode_thread, NULL, storage_task_thread, NULL);
 
@@ -2821,6 +2809,12 @@ static int encode_frames(void)
         }
 
         tmp = GetTickCount();
+        if(1 == ips.en_sw_brc)
+        {
+            baseqp = getQPfromRatectrl(current_frame_type);
+            ips.base_qindex = baseqp;
+        }
+
         va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_slot]);
         CHECK_VASTATUS(va_status, "vaBeginPicture");
         BeginPictureTicks += GetTickCount() - tmp;
