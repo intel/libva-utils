@@ -111,17 +111,17 @@ void create_ratectrl(struct Av1InputParameters ips)
     // third_party/webrtc/modules/video_coding/codecs/av1/libaom_av1_encoder.cc
     rc_config.max_quantizer = kMaxQP;
     rc_config.min_quantizer = kMinQP;
-    rc_config.target_bandwidth = 288000;  //ips.bitrate  gave 0 hence hardcoded
 
     rc_config.buf_initial_sz = 600;
     rc_config.buf_optimal_sz = 500;
+    rc_config.target_bandwidth =ips.target_bitrate ;
     rc_config.buf_sz = 1000;
     rc_config.undershoot_pct = 25;
     rc_config.overshoot_pct = 50;
     rc_config.max_intra_bitrate_pct = 300;
     rc_config.max_inter_bitrate_pct = 50;
     rc_config.framerate = 60;
-    rc_config.layer_target_bitrate[0] = ips.bit_rate;
+    rc_config.layer_target_bitrate[0] = ips.target_bitrate;
 
     rc_config.ts_rate_decimator[0] = 1;
     rc_config.aq_mode = 0;

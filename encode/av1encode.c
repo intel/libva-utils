@@ -675,7 +675,7 @@ static void process_cmdline(int argc, char *argv[])
                 break;
             case 3:
                 ips.RateControlMethod = string_to_rc(optarg); //16:cqp 2:CBR 4:VBR
-                break;
+				break;
             case 4:
                 ips.srcyuv = strdup(optarg);
                 break;
