@@ -72,6 +72,8 @@ int convert_one_image(const char *infilename)
     if (fp == NULL)
         exitmessage("Cannot open filename\n");
     length_of_file = filesize(fp);
+    if (length_of_file == -1)
+        exitmessage("Error to read file\n");
     buf = (unsigned char *)malloc(length_of_file + 4);
     if (buf == NULL)
         exitmessage("Not enough memory for loading file\n");
