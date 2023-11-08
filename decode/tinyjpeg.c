@@ -667,7 +667,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
             //surface_type = VA_RT_FORMAT_YUV422H;
             surface_type = VA_RT_FORMAT_YUV422;
             forcc.value.value.i = VA_FOURCC_422H;
-        } else if (h2 == 2 && h2 == 2 && h3 == 2 &&
+        } else if (h1 == 2 && h2 == 2 && h3 == 2 &&
                    v1 == 2 && v2 == 1 && v3 == 1) {
             //surface_type = VA_RT_FORMAT_YUV422V;
             surface_type = VA_RT_FORMAT_YUV422;
