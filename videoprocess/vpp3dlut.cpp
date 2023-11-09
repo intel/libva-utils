@@ -1236,10 +1236,6 @@ video_frame_process_scaling(VASurfaceID in_surface_id,
         vaDestroyBuffer(va_dpy, pipeline_param_buf_id);
     }
 
-    if (filter_param_buf_id != VA_INVALID_ID) {
-        vaDestroyBuffer(va_dpy, filter_param_buf_id);
-    }
-
     return va_status;
 }
 
