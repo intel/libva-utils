@@ -531,7 +531,7 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
     unsigned char *y_dst = NULL, *u_dst = NULL, *v_dst = NULL;
 
     int bytes_per_pixel = 2;
-
+    size_t n_items;
     void *out_buf = NULL;
     unsigned char *src_buffer = NULL;
 
@@ -560,8 +560,11 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
 
         src_buffer = (unsigned char*)malloc(frame_size);
         assert(src_buffer);
-        fread(src_buffer, 1, frame_size, fp);
-
+        n_items = fread(src_buffer, 1, frame_size, fp);
+        if (n_items != frame_size)
+        {
+            printf("read file failed on VA_FOURCC_P010\n");
+        }
         y_src = src_buffer;
         u_src = src_buffer + y_size; // UV offset for P010
 
@@ -588,7 +591,11 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
         frame_size = va_image.width * va_image.height * 4;
         src_buffer = (unsigned char*)malloc(frame_size);
         assert(src_buffer);
-        fread(src_buffer, 1, frame_size, fp);
+        n_items = fread(src_buffer, 1, frame_size, fp);
+        if (n_items != frame_size)
+        {
+            printf("read file failed on VA_RT_FORMAT_RGB32_10BPP or VA_FOURCC_RGBA \n");
+        }
         y_src = src_buffer;
         y_dst = (unsigned char*)out_buf + va_image.offsets[0];         
 
@@ -669,12 +676,12 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         y_src = (unsigned char*)in_buf + va_image.offsets[0];
         u_src = (unsigned char*)in_buf + va_image.offsets[1]; // U offset for P010                                                        
         for (i = 0; i < va_image.height; i++)  {
-            memcpy(y_dst, y_src, va_image.width * bytes_per_pixel);
+            memcpy(y_dst, y_src, static_cast<size_t>(va_image.width * bytes_per_pixel));
             y_dst += va_image.width * bytes_per_pixel;
             y_src += va_image.pitches[0];
         }
         for (i = 0; i < va_image.height >> 1; i++)  {
-            memcpy(u_dst, u_src, va_image.width * bytes_per_pixel);
+            memcpy(u_dst, u_src, static_cast<size_t>(va_image.width * bytes_per_pixel));
             u_dst += va_image.width * bytes_per_pixel;
             u_src += va_image.pitches[1];
         }
