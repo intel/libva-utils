@@ -67,6 +67,13 @@
         exit(1);                                                        \
     }
 
+#define CHECK_CONDITION(cond)                                                \
+    if(!(cond))                                                              \
+    {                                                                        \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__); \
+        exit(1);                                                             \
+    }
+
 static VADisplay va_dpy;
 
 static int rc_mode;
@@ -896,7 +903,7 @@ vp9enc_begin_picture(FILE *yuv_fp, int frame_num, int frame_type)
     /* hrd parameter */
     VAEncMiscParameterBuffer *misc_param;
     VAEncMiscParameterHRD *misc_hrd_param;
-    vaCreateBuffer(va_dpy,
+    va_status = vaCreateBuffer(va_dpy,
                    vp9enc_context.context_id,
                    VAEncMiscParameterBufferType,
                    sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
@@ -938,7 +945,7 @@ vp9enc_begin_picture(FILE *yuv_fp, int frame_num, int frame_type)
         VAEncMiscParameterFrameRate *misc_fr;
         VAEncMiscParameterRateControl *misc_rc;
 
-        vaCreateBuffer(va_dpy,
+        va_status = vaCreateBuffer(va_dpy,
                        vp9enc_context.context_id,
                        VAEncMiscParameterBufferType,
                        sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterFrameRate),
@@ -955,7 +962,7 @@ vp9enc_begin_picture(FILE *yuv_fp, int frame_num, int frame_type)
         misc_fr->framerate = frame_rate;
         vaUnmapBuffer(va_dpy, vp9enc_context.misc_fr_buf_id);
 
-        vaCreateBuffer(va_dpy,
+        va_status = vaCreateBuffer(va_dpy,
                        vp9enc_context.context_id,
                        VAEncMiscParameterBufferType,
                        sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
@@ -1182,7 +1189,8 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
         else
             index = SID_INPUT_PICTURE_0;
 
-        fseeko(yuv_fp, (off_t)frame_size * next_enc_frame, SEEK_SET);
+        ret = fseeko(yuv_fp, (off_t)frame_size * next_enc_frame, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
 
         vp9enc_context.upload_thread_param.yuv_fp = yuv_fp;
         vp9enc_context.upload_thread_param.surface_id = surface_ids[index];
@@ -1227,17 +1235,19 @@ vp9enc_encode_picture(FILE *yuv_fp, FILE *vp9_fp,
             packed_header_param_buffer.bit_length = raw_data_length * 8;
             packed_header_param_buffer.has_emulation_bytes = 0;
 
-            vaCreateBuffer(va_dpy,
+            va_status = vaCreateBuffer(va_dpy,
                            vp9enc_context.context_id,
                            VAEncPackedHeaderParameterBufferType,
                            sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
                            &vp9enc_context.raw_data_header_buf_id);
+            CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-            vaCreateBuffer(va_dpy,
+            va_status = vaCreateBuffer(va_dpy,
                            vp9enc_context.context_id,
                            VAEncPackedHeaderDataBufferType,
                            raw_data_length, 1, raw_data,
                            &vp9enc_context.raw_data_buf_id);
+            CHECK_VASTATUS(va_status, "vaCreateBuffer");
         }
 
         vp9enc_create_picture_parameter_buf();
@@ -1531,7 +1541,7 @@ main(int argc, char *argv[])
     file_size = ftello(yuv_fp);
     frame_size = picture_width * picture_height + ((picture_width * picture_height) >> 1) ;
 
-    if ((file_size < frame_size) || (file_size % frame_size)) {
+    if ((file_size < frame_size) || ((frame_size != 0) && (file_size % frame_size))) {
         fclose(yuv_fp);
         printf("The YUV file's size is not correct\n");
         return -1;
