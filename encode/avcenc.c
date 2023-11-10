@@ -80,6 +80,13 @@
         exit(1);                                                        \
     }
 
+#define CHECK_CONDITION(cond)                                                \
+    if(!(cond))                                                              \
+    {                                                                        \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__); \
+        exit(1);                                                             \
+    }
+
 static VADisplay va_dpy;
 
 static int picture_width, picture_width_in_mbs;
@@ -848,7 +855,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     /* hrd parameter */
     VAEncMiscParameterBuffer *misc_param;
     VAEncMiscParameterHRD *misc_hrd_param;
-    vaCreateBuffer(va_dpy,
+    va_status = vaCreateBuffer(va_dpy,
                    avcenc_context.context_id,
                    VAEncMiscParameterBufferType,
                    sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
@@ -878,13 +885,14 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
         VAEncMiscParameterBufferROI *misc_roi_param;
 
         int roi_num = 1;
-        vaCreateBuffer(va_dpy,
+        va_status = vaCreateBuffer(va_dpy,
                        avcenc_context.context_id,
                        VAEncMiscParameterBufferType,
                        sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterBufferROI) + roi_num * sizeof(VAEncROI),
                        1,
                        NULL,
                        &avcenc_context.misc_parameter_roi_buf_id);
+        CHECK_VASTATUS(va_status, "vaCreateBuffer");
         vaMapBuffer(va_dpy,
                     avcenc_context.misc_parameter_roi_buf_id,
                     (void **)&misc_param);
@@ -1792,7 +1800,8 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
             index = SID_INPUT_PICTURE_0;
         if (next_display_num >= frame_number)
             next_display_num = frame_number - 1;
-        fseeko(yuv_fp, (off_t)frame_size * next_display_num, SEEK_SET);
+        ret = fseeko(yuv_fp, (off_t)frame_size * next_display_num, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
 
         avcenc_context.upload_thread_param.yuv_fp = yuv_fp;
         avcenc_context.upload_thread_param.surface_id = surface_ids[index];
@@ -2108,7 +2117,7 @@ int main(int argc, char *argv[])
     file_size = ftello(yuv_fp);
     frame_size = picture_width * picture_height + ((picture_width * picture_height) >> 1) ;
 
-    if ((file_size < frame_size) || (file_size % frame_size)) {
+    if ((file_size < frame_size) || ((frame_size != 0) && (file_size % frame_size))) {
         fclose(yuv_fp);
         printf("The YUV file's size is not correct\n");
         return -1;

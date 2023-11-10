@@ -976,7 +976,7 @@ int main(int argc, char *argv[])
     fseeko(yuv_fp, (off_t)0, SEEK_END);
     file_size = ftello(yuv_fp);
 
-    if ((file_size < frame_size) || (file_size % frame_size)) {
+    if ((file_size < frame_size) || ((frame_size != 0) && (file_size % frame_size))) {
         fclose(yuv_fp);
         printf("The YUV file's size is not correct: file_size=%zd, frame_size=%d\n", file_size, frame_size);
         return -1;

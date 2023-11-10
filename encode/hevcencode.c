@@ -1280,8 +1280,6 @@ static void sliceHeader_rbsp(
 {
     uint8_t nal_unit_type = NALU_TRAIL_R;
     int gop_ref_distance = ip_period;
-    int incomplete_mini_gop = 0;
-    int p_slice_flag = 1;
     int i = 0;
 
     put_ui(bs, slice_header->first_slice_segment_in_pic_flag, 1);
@@ -1337,51 +1335,21 @@ static void sliceHeader_rbsp(
                     if (1 == gop_ref_distance) {
                         put_ue(bs, 0 /*delta_poc_s0_minus1*/);
                     } else {
-                        if (incomplete_mini_gop) {
-                            if (frame_cnt_in_gop % gop_ref_distance > i) {
-                                put_ue(bs, 0 /*delta_poc_s0_minus1*/);
-                            } else {
-                                int DeltaPoc = -(int)(gop_ref_distance);
-                                put_ue(bs, prev - DeltaPoc - 1 /*delta_poc_s0_minus1*/);
-                            }
+                        // For Non-BPyramid GOP i.e B0 type
+                        if (num_active_ref_p > 1) {
+                            // DeltaPOC Equals NumB
+                            int DeltaPoc = -(int)(gop_ref_distance);
+                            put_ue(bs, prev - DeltaPoc - 1 /*delta_poc_s0_minus1*/);
                         } else {
-                            // For Non-BPyramid GOP i.e B0 type
-                            if (num_active_ref_p > 1) {
-                                // MultiRef Case
-                                if (p_slice_flag) {
-                                    // DeltaPOC Equals NumB
-                                    int DeltaPoc = -(int)(gop_ref_distance);
-                                    put_ue(bs, prev - DeltaPoc - 1 /*delta_poc_s0_minus1*/);
-                                } else {
-                                    // for normal B
-                                    if (frame_cnt_in_gop < gop_ref_distance) {
-                                        if (0 == i) {
-                                            int DeltaPoc = -(int)(frame_cnt_in_gop);
-                                            put_ue(bs, prev - DeltaPoc - 1 /*delta_poc_s0_minus1*/);
-                                        }
-                                    } else if (frame_cnt_in_gop > gop_ref_distance) {
-                                        if (0 == i) {
-                                            //Need % to wraparound the delta poc, to avoid corruption caused on POC=5 with GOP (29,2) and 4 refs
-                                            int DeltaPoc = -(int)((frame_cnt_in_gop - gop_ref_distance) % gop_ref_distance);
-                                            put_ue(bs, prev - DeltaPoc - 1 /*delta_poc_s0_minus1*/);
-                                        } else if (1 <= i) {
-                                            int DeltaPoc = -(int)(gop_ref_distance);
-                                            put_ue(bs, prev - DeltaPoc - 1 /*delta_poc_s0_minus1*/);
-                                        }
-                                    }
-                                }
-                            } else {
-                                //  the big 'if' wraps here is -
-                                //     if (!slice_header->short_term_ref_pic_set_sps_flag)
-                                // From the Teddi logic, the short_term_ref_pic_set_sps_flag only can be '0'
-                                // either for B-Prymid or first several frames in a GOP in multi-ref cases
-                                // when there are not enough backward refs.
-                                // So though there are really some codes under this 'else'in Teddi, don't
-                                // want to introduce them in MEA to avoid confusion, and put an assert
-                                // here to guard that there is new case we need handle in the future.
-                                assert(0);
-
-                            }
+                            //  the big 'if' wraps here is -
+                            //     if (!slice_header->short_term_ref_pic_set_sps_flag)
+                            // From the Teddi logic, the short_term_ref_pic_set_sps_flag only can be '0'
+                            // either for B-Prymid or first several frames in a GOP in multi-ref cases
+                            // when there are not enough backward refs.
+                            // So though there are really some codes under this 'else'in Teddi, don't
+                            // want to introduce them in MEA to avoid confusion, and put an assert
+                            // here to guard that there is new case we need handle in the future.
+                            assert(0);
                         }
                     }
                     put_ui(bs, 1 /*used_by_curr_pic_s0_flag*/, 1);
@@ -1528,11 +1496,6 @@ static void sliceHeader_rbsp(
         int slice_header_extension_length = 0;
 
         put_ue(bs, slice_header_extension_length);
-
-        for (i = 0; i < slice_header_extension_length; i++) {
-            int slice_header_extension_data_byte = 0;
-            put_ui(bs, slice_header_extension_data_byte, 8);
-        }
     }
 }
 
@@ -1844,6 +1807,8 @@ static int process_cmdline(int argc, char *argv[])
             frame_rate = atoi(optarg);
             break;
         case 'o':
+            if (coded_fn)
+                free(coded_fn);
             coded_fn = strdup(optarg);
             break;
         case 0:
@@ -1875,9 +1840,13 @@ static int process_cmdline(int argc, char *argv[])
             }
             break;
         case 9:
+            if (srcyuv_fn)
+                free(srcyuv_fn);
             srcyuv_fn = strdup(optarg);
             break;
         case 10:
+            if (recyuv_fn)
+                free(recyuv_fn);
             recyuv_fn = strdup(optarg);
             break;
         case 11:
@@ -2511,7 +2480,7 @@ static int render_picture(struct PicParamSet *pps)
     int i = 0;
 
     memcpy(pic_param.reference_frames, ReferenceFrames, numShortTerm * sizeof(VAPictureHEVC));
-    for (i = numShortTerm; i < SURFACE_NUM; i++) {
+    for (i = numShortTerm; i < SURFACE_NUM - 1; i++) {
         pic_param.reference_frames[i].picture_id = VA_INVALID_SURFACE;
         pic_param.reference_frames[i].flags = VA_PICTURE_HEVC_INVALID;
     }

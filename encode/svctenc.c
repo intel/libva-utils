@@ -89,6 +89,13 @@
         exit(1);                                                        \
     }
 
+#define CHECK_CONDITION(cond)                                                \
+    if(!(cond))                                                              \
+    {                                                                        \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__); \
+        exit(1);                                                             \
+    }
+
 #define MAX_SLICES                      32
 #define MAX_LAYERS                      4
 
@@ -1159,7 +1166,8 @@ upload_task(struct svcenc_context *ctx, unsigned int display_order, int surface)
     int y_size = ctx->width * ctx->height;
     int u_size = (ctx->width >> 1) * (ctx->height >> 1);
 
-    fseek(ctx->ifp, ctx->frame_size * display_order, SEEK_SET);
+    int ret = fseek(ctx->ifp, ctx->frame_size * display_order, SEEK_SET);
+    CHECK_CONDITION(ret == 0);
 
     do {
         n_items = fread(ctx->frame_data_buffer, ctx->frame_size, 1, ctx->ifp);

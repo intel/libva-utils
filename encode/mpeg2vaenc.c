@@ -76,6 +76,13 @@ enum {
         exit(1);                                                        \
     }
 
+#define CHECK_CONDITION(cond)                                                \
+    if(!(cond))                                                              \
+    {                                                                        \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__); \
+        exit(1);                                                             \
+    }
+
 static VAProfile mpeg2_va_profiles[] = {
     VAProfileMPEG2Simple,
     VAProfileMPEG2Main
@@ -1382,7 +1389,8 @@ encode_picture(struct mpeg2enc_context *ctx,
         if (next_display_order >= ctx->num_pictures)
             next_display_order = ctx->num_pictures - 1;
 
-        fseek(ctx->ifp, ctx->frame_size * next_display_order, SEEK_SET);
+        ret = fseek(ctx->ifp, ctx->frame_size * next_display_order, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
         ctx->upload_thread_value = pthread_create(&ctx->upload_thread_id,
                                    NULL,
                                    upload_yuv_to_surface,
