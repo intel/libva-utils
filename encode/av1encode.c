@@ -35,10 +35,10 @@
         exit(1);                                                \
     }
     
-#define CHECK_CONDITION(cod)                                    \
-    if(!(cod))                                                      \
+#define CHECK_CONDITION(cond)                                    \
+    if(!(cond))                                                      \
     {                                                           \
-        fprintf(stderr, "Unexpected condition:%s:%d\n", __func__, __LINE__); \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__); \
         exit(1);                                                \
     }
 
@@ -797,7 +797,8 @@ static void process_cmdline(int argc, char *argv[])
         else {
             struct stat tmp;
 
-            fstat(fileno(srcyuv_fp), &tmp);
+            int ret = fstat(fileno(srcyuv_fp), &tmp);
+            CHECK_CONDITION(ret == 0);
             srcyuv_frames = tmp.st_size / (ips.width * ips.height * 1.5);
             printf("Source YUV file %s with %llu frames\n", ips.srcyuv, srcyuv_frames);
 
@@ -1849,12 +1850,6 @@ pack_render_size(bitstream* bs)
     uint32_t render_and_frame_size_different = 0;
 
     put_ui(bs, render_and_frame_size_different, 1);//render_and_frame_size_different
-
-    if (render_and_frame_size_different == 1)
-    {
-        put_ui(bs, fh.RenderWidth - 1, 16);//render_width_minus_1
-        put_ui(bs, fh.RenderHeight - 1, 16);//render_height_minus_1
-    }
 }
 
 
@@ -2552,6 +2547,7 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
 {
     VACodedBufferSegment *buf_list = NULL;
     VAStatus va_status;
+    int ret;
     unsigned int coded_size = 0;
 
     va_status = vaMapBuffer(va_dpy, coded_buf[display_order % SURFACE_NUM], (void **)(&buf_list));
@@ -2569,23 +2565,28 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     long frame_end = ftell(coded_fp);
     vaUnmapBuffer(va_dpy, coded_buf[display_order % SURFACE_NUM]);
 
+    CHECK_CONDITION(frame_start >= 0 && frame_end >= 0);
     if(encode_order == 0)
     {
         //first frame
         unsigned int ivf_size = coded_size - 32 - 12;
-        fseek(coded_fp, frame_start + 32, SEEK_SET);
+        ret = fseek(coded_fp, frame_start + 32, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
         fwrite(&ivf_size, 4, 1, coded_fp);
         fwrite(&display_order, 8, 1, coded_fp);
-        fseek(coded_fp, frame_end, SEEK_SET);
+        ret = fseek(coded_fp, frame_end, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
     }
     else
     {
         //other frames
         unsigned int ivf_size = coded_size - 12;
-        fseek(coded_fp, frame_start, SEEK_SET);
+        ret = fseek(coded_fp, frame_start, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
         fwrite(&ivf_size, 4, 1, coded_fp);
         fwrite(&display_order, 8, 1, coded_fp);
-        fseek(coded_fp, frame_end, SEEK_SET);
+        ret = fseek(coded_fp, frame_end, SEEK_SET);
+        CHECK_CONDITION(ret == 0);
     }
     
 
@@ -2918,6 +2919,10 @@ static int calc_PSNR(double *psnr)
             srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
             recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
+                if (srcyuv_ptr) 
+                    munmap(srcyuv_ptr, fourM);
+                if (recyuv_ptr) 
+                    munmap(recyuv_ptr, fourM);
                 printf("Failed to mmap YUV files\n");
                 return 1;
             }

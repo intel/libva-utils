@@ -96,7 +96,12 @@
     }
 #endif
 
-
+#define CHECK_CONDITION(cond)                                                \
+    if(!(cond))                                                              \
+    {                                                                        \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__); \
+        exit(1);                                                             \
+    }
 
 static const struct option long_opts[] = {
     {"help", no_argument, NULL, 0 },
@@ -673,7 +678,6 @@ void vp8enc_create_EncoderPipe()
     VAEntrypoint entrypoints[5];
     int num_entrypoints;
     int i;
-    bool entrypoint_found;
     VAConfigAttrib conf_attrib[2];
     VASurfaceAttrib surface_attrib;
     int major_ver, minor_ver;
@@ -685,17 +689,6 @@ void vp8enc_create_EncoderPipe()
 
     vaQueryConfigEntrypoints(vaapi_context.display, vaapi_context.profile, entrypoints,
                              &num_entrypoints);
-
-    entrypoint_found = true;
-    for (i = 0; i < num_entrypoints; i++) {
-        if (entrypoints[i] == settings.vaapi_entry_point)
-            entrypoint_found = true;
-    }
-
-    if (entrypoint_found == false) {
-        fprintf(stderr, "Error: VAEntrypoint not found!\n");
-        assert(0);
-    }
 
     /* find out the format for the render target, and rate control mode */
     conf_attrib[0].type = VAConfigAttribRTFormat;
@@ -835,7 +828,8 @@ vp8enc_store_coded_buffer(FILE *vp8_fp, uint64_t timestamp)
 size_t vp8enc_get_FileSize(FILE *fp)
 {
     struct stat st;
-    fstat(fileno(fp), &st);
+    int ret = fstat(fileno(fp), &st);
+    CHECK_CONDITION(ret == 0);
     return st.st_size;
 }
 
@@ -882,7 +876,7 @@ int vp8enc_prepare_buffers(int frame_type)
 
 
     /* hrd parameter */
-    vaCreateBuffer(vaapi_context.display,
+    va_status = vaCreateBuffer(vaapi_context.display,
                    vaapi_context.context_id,
                    VAEncMiscParameterBufferType,
                    sizeof(vaapi_context.hrd_param), 1, &vaapi_context.hrd_param,
@@ -905,7 +899,7 @@ int vp8enc_prepare_buffers(int frame_type)
     num_buffers++;
     /* Create the Misc FR/RC buffer under non-CQP mode */
     if (settings.rc_mode != VA_RC_CQP && frame_type == KEY_FRAME) {
-        vaCreateBuffer(vaapi_context.display,
+        va_status = vaCreateBuffer(vaapi_context.display,
                        vaapi_context.context_id,
                        VAEncMiscParameterBufferType,
                        sizeof(vaapi_context.frame_rate_param), 1, &vaapi_context.frame_rate_param,
@@ -915,7 +909,7 @@ int vp8enc_prepare_buffers(int frame_type)
         va_buffers ++;
         num_buffers++;
 
-        vaCreateBuffer(vaapi_context.display,
+        va_status = vaCreateBuffer(vaapi_context.display,
                        vaapi_context.context_id,
                        VAEncMiscParameterBufferType,
                        sizeof(vaapi_context.rate_control_param), 1, &vaapi_context.rate_control_param,
