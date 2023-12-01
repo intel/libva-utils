@@ -1541,7 +1541,12 @@ main(int argc, char *argv[])
     file_size = ftello(yuv_fp);
     frame_size = picture_width * picture_height + ((picture_width * picture_height) >> 1) ;
 
-    if ((file_size < frame_size) || ((frame_size != 0) && (file_size % frame_size))) {
+    if (frame_size == 0) {
+        fclose(yuv_fp);
+        printf("Frame size is not correct\n");
+        return -1;
+    }
+    if ((file_size < frame_size) || (file_size % frame_size)) {
         fclose(yuv_fp);
         printf("The YUV file's size is not correct\n");
         return -1;

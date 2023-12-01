@@ -2900,9 +2900,9 @@ static int calc_PSNR(double *psnr)
             srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
             recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
-                if (srcyuv_ptr) 
+                if (srcyuv_ptr != MAP_FAILED) 
                     munmap(srcyuv_ptr, fourM);
-                if (recyuv_ptr) 
+                if (recyuv_ptr != MAP_FAILED) 
                     munmap(recyuv_ptr, fourM);
                 printf("Failed to mmap YUV files\n");
                 return 1;

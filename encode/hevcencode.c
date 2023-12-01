@@ -47,6 +47,13 @@
         exit(1);                                                        \
     }
 
+#define CHECK_CONDITION(cond)                                                \
+    if(!(cond))                                                              \
+    {                                                                        \
+        fprintf(stderr, "Unexpected condition: %s:%d\n", __func__, __LINE__);\
+        exit(1);                                                             \
+    }
+
 #include "loadsurface.h"
 
 #define NAL_REF_IDC_NONE        0
@@ -1920,7 +1927,8 @@ static int process_cmdline(int argc, char *argv[])
         else {
             struct stat tmp;
 
-            fstat(fileno(srcyuv_fp), &tmp);
+            int ret = fstat(fileno(srcyuv_fp), &tmp);
+            CHECK_CONDITION(ret == 0);
             srcyuv_frames = tmp.st_size / (frame_width * frame_height * 1.5);
             printf("Source YUV file %s with %llu frames\n", srcyuv_fn, srcyuv_frames);
 
@@ -3277,6 +3285,10 @@ static int calc_PSNR(double *psnr)
             srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
             recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
+                if (srcyuv_ptr != MAP_FAILED) 
+                    munmap(srcyuv_ptr, fourM);
+                if (recyuv_ptr != MAP_FAILED) 
+                    munmap(recyuv_ptr, fourM);
                 printf("Failed to mmap YUV files\n");
                 return 1;
             }
