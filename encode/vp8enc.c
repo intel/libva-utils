@@ -677,7 +677,6 @@ void vp8enc_create_EncoderPipe()
 {
     VAEntrypoint entrypoints[5];
     int num_entrypoints;
-    int i;
     VAConfigAttrib conf_attrib[2];
     VASurfaceAttrib surface_attrib;
     int major_ver, minor_ver;

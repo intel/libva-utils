@@ -152,20 +152,6 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
     return 0;
 }
 
-static int8_t
-read_value_float(FILE *fp, const char* field_name, float* value)
-{
-    char str[MAX_LEN];
-    if (read_value_string(fp, field_name, str)) {
-        printf("Failed to find float field: %s \n", field_name);
-        return -1;
-    }
-
-    *value = atof(str);
-
-    return 0;
-}
-
 static VAStatus
 create_surface(VASurfaceID * p_surface_id,
                uint32_t width, uint32_t height,
@@ -524,10 +510,10 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
 
     int i = 0;
 
-    int frame_size = 0, y_size = 0, u_size = 0;
+    int frame_size = 0, y_size = 0;
 
-    unsigned char *y_src = NULL, *u_src = NULL, *v_src = NULL;
-    unsigned char *y_dst = NULL, *u_dst = NULL, *v_dst = NULL;
+    unsigned char *y_src = NULL, *u_src = NULL;
+    unsigned char *y_dst = NULL, *u_dst = NULL;
 
     int bytes_per_pixel = 2;
     size_t n_items;
@@ -554,7 +540,6 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
     case VA_FOURCC_P010:
         frame_size = va_image.width * va_image.height * bytes_per_pixel * 3 / 2;
         y_size = va_image.width * va_image.height * bytes_per_pixel;
-        u_size = (va_image.width / 2 * bytes_per_pixel) * (va_image.height >> 1);
 
         src_buffer = (unsigned char*)malloc(frame_size);
         assert(src_buffer);
@@ -629,10 +614,10 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
 
     int i = 0;
 
-    int frame_size = 0, y_size = 0, u_size = 0;
+    int frame_size = 0, y_size = 0;
 
-    unsigned char *y_src = NULL, *u_src = NULL, *v_src = NULL;
-    unsigned char *y_dst = NULL, *u_dst = NULL, *v_dst = NULL;
+    unsigned char *y_src = NULL, *u_src = NULL;
+    unsigned char *y_dst = NULL, *u_dst = NULL;
 
     int bytes_per_pixel = 2;
 
@@ -664,7 +649,6 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         dst_buffer = (unsigned char*)malloc(frame_size);
         assert(dst_buffer);
         y_size = va_image.width * va_image.height * bytes_per_pixel;
-        u_size = (va_image.width / 2 * bytes_per_pixel) * (va_image.height >> 1);
         y_dst = dst_buffer;
         u_dst = dst_buffer + y_size; // UV offset for P010
         y_src = (unsigned char*)in_buf + va_image.offsets[0];

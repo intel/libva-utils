@@ -527,7 +527,6 @@ static  pthread_mutex_t encode_mutex = PTHREAD_MUTEX_INITIALIZER;
 static  pthread_cond_t  encode_cond = PTHREAD_COND_INITIALIZER;
 static  pthread_t encode_thread;
 
-static  char *coded_fn = NULL;
 static  FILE *coded_fp = NULL, *srcyuv_fp = NULL, *recyuv_fp = NULL;
 static  unsigned long long srcyuv_frames = 0;
 static  int srcyuv_fourcc = VA_FOURCC_IYUV;
@@ -567,22 +566,6 @@ static unsigned int GetTickCount()
     if (gettimeofday(&tv, NULL))
         return 0;
     return tv.tv_usec / 1000 + tv.tv_sec * 1000;
-}
-
-static char *fourcc_to_string(int fourcc)
-{
-    switch (fourcc) {
-    case VA_FOURCC_NV12:
-        return "NV12";
-    case VA_FOURCC_IYUV:
-        return "IYUV";
-    case VA_FOURCC_YV12:
-        return "YV12";
-    case VA_FOURCC_UYVY:
-        return "UYVY";
-    default:
-        return "Unknown";
-    }
 }
 
 static int string_to_fourcc(char *str)
@@ -1831,10 +1814,7 @@ pack_error_resilient(bitstream* bs)
 static void
 pack_ref_frame_flags(bitstream* bs, uint8_t error_resilient_mode, uint8_t isI)
 {
-    uint8_t primary_ref_frame = PRIMARY_REF_NONE;
-    if(isI || error_resilient_mode) 
-        primary_ref_frame = PRIMARY_REF_NONE;
-    else
+    if(!(isI || error_resilient_mode))
         put_ui(bs, 0, 3); //primary_ref_frame
     if (!(fh.frame_type == SWITCH_FRAME || (fh.frame_type == KEY_FRAME && fh.show_frame)))
         put_ui(bs, fh.refresh_frame_flags, NUM_REF_FRAMES);
