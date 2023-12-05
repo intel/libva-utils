@@ -30,7 +30,7 @@
 # - pre version is libva_pre_version, usually development version
 m4_define([libva_utils_major_version], [2])
 m4_define([libva_utils_minor_version], [20])
-m4_define([libva_utils_micro_version], [0])
+m4_define([libva_utils_micro_version], [1])
 m4_define([libva_utils_pre_version],   [0])
 
 m4_define([libva_utils_version],
