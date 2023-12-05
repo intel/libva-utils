@@ -35,7 +35,7 @@ void dxcore_resolve_adapter(const char *adapter_string, /*out*/ bool* ptr_device
     IDXCoreAdapterFactory *factory = nullptr;
     IDXCoreAdapterList *adapter_list = nullptr;
     IDXCoreAdapter *adapter = nullptr;
-    typedef HRESULT(WINAPI *PFN_CREATE_DXCORE_ADAPTER_FACTORY)(REFIID riid, void **ppFactory);
+    typedef HRESULT(WINAPI * PFN_CREATE_DXCORE_ADAPTER_FACTORY)(REFIID riid, void **ppFactory);
     PFN_CREATE_DXCORE_ADAPTER_FACTORY DXCoreCreateAdapterFactory;
     HRESULT hr = S_OK;
 
@@ -71,7 +71,7 @@ void dxcore_resolve_adapter(const char *adapter_string, /*out*/ bool* ptr_device
     }
 
     if (!adapter_string) fprintf(stdout, "Available devices for --display win32:\n");
-    for (int i=0; i < adapter_list->GetAdapterCount(); i++) {
+    for (int i = 0; i < adapter_list->GetAdapterCount(); i++) {
         if (SUCCEEDED(adapter_list->GetAdapter(i, IID_IDXCoreAdapter, (void **)&adapter))) {
             size_t desc_size = 0;
             if (FAILED(adapter->GetPropertySize(DXCoreAdapterProperty::DriverDescription, &desc_size))) {
