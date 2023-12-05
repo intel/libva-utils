@@ -91,7 +91,7 @@ static uint32_t g_in_transfer_characteristic = 16;
 static uint32_t g_out_colour_primaries = 9;
 static uint32_t g_out_transfer_characteristic = 16;
 
-static uint32_t g_tm_type =1;
+static uint32_t g_tm_type = 1;
 
 static int8_t
 read_value_string(FILE *fp, const char* field_name, char* value)
@@ -129,7 +129,7 @@ read_value_string(FILE *fp, const char* field_name, char* value)
         while (*str == ' ')
             str++;
 
-        *(str + strlen(str)-1) = '\0';
+        *(str + strlen(str) - 1) = '\0';
         strcpy(value, str);
 
         return 0;
@@ -143,8 +143,8 @@ read_value_uint32(FILE* fp, const char* field_name, uint32_t* value)
     char str[MAX_LEN];
 
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find integer field: %s", field_name);
-       return -1;
+        printf("Failed to find integer field: %s", field_name);
+        return -1;
     }
 
     *value = (uint32_t)atoi(str);
@@ -157,8 +157,8 @@ read_value_float(FILE *fp, const char* field_name, float* value)
 {
     char str[MAX_LEN];
     if (read_value_string(fp, field_name, str)) {
-       printf("Failed to find float field: %s \n",field_name);
-       return -1;
+        printf("Failed to find float field: %s \n", field_name);
+        return -1;
     }
 
     *value = atof(str);
@@ -180,15 +180,15 @@ create_surface(VASurfaceID * p_surface_id,
 
     va_status = vaCreateSurfaces(va_dpy,
                                  format,
-                                 width ,
+                                 width,
                                  height,
                                  p_surface_id,
                                  1,
                                  &surface_attrib,
                                  1);
 
-    printf("create_surface: p_surface_id %d, width %d, height %d, fourCC 0x%x, format 0x%x\n", 
-        *p_surface_id, width, height, fourCC, format);
+    printf("create_surface: p_surface_id %d, width %d, height %d, fourCC 0x%x, format 0x%x\n",
+           *p_surface_id, width, height, fourCC, format);
 
     return va_status;
 }
@@ -213,12 +213,12 @@ hdrtm_filter_init(VABufferID *filter_param_buf_id, uint32_t tm_type)
     in_hdr10_metadata.display_primaries_x[2] = 6550;
     in_hdr10_metadata.display_primaries_y[2] = 2300;
     in_hdr10_metadata.white_point_x = 15635;
-    in_hdr10_metadata.white_point_y = 16450; 
+    in_hdr10_metadata.white_point_y = 16450;
 
     hdrtm_param.type = VAProcFilterHighDynamicRangeToneMapping;
     hdrtm_param.data.metadata_type = VAProcHighDynamicRangeMetadataHDR10;
-    hdrtm_param.data.metadata= &in_hdr10_metadata;
-    hdrtm_param.data.metadata_size = sizeof(VAHdrMetaDataHDR10);   
+    hdrtm_param.data.metadata = &in_hdr10_metadata;
+    hdrtm_param.data.metadata_size = sizeof(VAHdrMetaDataHDR10);
 
     va_status = vaCreateBuffer(va_dpy, context_id, VAProcFilterParameterBufferType, sizeof(hdrtm_param), 1, (void *)&hdrtm_param, filter_param_buf_id);
 
@@ -239,8 +239,7 @@ hdrtm_metadata_init(VAHdrMetaData &out_metadata, uint32_t tm_type, VAHdrMetaData
     printf("hdrtm_metadata_init g_out_max_content_luminance %d, g_out_pic_average_luminance %d\n", g_out_max_content_luminance, g_out_pic_average_luminance);
 
     // HDR display or SDR display
-    switch (tm_type)
-    {
+    switch (tm_type) {
     case VA_TONE_MAPPING_HDR_TO_HDR:
         out_hdr10_metadata.display_primaries_x[0] = 8500;
         out_hdr10_metadata.display_primaries_y[0] = 39850;
@@ -274,7 +273,7 @@ hdrtm_metadata_init(VAHdrMetaData &out_metadata, uint32_t tm_type, VAHdrMetaData
 
 static VAStatus
 video_frame_process(VASurfaceID in_surface_id,
-                            VASurfaceID out_surface_id)
+                    VASurfaceID out_surface_id)
 {
     VAStatus va_status;
     VAProcPipelineParameterBuffer pipeline_param = {};
@@ -290,10 +289,10 @@ video_frame_process(VASurfaceID in_surface_id,
     va_status = vaQueryVideoProcFilterCaps(va_dpy, context_id,
                                            VAProcFilterHighDynamicRangeToneMapping,
                                            (void *)hdrtm_caps, &num_hdrtm_caps);
-    CHECK_VASTATUS(va_status,"vaQueryVideoProcFilterCaps");
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcFilterCaps");
     printf("vaQueryVideoProcFilterCaps num_hdrtm_caps %d\n", num_hdrtm_caps);
     for (int i = 0; i < num_hdrtm_caps; ++i)    {
-       printf("vaQueryVideoProcFilterCaps hdrtm_caps[%d]: metadata type %d, flag %d\n", i, hdrtm_caps[i].metadata_type, hdrtm_caps[i].caps_flag);
+        printf("vaQueryVideoProcFilterCaps hdrtm_caps[%d]: metadata type %d, flag %d\n", i, hdrtm_caps[i].metadata_type, hdrtm_caps[i].caps_flag);
     }
 
     hdrtm_filter_init(&filter_param_buf_id, g_tm_type);
@@ -323,8 +322,8 @@ video_frame_process(VASurfaceID in_surface_id,
     pipeline_param.output_color_standard = VAProcColorStandardExplicit;
     pipeline_param.output_color_properties.colour_primaries = g_out_colour_primaries;
     pipeline_param.output_color_properties.transfer_characteristics = g_out_transfer_characteristic;
-    pipeline_param.output_hdr_metadata = &out_metadata; 
- 
+    pipeline_param.output_hdr_metadata = &out_metadata;
+
     va_status = vaCreateBuffer(va_dpy,
                                context_id,
                                VAProcPipelineParameterBufferType,
@@ -349,10 +348,10 @@ video_frame_process(VASurfaceID in_surface_id,
     CHECK_VASTATUS(va_status, "vaEndPicture");
 
     if (filter_param_buf_id != VA_INVALID_ID)
-        vaDestroyBuffer(va_dpy,filter_param_buf_id);
+        vaDestroyBuffer(va_dpy, filter_param_buf_id);
 
     if (pipeline_param_buf_id != VA_INVALID_ID)
-        vaDestroyBuffer(va_dpy,pipeline_param_buf_id);
+        vaDestroyBuffer(va_dpy, pipeline_param_buf_id);
 
     return va_status;
 }
@@ -397,20 +396,20 @@ vpp_context_create()
                                       VAProfileNone,
                                       VAEntrypointVideoProc,
                                       &attrib,
-                                     1);
+                                      1);
     CHECK_VASTATUS(va_status, "vaGetConfigAttributes");
     if (!(attrib.value & g_out_format)) {
-        printf("RT format %d is not supported by VPP !\n",g_out_format);
+        printf("RT format %d is not supported by VPP !\n", g_out_format);
         //assert(0);
     }
 
     /* Create surface/config/context for VPP pipeline */
     va_status = create_surface(&g_in_surface_id, g_in_pic_width, g_in_pic_height,
-                                g_in_fourcc, g_in_format);
+                               g_in_fourcc, g_in_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for input");
 
     va_status = create_surface(&g_out_surface_id, g_out_pic_width, g_out_pic_height,
-                                g_out_fourcc, g_out_format);
+                               g_out_fourcc, g_out_format);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for output");
 
     va_status = vaCreateConfig(va_dpy,
@@ -430,7 +429,7 @@ vpp_context_create()
                                 1,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
-    
+
     uint32_t supported_filter_num = VAProcFilterCount;
     VAProcFilterType supported_filter_types[VAProcFilterCount];
 
@@ -441,13 +440,13 @@ vpp_context_create()
 
     CHECK_VASTATUS(va_status, "vaQueryVideoProcFilters");
 
-    for (i = 0; i < supported_filter_num; i++){
+    for (i = 0; i < supported_filter_num; i++) {
         if (supported_filter_types[i] == VAProcFilterHighDynamicRangeToneMapping)
             break;
     }
 
     if (i == supported_filter_num) {
-        printf("VPP filter type VAProcFilterHighDynamicRangeToneMapping is not supported by driver !\n");        
+        printf("VPP filter type VAProcFilterHighDynamicRangeToneMapping is not supported by driver !\n");
     }
     return va_status;
 }
@@ -471,15 +470,15 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     uint32_t tfourcc = VA_FOURCC('N', 'V', '1', '2');
     uint32_t tformat = VA_RT_FORMAT_YUV420;
 
-    if (!strcmp(str, "YV12")){
+    if (!strcmp(str, "YV12")) {
         tfourcc = VA_FOURCC('Y', 'V', '1', '2');
-    } else if(!strcmp(str, "I420")){
+    } else if (!strcmp(str, "I420")) {
         tfourcc = VA_FOURCC('I', '4', '2', '0');
-    } else if(!strcmp(str, "NV12")){
+    } else if (!strcmp(str, "NV12")) {
         tfourcc = VA_FOURCC('N', 'V', '1', '2');
-    } else if(!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
+    } else if (!strcmp(str, "YUY2") || !strcmp(str, "YUYV")) {
         tfourcc = VA_FOURCC('Y', 'U', 'Y', '2');
-    } else if(!strcmp(str, "UYVY")){
+    } else if (!strcmp(str, "UYVY")) {
         tfourcc = VA_FOURCC('U', 'Y', 'V', 'Y');
     } else if (!strcmp(str, "P010")) {
         tfourcc = VA_FOURCC('P', '0', '1', '0');
@@ -494,14 +493,14 @@ parse_fourcc_and_format(char *str, uint32_t *fourcc, uint32_t *format)
     } else if (!strcmp(str, "BGRA")) {
         tfourcc = VA_FOURCC_BGRA;
     } else if (!strcmp(str, "BGRX")) {
-        tfourcc = VA_FOURCC_BGRX;    
-    } else if (!strcmp(str, "P010")) {        
-        tfourcc = VA_FOURCC_P010; 
+        tfourcc = VA_FOURCC_BGRX;
+    } else if (!strcmp(str, "P010")) {
+        tfourcc = VA_FOURCC_P010;
         printf("parse_fourcc_and_format: P010\n");
     } else if (!strcmp(str, "A2RGB10")) {  //A2R10G10B10
-        tfourcc = VA_FOURCC_A2R10G10B10; 
+        tfourcc = VA_FOURCC_A2R10G10B10;
         printf("parse_fourcc_and_format: ARGB10 format 0x%8x, fourcc 0x%8x\n", tformat, tfourcc);
-    } else{
+    } else {
         printf("Not supported format: %s! Currently only support following format: %s\n",
                str, "YV12, I420, NV12, YUY2(YUYV), UYVY, I010, RGBA, RGBX, BGRA or BGRX");
         assert(0);
@@ -547,12 +546,11 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
 
     va_status = vaMapBuffer(va_dpy, va_image.buf, &out_buf);
     CHECK_VASTATUS(va_status, "vaMapBuffer");
- 
-    printf("read_frame_to_surface: va_image.width %d, va_image.height %d, va_image.pitches[0]: %d, va_image.pitches[1] %d, va_image.pitches[2] %d\n", 
-        va_image.width, va_image.height, va_image.pitches[0], va_image.pitches[1], va_image.pitches[1]);    
 
-    switch (va_image.format.fourcc)
-    {
+    printf("read_frame_to_surface: va_image.width %d, va_image.height %d, va_image.pitches[0]: %d, va_image.pitches[1] %d, va_image.pitches[2] %d\n",
+           va_image.width, va_image.height, va_image.pitches[0], va_image.pitches[1], va_image.pitches[1]);
+
+    switch (va_image.format.fourcc) {
     case VA_FOURCC_P010:
         frame_size = va_image.width * va_image.height * bytes_per_pixel * 3 / 2;
         y_size = va_image.width * va_image.height * bytes_per_pixel;
@@ -561,8 +559,7 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
         src_buffer = (unsigned char*)malloc(frame_size);
         assert(src_buffer);
         n_items = fread(src_buffer, 1, frame_size, fp);
-        if (n_items != frame_size)
-        {
+        if (n_items != frame_size) {
             printf("read file failed on VA_FOURCC_P010\n");
         }
         y_src = src_buffer;
@@ -570,7 +567,7 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
 
         y_dst = (unsigned char*)out_buf + va_image.offsets[0]; // Y plane
         u_dst = (unsigned char*)out_buf + va_image.offsets[1]; // U offset for P010
-                                                          
+
         for (i = 0; i < va_image.height; i++) {
             memcpy(y_dst, y_src, va_image.width * 2);
             y_dst += va_image.pitches[0];
@@ -592,12 +589,11 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
         src_buffer = (unsigned char*)malloc(frame_size);
         assert(src_buffer);
         n_items = fread(src_buffer, 1, frame_size, fp);
-        if (n_items != frame_size)
-        {
+        if (n_items != frame_size) {
             printf("read file failed on VA_RT_FORMAT_RGB32_10BPP or VA_FOURCC_RGBA \n");
         }
         y_src = src_buffer;
-        y_dst = (unsigned char*)out_buf + va_image.offsets[0];         
+        y_dst = (unsigned char*)out_buf + va_image.offsets[0];
 
         for (i = 0; i < va_image.height; i++)  {
             memcpy(y_dst, y_src, va_image.width * 4);
@@ -615,8 +611,7 @@ bool read_frame_to_surface(FILE *fp, VASurfaceID surface_id)
 
     vaUnmapBuffer(va_dpy, va_image.buf);
     vaDestroyImage(va_dpy, va_image.image_id);
-    if (src_buffer)
-    {
+    if (src_buffer) {
         free(src_buffer);
         src_buffer = NULL;
     }
@@ -656,13 +651,12 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
 
     va_status = vaMapBuffer(va_dpy, va_image.buf, &in_buf);
     CHECK_VASTATUS(va_status, "vaMapBuffer");
-   
-    printf("write_surface_to_frame: va_image.width %d, va_image.height %d, va_image.pitches[0]: %d, va_image.pitches[1] %d, va_image.pitches[2] %d\n", 
-        va_image.width, va_image.height, va_image.pitches[0], va_image.pitches[1], va_image.pitches[1]);    
+
+    printf("write_surface_to_frame: va_image.width %d, va_image.height %d, va_image.pitches[0]: %d, va_image.pitches[1] %d, va_image.pitches[2] %d\n",
+           va_image.width, va_image.height, va_image.pitches[0], va_image.pitches[1], va_image.pitches[1]);
 
 
-    switch (va_image.format.fourcc)
-    {
+    switch (va_image.format.fourcc) {
     case VA_FOURCC_P010:
     case VA_FOURCC_NV12:
         bytes_per_pixel = (va_image.format.fourcc == VA_FOURCC_P010) ? 2 : 1;
@@ -674,7 +668,7 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         y_dst = dst_buffer;
         u_dst = dst_buffer + y_size; // UV offset for P010
         y_src = (unsigned char*)in_buf + va_image.offsets[0];
-        u_src = (unsigned char*)in_buf + va_image.offsets[1]; // U offset for P010                                                        
+        u_src = (unsigned char*)in_buf + va_image.offsets[1]; // U offset for P010
         for (i = 0; i < va_image.height; i++)  {
             memcpy(y_dst, y_src, static_cast<size_t>(va_image.width * bytes_per_pixel));
             y_dst += va_image.width * bytes_per_pixel;
@@ -687,7 +681,7 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         }
         printf("read_frame_to_surface: P010 \n");
         break;
-        
+
     case VA_FOURCC_RGBA:
     case VA_FOURCC_ABGR:
     case VA_FOURCC_A2B10G10R10:
@@ -696,14 +690,14 @@ bool write_surface_to_frame(FILE *fp, VASurfaceID surface_id)
         dst_buffer = (unsigned char*)malloc(frame_size);
         assert(dst_buffer);
         y_dst = dst_buffer;
-        y_src = (unsigned char*)in_buf + va_image.offsets[0];         
+        y_src = (unsigned char*)in_buf + va_image.offsets[0];
 
         for (i = 0; i < va_image.height; i++) {
             memcpy(y_dst, y_src, va_image.width * 4);
             y_dst += va_image.pitches[0];
             y_src += va_image.width * 4;
-        } 
-        printf("read_frame_to_surface: RGBA and A2R10G10B10 \n");       
+        }
+        printf("read_frame_to_surface: RGBA and A2R10G10B10 \n");
         break;
 
     default: // should not come here
@@ -744,7 +738,7 @@ parse_basic_parameters()
     /* Read dst frame file information */
     read_value_string(g_config_file_fd, "DST_FILE_NAME", g_dst_file_name);
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_out_pic_width);
-    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT",&g_out_pic_height);
+    read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT", &g_out_pic_height);
     read_value_string(g_config_file_fd, "DST_FRAME_FORMAT", str);
     parse_fourcc_and_format(str, &g_out_fourcc, &g_out_format);
 
@@ -792,7 +786,7 @@ int32_t main(int32_t argc, char *argv[])
     VAStatus va_status;
     uint32_t i;
 
-    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")){
+    if (argc != 2 || !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
         print_help();
         return -1;
     }
@@ -801,13 +795,13 @@ int32_t main(int32_t argc, char *argv[])
     strncpy(g_config_file_name, argv[1], MAX_LEN);
     g_config_file_name[MAX_LEN - 1] = '\0';
 
-    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))){
-        printf("Open configure file %s failed!\n",g_config_file_name);
+    if (NULL == (g_config_file_fd = fopen(g_config_file_name, "r"))) {
+        printf("Open configure file %s failed!\n", g_config_file_name);
         assert(0);
     }
 
     /* Parse basic parameters */
-    if (parse_basic_parameters()){
+    if (parse_basic_parameters()) {
         printf("Parse parameters in configure file error\n");
         assert(0);
     }
@@ -819,13 +813,13 @@ int32_t main(int32_t argc, char *argv[])
     }
 
     /* Video frame fetch, process and store */
-    if (NULL == (g_src_file_fd = fopen(g_src_file_name, "r"))){
+    if (NULL == (g_src_file_fd = fopen(g_src_file_name, "r"))) {
         printf("Open SRC_FILE_NAME: %s failed, please specify it in config file: %s !\n",
-                g_src_file_name, g_config_file_name);
+               g_src_file_name, g_config_file_name);
         assert(0);
     }
 
-    if (NULL == (g_dst_file_fd = fopen(g_dst_file_name, "w"))){
+    if (NULL == (g_dst_file_fd = fopen(g_dst_file_name, "w"))) {
         printf("Open DST_FILE_NAME: %s failed, please specify it in config file: %s !\n",
                g_dst_file_name, g_config_file_name);
         assert(0);
@@ -837,9 +831,9 @@ int32_t main(int32_t argc, char *argv[])
     unsigned int duration = 0;
     clock_gettime(CLOCK_MONOTONIC, &Pre_time);
 
-    for (i = 0; i < g_frame_count; i ++){
+    for (i = 0; i < g_frame_count; i ++) {
         read_frame_to_surface(g_src_file_fd, g_in_surface_id);
-        video_frame_process(g_in_surface_id, g_out_surface_id);        
+        video_frame_process(g_in_surface_id, g_out_surface_id);
         write_surface_to_frame(g_dst_file_fd, g_out_surface_id);
     }
 
@@ -850,22 +844,22 @@ int32_t main(int32_t argc, char *argv[])
     } else {
         duration += (Cur_time.tv_nsec + 1000000000 - Pre_time.tv_nsec) / 1000000 - 1000;
     }
-    printf("Finish processing, performance: \n" );
-    printf("%d frames processed in: %d ms, ave time = %d ms\n",g_frame_count, duration, duration/g_frame_count);
+    printf("Finish processing, performance: \n");
+    printf("%d frames processed in: %d ms, ave time = %d ms\n", g_frame_count, duration, duration / g_frame_count);
 
     if (g_src_file_fd) {
-       fclose(g_src_file_fd);
-       g_src_file_fd = NULL;
+        fclose(g_src_file_fd);
+        g_src_file_fd = NULL;
     }
 
     if (g_dst_file_fd) {
-       fclose(g_dst_file_fd);
-       g_dst_file_fd = NULL;
+        fclose(g_dst_file_fd);
+        g_dst_file_fd = NULL;
     }
 
     if (g_config_file_fd) {
-       fclose(g_config_file_fd);
-       g_config_file_fd = NULL;
+        fclose(g_config_file_fd);
+        g_config_file_fd = NULL;
     }
 
     vpp_context_destroy();

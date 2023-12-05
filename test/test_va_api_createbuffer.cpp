@@ -167,19 +167,19 @@ static const BufferSpecsMap encodeBufferSpecs = {
             make_tuple(g_vaH264Profiles, sizeof(VAEncSliceParameterBufferH264)),
             make_tuple(g_vaJPEGProfiles, sizeof(VAEncSliceParameterBufferJPEG)),
             make_tuple(g_vaHEVCProfiles, sizeof(VAEncSliceParameterBufferHEVC)),
-            make_tuple(g_vaAV1Profiles, sizeof(VAEncPictureParameterBufferAV1)),            
+            make_tuple(g_vaAV1Profiles, sizeof(VAEncPictureParameterBufferAV1)),
         }
     },
     {
         VAEncPackedHeaderParameterBufferType, {
             make_tuple(g_vaProfiles, sizeof(VAEncPackedHeaderParameterBuffer)),
-            make_tuple(g_vaAV1Profiles, sizeof(VAEncPictureParameterBufferAV1)),            
+            make_tuple(g_vaAV1Profiles, sizeof(VAEncPictureParameterBufferAV1)),
         }
     },
     {
         VAEncMiscParameterBufferType, {
             make_tuple(g_vaProfiles, sizeof(VAEncMiscParameterBuffer)),
-            make_tuple(g_vaAV1Profiles, sizeof(VAEncPictureParameterBufferAV1)),            
+            make_tuple(g_vaAV1Profiles, sizeof(VAEncPictureParameterBufferAV1)),
         }
     },
 };
