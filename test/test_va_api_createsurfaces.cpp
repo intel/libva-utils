@@ -88,6 +88,9 @@ protected:
 
         const uint32_t drmMemMask = VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM
                                     | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME
+#if VA_CHECK_VERSION(1, 21, 0)
+                                    | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3
+#endif
                                     | VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2;
 
         // create surfaces for each supported attribute

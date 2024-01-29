@@ -274,6 +274,9 @@ static const BitMasks g_vaSurfaceMemTypes = {
     VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR, VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM,
     VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME,
     VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+#if VA_CHECK_VERSION(1, 21, 0)
+    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3,
+#endif
 };
 
 static const std::map<VASurfaceAttribType, const BitMasks&>
