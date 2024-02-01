@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout libva
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: intel/libva
         path: libva
     - name: checkout libva-utils
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: libva-utils
     - name: test
@@ -30,14 +30,11 @@ jobs:
           pkg install -y meson pkgconf libdrm libXext libXfixes wayland
           pkg install -y -x '^mesa($|-libs)'
         run: |
-          set PREFIX="$PWD/_install"
-          set LIBDIR="$PREFIX/lib"
-          setenv PKG_CONFIG_PATH $LIBDIR/pkgconfig:$PREFIX/libdata/pkgconfig
           cd libva
-          meson --prefix=$PREFIX --libdir=$LIBDIR _build
+          meson setup _build --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
           meson compile -C _build
           meson install -C _build
           cd ../libva-utils
-          meson --prefix=$PREFIX --libdir=$LIBDIR _build
+          meson setup _build --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
           meson compile -C _build
           meson install -C _build
