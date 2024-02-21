@@ -12,6 +12,8 @@ on:
     - '!.github/workflows/windows.yml'
     - '!.github/workflows/EnterDevShell.ps1'
 
+permissions: read
+
 jobs:
   windows-msvc:
     runs-on: windows-2022
