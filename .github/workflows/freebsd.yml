@@ -10,6 +10,8 @@ on:
     - '.github/workflows/**'
     - '!.github/workflows/freebsd.yml'
 
+permissions: read
+
 jobs:
   freebsd:
     runs-on: ubuntu-latest
