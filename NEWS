@@ -1,5 +1,20 @@
-libva-utils NEWS -- summary of changes.  2023-09-14
-Copyright (C) 2009-2023 Intel Corporation
+libva-utils NEWS -- summary of changes.  2024-03-12
+Copyright (C) 2009-2024 Intel Corporation
+
+Version 2.21.0 - 12.Mar.2024
+* vainfo: Print VAConfigAttribEncMaxTileRows and VAConfigAttribEncMaxTileCols
+* test: Add Prime3 memtype support
+* sample: Add back buffer size options for AV1e
+* sample: simplify cbr/vbr interface and refine codes for AV1e
+* fix: clean some unused variables and functions
+* fix: unify the coding style
+* fix: Fix coverity issues exposed in encode/decode/vpp
+* fix: options in AV1 encode sample
+* fix: fix typo of version in NEWS
+* ci: harden permission for freebsd.yml
+* ci: add workflow permission for all jobs
+* ci: update freebsd vm to the v1 version
+* meson: use meson setup instead of meson options
 
 Version 2.20.0 - 14.Sep.2023
 * test: Enable AV1 encode test
