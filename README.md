@@ -40,7 +40,7 @@ or build using Meson
 ```
 mkdir build
 cd build
-meson .. or meson .. -Denable-tests
+meson .. or meson .. -Dtests=true
 ninja
 sudo ninja install
 ```
