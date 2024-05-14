@@ -56,7 +56,7 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
 
 
 #define CLIP_WIDTH  1920
-#define CLIP_HEIGHT 1080
+#define CLIP_HEIGHT 1920
 
 VADisplay openDriver(char *device_paths)
 {
@@ -76,6 +76,51 @@ VADisplay openDriver(char *device_paths)
     return 0;
 }
 
+uint32_t va_fourcc[] = 
+{
+    VA_FOURCC_BGRA,
+    VA_FOURCC_ARGB,
+    VA_FOURCC_RGBA,
+    VA_FOURCC_ABGR,
+    VA_FOURCC_BGRX,
+    VA_FOURCC_XRGB,
+    VA_FOURCC_RGBX,
+    VA_FOURCC_XBGR,
+    VA_FOURCC_RGBP,
+    VA_FOURCC_BGRP,
+    VA_FOURCC_RGB565,
+    VA_FOURCC_AYUV,
+    VA_FOURCC_XYUV,
+    VA_FOURCC_NV12,
+    VA_FOURCC_NV21,
+    VA_FOURCC_YUY2,
+    VA_FOURCC_UYVY,
+    VA_FOURCC_YV12,
+    VA_FOURCC_I420,
+    VA_FOURCC_IYUV,
+    VA_FOURCC_411P,
+    VA_FOURCC_422H,
+    VA_FOURCC_422V,
+    VA_FOURCC_444P,
+    VA_FOURCC_IMC3,
+    VA_FOURCC_P208,
+    VA_FOURCC_P010,
+    VA_FOURCC_P012,
+    VA_FOURCC_P016,
+    VA_FOURCC_Y210,
+    VA_FOURCC_Y410,
+    VA_FOURCC_Y212,
+    VA_FOURCC_Y216,
+    VA_FOURCC_Y412,
+    VA_FOURCC_Y416,
+    VA_FOURCC_Y800,
+    VA_FOURCC_A2R10G10B10,
+    VA_FOURCC_A2B10G10R10,
+    VA_FOURCC_X2R10G10B10,
+    VA_FOURCC_X2B10G10R10
+};
+
+
 int main(int argc, char **argv)
 {
     clock_t start_time, end_time;
@@ -88,27 +133,42 @@ int main(int argc, char **argv)
     va_dpy = openDriver(argv[1]);
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     assert(va_status == VA_STATUS_SUCCESS);
-    std::vector<VASurfaceID> surfacesPool;
-    start_time = clock();
-    for (uint32_t i = 0; i < 168; i++)
-    {
-        VASurfaceID surface_id;
-        va_status = vaCreateSurfaces(
-                        va_dpy,
-                        VA_RT_FORMAT_YUV420, CLIP_WIDTH, CLIP_HEIGHT,
-                        &surface_id, 1,
-                        NULL, 0
-                    );
-        CHECK_VASTATUS(va_status, "vaCreateSurfaces");
-        surfacesPool.push_back(surface_id);
-    }
-    end_time = clock();
-    execution_time_ms = ((double)(end_time - start_time) * 1000) / CLOCKS_PER_SEC;
-    printf("168 * 1080p y420 surfaces execution time = %f \n", execution_time_ms);
 
-    for (std::vector<VASurfaceID>::iterator it = surfacesPool.begin(); it != surfacesPool.end(); it++)
+    //VAImage csc_dst_fourcc_image;
+    //VAImageFormat image_format;
+    //image_format.fourcc = VA_FOURCC_NV12;
+    //image_format.byte_order = VA_LSB_FIRST;
+    //image_format.bits_per_pixel = 16;
+
+    int fourcc_count = 30;
+    //test i420
+    if (1)
     {
-        vaDestroySurfaces(va_dpy, &*it, 1);
+        va_fourcc[0] = VA_FOURCC_I420;
+        fourcc_count = 1;
+    }
+
+    for (int i = 0; i < fourcc_count; i++)
+    {
+        VAImage csc_dst_fourcc_image;
+        VAImageFormat image_format;
+        image_format.fourcc = va_fourcc[i];
+        //image_format.byte_order = VA_LSB_FIRST;
+        //image_format.bits_per_pixel = 16;
+
+        printf(">>>>>>>create image fourcc[%d]: %d\n", i, va_fourcc[i]);
+        va_status = vaCreateImage(va_dpy, &image_format,
+                                  16, 16384,
+                                  &csc_dst_fourcc_image);
+
+        if (va_status != VA_STATUS_SUCCESS)
+        {
+            printf(">>>>>>>failed to create image fourcc[%d]: %d\n", i, va_fourcc[i]);
+        }
+        else
+        {
+            vaDestroyImage(va_dpy, csc_dst_fourcc_image.image_id);
+        }
     }
 
     vaTerminate(va_dpy);
