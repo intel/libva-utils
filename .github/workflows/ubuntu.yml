@@ -10,7 +10,7 @@ on:
     - '.github/workflows/**'
     - '!.github/workflows/ubuntu.yml'
 
-permissions: read
+permissions: read-all
 
 jobs:
   ubuntu-20-04:

@@ -10,7 +10,7 @@ on:
     - '.github/workflows/**'
     - '!.github/workflows/freebsd.yml'
 
-permissions: read
+permissions: read-all
 
 jobs:
   freebsd:
