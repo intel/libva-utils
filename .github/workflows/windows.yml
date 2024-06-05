@@ -12,7 +12,7 @@ on:
     - '!.github/workflows/windows.yml'
     - '!.github/workflows/EnterDevShell.ps1'
 
-permissions: read
+permissions: read-all
 
 jobs:
   windows-msvc:
