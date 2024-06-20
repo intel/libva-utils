@@ -1,0 +1,30 @@
+# Configuration information for video process test case.
+#    This application will firstly load yuv frames to one type of surface(NV12/YV12/I420)
+#  you require. After video processing, the processed content (NV12/YV12/I420 surface)
+#  will be stored to frames(yv12 format in file).
+#    Supported features include scaling and implicit format conversion(NV12<->YV12<->I420). 
+#  you can modify this configuration file to set the corresponding parameters.
+
+#1.Source YUV(RGB) file information
+SRC_FILE_NAME: ./bigship_1280_720p_25fps_10frames_writer1280x720_noised.nv12
+SRC_FRAME_WIDTH:  1280
+SRC_FRAME_HEIGHT: 720
+SRC_FRAME_FORMAT: NV12
+
+#Note .nv12 files are in NV12 format
+SRC_FILE_FORMAT: NV12
+
+#2.Destination YUV(RGB) file information
+DST_FILE_NAME:    ./scaling_out_720x1280.nv12
+DST_FRAME_WIDTH:  720
+DST_FRAME_HEIGHT: 1280
+DST_FRAME_FORMAT: NV12
+
+DST_FILE_FORMAT: NV12
+
+#3.How many frames to be processed
+FRAME_SUM: 1
+
+#4.How to use this template
+ROTATION: 1
+#./vppscaling_csc process_rotation.cfg.template 
