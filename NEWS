@@ -1,5 +1,11 @@
-libva-utils NEWS -- summary of changes.  2024-03-12
+libva-utils NEWS -- summary of changes.  2024-06-20
 Copyright (C) 2009-2024 Intel Corporation
+
+Version 2.22.0 - 20.Jun.2024
+* ci:  correct the permission of workflows
+* fix: Fixed possible memory leak in h264encode
+* doc: Fix meson build options in README
+* test/CheckEntrypointsForProfile: fix for limited profiles
 
 Version 2.21.0 - 12.Mar.2024
 * vainfo: Print VAConfigAttribEncMaxTileRows and VAConfigAttribEncMaxTileCols
