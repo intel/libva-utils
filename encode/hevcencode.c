@@ -436,7 +436,7 @@ static  VAEncSliceParameterBufferHEVC slice_param;
 static  VAPictureHEVC CurrentCurrPic;
 static  VAPictureHEVC ReferenceFrames[16], RefPicList0_P[32], RefPicList0_B[32], RefPicList1_B[32];
 
-static  unsigned int MaxPicOrderCntLsb = (2 << 8);
+static  unsigned int MaxPicOrderCntLsb = (2 << 4);
 
 static  unsigned int num_ref_frames = 2;
 static  unsigned int num_active_ref_p = 1;
@@ -837,7 +837,7 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
     sps->log2_diff_max_min_luma_coding_block_size = log2_max_luma_coding_block_size -
             log2_min_luma_coding_block_size;
     sps->log2_min_luma_transform_block_size_minus2 = use_block_sizes ? block_sizes.log2_min_luma_transform_block_size_minus2 : 0;
-    sps->log2_diff_max_min_luma_transform_block_size = use_block_sizes ? (block_sizes.log2_max_luma_transform_block_size_minus2 - 
+    sps->log2_diff_max_min_luma_transform_block_size = use_block_sizes ? (block_sizes.log2_max_luma_transform_block_size_minus2 -
                                                                           sps->log2_min_luma_transform_block_size_minus2) : 3;
     sps->max_transform_hierarchy_depth_inter = use_block_sizes ? block_sizes.max_max_transform_hierarchy_depth_inter : 2;
     sps->max_transform_hierarchy_depth_intra = use_block_sizes ? block_sizes.max_max_transform_hierarchy_depth_intra : 2;
@@ -866,7 +866,7 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
     */
     sps->sps_temporal_mvp_enabled_flag = use_features ? features.temporal_mvp : 1;
     sps->strong_intra_smoothing_enabled_flag = use_features ? features.strong_intra_smoothing : 0;
-    
+
     sps->vui_parameters_present_flag = 0;
     sps->sps_extension_present_flag = 0;
     /* ignore below parameters seting since sps_extension_present_flag equal to 0
@@ -2499,7 +2499,7 @@ static int render_picture(struct PicParamSet *pps)
     pic_param.coded_buf = coded_buf[current_slot];
 
     pic_param.decoded_curr_pic.picture_id = ref_surface[current_slot];
-    pic_param.decoded_curr_pic.pic_order_cnt = calc_poc((current_frame_display - current_IDR_display) % MaxPicOrderCntLsb) * 2;
+    pic_param.decoded_curr_pic.pic_order_cnt = calc_poc((current_frame_display - current_IDR_display) % MaxPicOrderCntLsb) * 1;
     pic_param.decoded_curr_pic.flags = 0;
     CurrentCurrPic = pic_param.decoded_curr_pic;
 
@@ -2539,6 +2539,11 @@ static int render_picture(struct PicParamSet *pps)
     pic_param.pic_fields.bits.loop_filter_across_tiles_enabled_flag = pps->loop_filter_across_tiles_enabled_flag;
     pic_param.pic_fields.bits.pps_loop_filter_across_slices_enabled_flag = pps->pps_loop_filter_across_slices_enabled_flag;
     pic_param.pic_fields.bits.scaling_list_data_present_flag = pps->pps_scaling_list_data_present_flag;
+
+    if (!!pic_param.pic_fields.bits.idr_pic_flag)
+        pic_param.nal_unit_type = NALU_IDR_W_DLP;
+    else
+        pic_param.nal_unit_type = NALU_TRAIL_R;
 
     va_status = vaCreateBuffer(va_dpy, context_id, VAEncPictureParameterBufferType,
                                sizeof(pic_param), 1, &pic_param, &pic_param_buf);
@@ -3285,9 +3290,9 @@ static int calc_PSNR(double *psnr)
             srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
             recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
-                if (srcyuv_ptr != MAP_FAILED) 
+                if (srcyuv_ptr != MAP_FAILED)
                     munmap(srcyuv_ptr, fourM);
-                if (recyuv_ptr != MAP_FAILED) 
+                if (recyuv_ptr != MAP_FAILED)
                     munmap(recyuv_ptr, fourM);
                 printf("Failed to mmap YUV files\n");
                 return 1;
