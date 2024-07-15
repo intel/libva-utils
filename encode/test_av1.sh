@@ -1,0 +1,1 @@
+./av1encode -n 8 -f 30 -intra_period 4 --rcmode CQP --srcyuv ~/test/others/yuvstreams/Life_1280x720_yuv420p.yuv --fourcc IYUV --recyuv ./rec.yuv  --level 8 --width 1280 --height 720 --base_q_idx 128 -o ./out.av1 --normal_mode
