@@ -841,9 +841,9 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
                                                                           sps->log2_min_luma_transform_block_size_minus2) : 3;
     sps->max_transform_hierarchy_depth_inter = use_block_sizes ? block_sizes.max_max_transform_hierarchy_depth_inter : 2;
     sps->max_transform_hierarchy_depth_intra = use_block_sizes ? block_sizes.max_max_transform_hierarchy_depth_intra : 2;
-    sps->scaling_list_enabled_flag = use_features ? features.scaling_lists : 0;
-    sps->sps_scaling_list_data_present_flag = 0;
-    sps->amp_enabled_flag = use_features ? features.amp : 1;
+    sps->scaling_list_enabled_flag = 0;
+    //sps->sps_scaling_list_data_present_flag; // ignore since scaling_list_enabled_flag equal to 0
+    sps->amp_enabled_flag = use_features ? features.amp >= 1 : 1;
     sps->sample_adaptive_offset_enabled_flag = use_features ? features.sao : 1;
     sps->pcm_enabled_flag = use_features ? features.pcm : 0;
     /* ignore below parameters seting since pcm_enabled_flag equal to 0
@@ -899,7 +899,7 @@ static void fill_pps_header(
     pps->init_qp_minus26 = initial_qp - 26;
     pps->constrained_intra_pred_flag = use_features ? features.constrained_intra_pred : 0;
     pps->transform_skip_enabled_flag = use_features ? features.transform_skip : 0;
-    pps->cu_qp_delta_enabled_flag = use_features ? features.cu_qp_delta : 1;
+    pps->cu_qp_delta_enabled_flag = use_features ? features.cu_qp_delta >= 1 : 1;
     if (pps->cu_qp_delta_enabled_flag)
         pps->diff_cu_qp_delta_depth = 2;
     pps->pps_cb_qp_offset = 0;
@@ -1986,6 +1986,7 @@ static int init_va(void)
     VAEntrypoint *entrypoints;
     int num_entrypoints, slice_entrypoint;
     int support_encode = 0;
+    int support_lpEntryPoint = 0;
     int major_ver, minor_ver;
     VAStatus va_status;
     unsigned int i;
@@ -2009,10 +2010,12 @@ static int init_va(void)
         hevc_profile = profile_list[i];
         vaQueryConfigEntrypoints(va_dpy, hevc_profile, entrypoints, &num_entrypoints);
         for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
-            if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice ||
-                entrypoints[slice_entrypoint] == VAEntrypointEncSliceLP ) {
+            if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice) {
                 support_encode = 1;
-                break;
+            }
+            else if (entrypoints[slice_entrypoint] == VAEntrypointEncSliceLP) {
+                support_encode = 1;
+                support_lpEntryPoint = 1;
             }
         }
         if (support_encode == 1)
@@ -2048,8 +2051,10 @@ static int init_va(void)
 
     if (lowpower)
     {
-        entryPoint = VAEntrypointEncSliceLP;
         LCU_SIZE = 64;
+        if (support_lpEntryPoint == 1) {
+            entryPoint = VAEntrypointEncSliceLP;
+        }
     }
 
     va_status = vaGetConfigAttributes(va_dpy, hevc_profile, entryPoint,
