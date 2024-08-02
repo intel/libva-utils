@@ -1968,7 +1968,7 @@ static int process_cmdline(int argc, char *argv[])
     }
 
     frame_width_aligned = (frame_width + 63) & (~63);
-    frame_height_aligned = (frame_height + 63) & (~63);
+    frame_height_aligned = (frame_height + 15) & (~15);
     if (frame_width != frame_width_aligned ||
         frame_height != frame_height_aligned) {
         printf("Source frame is %dx%d and will code clip to %dx%d with crop\n",
