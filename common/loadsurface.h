@@ -332,6 +332,7 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
     Y_pitch = surface_image.pitches[0];
     switch (surface_image.format.fourcc) {
     case VA_FOURCC_NV12:
+    case VA_FOURCC_P010:
         U_start = (unsigned char *)surface_p + surface_image.offsets[1];
         U_pitch = surface_image.pitches[1];
         break;
@@ -354,6 +355,16 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
     /* copy Y plane */
     for (row = 0; row < src_height; row++) {
         unsigned char *Y_row = Y_start + row * Y_pitch;
+
+        //For 10 bit color shift from LSB to MSB
+        if (src_fourcc == VA_FOURCC_P010) {
+            memcpy(Y_row, src_Y + row * src_width * 2, src_width * 2);
+            unsigned short *pTmp = (unsigned short*)Y_row;
+            for (unsigned int x = 0; x < src_width; x++) {
+                *(pTmp++) = (*pTmp << 6);
+            }
+        }
+        else 
         memcpy(Y_row, src_Y + row * src_width, src_width);
     }
 
@@ -363,6 +374,7 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
         int j;
         switch (surface_image.format.fourcc) {
         case VA_FOURCC_NV12:
+        case VA_FOURCC_P010:
             if (src_fourcc == VA_FOURCC_NV12) {
                 memcpy(U_row, src_U + row * src_width, src_width);
                 break;
@@ -372,12 +384,24 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
             } else if (src_fourcc == VA_FOURCC_YV12) {
                 v_ptr = src_U + row * (src_width / 2);
                 u_ptr = src_V + row * (src_width / 2);
+            } else if (src_fourcc == VA_FOURCC_P010) {
+                u_ptr = src_U + row * src_width;
+                v_ptr = src_V + row * src_width;
             }
             if ((src_fourcc == VA_FOURCC_IYUV) ||
                 (src_fourcc == VA_FOURCC_YV12)) {
                 for (j = 0; j < src_width / 2; j++) {
                     U_row[2 * j] = u_ptr[j];
                     U_row[2 * j + 1] = v_ptr[j];
+                }
+            } else if (src_fourcc == VA_FOURCC_P010) {
+                unsigned short *pTmp = (unsigned short*)U_row;
+                unsigned short *uTmp = (unsigned short*)u_ptr;
+                unsigned short *vTmp = (unsigned short*)v_ptr;
+
+                for (unsigned int x = 0; x < src_width / 2; x++) {
+                    *(pTmp++) = (*(uTmp++)) << 6;
+                    *(pTmp++) = (*(vTmp++)) << 6;
                 }
             }
             break;

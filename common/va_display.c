@@ -150,7 +150,8 @@ va_open_display(void)
     VADisplay va_dpy = NULL;
     unsigned int i;
 
-    for (i = 0; !va_dpy && g_display_hooks_available[i]; i++) {
+    // for (i = 0; !va_dpy && g_display_hooks_available[i]; i++) {
+    for (i = 0; g_display_hooks_available[i]; i++) {
         g_display_hooks = g_display_hooks_available[i];
         if (g_display_name &&
             strcmp(g_display_name, g_display_hooks->name) != 0)
@@ -159,6 +160,9 @@ va_open_display(void)
             continue;
         printf("Trying display: %s\n", g_display_hooks->name);
         va_dpy = g_display_hooks->open_display();
+        // Force drm
+        if (strcmp(g_display_hooks->name, "drm") == 0) 
+            break;
     }
 
     if (!va_dpy)  {

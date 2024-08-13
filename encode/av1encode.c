@@ -608,7 +608,10 @@ static int string_to_fourcc(char *str)
         fourcc = VA_FOURCC_YV12;
     else if (!strncmp(str, "UYVY", 4))
         fourcc = VA_FOURCC_UYVY;
-    else {
+    else if (!strncmp(str, "P010", 4)) {
+        fourcc = VA_FOURCC_P010;
+        ips.bit_depth = BITDEPTH_10;
+    } else {
         printf("Unknow FOURCC\n");
         fourcc = -1;
     }
@@ -647,7 +650,7 @@ static void print_help()
     printf("   --ip_period <number>\n");
     printf("   --rcmode <16 for CQP>\n");
     printf("   --srcyuv <filename> load YUV from a file\n");
-    printf("   --fourcc <NV12|IYUV|YV12> source YUV fourcc\n");
+    printf("   --fourcc <NV12|IYUV|YV12|P010> source YUV fourcc\n");
     printf("   --recyuv <filename> save reconstructed YUV into a file\n");
     printf("   --enablePSNR calculate PSNR of recyuv vs. srcyuv\n");
     printf("   --level\n");
@@ -776,7 +779,7 @@ static void process_cmdline(int argc, char *argv[])
     // init other input parameters as default value
     ips.MaxBaseQIndex = 255;
     ips.MinBaseQIndex = 1;
-    ips.bit_depth = 8;
+    if (ips.bit_depth != BITDEPTH_10) ips.bit_depth = BITDEPTH_8;
 
     if (ips.frame_rate_extD == 0)
     {
@@ -939,7 +942,7 @@ static int init_va(void)
         free(entrypoints);
 
     if (support_encode == 0) {
-        printf("Can't find avaiable or requested entrypoints for AV1 profiles\n");
+        printf("Can't find available or requested entrypoints for AV1 profiles\n");
         exit(1);
     }
 
@@ -958,6 +961,7 @@ static int init_va(void)
     } else {
         config_attrib[config_attrib_num].type = VAConfigAttribRTFormat;
         config_attrib[config_attrib_num].value = VA_RT_FORMAT_YUV420;
+        if (srcyuv_fourcc == VA_FOURCC_P010) config_attrib[config_attrib_num].value = VA_RT_FORMAT_YUV420_10;
         config_attrib_num++;
     }
 
@@ -1065,19 +1069,27 @@ static int setup_encode()
                                &config_attrib[0], config_attrib_num, &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
+    // Force Pixel Format
+    int format = (ips.bit_depth == BITDEPTH_10) ? VA_RT_FORMAT_YUV420_10 : VA_RT_FORMAT_YUV420;
+
+    VASurfaceAttrib attrs[2] = { {VASurfaceAttribMemoryType, VA_SURFACE_ATTRIB_SETTABLE,{VAGenericValueTypeInteger, 0},},
+                                 {VASurfaceAttribPixelFormat,VA_SURFACE_ATTRIB_SETTABLE,{VAGenericValueTypeInteger, 0},} };
+    attrs[0].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_VA;
+    attrs[1].value.value.i = (ips.bit_depth == BITDEPTH_10) ? srcyuv_fourcc : VA_FOURCC_NV12;
+
     /* create source surfaces */
     va_status = vaCreateSurfaces(va_dpy,
-                                 VA_RT_FORMAT_YUV420, ips.frame_width_aligned, ips.frame_height_aligned,
+                                 format, ips.frame_width_aligned, ips.frame_height_aligned,
                                  &src_surface[0], SURFACE_NUM,
-                                 NULL, 0);
+                                 &attrs[0], 2);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* create reference surfaces */
     va_status = vaCreateSurfaces(
                     va_dpy,
-                    VA_RT_FORMAT_YUV420, ips.frame_width_aligned, ips.frame_height_aligned,
+                    format, ips.frame_width_aligned, ips.frame_height_aligned,
                     &ref_surface[0], SURFACE_NUM,
-                    NULL, 0
+                    &attrs[0], 2
                 );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
@@ -1097,6 +1109,7 @@ static int setup_encode()
     free(tmp_surfaceid);
 
     codedbuf_size = ((long long int) ips.frame_width_aligned * ips.frame_height_aligned * 400) / (16 * 16);
+    if (ips.bit_depth == BITDEPTH_10) codedbuf_size *= 2;
 
     for (i = 0; i < SURFACE_NUM; i++) {
         /* create coded buffer once for all
@@ -1770,7 +1783,8 @@ pack_seq_data(bitstream *bs)
     put_ui(bs, sh.enable_restoration, 1);//enable_restoration
 
     // pack color config
-    put_ui(bs, sh.color_config.BitDepth == BITDEPTH_10 ? 1 : 0, 1);
+    put_ui(bs, ips.bit_depth == BITDEPTH_10 ? 1 : 0, 1);//high_bitdepth
+
     if (sh.seq_profile != 1)
         put_ui(bs, 0, 1);; //mono_chrome
 
@@ -2516,6 +2530,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     /* allow encoding more than srcyuv_frames */
     display_order = display_order % srcyuv_frames;
     frame_size = ips.width * ips.height * 3 / 2; /* for YUV420 */
+    if (ips.bit_depth == BITDEPTH_10) frame_size *= 2; // 2 Byte for each color if 10bit color depth
     frame_start = display_order * frame_size;
 
     mmap_start = frame_start & (~0xfff);
@@ -2532,11 +2547,15 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
         src_U = src_Y + ips.width * ips.height;
         src_V = NULL;
     } else if (srcyuv_fourcc == VA_FOURCC_IYUV ||
-               srcyuv_fourcc == VA_FOURCC_YV12) {
+               srcyuv_fourcc == VA_FOURCC_YV12 ||
+               srcyuv_fourcc == VA_FOURCC_P010) {
         src_Y = srcyuv_ptr;
         if (srcyuv_fourcc == VA_FOURCC_IYUV) {
             src_U = src_Y + ips.width * ips.height;
             src_V = src_U + (ips.width / 2) * (ips.height / 2);
+        } else if (srcyuv_fourcc == VA_FOURCC_P010) {
+            src_U = src_Y + ips.width * ips.height * 2;
+            src_V = src_U + (ips.width / 2) * (ips.height / 2) * 2;
         } else { /* YV12 */
             src_V = src_Y + ips.width * ips.height;
             src_U = src_V + (ips.width / 2) * (ips.height / 2);

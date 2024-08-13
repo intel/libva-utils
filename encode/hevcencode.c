@@ -822,8 +822,13 @@ void fill_sps_header(struct  SeqParamSet *sps, int id)
         sps->conformance_window_flag = 0;
     }
 
-    sps->bit_depth_luma_minus8 = 0;
-    sps->bit_depth_chroma_minus8 = 0;
+    if (srcyuv_fourcc == VA_FOURCC_IYUV) {
+        sps->bit_depth_luma_minus8 = 0;
+        sps->bit_depth_chroma_minus8 = 0;
+    } else if (srcyuv_fourcc == VA_FOURCC_P010) {
+        sps->bit_depth_luma_minus8 = 2;
+        sps->bit_depth_chroma_minus8 = 2;
+    }
     sps->log2_max_pic_order_cnt_lsb_minus4 = MAX((ceil(log(ip_period - 1 + 4) / log(2.0)) + 3), 4) - 4;
     sps->sps_sub_layer_ordering_info_present_flag = 0;
     for (i = 0; i < MAX_TEMPORAL_SUBLAYERS; i++) {
@@ -1675,6 +1680,8 @@ static char *fourcc_to_string(int fourcc)
         return "YV12";
     case VA_FOURCC_UYVY:
         return "UYVY";
+    case VA_FOURCC_P010:
+        return "P010";
     default:
         return "Unknown";
     }
@@ -1692,6 +1699,8 @@ static int string_to_fourcc(char *str)
         fourcc = VA_FOURCC_YV12;
     else if (!strncmp(str, "UYVY", 4))
         fourcc = VA_FOURCC_UYVY;
+    else if (!strncmp(str, "P010", 4))
+        fourcc = VA_FOURCC_P010;
     else {
         printf("Unknow FOURCC\n");
         fourcc = -1;
@@ -1762,7 +1771,7 @@ static int print_help(void)
     printf("   --rcmode <NONE|CBR|VBR|VCM|CQP|VBR_CONTRAINED>\n");
     printf("   --syncmode: sequentially upload source, encoding, save result, no multi-thread\n");
     printf("   --srcyuv <filename> load YUV from a file\n");
-    printf("   --fourcc <NV12|IYUV|YV12> source YUV fourcc\n");
+    printf("   --fourcc <NV12|IYUV|YV12|P010> source YUV fourcc\n");
     printf("   --recyuv <filename> save reconstructed YUV into a file\n");
     printf("   --enablePSNR calculate PSNR of recyuv vs. srcyuv\n");
     printf("   --profile 1: main 2 : main10\n");
@@ -2061,7 +2070,7 @@ static int init_va(void)
         exit(1);
     } else {
         config_attrib[config_attrib_num].type = VAConfigAttribRTFormat;
-        config_attrib[config_attrib_num].value = VA_RT_FORMAT_YUV420;
+        config_attrib[config_attrib_num].value = (srcyuv_fourcc == VA_FOURCC_P010) ? VA_RT_FORMAT_YUV420_10 : VA_RT_FORMAT_YUV420;
         config_attrib_num++;
     }
 
@@ -2244,19 +2253,25 @@ static int setup_encode()
                                &config_attrib[0], config_attrib_num, &config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
+    int format = (srcyuv_fourcc == VA_FOURCC_P010) ? VA_RT_FORMAT_YUV420_10 : VA_RT_FORMAT_YUV420;
+    VASurfaceAttrib attrs[2] = { {VASurfaceAttribMemoryType, VA_SURFACE_ATTRIB_SETTABLE,{VAGenericValueTypeInteger, 0},},
+                                 {VASurfaceAttribPixelFormat,VA_SURFACE_ATTRIB_SETTABLE,{VAGenericValueTypeInteger, 0},} };
+    attrs[0].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_VA;
+    attrs[1].value.value.i = (srcyuv_fourcc == VA_FOURCC_P010) ? srcyuv_fourcc : VA_FOURCC_NV12;
+
     /* create source surfaces */
     va_status = vaCreateSurfaces(va_dpy,
-                                 VA_RT_FORMAT_YUV420, frame_width_aligned, frame_height_aligned,
+                                 format, frame_width_aligned, frame_height_aligned,
                                  &src_surface[0], SURFACE_NUM,
-                                 NULL, 0);
+                                 &attrs[0], 2);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* create reference surfaces */
     va_status = vaCreateSurfaces(
                     va_dpy,
-                    VA_RT_FORMAT_YUV420, frame_width_aligned, frame_height_aligned,
+                    format, frame_width_aligned, frame_height_aligned,
                     &ref_surface[0], SURFACE_NUM,
-                    NULL, 0
+                    &attrs[0], 2
                 );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
@@ -2276,6 +2291,7 @@ static int setup_encode()
     free(tmp_surfaceid);
 
     codedbuf_size = ((long long int) frame_width_aligned * frame_height_aligned * 400) / (16 * 16);
+    if (srcyuv_fourcc == VA_FOURCC_P010) codedbuf_size *= 2;
 
     for (i = 0; i < SURFACE_NUM; i++) {
         /* create coded buffer once for all
@@ -2856,6 +2872,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     /* allow encoding more than srcyuv_frames */
     display_order = display_order % srcyuv_frames;
     frame_size = frame_width * frame_height * 3 / 2; /* for YUV420 */
+    if (srcyuv_fourcc == VA_FOURCC_P010) frame_size *= 2;
     frame_start = display_order * frame_size;
 
     mmap_start = frame_start & (~0xfff);
@@ -2881,6 +2898,10 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
             src_V = src_Y + frame_width * frame_height;
             src_U = src_V + (frame_width / 2) * (frame_height / 2);
         }
+    } else if (srcyuv_fourcc == VA_FOURCC_P010) {
+        src_Y = srcyuv_ptr;
+        src_U = src_Y + frame_width * frame_height * 2;
+        src_V = src_U + (frame_width / 2) * (frame_height / 2) * 2;
     } else {
         printf("Unsupported source YUV format\n");
         exit(1);
