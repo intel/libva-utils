@@ -358,10 +358,10 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
 
         //For 10 bit color shift from LSB to MSB
         if (src_fourcc == VA_FOURCC_P010) {
-            memcpy(Y_row, src_Y + row * src_width * 2, src_width * 2);
             unsigned short *pTmp = (unsigned short*)Y_row;
+            unsigned short *y_ptr = src_Y + row * src_width * 2;
             for (unsigned int x = 0; x < src_width; x++) {
-                *(pTmp++) = (*pTmp << 6);
+                *(pTmp++) = (*(y_ptr++) << 6);
             }
         }
         else 
