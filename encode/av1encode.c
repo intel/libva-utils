@@ -794,7 +794,8 @@ static void process_cmdline(int argc, char *argv[])
 
             int ret = fstat(fileno(srcyuv_fp), &tmp);
             CHECK_CONDITION(ret == 0);
-            srcyuv_frames = tmp.st_size / (ips.width * ips.height * 1.5);
+            int pixel_size = (srcyuv_fourcc == VA_FOURCC_P010) ? 2 : 1;
+            srcyuv_frames = tmp.st_size / (ips.width * ips.height * 1.5 * pixel_size);
             printf("Source YUV file %s with %llu frames\n", ips.srcyuv, srcyuv_frames);
 
             if (ips.frame_count == 0)

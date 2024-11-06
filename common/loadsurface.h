@@ -364,8 +364,10 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
                 *(pTmp++) = (*(y_ptr++) << 6);
             }
         }
-        else 
-        memcpy(Y_row, src_Y + row * src_width, src_width);
+        else {
+            memcpy(Y_row, src_Y + row * src_width, src_width);
+        }
+
     }
 
     for (row = 0; row < src_height / 2; row++) {
