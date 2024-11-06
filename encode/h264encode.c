@@ -1032,7 +1032,8 @@ static int process_cmdline(int argc, char *argv[])
             struct stat tmp;
 
             fstat(fileno(srcyuv_fp), &tmp);
-            srcyuv_frames = tmp.st_size / (frame_width * frame_height * 1.5);
+            int pixel_size = (srcyuv_fourcc == VA_FOURCC_P010) ? 2 : 1;
+            srcyuv_frames = tmp.st_size / (frame_width * frame_height * 1.5 * pixel_size);
             printf("Source YUV file %s with %llu frames\n", srcyuv_fn, srcyuv_frames);
 
             if (frame_count == 0)
