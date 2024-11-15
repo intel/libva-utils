@@ -73,37 +73,36 @@ static unsigned char mpeg2_clip[] = {
  * please see picture mpeg2-I.jpg for bitstream details
  */
 static VAPictureParameterBufferMPEG2 pic_param = {
-    horizontal_size: 16,
-    vertical_size: 16,
-    forward_reference_picture: 0xffffffff,
-    backward_reference_picture: 0xffffffff,
-    picture_coding_type: 1,
-    f_code: 0xffff,
+    .horizontal_size = 16,
+    .vertical_size = 16,
+    .forward_reference_picture = 0xffffffff,
+    .backward_reference_picture = 0xffffffff,
+    .picture_coding_type = 1,
+    .f_code = 0xffff,
     {
         {
-            intra_dc_precision: 0,
-            picture_structure: 3,
-            top_field_first: 0,
-            frame_pred_frame_dct: 1,
-            concealment_motion_vectors: 0,
-            q_scale_type: 0,
-            intra_vlc_format: 0,
-            alternate_scan: 0,
-            repeat_first_field: 0,
-            progressive_frame: 1,
-            is_first_field: 1
+            .intra_dc_precision = 0,
+            .picture_structure = 3,
+            .top_field_first = 0,
+            .frame_pred_frame_dct = 1,
+            .concealment_motion_vectors = 0,
+            .q_scale_type = 0,
+            .intra_vlc_format = 0,
+            .alternate_scan = 0,
+            .repeat_first_field = 0,
+            .progressive_frame = 1,
+            .is_first_field = 1
         },
     }
 };
 
 /* see MPEG2 spec65 for the defines of matrix */
 static VAIQMatrixBufferMPEG2 iq_matrix = {
-    load_intra_quantiser_matrix: 1,
-    load_non_intra_quantiser_matrix: 1,
-    load_chroma_intra_quantiser_matrix: 0,
-    load_chroma_non_intra_quantiser_matrix: 0,
-intra_quantiser_matrix:
-    {
+    .load_intra_quantiser_matrix = 1,
+    .load_non_intra_quantiser_matrix = 1,
+    .load_chroma_intra_quantiser_matrix = 0,
+    .load_chroma_non_intra_quantiser_matrix = 0,
+    .intra_quantiser_matrix = {
         8, 16, 16, 19, 16, 19, 22, 22,
         22, 22, 22, 22, 26, 24, 26, 27,
         27, 27, 26, 26, 26, 26, 27, 27,
@@ -112,25 +111,22 @@ intra_quantiser_matrix:
         34, 34, 37, 38, 37, 35, 35, 34,
         35, 38, 38, 40, 40, 40, 48, 48,
         46, 46, 56, 56, 58, 69, 69, 83
-    },
-non_intra_quantiser_matrix:
-    {16},
-chroma_intra_quantiser_matrix:
-    {0},
-chroma_non_intra_quantiser_matrix:
-    {0}
+     },
+    .non_intra_quantiser_matrix = {16},
+    .chroma_intra_quantiser_matrix = {0},
+    .chroma_non_intra_quantiser_matrix ={0}
 };
 
 #if 1
 static VASliceParameterBufferMPEG2 slice_param = {
-    slice_data_size: 150,
-    slice_data_offset: 0,
-    slice_data_flag: 0,
-    macroblock_offset: 38, /* 4byte + 6bits=38bits */
-    slice_horizontal_position: 0,
-    slice_vertical_position: 0,
-    quantiser_scale_code: 2,
-    intra_slice_flag: 0
+    .slice_data_size = 150,
+    .slice_data_offset = 0,
+    .slice_data_flag = 0,
+    .macroblock_offset = 38, /* 4byte + 6bits=38bits */
+    .slice_horizontal_position = 0,
+    .slice_vertical_position = 0,
+    .quantiser_scale_code = 2,
+    .intra_slice_flag = 0
 };
 #endif
 

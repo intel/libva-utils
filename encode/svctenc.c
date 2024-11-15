@@ -1183,9 +1183,9 @@ upload_task(struct svcenc_context *ctx, unsigned int display_order, int surface)
     u_src = ctx->frame_data_buffer + y_size; /* UV offset for NV12 */
     v_src = ctx->frame_data_buffer + y_size + u_size;
 
-    y_dst = surface_p + surface_image.offsets[0];
-    u_dst = surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
-    v_dst = surface_p + surface_image.offsets[2];
+    y_dst = (unsigned char *)surface_p + surface_image.offsets[0];
+    u_dst = (unsigned char *)surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
+    v_dst = (unsigned char *)surface_p + surface_image.offsets[2];
 
     /* Y plane */
     for (row = 0; row < surface_image.height; row++) {

@@ -555,9 +555,10 @@ vp9enc_upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
     u_src = newImageBuffer + y_size; /* UV offset for NV12 */
     v_src = newImageBuffer + y_size + u_size;
 
-    y_dst = surface_p + surface_image.offsets[0];
-    u_dst = surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
-    v_dst = surface_p + surface_image.offsets[2];
+    y_dst = (unsigned char *)surface_p + surface_image.offsets[0];
+    u_dst = (unsigned char *)surface_p +
+            surface_image.offsets[1]; /* UV offset for NV12 */
+    v_dst = (unsigned char *)surface_p + surface_image.offsets[2];
 
     /* Y plane */
     for (row = 0; row < surface_image.height; row++) {
@@ -582,8 +583,8 @@ vp9enc_upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
         const int U = surface_image.format.fourcc == VA_FOURCC_I420 ? 1 : 2;
         const int V = surface_image.format.fourcc == VA_FOURCC_I420 ? 2 : 1;
 
-        u_dst = surface_p + surface_image.offsets[U];
-        v_dst = surface_p + surface_image.offsets[V];
+        u_dst = (unsigned char *)surface_p + surface_image.offsets[U];
+        v_dst = (unsigned char *)surface_p + surface_image.offsets[V];
 
         for (row = 0; row < surface_image.height / 2; row++) {
             memcpy(u_dst, u_src, surface_image.width / 2);

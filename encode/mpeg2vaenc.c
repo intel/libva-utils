@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <time.h>
+#include <math.h>
 #include <pthread.h>
 
 #include <va/va.h>
@@ -277,9 +278,9 @@ find_frame_rate_code(const VAEncSequenceParameterBufferMPEG2 *seq_param)
 
     for (i = 0; i < sizeof(frame_rate_tab) / sizeof(frame_rate_tab[0]); i++) {
 
-        if (abs(1000 * frame_rate_tab[i].value - 1000 * frame_rate_value) < delta) {
+        if (fabsf(1000 * frame_rate_tab[i].value - 1000 * frame_rate_value) < delta) {
             code = frame_rate_tab[i].code;
-            delta = abs(1000 * frame_rate_tab[i].value - 1000 * frame_rate_value);
+            delta = fabsf(1000 * frame_rate_tab[i].value - 1000 * frame_rate_value);
         }
     }
 
@@ -466,9 +467,9 @@ upload_yuv_to_surface(void *data)
     u_src = ctx->frame_data_buffer + y_size; /* UV offset for NV12 */
     v_src = ctx->frame_data_buffer + y_size + u_size;
 
-    y_dst = surface_p + surface_image.offsets[0];
-    u_dst = surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
-    v_dst = surface_p + surface_image.offsets[2];
+    y_dst = (unsigned char *)surface_p + surface_image.offsets[0];
+    u_dst = (unsigned char *)surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
+    v_dst = (unsigned char *)surface_p + surface_image.offsets[2];
 
     /* Y plane */
     for (row = 0; row < surface_image.height; row++) {
