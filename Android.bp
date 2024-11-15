@@ -1,0 +1,210 @@
+/*
+ * Copyright (c) 2024 Intel Corporation. All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sub license, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the
+ * next paragraph) shall be included in all copies or substantial portions
+ * of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+ * IN NO EVENT SHALL PRECISION INSIGHT AND/OR ITS SUPPLIERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package {
+    default_applicable_licenses: ["external_libva-utils_license"],
+}
+
+license {
+    name: "external_libva-utils_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+        "SPDX-license-identifier-BSD",
+        "SPDX-license-identifier-ISC",
+        "SPDX-license-identifier-MIT",
+    ],
+    license_text: [
+        "LICENSE",
+    ],
+}
+
+cc_defaults {
+    name: "libva_utils_defaults",
+    shared_libs: [
+        "libva",
+        "libdl",
+        "libcutils",
+        "libutils",
+        "libgui",
+        "libdrm",
+    ],
+
+    vendor: true,
+    enabled: false,
+    arch: {
+        x86_64: {
+            enabled: true,
+        },
+    },
+}
+
+cc_library {
+    name: "libva_utils_common",
+
+    defaults: ["libva_utils_defaults"],
+
+    srcs: [
+        "common/va_display.c",
+        "common/va_display_drm.c",
+    ],
+
+    export_include_dirs: ["common/"],
+
+    cflags: ["-DHAVE_VA_DRM"],
+
+    visibility: [":__subpackages__"],
+}
+
+cc_defaults {
+    name: "libva_utils_bin_defaults",
+
+    defaults: ["libva_utils_defaults"],
+
+    shared_libs: [
+        "libva_utils_common",
+    ],
+}
+
+// decode directory
+
+cc_binary {
+    name: "vampeg2vldemo",
+
+    srcs: [
+        "decode/mpeg2vldemo.cpp",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "valoadjpeg",
+
+    srcs: [
+        "decode/loadjpeg.c",
+        "decode/tinyjpeg.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+// encode directory
+
+cc_binary {
+    name: "vah264encode",
+
+    srcs: [
+        "encode/h264encode.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "vaavcenc",
+
+    srcs: [
+        "encode/avcenc.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "vavp8enc",
+
+    srcs: [
+        "encode/vp8enc.c",
+    ],
+
+    cflags: [
+        "-Wno-gnu-variable-sized-type-not-at-end",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "vavp9enc",
+
+    srcs: [
+        "encode/vp9enc.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "vajpegenc",
+
+    srcs: [
+        "encode/jpegenc.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "vampeg2vaenc",
+
+    srcs: [
+        "encode/mpeg2vaenc.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+cc_binary {
+    name: "vasvctenc",
+
+    srcs: [
+        "encode/svctenc.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+// vainfo directory
+
+cc_binary {
+    name: "vainfo",
+
+    srcs: [
+        "vainfo/vainfo.c",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}
+
+// videoprocess directory
+cc_binary {
+    name: "vavpp",
+
+    srcs: [
+        "videoprocess/vavpp.cpp",
+    ],
+
+    defaults: ["libva_utils_bin_defaults"],
+}

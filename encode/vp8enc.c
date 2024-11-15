@@ -343,10 +343,10 @@ vp8enc_upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id, int current_f
     vaMapBuffer(vaapi_context.display, surface_image.buf, &surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
 
-
-    y_dst = surface_p + surface_image.offsets[0];
-    u_dst = surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
-    v_dst = surface_p + surface_image.offsets[2];
+    y_dst = (unsigned char *)surface_p + surface_image.offsets[0];
+    u_dst = (unsigned char *)surface_p +
+            surface_image.offsets[1]; /* UV offset for NV12 */
+    v_dst = (unsigned char *)surface_p + surface_image.offsets[2];
 
     /* Y plane */
     for (row = 0; row < surface_image.height; row++) {
@@ -371,8 +371,8 @@ vp8enc_upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id, int current_f
         const int U = surface_image.format.fourcc == VA_FOURCC_I420 ? 1 : 2;
         const int V = surface_image.format.fourcc == VA_FOURCC_I420 ? 2 : 1;
 
-        u_dst = surface_p + surface_image.offsets[U];
-        v_dst = surface_p + surface_image.offsets[V];
+        u_dst = (unsigned char *)surface_p + surface_image.offsets[U];
+        v_dst = (unsigned char *)surface_p + surface_image.offsets[V];
 
         for (row = 0; row < surface_image.height / 2; row++) {
             memcpy(u_dst, u_src, surface_image.width / 2);
@@ -598,6 +598,7 @@ VASurfaceID vp8enc_get_unused_surface()
     fprintf(stderr, "Error: No unused surface found!\n");
     assert(0);
 
+    return VA_INVALID_ID;  // should never happen
 }
 
 VASurfaceID vp8enc_update_reference(VASurfaceID current_surface, VASurfaceID second_copy_surface, bool refresh_with_recon, int copy_flag)

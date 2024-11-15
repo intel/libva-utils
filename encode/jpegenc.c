@@ -521,8 +521,8 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
     u_src = newImageBuffer + y_size; /* UV offset for NV12 */
     v_src = newImageBuffer + y_size + u_size;
 
-    y_dst = surface_p + surface_image.offsets[0];
-    u_dst = surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
+    y_dst = (unsigned char *)surface_p + surface_image.offsets[0];
+    u_dst = (unsigned char *)surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
 
     if ((yuvComp.fourcc_val == VA_FOURCC_NV12) || (yuvComp.fourcc_val == VA_FOURCC_I420) ||
         (yuvComp.fourcc_val == VA_FOURCC_Y800)) {
@@ -1001,4 +1001,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
