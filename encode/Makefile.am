@@ -90,11 +90,15 @@ vp8enc_LDADD       = \
 	-lpthread -lm
 
 av1encode_SOURCES	= av1encode.c
+av1encode_SOURCES   += libmebo/libmebo_interface.cc
 av1encode_CFLAGS	= -I$(top_srcdir)/common -g
 av1encode_LDADD	= \
        	$(LIBVA_LIBS) \
 	$(top_builddir)/common/libva-display.la \
-	-lpthread -lm
+	-lpthread -lm \
+	-ldl \
+	-lmebo \
+	-laom_av1_rc
 
 valgrind:	$(bin_PROGRAMS) $(noinst_PROGRAMS)
 	for a in $(bin_PROGRAMS) $(noinst_PROGRAMS); do \
