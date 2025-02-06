@@ -58,8 +58,6 @@
  * */
 #define BITSTREAM_ALLOCATE_STEPPING 1024 // in byte
 
-#define SWBRC 1
-
 struct __bitstream {
     uint8_t *buffer; // managed by u8 to avoid swap every 4byte
     int bit_offset;
