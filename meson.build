@@ -81,8 +81,8 @@ if get_option('brc_controller') != 'disabled'
                                             '/usr/local/lib/x86_64-linux-gnu'],
                                       required:false)
   if not brc_controller_dep.found() and require_brc_controller
-     error('Libbrc_controller library not installed in local path or system:
-            local path=/encode/libmebo/libs')
+     error('''Libbrc_controller library not installed in local path or system:
+            local path=/encode/libmebo/libs''')
   endif
 
   if brc_controller_dep.found()
