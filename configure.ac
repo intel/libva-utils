@@ -93,6 +93,156 @@ AC_ARG_ENABLE([tests],
                     [build unit tests @<:@default=no@:>@])],
     [], [enable_tests="no"])
 
+AC_ARG_ENABLE(mebo,
+    [AC_HELP_STRING([--enable-mebo],
+                    [Enable LibMebo Support @<:@default=yes@:>@])],
+    [], [enable_mebo="yes"])
+
+AC_ARG_ENABLE(aom_av1_rc,
+    [AC_HELP_STRING([--enable-aom_av1_rc],
+                    [Enable AOM AV1 RC Support @<:@default=yes@:>@])],
+    [], [enable_aom_av1_rc="yes"])
+
+AC_ARG_ENABLE(brc,
+    [AC_HELP_STRING([--enable-brc],
+                    [Enable Bitrate RC for VP9,VP8 Support 
+                    @<:@default=yes@:>@])],
+    [], [enable_brc="yes"])
+
+AC_ARG_ENABLE(brc_controller,
+    [AC_HELP_STRING([--enable-brc_controller],
+                    [Enable Bitrate RC_controller 
+                    to support libmebo @<:@default=yes@:>@])],
+    [], [enable_brc_controller="yes"])
+
+#check for LibMebo library
+MEBO_LIBDIR=""
+abs_srcdir="$(cd "$srcdir" && pwd)"
+if test "x$enable_mebo" != "xno" ; then
+      #local path
+      if test -f "$srcdir/encode/libmebo/libs/libmebo.so"; then
+        MEBO_LIBDIR="${abs_srcdir}/encode/libmebo/libs"
+        AC_DEFINE([HAVE_MEBO], [1], [Define if MEBO is available])
+        AC_MSG_NOTICE([MEBO LIB INSTALLED in local path])
+      else
+        AC_MSG_NOTICE([Mebo LIB NOT INSTALLED in local path])
+      #system path
+        if test -f "/usr/local/lib/x86_64-linux-gnu/libmebo.so" ; then
+            MEBO_LIBDIR="/usr/local/lib/x86_64-linux-gnu"
+            AC_DEFINE([HAVE_MEBO], [1], [Define if MEBO is available])
+            AC_MSG_NOTICE([MEBO LIB INSTALLED in SYSTEM path])
+        else
+            AC_MSG_NOTICE([Mebo LIB NOT INSTALLED in system path])
+            if test "x$enable_mebo"="xyes"; then
+                AC_MSG_ERROR(
+                    [LibMebo NOT installed in local path nor in system paths])
+            fi
+        fi
+    fi
+fi
+AC_SUBST([MEBO_LIBDIR])
+
+#CHECK FOR AOM AV1 RC library
+AOM_AV1_RC_LIBDIR=""
+if test "x$enable_aom_av1_rc" != "xno" ; then
+      #local path
+      if test -f "$srcdir/encode/libmebo/libs/aom_libs/libaom_av1_rc.so"; then
+        AOM_AV1_RC_LIBDIR="${abs_srcdir}/encode/libmebo/libs/aom_libs/"
+        AC_DEFINE([HAVE_AOM_AV1_RC], [1], [Define if AOM AV1 RC is available])
+        AC_MSG_NOTICE([AOM AV1 RC LIB INSTALLED in local path])
+      else
+        AC_MSG_NOTICE([AOM AV1 RC LIB NOT INSTALLED in local path])
+      #system path
+        if test -f "/usr/local/lib/x86_64-linux-gnu/libaom_av1_rc.so" ; then
+            AOM_AV1_RC_LIBDIR="/usr/local/lib/x86_64-linux-gnu"
+            AC_DEFINE([HAVE_AOM_AV1_RC], [1], [Define if AOM AV1 RC
+                       is available])
+            AC_MSG_NOTICE([AOM AV1 RC LIB INSTALLED in SYSTEM path])
+      else
+        AC_MSG_NOTICE([AOM AV1 RC LIB NOT INSTALLED in system path])
+        if test "x$enable_aom_av1_rc"="xyes"; then
+            AC_MSG_ERROR(
+                [AOM AV1 RC NOT installed in local path nor in system paths])
+        fi
+    fi
+    fi
+fi
+AC_SUBST([AOM_AV1_RC_LIBDIR])
+
+
+#Check for brc library
+BRC_LIBDIR=""
+if test "x$enable_brc" != "xno" ; then
+      #local path
+      if test -f "$srcdir/encode/libmebo/libs/libbrc.so"; then
+        BRC_LIBDIR="${abs_srcdir}/encode/libmebo/libs"
+        AC_DEFINE([HAVE_BRC], [1], [Define if BRC is available])
+        AC_MSG_NOTICE([BRC LIB INSTALLED in local path])
+      else
+        AC_MSG_NOTICE([BRC LIB NOT INSTALLED in local path])
+      #system path
+        if test -f "/usr/local/lib/x86_64-linux-gnu/libbrc.so" ; then
+            BRC_LIBDIR="/usr/local/lib/x86_64-linux-gnu"
+            AC_DEFINE([HAVE_BRC], [1], [Define if BRC is available])
+            AC_MSG_NOTICE([BRC LIB INSTALLED in SYSTEM path])
+        else
+            AC_MSG_NOTICE([BRC LIB NOT INSTALLED in system path])
+            if test "x$enable_brc"="xyes"; then
+                AC_MSG_ERROR(
+                    [BRC NOT installed in local path nor in system paths])
+            fi
+        fi
+    fi
+fi
+AC_SUBST([BRC_LIBDIR])
+
+#Check for brc_controller library
+BRC_CONTROLLER_LIBDIR=""
+if test "x$enable_brc_controller" != "xno" ; then
+      #local path
+      if test -f "$srcdir/encode/libmebo/libs/libbrc_controller.so"; then
+        BRC_CONTROLLER_LIBDIR="${abs_srcdir}/encode/libmebo/libs"
+        AC_DEFINE([HAVE_BRC_CONTROLLER], [1], [Define if BRC_CONTROLLER 
+                                                is available])
+        AC_MSG_NOTICE([BRC_CONTROLLER LIB INSTALLED in local path])
+      else
+        AC_MSG_NOTICE([BRC_CONTROLLER LIB NOT INSTALLED in local path])
+      #system path
+        if test -f "/usr/local/lib/x86_64-linux-gnu/libbrc_controller.so" ; then
+            BRC_CONTROLLER_LIBDIR="/usr/local/lib/x86_64-linux-gnu"
+            AC_DEFINE([HAVE_BRC_CONTROLLER], [1], [Define if BRC_CONTROLLER 
+                                                      is available])
+            AC_MSG_NOTICE([BRC_CONTROLLER LIB INSTALLED in SYSTEM path])
+        else
+            AC_MSG_NOTICE([BRC LIB NOT INSTALLED in system path])
+            if test "x$enable_brc_controller"="xyes"; then
+                AC_MSG_ERROR(
+                    [BRC_CONTROLLER NOT installed in local path nor 
+                                                          in system paths])
+            fi
+        fi
+    fi
+fi
+AC_SUBST([BRC_CONTROLLER_LIBDIR])
+
+# configure for ldl lib
+AC_CHECK_LIB([dl], [dlopen],
+             [DL_LIBS= "-ldl",
+             AC_DEFINE([HAVE_DLOPEN], [1], [Define if dlopen is available])],
+             [AC_MSG_ERROR([Unable to find library support dlopen, dlsym])])
+AC_SUBST([DL_LIBS])
+
+#libs path
+AC_MSG_NOTICE([LIBRARY PATHS ARE set to])
+AC_MSG_NOTICE([MEBO_LIBDIR is set to  :${MEBO_LIBDIR}])
+AC_MSG_NOTICE([AOM_AV1_RC_LIBDIR is set to  :${AOM_AV1_RC_LIBDIR}])
+AC_MSG_NOTICE([BRC_LIBDIR is set to  :${BRC_LIBDIR}])
+AC_MSG_NOTICE([BRC_CONTROLLER is set to  :${BRC_CONTROLLER_LIBDIR}])
+
+AM_CONDITIONAL([ENABLE_MEBO], [test "x$MEBO_LIBDIR"!="x"])
+AM_CONDITIONAL([ENABLE_AOM_AV1_RC], [test "x$AOM_AV1_RC_LIBDIR"!="x"])
+AM_CONDITIONAL([ENABLE_BRC], [test "x$BRC_LIBDIR"!="x"])
+AM_CONDITIONAL([ENABLE_BRC_CONTROLLER], [test "x$BRC_CONTROLLER_LIBDIR"!="x"])
 
 LT_INIT
 AC_DISABLE_STATIC
