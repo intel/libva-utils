@@ -19,6 +19,12 @@
 #include "va_display.h"
 
 #define ALIGN16(x)  ((x+15)&~15)
+
+#define ALIGN_UNIT(value, alignment) \
+	((value) + (alignment) - 1) / (alignment)
+#define ALIGN(value, alignment) \
+        ALIGN_UNIT(value, alignment) * (alignment)
+
 #define CHECK_VASTATUS(va_status,func)                                  \
     if (va_status != VA_STATUS_SUCCESS) {                               \
         fprintf(stderr,"%s:%s (%d) failed,exit\n", __func__, func, __LINE__); \
@@ -34,7 +40,7 @@
         fprintf(stderr, "Null pointer at:%s:%d\n", __func__, __LINE__); \
         exit(1);                                                \
     }
-    
+
 #define CHECK_CONDITION(cond)                                    \
     if(!(cond))                                                      \
     {                                                           \
@@ -44,15 +50,15 @@
 
 #define CHECK_BS_NULL(p)         \
     CHECK_NULL(p)        \
-    CHECK_NULL(p->buffer)      
+    CHECK_NULL(p->buffer)
 
 #include "loadsurface.h"
 
 /*****
- * 
+ *
  * Bit stream management
- * 
- * 
+ *
+ *
  * */
 #define BITSTREAM_ALLOCATE_STEPPING 1024 // in byte
 
@@ -90,7 +96,7 @@ put_ui(bitstream* bs, uint32_t val, int size_in_bits)
     }
     else
     {
-        
+
         put_ui(bs, val >> (size_in_bits - remain_bits), remain_bits);
         put_ui(bs, val & (~(0xffffffff << (size_in_bits - remain_bits))), size_in_bits - remain_bits);
 
@@ -145,9 +151,9 @@ bitstream_cat(bitstream *bs1, bitstream *bs2)
 
 /******
  * definition of para set structure
- * 
- * 
- * 
+ *
+ *
+ *
  * */
 #define PRIMARY_REF_BITS              3
 #define PRIMARY_REF_NONE              7
@@ -342,21 +348,21 @@ typedef struct FrameHeader
     uint32_t allow_high_precision_mv;
     enum INTERP_FILTER interpolation_filter;
     //uint32_t is_motion_mode_switchable;
-    uint32_t use_ref_frame_mvs; 
+    uint32_t use_ref_frame_mvs;
     uint32_t disable_frame_end_update_cdf;
 
-    uint32_t sbCols; 
+    uint32_t sbCols;
     uint32_t sbRows;
     uint32_t sbSize; //64 by default
 
     struct TileInfoAv1 tile_info;
-    struct QuantizationParams quantization_params; 
+    struct QuantizationParams quantization_params;
 
     uint32_t delta_q_present;
     uint32_t delta_q_res;
 
-    uint32_t delta_lf_present; 
-    uint32_t delta_lf_res; 
+    uint32_t delta_lf_present;
+    uint32_t delta_lf_res;
     uint32_t delta_lf_multi;
 
     uint32_t CodedLossless;
@@ -386,7 +392,7 @@ typedef struct SequenceHeader
 
     uint32_t decoder_model_info_present_flag  ;
 
-    uint32_t operating_points_cnt_minus_1     ; 
+    uint32_t operating_points_cnt_minus_1     ;
     uint32_t operating_point_idc[MAX_NUM_OPERATING_POINTS]                                   ;
     uint32_t seq_level_idx[MAX_NUM_OPERATING_POINTS]                                         ;
     uint32_t seq_tier[MAX_NUM_OPERATING_POINTS]                                              ;
@@ -399,19 +405,19 @@ typedef struct SequenceHeader
     uint32_t frame_id_numbers_present_flag      ; // default 0
 
     uint32_t sbSize                             ; //default 64
-    uint32_t enable_filter_intra                ; 
+    uint32_t enable_filter_intra                ;
     uint32_t enable_intra_edge_filter           ;
     uint32_t enable_interintra_compound         ;
     uint32_t enable_masked_compound             ;
-    uint32_t enable_warped_motion               ; 
-    uint32_t enable_dual_filter                 ; 
+    uint32_t enable_warped_motion               ;
+    uint32_t enable_dual_filter                 ;
     uint32_t enable_order_hint                  ;//default set to 1
     uint32_t enable_jnt_comp                    ;
-    uint32_t enable_ref_frame_mvs               ; 
-    uint32_t seq_force_screen_content_tools     ; 
-    uint32_t seq_force_integer_mv               ; 
+    uint32_t enable_ref_frame_mvs               ;
+    uint32_t seq_force_screen_content_tools     ;
+    uint32_t seq_force_integer_mv               ;
     uint32_t order_hint_bits_minus1             ; //default 8 - 1
-    uint32_t enable_superres                    ; 
+    uint32_t enable_superres                    ;
     uint32_t enable_cdef                        ;
     uint32_t enable_restoration                 ;
 
@@ -432,7 +438,7 @@ struct BitOffsets
 {
     uint32_t QIndexBitOffset;
     uint32_t SegmentationBitOffset;
-    uint32_t SegmentationBitSize; 
+    uint32_t SegmentationBitSize;
     uint32_t LoopFilterParamsBitOffset;
     uint32_t FrameHdrOBUSizeInBits;
     uint32_t FrameHdrOBUSizeByteOffset;
@@ -447,7 +453,7 @@ struct Av1InputParameters
     char* recyuv;
     char* output;
     uint32_t profile;
-    
+
     uint32_t order_hint_bits;
     uint32_t enable_cdef;
     uint32_t width;
@@ -479,20 +485,35 @@ struct Av1InputParameters
     int initial_buffer_fullness;
 };
 
+struct qp_map_struct
+{
+    int buf_size;
+    int pitch_in_unit;
+    int width_in_unit;
+    int height_in_unit;
+    int unit_size;
+    int left_shift_bits;
+    int division_factor;
+    int division_context;
+};
+
+static struct qp_map_struct qp_map_desc;
 
 static  VADisplay va_dpy;
 static  VAProfile av1_profile;
 static  VAEntrypoint entryPoint;
 static  VAConfigAttrib attrib[VAConfigAttribTypeMax];
 static  VAConfigAttrib config_attrib[VAConfigAttribTypeMax];
+static  VAConfigAttribValEncQPMap qp_map_attr;
 static  int config_attrib_num = 0;
 static  VASurfaceID src_surface[SURFACE_NUM];
 static  VABufferID  coded_buf[SURFACE_NUM];
 static  VASurfaceID ref_surface[SURFACE_NUM];
+static  VABufferID  qp_map_buf[SURFACE_NUM];
 static  VAConfigID config_id;
 static  VAContextID context_id;
 
-// buffer 
+// buffer
 static  VAEncSequenceParameterBufferAV1 seq_param;
 static  VAEncPictureParameterBufferAV1 pic_param;
 static  VAEncTileGroupBufferAV1 tile_group_param;
@@ -543,6 +564,8 @@ static unsigned int SavePictureTicks = 0;
 static unsigned int TotalTicks = 0;
 
 static  unsigned int frame_coded = 0;
+static int qp_map_enable = 0;
+static int qp_map_mode = 0; /* 1, delta, 2, absolute */
 
 static  int rc_default_modes[] = {
     VA_RC_VBR,
@@ -632,11 +655,12 @@ static void print_help()
     printf("   --base_q_idx <number> 1-255\n");
     printf("   --normal_mode select VAEntrypointEncSlice as entrypoint\n");
     printf("   --low_power_mode select VAEntrypointEncSliceLP as entrypoint\n");
+    printf("   --qp_map <det|abs> del: Detla QPMap, abs: Absolute QPMap\n");
 
     printf(" sample usage:\n");
     printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --base_q_idx 128  -o ./out.av1 --LDB --low_power_mode\n"
-           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --target_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode\n"
-           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode VBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --vbr_max_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode\n");
+           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --target_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode --qp_map 0\n"
+           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode VBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --vbr_max_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode --qp_map 0\n");
 
 }
 
@@ -662,13 +686,14 @@ static void process_cmdline(int argc, char *argv[])
         {"low_power_mode",  no_argument,        NULL, 15},
         {"target_bitrate",  required_argument,  NULL, 16},
         {"vbr_max_bitrate", required_argument,  NULL, 17},
+        {"qp_map",          required_argument,  NULL, 18},
         {NULL,              no_argument,        NULL, 0 }
     };
 
     int long_index;
     while ((c = getopt_long_only(argc, argv, "n:f:o:t:m:u:d:?", long_opts, &long_index)) != EOF)
     {
-        switch (c) 
+        switch (c)
         {
             case 'n':
                 ips.frame_count = atoi(optarg);
@@ -741,6 +766,16 @@ static void process_cmdline(int argc, char *argv[])
             case 'd':
                 ips.initial_buffer_fullness = atoi(optarg) * 8000;
                 break;
+            case 18: {
+                if (strncmp(optarg, "det", 3) == 0)
+                    qp_map_mode = 1;
+                else if (strncmp(optarg, "abs", 3) == 0)
+                    qp_map_mode = 2;
+
+                if (qp_map_mode)
+                    qp_map_enable = 1;
+            }
+            break;
             case 0:
             case ':':
             case '?':
@@ -871,6 +906,8 @@ static int print_input()
     printf("base_q_index: %d \n", ips.base_qindex);
     printf("target_bitrate: %d bps\n", ips.target_bitrate);
     printf("vbr_max_bitrate: %d bps\n", ips.vbr_max_bitrate);
+    printf("qp_map: %s \n", qp_map_mode ? qp_map_mode == 2 ? "Absolute Mode (only valid in CQP mode, not valid in other RC modes)"
+                                                           : "Delta Mode" : "None");
     return 0;
 }
 
@@ -894,7 +931,7 @@ static int init_va(void)
 
     vaQueryConfigEntrypoints(va_dpy, av1_profile, entrypoints, &num_entrypoints);
     int support_encode = 0;
-    for (int slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) 
+    for (int slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++)
     {
         if (requested_entrypoint == -1) {
             //Select the entry point based on what is avaiable
@@ -1030,14 +1067,47 @@ static int init_va(void)
         config_attrib_num++;
     }
 
+    if (attrib[VAConfigAttribEncQPMap].value != VA_ATTRIB_NOT_SUPPORTED) {
+        printf("Support VAConfigAttribEncQPMap!\n");
+        qp_map_attr.value = attrib[VAConfigAttribEncQPMap].value;
+        /* not necessary */
+        config_attrib[config_attrib_num].type = VAConfigAttribEncQPMap;
+        config_attrib[config_attrib_num].value = attrib[VAConfigAttribEncQPMap].value;
+        config_attrib_num++;
+    } else {
+        printf("Do not support VAConfigAttribEncQPMap!\n");
+        qp_map_enable = 0;
+    }
+
     return 0;
+}
+
+static int qp_map_size(VAConfigAttribValEncQPMap *attr, int width, int height)
+{
+    int width_unit, height_unit, pitch;
+    int block_size = 1 << attr->bits.log2_block_size;
+
+    width_unit = ALIGN_UNIT(width, block_size );
+    height_unit = ALIGN_UNIT(height, block_size );
+    qp_map_desc.unit_size = attr->bits.unit_size_in_bytes;
+    qp_map_desc.left_shift_bits = attr->bits.left_shit_bits;
+    pitch = ALIGN(width_unit * qp_map_desc.unit_size,
+                  (1 << attr->bits.log2_qp_map_width_align));
+    qp_map_desc.width_in_unit = width_unit;
+    qp_map_desc.pitch_in_unit = ALIGN_UNIT(pitch, qp_map_desc.unit_size);
+    qp_map_desc.height_in_unit = ALIGN(height_unit, (1 << attr->bits.log2_qp_map_height_align));
+    qp_map_desc.buf_size = qp_map_desc.pitch_in_unit *
+                           qp_map_desc.height_in_unit * qp_map_desc.unit_size;
+
+    qp_map_desc.division_factor = attr->bits.division_factor;
+    return qp_map_desc.buf_size;
 }
 
 static int setup_encode()
 {
     VAStatus va_status;
     VASurfaceID *tmp_surfaceid;
-    int codedbuf_size, i;
+    int codedbuf_size, i, qp_map_buffer_size;
 
     va_status = vaCreateConfig(va_dpy, av1_profile, entryPoint,
                                &config_attrib[0], config_attrib_num, &config_id);
@@ -1085,7 +1155,14 @@ static int setup_encode()
     codedbuf_size = ((long long int) ips.frame_width_aligned * ips.frame_height_aligned * 400) / (16 * 16);
     if (ips.bit_depth == BITDEPTH_10) codedbuf_size *= 2;
 
+    if (qp_map_enable && qp_map_attr.bits.qp_map_mode)
+        qp_map_buffer_size = qp_map_size(&qp_map_attr, ips.width, ips.height);
+    else
+        qp_map_enable = 0;
+
     for (i = 0; i < SURFACE_NUM; i++) {
+        void *pqp_map = NULL;
+        int i0, j0;
         /* create coded buffer once for all
          * other VA buffers which won't be used again after vaRenderPicture.
          * so APP can always vaCreateBuffer for every frame
@@ -1095,6 +1172,36 @@ static int setup_encode()
         va_status = vaCreateBuffer(va_dpy, context_id, VAEncCodedBufferType,
                                    codedbuf_size, 1, NULL, &coded_buf[i]);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+        if (qp_map_enable) {
+            uint32_t count = i;
+            int offset = 0;
+            uint32_t abs_offset = 0;
+            if (qp_map_mode == 1)
+                abs_offset = 0;
+            else if (qp_map_mode == 2)
+                abs_offset = 150;      /* in absolute mode, use 150 as the start qindex for tests */
+            va_status = vaCreateBuffer(va_dpy, context_id, VAEncQPMapBufferType, qp_map_buffer_size, 1, NULL, &qp_map_buf[i]);
+            CHECK_VASTATUS(va_status, "VAEncQPMapBuffer");
+
+            vaMapBuffer(va_dpy,
+                        qp_map_buf[i],
+                        (void **)&pqp_map);
+            /* testing pqp map, use a simple value to try*/
+            for (j0 = 0; j0 < qp_map_desc.height_in_unit; j0++)
+                for (i0 = 0; i0 < qp_map_desc.width_in_unit; i0++) {
+                    count++;
+                    offset = i0 + j0 * qp_map_desc.pitch_in_unit;
+                    /* (count % 5) * dvision_factor is to check the output variations */
+                    if (qp_map_desc.unit_size == 2) {
+                        *(((short *)pqp_map + offset)) = (((abs_offset + 5 * (count % 5)) * qp_map_desc.division_factor) / qp_map_desc.division_factor) << qp_map_desc.left_shift_bits;
+                    }
+                    else if (qp_map_desc.unit_size == 4) {
+                        *(((int *)pqp_map + offset)) = (((abs_offset + 5 * (count % 5)) * qp_map_desc.division_factor) / qp_map_desc.division_factor) << qp_map_desc.left_shift_bits;
+                    }
+                }
+            vaUnmapBuffer(va_dpy, qp_map_buf[i]);
+        }
     }
 
     return 0;
@@ -1107,8 +1214,11 @@ static int release_encode()
     vaDestroySurfaces(va_dpy, &src_surface[0], SURFACE_NUM);
     vaDestroySurfaces(va_dpy, &ref_surface[0], SURFACE_NUM);
 
-    for (i = 0; i < SURFACE_NUM; i++)
+    for (i = 0; i < SURFACE_NUM; i++) {
         vaDestroyBuffer(va_dpy, coded_buf[i]);
+        if (qp_map_enable)
+            vaDestroyBuffer(va_dpy, qp_map_buf[i]);
+    }
 
     vaDestroyContext(va_dpy, context_id);
     vaDestroyConfig(va_dpy, config_id);
@@ -1193,7 +1303,7 @@ fill_pps_header(uint64_t displaying_order)
     for(uint8_t i = 0; i < REFS_PER_FRAME; i++)
         fh.ref_frame_idx[i] = 0;
     fh.allow_high_precision_mv = 0;
-    fh.interpolation_filter = 0; 
+    fh.interpolation_filter = 0;
     fh.use_ref_frame_mvs = 0;
     fh.disable_frame_end_update_cdf = 0;
     fh.sbCols = ((fh.FrameWidth+63)&(~63))/64;
@@ -1292,7 +1402,7 @@ va_render_packed_data(bitstream* bs)
     unsigned char *packedpic_buffer = bs->buffer;
     VAStatus va_status;
 
-    packedheader_param_buffer.type = VAEncPackedHeaderPicture; 
+    packedheader_param_buffer.type = VAEncPackedHeaderPicture;
     packedheader_param_buffer.bit_length = length_in_bits;
     packedheader_param_buffer.has_emulation_bytes = 0;
 
@@ -1360,7 +1470,7 @@ render_ivf_header()
     0x00000000,
     0,0,0 };
 
-    // 
+    //
     uint8_t* hdr = (uint8_t*) ivfSeqHeader;
     for (size_t i = 0; i < 44; i++)
     {
@@ -1489,7 +1599,7 @@ render_rc_buffer()
     va_status = vaRenderPicture(va_dpy, context_id, &render_id, 1);
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
-    if (rc_param_buf != VA_INVALID_ID) 
+    if (rc_param_buf != VA_INVALID_ID)
     {
         vaDestroyBuffer(va_dpy, rc_param_buf);
         rc_param_buf = VA_INVALID_ID;
@@ -1527,7 +1637,7 @@ render_hrd_buffer()
     va_status = vaRenderPicture(va_dpy, context_id, &render_id, 1);
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
-    if (param_buf != VA_INVALID_ID) 
+    if (param_buf != VA_INVALID_ID)
     {
         vaDestroyBuffer(va_dpy, param_buf);
         param_buf = VA_INVALID_ID;
@@ -1564,7 +1674,7 @@ render_fr_buffer()
     va_status = vaRenderPicture(va_dpy, context_id, &render_id, 1);
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
-    if (param_buf != VA_INVALID_ID) 
+    if (param_buf != VA_INVALID_ID)
     {
         vaDestroyBuffer(va_dpy, param_buf);
         param_buf = VA_INVALID_ID;
@@ -1619,7 +1729,7 @@ pack_obu_header(bitstream *bs, int obu_type, uint32_t obu_extension_flag)
 }
 
 static void
-pack_obu_header_size(bitstream *bs, 
+pack_obu_header_size(bitstream *bs,
                     uint32_t value,
                     uint8_t fixed_output_len)
 {
@@ -1668,13 +1778,13 @@ static void
 pack_operating_points(bitstream* bs)
 {
     put_ui(bs, sh.operating_points_cnt_minus_1, 5);
-    
+
     for(uint8_t i = 0;i <= sh.operating_points_cnt_minus_1;i++)
     {
         //put_ui(bs, sh.operating_point_idc[i], 12);
         put_ui(bs, sh.operating_point_idc[i] >> 4, 8);
         put_ui(bs, sh.operating_point_idc[i] & 0x9f, 4);
-        
+
         put_ui(bs, sh.seq_level_idx[i], 5);
         if(sh.seq_level_idx[i]>7)
             put_ui(bs, sh.seq_tier[i], 1);
@@ -1744,7 +1854,7 @@ pack_seq_data(bitstream *bs)
 
     if (sh.seq_profile != 1)
         put_ui(bs, 0, 1);; //mono_chrome
-        
+
     put_ui(bs, sh.color_config.color_description_present_flag, 1);
 
     if (sh.color_config.color_description_present_flag)
@@ -1783,7 +1893,7 @@ build_packed_seq_header(bitstream* bs)
     //calculate data size
     uint32_t obu_size_in_bytes = (obu_data.bit_offset + 7) / 8;
     pack_obu_header_size(bs, obu_size_in_bytes, 0);
-    
+
     bitstream_cat(bs, &obu_data);
 }
 
@@ -1982,7 +2092,7 @@ pack_loop_filter_params(bitstream* bs)
 {
     if (fh.CodedLossless || fh.allow_intrabc)
         return;
-    
+
     put_ui(bs, fh.loop_filter_params.loop_filter_level[0], 6);//loop_filter_level[0]
     put_ui(bs, fh.loop_filter_params.loop_filter_level[1], 6);//loop_filter_level[1]
 
@@ -2048,7 +2158,7 @@ pack_lr_params(bitstream* bs)
     {
         put_ui(bs, fh.lr_params.lr_unit_shift, 1);
 
-        if (sh.sbSize != 1 && fh.lr_params.lr_unit_shift) 
+        if (sh.sbSize != 1 && fh.lr_params.lr_unit_shift)
         {
             put_ui(bs, fh.lr_params.lr_unit_extra_shift, 1);
         }
@@ -2120,7 +2230,7 @@ pack_frame_header(bitstream* bs)
 
     uint8_t error_resilient_mode = 0;
     pack_error_resilient(bs);
-    
+
     put_ui(bs, fh.disable_cdf_update, 1);
     put_ui(bs, fh.allow_screen_content_tools, 1);
     put_ui(bs, fh.frame_size_override_flag, 1);
@@ -2171,7 +2281,7 @@ pack_frame_header(bitstream* bs)
     pack_lr_params(bs);
 
     const uint8_t tx_mode_select = fh.TxMode ? 1 : 0;
-   
+
     if (!fh.CodedLossless)
     put_ui(bs, tx_mode_select, 1); //tx_mode_select
 
@@ -2229,6 +2339,45 @@ build_packed_pic_header(bitstream* bs)
     bitstream_cat(bs, &tmp);
 }
 
+static int render_qp_map(void)
+{
+    VABufferID misc_parameter_qp_map_buf_id;
+    VAStatus va_status;
+    VAEncMiscParameterBuffer *misc_param;
+    VAEncMiscParameterQPMap *misc_qp_map_param;
+
+    va_status = vaCreateBuffer(va_dpy, context_id,
+                               VAEncMiscParameterBufferType,
+                               sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterQPMap),
+                               1,
+                               NULL,
+                               &misc_parameter_qp_map_buf_id);
+    CHECK_VASTATUS(va_status, "vaQPMapCreateBuffer");
+
+    vaMapBuffer(va_dpy,
+                misc_parameter_qp_map_buf_id,
+                (void **)&misc_param);
+    misc_param->type = VAEncMiscParameterTypeQPMap;
+    misc_qp_map_param = (VAEncMiscParameterQPMap *)misc_param->data;
+
+    vaUnmapBuffer(va_dpy, misc_parameter_qp_map_buf_id);
+
+    if (qp_map_mode == 1)
+        misc_qp_map_param->qp_map_mode = VA_ENC_QP_MAP_MODE_DELTA;
+    else
+        misc_qp_map_param->qp_map_mode = VA_ENC_QP_MAP_MODE_ABSOLUTE;
+
+    misc_qp_map_param->qp_map = qp_map_buf[current_slot];
+
+    va_status = vaRenderPicture(va_dpy, context_id, &misc_parameter_qp_map_buf_id, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");;
+    if (misc_parameter_qp_map_buf_id != VA_INVALID_ID)
+        vaDestroyBuffer(va_dpy, misc_parameter_qp_map_buf_id);
+
+    return 0;
+}
+
+
 static void
 render_packedpicture()
 {
@@ -2275,7 +2424,7 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
 
     //bitstream
     pps->coded_buf = coded_buf[current_slot];
-    
+
     for(int k = 0; k < REFS_PER_FRAME; k++)
         pps->ref_frame_idx[k] = 0;
 
@@ -2325,7 +2474,7 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
     fill_ref_params(pps);
     pps->refresh_frame_flags = fh.refresh_frame_flags;
 
-    // //loop filter  
+    // //loop filter
     // auto& lf = fh.loop_filter_params;
     pps->filter_level[0] = (uint8_t)(fh.loop_filter_params.loop_filter_level[0]);
     pps->filter_level[1] = (uint8_t)(fh.loop_filter_params.loop_filter_level[1]);
@@ -2350,7 +2499,7 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
     pps->mode_control_flags.bits.skip_mode_present = fh.skip_mode_present;
 
     //tile
-    pps->tile_cols = 1; 
+    pps->tile_cols = 1;
     pps->width_in_sbs_minus_1[0] = (uint16_t)(((fh.UpscaledWidth+63)&(~63))/64 - 1);
 
 
@@ -2798,7 +2947,7 @@ static int encode_frames(void)
         pthread_create(&encode_thread, NULL, storage_task_thread, NULL);
 
     for (current_frame_encoding = 0; current_frame_encoding < ips.frame_count; current_frame_encoding++) {
-        encoding2display_order(current_frame_encoding, ips.intra_period, 
+        encoding2display_order(current_frame_encoding, ips.intra_period,
                                &current_frame_display, &current_frame_type);
 
         printf("%s : %lld %s : %lld type : %d\n", "encoding order", current_frame_encoding, "Display order", current_frame_display, current_frame_type);
@@ -2825,12 +2974,12 @@ static int encode_frames(void)
 
         // render headers
         // first frame send IVF sequence header + frame header
-        if(current_frame_encoding == 0) 
+        if(current_frame_encoding == 0)
         {
             render_ivf_header(); //44 byte, 32byte sequence ivf header, 12 byte frame ivf header
             len_ivf_header = 44;
         }
-        else 
+        else
         {
             render_ivf_frame_header(); //12 byte frame ivf header
             len_ivf_header = 12;
@@ -2855,8 +3004,10 @@ static int encode_frames(void)
         }
 
 
-        render_packedpicture(); //render packed frame header 
+        render_packedpicture(); //render packed frame header
         render_picture(); //render frame PPS buffer
+        if (qp_map_enable)
+            render_qp_map();
         render_tile_group(); //render tile group buffer
         RenderPictureTicks += GetTickCount() - tmp;
 
@@ -2901,9 +3052,9 @@ static int calc_PSNR(double *psnr)
             srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
             recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
-                if (srcyuv_ptr != MAP_FAILED) 
+                if (srcyuv_ptr != MAP_FAILED)
                     munmap(srcyuv_ptr, fourM);
-                if (recyuv_ptr != MAP_FAILED) 
+                if (recyuv_ptr != MAP_FAILED)
                     munmap(recyuv_ptr, fourM);
                 printf("Failed to mmap YUV files\n");
                 return 1;
