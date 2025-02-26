@@ -74,6 +74,10 @@
 #define PROFILE_IDC_BASELINE    66
 #define PROFILE_IDC_MAIN        77
 #define PROFILE_IDC_HIGH        100
+#define ALIGN_UNIT(value, alignment) \
+	((value) + (alignment) - 1) / (alignment)
+#define ALIGN(value, alignment) \
+        ALIGN_UNIT(value, alignment) * (alignment)
 
 #define BITSTREAM_ALLOCATE_STEPPING     4096
 
@@ -83,9 +87,11 @@ static  VADisplay va_dpy;
 static  VAProfile h264_profile = ~0;
 static  VAConfigAttrib attrib[VAConfigAttribTypeMax];
 static  VAConfigAttrib config_attrib[VAConfigAttribTypeMax];
+static VAConfigAttribValEncQPMap qp_map_attr;
 static  int config_attrib_num = 0, enc_packed_header_idx;
 static  VASurfaceID src_surface[SURFACE_NUM];
 static  VABufferID  coded_buf[SURFACE_NUM];
+static  VABufferID  qp_map_buf[SURFACE_NUM];
 static  VASurfaceID ref_surface[SURFACE_NUM];
 static  VAConfigID config_id;
 static  VAContextID context_id;
@@ -128,6 +134,8 @@ static  int minimal_qp = 0;
 static  int intra_period = 30;
 static  int intra_idr_period = 60;
 static  int ip_period = 1;
+static  int qp_map_enable = 0;
+static  int qp_map_mode = 0; /* 1, delta, 2, absolute */
 static  int rc_mode = -1;
 static  int rc_default_modes[] = {
     VA_RC_VBR,
@@ -174,6 +182,16 @@ static unsigned int SyncPictureTicks = 0;
 static unsigned int SavePictureTicks = 0;
 static unsigned int TotalTicks = 0;
 
+struct qp_map_struct
+{
+    int buf_size;
+    int pitch_in_unit;
+    int width_in_unit;
+    int height_in_unit;
+    int unit_size;
+    int left_shift_bits;
+};
+static struct qp_map_struct qp_map_desc;
 //Default entrypoint for Encode
 static VAEntrypoint requested_entrypoint = -1;
 static VAEntrypoint selected_entrypoint = -1;
@@ -869,6 +887,7 @@ static int print_help(void)
     printf("   --entropy <0|1>, 1 means cabac, 0 cavlc\n");
     printf("   --profile <BP|MP|HP>\n");
     printf("   --low_power <num> 0: Normal mode, 1: Low power mode, others: auto mode\n");
+    printf("   --qp_map <det|abs> del: Detla QPMap, abs: Absolute QPMap\n");
     return 0;
 }
 
@@ -895,6 +914,7 @@ static int process_cmdline(int argc, char *argv[])
         {"entropy", required_argument, NULL, 17 },
         {"profile", required_argument, NULL, 18 },
         {"low_power", required_argument, NULL, 19 },
+        {"qp_map", required_argument, NULL, 20 },
         {NULL, no_argument, NULL, 0 }
     };
     int long_index;
@@ -997,6 +1017,16 @@ static int process_cmdline(int argc, char *argv[])
                 requested_entrypoint =  VAEntrypointEncSliceLP; //low power 1
             else
                 requested_entrypoint = -1;
+        }
+        break;
+        case 20: {
+            if (strncmp(optarg, "det", 3) == 0)
+                qp_map_mode = 1;
+            else if (strncmp(optarg, "abs", 3) == 0)
+                qp_map_mode = 2;
+
+            if (qp_map_mode)
+                qp_map_enable = 1;
         }
         break;
         case ':':
@@ -1297,15 +1327,43 @@ static int init_va(void)
         printf("Support VAConfigAttribEncMacroblockInfo\n");
     }
 
+    if (attrib[VAConfigAttribEncQPMap].value != VA_ATTRIB_NOT_SUPPORTED) {
+        qp_map_attr.value = attrib[VAConfigAttribEncQPMap].value;
+        printf("Support VAConfigAttribEncQPMap!\n");
+    } else {
+        qp_map_enable = 0;
+        printf("Do not support VAConfigAttribEncQPMap!\n");
+    }
+
     free(entrypoints);
     return 0;
+}
+
+static int qp_map_size(VAConfigAttribValEncQPMap *attr, int width, int height)
+{
+    int width_unit, height_unit, pitch;
+    int block_size = 1 << attr->bits.log2_block_size;
+
+    width_unit = ALIGN_UNIT(width, block_size );
+    height_unit = ALIGN_UNIT(height, block_size );
+   qp_map_desc.unit_size = attr->bits.unit_size_in_bytes;
+    qp_map_desc.left_shift_bits = attr->bits.left_shit_bits;
+    pitch = ALIGN(width_unit * qp_map_desc.unit_size,
+                  (1 << attr->bits.log2_qp_map_width_align));
+    qp_map_desc.width_in_unit = width_unit;
+    qp_map_desc.pitch_in_unit = ALIGN_UNIT(pitch, qp_map_desc.unit_size);
+    qp_map_desc.height_in_unit = ALIGN(height_unit, (1 << attr->bits.log2_qp_map_height_align));
+    qp_map_desc.buf_size = qp_map_desc.pitch_in_unit *
+                           qp_map_desc.height_in_unit * qp_map_desc.unit_size;
+
+    return qp_map_desc.buf_size;
 }
 
 static int setup_encode()
 {
     VAStatus va_status;
     VASurfaceID *tmp_surfaceid;
-    int codedbuf_size, i;
+    int codedbuf_size, i, qp_map_buffer_size;
 
     va_status = vaCreateConfig(va_dpy, h264_profile, selected_entrypoint,
                                &config_attrib[0], config_attrib_num, &config_id);
@@ -1350,7 +1408,14 @@ static int setup_encode()
     codedbuf_size = ((long long int)frame_width_mbaligned * frame_height_mbaligned * 400) / (16 * 16);
     if (srcyuv_fourcc == VA_FOURCC_P010) codedbuf_size *= 2;
 
+    if (qp_map_enable && qp_map_attr.bits.qp_map_mode)
+        qp_map_buffer_size = qp_map_size(&qp_map_attr, frame_width, frame_height);
+    else
+        qp_map_enable = 0;
+
     for (i = 0; i < SURFACE_NUM; i++) {
+        void *pqp_map = NULL;
+        int i0, j0;
         /* create coded buffer once for all
          * other VA buffers which won't be used again after vaRenderPicture.
          * so APP can always vaCreateBuffer for every frame
@@ -1360,6 +1425,34 @@ static int setup_encode()
         va_status = vaCreateBuffer(va_dpy, context_id, VAEncCodedBufferType,
                                    codedbuf_size, 1, NULL, &coded_buf[i]);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+        if (qp_map_enable) {
+            uint32_t count = i;
+            int offset = 0;
+            uint32_t abs_offset = 0;
+            if (qp_map_mode == 1)
+                abs_offset = 0;
+            else if (qp_map_mode == 2)
+                abs_offset = 30;
+
+            va_status = vaCreateBuffer(va_dpy, context_id, VAEncQPMapBufferType, qp_map_buffer_size, 1, NULL, &qp_map_buf[i]);
+            CHECK_VASTATUS(va_status, "VAEncQPMapBuffer");
+
+            vaMapBuffer(va_dpy,
+                        qp_map_buf[i],
+                        (void **)&pqp_map);
+            /* testing pqp map, use a simple value to try*/
+            for (j0 = 0; j0 < qp_map_desc.height_in_unit; j0++)
+                for (i0 = 0; i0 < qp_map_desc.width_in_unit; i0++) {
+                    count++;
+                    offset = i0 + j0 * qp_map_desc.pitch_in_unit;
+                    if (qp_map_desc.unit_size == 2)
+                        *(((short *)pqp_map + offset)) = (abs_offset + (count % 5)) << qp_map_desc.left_shift_bits;
+                    else if (qp_map_desc.unit_size == 4)
+                        *(((int *)pqp_map + offset)) = (abs_offset + (count % 5)) << qp_map_desc.left_shift_bits;
+                }
+            vaUnmapBuffer(va_dpy, qp_map_buf[i]);
+        }
     }
 
     return 0;
@@ -1545,6 +1638,9 @@ static int render_sequence(void)
     va_status = vaRenderPicture(va_dpy, context_id, &render_id[0], 2);
     CHECK_VASTATUS(va_status, "vaRenderPicture");;
 
+    for (int i = 0; i < 2; i++)
+        vaDestroyBuffer(va_dpy, render_id[i]);
+
     if (misc_priv_type != 0) {
         va_status = vaCreateBuffer(va_dpy, context_id,
                                    VAEncMiscParameterBufferType,
@@ -1557,6 +1653,8 @@ static int render_sequence(void)
         vaUnmapBuffer(va_dpy, misc_param_tmpbuf);
 
         va_status = vaRenderPicture(va_dpy, context_id, &misc_param_tmpbuf, 1);
+        CHECK_VASTATUS(va_status, "vaRenderPicture");
+        vaDestroyBuffer(va_dpy, misc_param_tmpbuf);
     }
 
     return 0;
@@ -1640,6 +1738,7 @@ static int render_picture(void)
     va_status = vaRenderPicture(va_dpy, context_id, &pic_param_buf, 1);
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
+    vaDestroyBuffer(va_dpy, pic_param_buf);
     return 0;
 }
 
@@ -1677,6 +1776,8 @@ static int render_packedsequence(void)
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     free(packedseq_buffer);
+    for (int i = 0; i < 2; i++)
+        vaDestroyBuffer(va_dpy, render_id[i]);
 
     return 0;
 }
@@ -1715,6 +1816,8 @@ static int render_packedpicture(void)
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     free(packedpic_buffer);
+    for (int i = 0; i < 2; i++)
+        vaDestroyBuffer(va_dpy, render_id[i]);
 
     return 0;
 }
@@ -1821,6 +1924,42 @@ static int render_hrd(void)
 
 #endif
 
+static int render_qp_map(void)
+{
+    VABufferID misc_parameter_qp_map_buf_id;
+    VAStatus va_status;
+    VAEncMiscParameterBuffer *misc_param;
+    VAEncMiscParameterQPMap *misc_qp_map_param;
+
+    va_status = vaCreateBuffer(va_dpy, context_id,
+                               VAEncMiscParameterBufferType,
+                               sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterQPMap),
+                               1,
+                               NULL,
+                               &misc_parameter_qp_map_buf_id);
+    CHECK_VASTATUS(va_status, "vaQPMapCreateBuffer");
+
+    vaMapBuffer(va_dpy,
+                misc_parameter_qp_map_buf_id,
+                (void **)&misc_param);
+    misc_param->type = VAEncMiscParameterTypeQPMap;
+    misc_qp_map_param = (VAEncMiscParameterQPMap *)misc_param->data;
+
+    vaUnmapBuffer(va_dpy, misc_parameter_qp_map_buf_id);
+    if (qp_map_mode == 1)
+        misc_qp_map_param->qp_map_mode = VA_ENC_QP_MAP_MODE_DELTA;
+    else
+        misc_qp_map_param->qp_map_mode = VA_ENC_QP_MAP_MODE_ABSOLUTE;
+    misc_qp_map_param->qp_map = qp_map_buf[current_slot];
+
+    va_status = vaRenderPicture(va_dpy, context_id, &misc_parameter_qp_map_buf_id, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");;
+    if (misc_parameter_qp_map_buf_id != VA_INVALID_ID)
+        vaDestroyBuffer(va_dpy, misc_parameter_qp_map_buf_id);
+
+    return 0;
+}
+
 static void render_packedslice()
 {
     VAEncPackedHeaderParameterBuffer packedheader_param_buffer;
@@ -1854,6 +1993,8 @@ static void render_packedslice()
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
     free(packedslice_buffer);
+    for (int i = 0; i < 2; i++)
+        vaDestroyBuffer(va_dpy, render_id[i]);
 }
 
 static int render_slice(void)
@@ -1912,6 +2053,7 @@ static int render_slice(void)
 
     va_status = vaRenderPicture(va_dpy, context_id, &slice_param_buf, 1);
     CHECK_VASTATUS(va_status, "vaRenderPicture");
+    vaDestroyBuffer(va_dpy, slice_param_buf);
 
     return 0;
 }
@@ -1977,7 +2119,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
         } else { /* YV12 */
             src_V = src_Y + frame_width * frame_height;
             src_U = src_V + (frame_width / 2) * (frame_height / 2);
-        } 
+        }
     } else {
         printf("Unsupported source YUV format\n");
         if (mmap_ptr)
@@ -2289,6 +2431,8 @@ static int encode_frames(void)
             //    render_packedsei();
             //render_hrd();
         }
+        if (qp_map_enable)
+            render_qp_map();
         render_slice();
         RenderPictureTicks += GetTickCount() - tmp;
 
@@ -2321,8 +2465,11 @@ static int release_encode()
     vaDestroySurfaces(va_dpy, &src_surface[0], SURFACE_NUM);
     vaDestroySurfaces(va_dpy, &ref_surface[0], SURFACE_NUM);
 
-    for (i = 0; i < SURFACE_NUM; i++)
+    for (i = 0; i < SURFACE_NUM; i++) {
         vaDestroyBuffer(va_dpy, coded_buf[i]);
+        if (qp_map_enable)
+            vaDestroyBuffer(va_dpy, qp_map_buf[i]);
+    }
 
     vaDestroyContext(va_dpy, context_id);
     vaDestroyConfig(va_dpy, config_id);
@@ -2366,6 +2513,10 @@ static int print_input()
     else
         printf("INPUT: Rec   Clip   : Save reconstructed frame into %s (fourcc %s)\n", recyuv_fn,
                fourcc_to_string(srcyuv_fourcc));
+
+    if (qp_map_enable)
+        printf("INPUT: QP mapmode   : %s\n", qp_map_mode ? qp_map_mode == 2 ? "Absolute Mode (only valid in CQP mode, not valid in Rate control modes" : "Delta mode" : "None");
+
 
     printf("\n\n"); /* return back to startpoint */
 
