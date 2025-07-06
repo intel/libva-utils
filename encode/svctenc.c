@@ -1719,12 +1719,7 @@ svcenc_update_picture_parameter_buffer(struct svcenc_context *ctx,
     pic_param->pic_fields.bits.reference_pic_flag = !!current_surface->is_ref;
     pic_param->pic_fields.bits.deblocking_filter_control_present_flag = 1;
 
-    if (ctx->profile_idc == PROFILE_IDC_BASELINE ||
-        ctx->profile_idc == PROFILE_IDC_MAIN ||
-        ctx->profile_idc == PROFILE_IDC_SCALABLE_BASELINE)
-        pic_param->pic_fields.bits.transform_8x8_mode_flag = 0;
-    else
-        pic_param->pic_fields.bits.transform_8x8_mode_flag = 0;
+    pic_param->pic_fields.bits.transform_8x8_mode_flag = 0;
 
     /* Allocate the new picture parameter buffer */
     va_status = vaCreateBuffer(ctx->va_dpy,

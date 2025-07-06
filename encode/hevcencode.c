@@ -2702,7 +2702,7 @@ static int render_packedpicture(void)
     }
     if (packedpic_data_bufid != VA_INVALID_ID) {
         vaDestroyBuffer(va_dpy, packedpic_data_bufid);
-        packedpic_para_bufid = VA_INVALID_ID;
+        packedpic_data_bufid = VA_INVALID_ID;
     }
 
     return 0;
