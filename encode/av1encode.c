@@ -2536,6 +2536,7 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     if(encode_order == 0)
     {
         //first frame
+        CHECK_CONDITION(coded_size >= 44);
         unsigned int ivf_size = coded_size - 32 - 12;
         ret = fseek(coded_fp, frame_start + 32, SEEK_SET);
         CHECK_CONDITION(ret == 0);
@@ -2547,6 +2548,7 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     else
     {
         //other frames
+        CHECK_CONDITION(coded_size >= 12);
         unsigned int ivf_size = coded_size - 12;
         ret = fseek(coded_fp, frame_start, SEEK_SET);
         CHECK_CONDITION(ret == 0);
