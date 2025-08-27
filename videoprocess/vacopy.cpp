@@ -241,7 +241,6 @@ create_surface(VASurfaceID * p_surface_id, SurfInfo &surf)
             extBuffer.num_buffers = 1;
             extBuffer.buffers = &(surf.ptrb);
             extBuffer.buffers[0] = (uintptr_t)(surf.pBufBase);
-            extBuffer.flags = VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR;
 
             va_status = vaCreateSurfaces(va_dpy, surf.format, surf.width, surf.height, p_surface_id, 1, surfaceAttrib, 3);
             CHECK_VASTATUS(va_status, "vaCreateSurfaces");

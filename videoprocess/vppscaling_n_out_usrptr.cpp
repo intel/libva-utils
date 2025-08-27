@@ -277,7 +277,6 @@ create_surface(VPP_ImageInfo &img_info, VASurfaceID * p_surface_id)
         extBuffer.buffers = &(img_info.ptrb);
         extBuffer.buffers[0] = (uintptr_t)(img_info.pUserBase);
 
-        extBuffer.flags = VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR;
         va_status = vaCreateSurfaces(va_dpy, img_info.rtformat, img_info.pic_width, img_info.pic_height, p_surface_id, 1, surfaceAttrib, 3);
         CHECK_VASTATUS(va_status, "vaCreateSurfaces");
     }
