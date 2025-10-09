@@ -1,0 +1,1970 @@
+{
+ "name": "Intel-Media",
+ "id": "{4E1C52C9-1D1E-4470-A110-25A9F3EBE1A5}",
+ "events": {
+  "1": {
+   "name": "AllocateResource",
+   "op": {
+    "0": "t_AllocateResource",
+    "1": "t_Empty",
+    "2": "t_Status"
+   }
+  },
+  "3": {
+   "name": "RegisterResource",
+   "op": {
+    "3": "t_RegisterResource2"
+   }
+  },
+  "4": {
+   "name": "PatchResource",
+   "op": {
+    "3": "t_PatchResource2"
+   }
+  },
+  "12": {
+   "name": "Codecl_NV12ToP010",
+   "op": {
+    "1": "t_Empty",
+    "2": "t_NV12ToP010Exit"
+   }
+  },
+  "15": {
+   "name": "Codec_Decode",
+   "op": {
+    "1": "t_Codec_DecodeEntry",
+    "2": "t_Status"
+   }
+  },
+  "19": {
+   "name": "CodecHal_Create",
+   "op": {
+    "0": "t_CodecHal_CreateEntry"
+   }
+  },
+  "20": {
+   "name": "CodecHal_Execute",
+   "op": {
+    "1": "t_CodecHal_ExecuteEntry",
+    "2": "t_Status"
+   }
+  },
+  "21": {
+   "name": "CodecHal_Destroy",
+   "op": {
+    "1": "t_Empty",
+    "2": "t_Empty"
+   }
+  },
+  "77": {
+   "name": "MediaCopy",
+   "op": {
+    "1": "t_Empty",
+    "2": "t_Empty"
+   }
+  },
+  "78": {
+   "name": "Mos_Batch_Submit",
+   "op": {
+    "0": "t_Mos_Batch",
+    "1": "t_Empty",
+    "2": "t_Status"
+   }
+  },
+  "79": {
+   "name": "VA_Render",
+   "op": {
+    "0": "t_vaRender_info",
+    "1": "t_vaRender_start",
+    "2": "t_vaRender_end"
+   }
+  },
+  "80": {
+   "name": "VA_SyncSurface",
+   "op": {
+    "0": "t_BoHandle",
+    "1": "t_VAId",
+    "2": "t_Empty"
+   }
+  },
+  "81": {
+   "name": "VA_GetImage",
+   "op": {
+    "1": "t_vaGetImage_start",
+    "2": "t_Empty"
+   }
+  },
+  "82": {
+   "name": "VA_Config",
+   "op": {
+    "0": "t_VAConfig"
+   }
+  },
+  "83": {
+   "name": "VA_CreateSurface",
+   "op": {
+    "0": "t_VA_CreateSurface_info",
+    "1": "t_VA_CreateSurface_start",
+    "2": "t_VAIdArray"
+   }
+  },
+  "84": {
+   "name": "VA_DestroySurface",
+   "op": {
+    "1": "t_VAIdArray",
+    "2": "t_Empty"
+   }
+  },
+  "85": {
+   "name": "VA_DeriveImage",
+   "op": {
+    "1": "t_Empty",
+    "2": "t_VA_derive_end"
+   }
+  },
+  "86": {
+   "name": "VA_MapBuffer",
+   "op": {
+    "0": "t_vaMapBuf_info",
+    "1": "t_vaMapBuf_start",
+    "2": "t_Empty"
+   }
+  },
+  "87": {
+   "name": "VA_UnmapBuffer",
+   "op": {
+    "1": "t_VAId",
+    "2": "t_Empty"
+   }
+  },
+  "88": {
+   "name": "VA_LockSurface",
+   "op": {
+    "1": "t_VAId",
+    "2": "t_Empty"
+   }
+  },
+  "89": {
+   "name": "VA_UnlockSurface",
+   "op": {
+    "1": "t_VAId",
+    "2": "t_Empty"
+   }
+  },
+  "90": {
+   "name": "VA_CreateBuffer",
+   "op": {
+    "0": "t_VA_CreateSurface_info",
+    "1": "t_VA_Buffer_start",
+    "2": "t_VAId"
+   }
+  },
+  "91": {
+   "name": "VA_DestroyBuffer",
+   "op": {
+    "1": "t_VAId",
+    "2": "t_Empty"
+   }
+  },
+  "92": {
+   "name": "VA_CreateImage",
+   "op": {
+    "1": "t_vaCreateImage_start",
+    "2": "t_VAId"
+   }
+  },
+  "93": {
+   "name": "VA_DestroyImage",
+   "op": {
+    "1": "t_VAId",
+    "2": "t_Empty"
+   }
+  },
+  "94": {
+   "name": "VA_PutImage",
+   "op": {
+    "1": "t_vaPutImage_start",
+    "2": "t_Empty"
+   }
+  },
+  "95": {
+   "name": "MediaPipeExecute",
+   "op": {
+    "0": "t_MeidaPipeExecInfo",
+    "1": "t_Empty",
+    "2": "t_Empty"
+   }
+  },
+  "96": {
+   "name": "ActivatePacket",
+   "op": {
+    "0": "t_ActivatePacketInfo"
+   }
+  },
+  "113": {
+   "name": "GPU_ContextCreate",
+   "op": {
+    "1": "t_GPUContextCreate_start",
+    "2": "t_GPUContextCreate_end"
+   }
+  },
+  "114": {
+   "name": "GPU_ContextDestroy",
+   "op": {
+    "1": "t_GPUContextDestroy_start",
+    "2": "t_Empty"
+   }
+  },
+  "115": {
+   "name": "Picture_Param_AVC",
+   "op": {
+    "0": "t_PicParamAvc_info"
+   }
+  },
+  "119": {
+   "name": "MediaRuntimeLog",
+   "op": {
+    "0": "t_RTLog0",
+    "1": "t_RTLog1",
+    "2": "t_RTLog2",
+    "3": "t_RTLog3",
+    "4": "t_RTLog4",
+    "5": "t_RTLog5",
+    "6": "t_RTLog6",
+    "7": "t_RTLog7"
+   }
+  },
+  "121": {
+   "name": "MediaRuntimeError",
+   "op": {
+    "0": "t_RTError0",
+    "1": "t_RTError1",
+    "2": "t_RTError2",
+    "3": "t_RTError3",
+    "4": "t_Empty",
+    "5": "t_Empty",
+    "6": "t_Empty",
+    "7": "t_Empty"
+   }
+  }
+ },
+ "maps": {
+  "MosFormat": {
+   "type": 0,
+   "0": "Any",
+   "1": "A8R8G8B8",
+   "2": "X8R8G8B8",
+   "3": "A8B8G8R8",
+   "4": "X8B8G8R8",
+   "5": "A16B16G16B16",
+   "6": "A16R16G16B16",
+   "7": "R5G6B5",
+   "8": "R32U",
+   "9": "R32F",
+   "10": "R8G8B8",
+   "11": "RGBP",
+   "12": "BGRP",
+   "13": "YUY2",
+   "14": "YUYV",
+   "15": "YVYU",
+   "16": "UYVY",
+   "17": "VYUY",
+   "18": "Y216",
+   "19": "Y210",
+   "20": "Y416",
+   "21": "AYUV",
+   "22": "AUYV",
+   "23": "Y410",
+   "24": "400P",
+   "25": "NV12",
+   "26": "NV12_UnAligned",
+   "27": "NV21",
+   "28": "NV11",
+   "29": "NV11_UnAligned",
+   "30": "P208",
+   "31": "P208_UnAligned",
+   "32": "IMC1",
+   "33": "IMC2",
+   "34": "IMC3",
+   "35": "IMC4",
+   "36": "422H",
+   "37": "422V",
+   "38": "444P",
+   "39": "411P",
+   "40": "411R",
+   "41": "I420",
+   "42": "IYUV",
+   "43": "YV12",
+   "44": "YVU9",
+   "45": "AI44",
+   "46": "IA44",
+   "47": "P8",
+   "48": "A8P8",
+   "49": "A8",
+   "50": "L8",
+   "51": "A4L4",
+   "52": "A8L8",
+   "53": "IRW0",
+   "54": "IRW1",
+   "55": "IRW2",
+   "56": "IRW3",
+   "57": "IRW4",
+   "58": "IRW5",
+   "59": "IRW6",
+   "60": "IRW7",
+   "61": "STMM",
+   "62": "Buffer",
+   "63": "Buffer_2D",
+   "64": "V8U8",
+   "65": "R32S",
+   "66": "R8U",
+   "67": "R8G8UN",
+   "68": "R8G8SN",
+   "69": "G8R8_G8B8",
+   "70": "R16U",
+   "71": "R16S",
+   "72": "R16UN",
+   "73": "RAW",
+   "74": "Y8",
+   "75": "Y1",
+   "76": "Y16U",
+   "77": "Y16S",
+   "78": "L16",
+   "79": "D16",
+   "80": "R10G10B10A2",
+   "81": "B10G10R10A2",
+   "82": "P016",
+   "83": "P010",
+   "84": "YV12_Planar",
+   "85": "A16B16G16R16F",
+   "86": "R16G16UN",
+   "87": "R16F",
+   "88": "P210",
+   "89": "P216",
+   "90": "A16R16G16B16F",
+   "91": "YUY2V",
+   "92": "Y216V",
+   "93": "D32F",
+   "94": "D24S8UN",
+   "95": "D32S8X24_Float",
+   "96": "R16",
+   "97": "R16G16S",
+   "98": "R24G8",
+   "99": "R32",
+   "100": "R32G8X24",
+   "101": "R8UN",
+   "102": "R32G32B32A32F"
+  },
+  "HwCommandType": {
+   "type": 0,
+   "0": "NULL",
+   "1": "MiBatchBufferStart",
+   "2": "MiCLFLUSH",
+   "3": "MiConditionalBatchBufferEnd",
+   "4": "MiCopyMemMem",
+   "5": "MiFlushDw",
+   "6": "MiLocalRegistreMem",
+   "7": "MiReportPerfCount",
+   "8": "MiSemaphoreMbox",
+   "9": "MiSemaphoneSignal",
+   "10": "MiSemaphoneWait",
+   "11": "MiStoreDataImm",
+   "12": "MiStoreDataIndex",
+   "13": "MiStoreRegisterMem",
+   "14": "MiUpdateGTT",
+   "15": "PipeControl",
+   "16": "HWCommandsMax",
+   "17": "MiBatchBufferStartRCS",
+   "18": "MfxPipeBufAddr",
+   "19": "MfxIndirectObjBaseAddr",
+   "20": "MfxBspBufBaseAddr",
+   "21": "MfxAvcDirctMode",
+   "22": "MfxVC1DirctMode",
+   "23": "MfxVp8Pic",
+   "24": "MfxDbkObject",
+   "25": "HucDmem",
+   "26": "HucVirtualAddr",
+   "27": "HucIndirectObjBaseAddr",
+   "28": "VdencPipeBufAddr",
+   "29": "MediaSurfaceState",
+   "30": "MediaSurfaceStateAdv",
+   "31": "MediaStateBaseAddr",
+   "32": "VeboxState",
+   "33": "VeboxDiIecp",
+   "34": "VeboxTilingConvert",
+   "35": "SfcState",
+   "36": "MiAtomic",
+   "37": "MfxCCBaseAddrState",
+   "38": "VeboxSurfaceState"
+  },
+  "PatchType": {
+   "type": 0,
+   "0": "BaseAddress",
+   "1": "Pitch",
+   "2": "UV_Y_Offset",
+   "3": "BindOnly",
+   "4": "UV_BaseAddress",
+   "5": "V_BaseAddress",
+   "6": "V_Y_Offset"
+  },
+  "CodecStandard": {
+   "type": 0,
+   "0": "MPEG2",
+   "1": "VC1",
+   "2": "AVC",
+   "3": "JPEG",
+   "5": "VP8",
+   "63": "DECRYPT",
+   "64": "HEVC",
+   "65": "VP9"
+  },
+  "CodecFunction": {
+   "type": 1,
+   "0x0": "INVALID",
+   "0x1": "DECODE",
+   "0x2": "ENC",
+   "0x4": "PAK",
+   "0x8": "ENC_PAK",
+   "0x10": "HYBRIDPAK",
+   "0x20": "ENC_VDENC_PAK",
+   "0x40": "CREATE_OS_INSTANCE",
+   "0x80": "DECODE_DECRYPT",
+   "0x100": "DEMO_COPY",
+   "0x200": "FEI_PRE_ENC",
+   "0x400": "FEI_ENC",
+   "0x800": "FEI_PAK",
+   "0x1000": "FEI_ENC_PAK"
+  },
+  "vaCtxType": {
+   "type": 0,
+   "0": "ContextNone",
+   "1": "ContextDecoder",
+   "2": "ContextEncoder",
+   "3": "ContextVP",
+   "4": "ContextMedia",
+   "5": "ContextCM",
+   "6": "ContextProtected",
+   "7": "ContextMFE"
+  },
+  "VaProfile": {
+   "type": 0,
+   "0": "MPEG2Simple",
+   "1": "MPEG2Main",
+   "2": "MPEG4Simple",
+   "3": "MPEG4AdvancedSimple",
+   "4": "MPEG4Main",
+   "5": "H264Baseline",
+   "6": "H264Main",
+   "7": "H264High",
+   "8": "VC1Simple",
+   "9": "VC1Main",
+   "10": "VC1Advance",
+   "11": "H263Baseline",
+   "12": "JPEGBaseline",
+   "13": "H264ContrainedBaseline",
+   "14": "VP8Version0_3",
+   "15": "H264MultiviewHigh",
+   "16": "H264StereoHigt",
+   "17": "HEVCMain",
+   "18": "HEVCMain10",
+   "19": "VP9Profile0",
+   "20": "VP9Profile1",
+   "21": "VP9Profile2",
+   "22": "VP9Profile3",
+   "23": "HEVCMain12",
+   "24": "HEVCMain422_10",
+   "25": "HEVCMain422_12",
+   "26": "HEVCMain444",
+   "27": "HEVCMain444_10",
+   "28": "HEVCMain444_12",
+   "29": "HEVCSccMain",
+   "30": "HEVCSccMain10",
+   "31": "HEVCSccMain444",
+   "32": "AV1Profile0",
+   "33": "AV1Profile1",
+   "34": "HEVCSccMain444_10"
+  },
+  "VaEntryPoint": {
+   "type": 0,
+   "1": "VLD",
+   "2": "IZZ",
+   "3": "IDCT",
+   "4": "MoComp",
+   "5": "Deblocking",
+   "6": "EncodeSlice",
+   "7": "EncodePicture",
+   "8": "EncodeSliceLP",
+   "10": "VideoProcess",
+   "11": "FEI",
+   "12": "Stats"
+  },
+  "vaDDIFormat": {
+   "type": 0,
+   "0": "NV12",
+   "1": "NV21",
+   "2": "Buffer",
+   "3": "2DBuffer",
+   "4": "PerfBuffer",
+   "5": "X8R8G8B8",
+   "6": "A8R8G8B8",
+   "7": "X8B8G8R8",
+   "8": "A8B8G8R8",
+   "9": "R8G8B8A8",
+   "10": "R5G6B5",
+   "11": "R10G10B10A2",
+   "12": "B10G10A10A2",
+   "13": "R10G10B10X2",
+   "14": "B10G10R10X2",
+   "15": "CPU",
+   "16": "YUY2",
+   "17": "UYVY",
+   "18": "YV12",
+   "19": "IYUV",
+   "20": "I420",
+   "21": "422H",
+   "22": "444P",
+   "23": "411P",
+   "24": "400P",
+   "25": "422V",
+   "26": "IMC3",
+   "27": "P010",
+   "28": "R8G8B8",
+   "29": "RGBP",
+   "30": "BGRP",
+   "31": "P016",
+   "32": "Y210",
+   "33": "Y216",
+   "34": "AYUV",
+   "35": "Y410",
+   "36": "Y416",
+   "37": "Y8",
+   "38": "Y16S",
+   "39": "Y16U",
+   "40": "VYUY",
+   "41": "YVYU",
+   "42": "A16R16G16B16",
+   "43": "A16B16G16R16",
+   "44": "P012"
+  },
+  "I195_tile": {
+   "type": 0,
+   "0": "None",
+   "1": "TilingX",
+   "2": "TilingY"
+  },
+  "vaFormat": {
+   "type": 1,
+   "0x1": "YUV420",
+   "0x2": "YUV422",
+   "0x4": "YUV444",
+   "0x8": "YUV411",
+   "0x10": "YUV400",
+   "0x100": "YUV420_10bit",
+   "0x200": "YUV422_10bit",
+   "0x400": "YUV44_10bit",
+   "0x1000": "YUV420_12bit",
+   "0x2000": "YUV422_12bit",
+   "0x4000": "YUV444_12bit",
+   "0x10000": "RGB16",
+   "0x20000": "RGB32",
+   "0x100000": "RGBP",
+   "0x200000": "RGB32_10bit",
+   "0x80000000": "Protected"
+  },
+  "vaBufferType": {
+   "type": 0,
+   "0": "VAPictureParameterBuffer",
+   "1": "VAIQMatrixBuffer",
+   "2": "VABitPlaneBuffer",
+   "3": "VASliceGroupMapBuffer",
+   "4": "VASliceParameterBuffer",
+   "5": "VASliceDataBuffer",
+   "6": "VAMacroblockParameterBuffer",
+   "7": "VAResidualDataBuffer",
+   "8": "VADeblockingParameterBuffer",
+   "9": "VAImageBuffer",
+   "10": "VAProtectedSliceDataBuffer",
+   "11": "VAQMatrixBuffer",
+   "12": "VAHuffmanTableBuffer",
+   "13": "VAProbabilityBuffer",
+   "21": "VAEncCodedBuffer",
+   "22": "VAEncSequenceParameterBuffer",
+   "23": "VAEncPictureParameterBuffer",
+   "24": "VAEncSliceParameterBuffer",
+   "25": "VAEncPackedHeaderParameterBuffer",
+   "26": "VAEncPackedHeaderDataBuffer",
+   "27": "VAEncMiscParameterBuffer",
+   "28": "VAEncMacroblockParameterBuffer",
+   "29": "VAEncMacroblockMapBuffer",
+   "30": "VAEncQPBuffer",
+   "41": "VAProcPipelineParameterBuffer",
+   "42": "VAProcFilterParameterBuffer",
+   "43": "VAEncFEIMVBuffer",
+   "44": "VAEncFEIMBCodeBuffer",
+   "45": "VAEncFEIDistortionBuffer",
+   "46": "VAEncFEIMBControlBuffer",
+   "47": "VAEncFEIMVPredictorBuffer",
+   "48": "VAStatsStatisticsParameterBuffer",
+   "49": "VAStatsStatisticsBuffer",
+   "50": "VAStatsStatisticsBottomFieldBuffer",
+   "51": "VAStatsMVBuffer",
+   "52": "VAStatsMVPredictorBuffer",
+   "53": "VAEncMacroblockDisableSkipMapBuffer",
+   "54": "VAEncFEICTBCmdBuffer",
+   "55": "VAEncFEICURecordBuffer",
+   "56": "VADecodeStreamoutBuffer",
+   "57": "VASubsetsParameterBuffer"
+  },
+  "BOOL": {
+   "type": 0,
+   "0": "FALSE",
+   "1": "TRUE"
+  },
+  "GpuNodeName": {
+   "type": 0,
+   "0": "Default3D",
+   "1": "Render",
+   "2": "BSD",
+   "3": "Blt",
+   "4": "Vebox",
+   "65536": "Video",
+   "131072": "Blt_",
+   "196608": "VE",
+   "262144": "VCS2",
+   "327680": "CCS0",
+   "393216": "GSC",
+   "458752": "PICS",
+   "524288": "Overlay",
+   "589824": "GDI2D",
+   "655360": "VXD"
+  },
+  "PicFlagsAVC": {
+   "type": 1,
+   "0x1": "field_pic",
+   "0x2": "MbaffFrame",
+   "0x4": "resid_colr_transf",
+   "0x8": "sp_for_switch",
+   "0x40": "RefPic",
+   "0x80": "constrained_intra_pred",
+   "0x100": "weighted_pred",
+   "0x800": "MbsConsecutive",
+   "0x1000": "frame_mbs_only",
+   "0x2000": "transform_8x8",
+   "0x4000": "MinLumaBipredSize8x8",
+   "0x8000": "IntraPic"
+  },
+  "MT_LOG_ID": {
+   "type": 0,
+   "0": "MT_LOG_ID_BASE",
+   "1": "MT_ERR_MEM_ALLOC",
+   "2": "MT_ERR_GRAPHIC_ALLOC",
+   "3": "MT_ERR_NULL_CHECK",
+   "4": "MT_ERR_HR_CHECK",
+   "5": "MT_ERR_MOS_STATUS_CHECK",
+   "6": "MT_ERR_CONDITION_CHECK",
+   "7": "MT_ERR_INVALID_ARG",
+   "8": "MT_ERR_LOCK_SURFACE",
+   "9": "MT_MOS_GPUCXT_CREATE",
+   "10": "MT_MOS_GPUCXT_DESTROY",
+   "11": "MT_MOS_GPUCXT_GET",
+   "12": "MT_MOS_GPUCXT_PRIMARIES",
+   "13": "MT_MOS_ADDCMD",
+   "16777216": "MT_LOG_ID_CP_BASE",
+   "16777217": "MT_CP_HAL_NOT_INITIALIZED",
+   "16777218": "MT_CP_HAL_FAIL",
+   "16777219": "MT_CP_HAL_KEY_RULE",
+   "16777220": "MT_CP_HAL_FW_RULE",
+   "16777221": "MT_CP_HAL_EPID_CERT",
+   "16777222": "MT_CP_HAL_VERIFY_TRANS_KERNEL",
+   "16777223": "MT_CP_HAL_METADATA",
+   "16777224": "MT_CP_HAL_EPID_STATUS",
+   "16777225": "MT_CP_HAL_STATUS_CHECK",
+   "16777226": "MT_CP_PROVISION_CERT_CHECK",
+   "16777227": "MT_CP_PROVISION_CERT_NOT_FOUND",
+   "16777228": "MT_CP_KERNEL_RULE",
+   "16777229": "MT_CP_KERNEL_TRANSCRYPT",
+   "16777230": "MT_CP_BUFFER_RULE",
+   "16777231": "MT_CP_MEM_COPY",
+   "33554432": "MT_LOG_ID_VP_BASE",
+   "33554433": "MT_VP_CREATE",
+   "33554434": "MT_VP_DESTROY",
+   "33554435": "MT_VP_BLT",
+   "33554436": "MT_VP_BLT_START",
+   "33554437": "MT_VP_BLT_END",
+   "33554438": "MT_VP_BLT_BYPSSED",
+   "33554439": "MT_VP_BLT_FORCE_COLORFILL",
+   "33554440": "MT_VP_BLT_PROCAMP_PARAM",
+   "33554441": "MT_VP_BLT_DN_PARAM",
+   "33554442": "MT_VP_BLT_IEF_PARAM",
+   "33554443": "MT_VP_BLT_IECP_PARAM",
+   "33554444": "MT_VP_BLT_SR_PARAM",
+   "33554445": "MT_VP_BLT_RENDERPASS_DATA",
+   "33555456": "MT_VP_HAL_ID_BASE",
+   "33555457": "MT_VP_HAL_PIPELINE_ADAPTER",
+   "33555458": "MT_VP_HAL_PIPELINE_ADAPTER_EXT_ENTRY",
+   "33555459": "MT_VP_HAL_PIPELINE_ADAPTER_EXT_EXIT",
+   "33555460": "MT_VP_HAL_PIPELINE",
+   "33555461": "MT_VP_HAL_PIPELINE_PREPARE",
+   "33555462": "MT_VP_HAL_PIPELINE_EXT",
+   "33555463": "MT_VP_HAL_POLICY",
+   "33555464": "MT_VP_HAL_HWFILTER",
+   "33555465": "MT_VP_HAL_SWWFILTER",
+   "33555466": "MT_VP_HAL_INIT",
+   "33555467": "MT_VP_HAL_DESTROY",
+   "33555468": "MT_VP_HAL_RENDER",
+   "33555469": "MT_VP_HAL_RENDER_VE",
+   "33555470": "MT_VP_HAL_RENDER_VE_ISNEEDED",
+   "33555471": "MT_VP_HAL_RENDER_VE_GETOUTPUTPIPE",
+   "33555472": "MT_VP_HAL_RENDER_SFC",
+   "33555473": "MT_VP_HAL_RENDER_COMPOSITE",
+   "33555474": "MT_VP_HAL_ALLOC_SURF",
+   "33555475": "MT_VP_HAL_REALLOC_SURF",
+   "33562624": "MT_VP_MHW_ID_BASE",
+   "33562625": "MT_VP_MHW_VE_SURFSTATE_INPUT",
+   "33562626": "MT_VP_MHW_VE_SURFSTATE_OUT",
+   "33562627": "MT_VP_MHW_VE_SURFSTATE_DNOUT",
+   "33562628": "MT_VP_MHW_VE_SURFSTATE_SKINSCORE",
+   "33562629": "MT_VP_MHW_VE_SURFSTATE_STMM",
+   "33562630": "MT_VP_MHW_VE_SCALABILITY",
+   "33562631": "MT_VP_MHW_VE_ADJUST_SURFPARAM",
+   "33566720": "MT_VP_KERNEL_ID_BASE",
+   "33566721": "MT_VP_KERNEL_CSC",
+   "33566722": "MT_VP_KERNEL_RULE",
+   "33570816": "MT_MEDIA_COPY_ID_BASE",
+   "33570817": "MT_VE_DECOMP_COPY",
+   "33570818": "MT_MEDIA_COPY",
+   "33570819": "MT_MEDIA_COPY_BLT",
+   "33570820": "MT_MEDIA_COPY_RENDER",
+   "33570821": "MT_MEDIA_COPY_VE",
+   "50331648": "MT_LOG_ID_DEC_BASE",
+   "50331649": "MT_DEC_HEVC",
+   "67108864": "MT_LOG_ID_ENC_BASE"
+  },
+  "MT_LOG_LEVEL": {
+   "type": 0,
+   "0": "Verbose",
+   "1": "Normal",
+   "2": "Critial"
+  },
+  "MT_PARAM_ID": {
+   "type": 0,
+   "0": "MT_PARAM_ID_BASE",
+   "1": "MT_ERROR_CODE",
+   "2": "MT_COMPONENT",
+   "3": "MT_SUB_COMPONENT",
+   "4": "MT_CODE_LINE",
+   "5": "MT_GENERIC_VALUE",
+   "6": "MT_PRODUCT_FAMILY",
+   "7": "MT_SURF_PTR",
+   "8": "MT_SURF_ALLOC_HANDLE",
+   "9": "MT_SURF_WIDTH",
+   "10": "MT_SURF_HEIGHT",
+   "11": "MT_SURF_PITCH",
+   "12": "MT_SURF_MOS_FORMAT",
+   "13": "MT_SURF_TILE_TYPE",
+   "14": "MT_SURF_TILE_MODE",
+   "15": "MT_SURF_COMP_ABLE",
+   "16": "MT_SURF_COMP_MODE",
+   "17": "MT_SURF_GMM_FLAG_GPU",
+   "18": "MT_SURF_GMM_FLAG_INF",
+   "19": "MT_SURF_GMM_FLAG_WA",
+   "20": "MT_SURF_RES_ARRAYSIZE",
+   "21": "MT_SURF_RES_INDEX",
+   "22": "MT_SURF_CP_TAG",
+   "23": "MT_SURF_IS_INPUT",
+   "24": "MT_SURF_IS_OUTPUT",
+   "25": "MT_RECT_LEFT",
+   "26": "MT_RECT_TOP",
+   "27": "MT_RECT_RIGHT",
+   "28": "MT_RECT_BOTTOM",
+   "29": "MT_SYSMEM_PTR",
+   "30": "MT_SYSMEM_WIDTH",
+   "31": "MT_SYSMEM_HSTRIDE",
+   "32": "MT_SYSMEM_VSTRIDE",
+   "4096": "MT_PARAM_ID_MOS_BASE",
+   "4097": "MT_MOS_STATUS",
+   "4098": "MT_MOS_GPU_NODE",
+   "4099": "MT_MOS_GPUCXT_MGR_PTR",
+   "4100": "MT_MOS_GPUCXT_PTR",
+   "4101": "MT_MOS_GPUCXT_HANDLE",
+   "4102": "MT_MOS_GPUCXT_COUNT",
+   "4103": "MT_MOS_GPUCXT_NUMPRIMARIES",
+   "16777216": "MT_PARAM_ID_CP_BASE",
+   "16777217": "MT_CP_SESSION_TYPE",
+   "16777218": "MT_CP_SESSION_MODE",
+   "16777219": "MT_CP_STREAM_ID",
+   "16777220": "MT_CP_FW_CAPABILITY",
+   "16777221": "MT_CP_KEY_LENGTH",
+   "16777222": "MT_CP_COMMAND_ID",
+   "16777223": "MT_CP_COMMAND",
+   "16777224": "MT_CP_GROUP_ID",
+   "16777225": "MT_CP_METADATA_INFO_VERSION",
+   "16777226": "MT_CP_FW_API_VERSION",
+   "16777227": "MT_CP_BUFFER_NAME",
+   "33554432": "MT_PARAM_ID_VP_BASE",
+   "33554433": "MT_VP_SCALINGMODE_SR",
+   "33554944": "MT_PARAM_ID_VP_FTR_BASE",
+   "33554945": "MT_VP_SKU_FTR_VERING",
+   "33554946": "MT_VP_SKU_FTR_MCPY",
+   "33555200": "MT_PARAM_ID_VP_BLT_BASE",
+   "33555201": "MT_VP_BLT_PARAM_DATA",
+   "33555202": "MT_VP_BLT_PARAM_FLAG",
+   "33555203": "MT_VP_BLT_SRC_COUNT",
+   "33555456": "MT_PARAM_ID_VP_HAL_BASE",
+   "33555457": "MT_VP_HAL_APO",
+   "33555458": "MT_VP_HAL_PTR",
+   "33555459": "MT_VP_HAL_PIPE_CNT",
+   "33555460": "MT_VP_HAL_INTER_SURF_TYPE",
+   "33555461": "MT_VP_RENDERPASS_FLAG_COMP_NEEDED",
+   "33555462": "MT_VP_RENDERPASS_FLAG_HDR_NEEDED",
+   "33555463": "MT_VP_RENDERPASS_FLAG_FASTCOLORFILL",
+   "33555464": "MT_VP_RENDERPASS_FLAG_BYPASS_HDRKERNEL",
+   "33555465": "MT_VP_RENDERPASS_FLAG_USEVEHDRSFC",
+   "33555466": "MT_VP_RENDERDATA_OUTPUT_PIPE",
+   "33555467": "MT_VP_RENDERDATA_2PASS_CSC",
+   "33555468": "MT_VP_RENDERDATA_HDRCSCCUSDS",
+   "33555469": "MT_VP_RENDERDATA_HDRSFC",
+   "33555470": "MT_VP_RENDERDATA_HDR3DLUT",
+   "33555471": "MT_VP_RENDERDATA_HDR1DLUT",
+   "33555472": "MT_VP_RENDERDATA_BPROCAMP",
+   "33555473": "MT_VP_RENDERDATA_BIECP",
+   "33555474": "MT_VP_RENDERDATA_DV_TONAMAPPING",
+   "33555475": "MT_VP_RENDER_VE_2PASS_SFC",
+   "33555476": "MT_VP_RENDER_VE_USE_HDRTEMPSURF",
+   "33555477": "MT_VP_RENDER_VE_HDRMODE",
+   "33555478": "MT_VP_RENDER_VE_NEEDED",
+   "33555479": "MT_VP_RENDER_VE_HITLIMITATION",
+   "33555480": "MT_VP_RENDER_VE_8KFORCERENDER",
+   "33555481": "MT_VP_RENDER_VE_CROPPING",
+   "33555482": "MT_VP_RENDER_VE_SFCONLYFORVE",
+   "33555483": "MT_VP_RENDER_VE_COMPBYPASSFEASIBLE",
+   "33562624": "MT_PARAM_ID_VP_MHW_BASE",
+   "33562625": "MT_VP_MHW_VE_SCALABILITY_EN",
+   "33562626": "MT_VP_MHW_VE_SCALABILITY_USE_SFC",
+   "33562627": "MT_VP_MHW_VE_SCALABILITY_IDX",
+   "33566720": "MT_PARAM_ID_VP_KERNEL_BASE",
+   "33566721": "MT_VP_KERNEL_CSPACE",
+   "33566722": "MT_VP_KERNEL_RULE_ID",
+   "33566723": "MT_VP_KERNEL_RULE_LAYERNUM",
+   "33566724": "MT_VP_KERNEL_RULE_SEARCH_STATE",
+   "33570816": "MT_PARAM_ID_MEDIA_COPY_BASE",
+   "33570817": "MT_VE_DECOMP_COPY_SURF_LOCK_STATUS",
+   "33570818": "MT_MEDIA_COPY_CAPS",
+   "33570819": "MT_MEDIA_COPY_DIRECTION",
+   "33570820": "MT_MEDIA_COPY_METHOD",
+   "50331648": "MT_PARAM_ID_DEC_BASE",
+   "50331649": "MT_DEC_HUC_ERROR_STATUS2",
+   "67108864": "MT_PARAM_ID_ENC_BASE"
+  }
+ },
+ "templates": {
+  "t_AllocateResource": [
+   [
+    "Surface Handle",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "Format",
+    "win:UInt32",
+    "MosFormat"
+   ],
+   [
+    "Width",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Height",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Pitch",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Size",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "TileType",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "GpuFlags",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "InfoFlags",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "WaFlags",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "Reserve",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "Name",
+    "win:AnsiString",
+    "xs:string"
+   ]
+  ],
+  "t_Empty": [],
+  "t_Status": [
+   [
+    "Status",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_RegisterResource2": [
+   [
+    "HwCommand",
+    "win:UInt32",
+    "HwCommandType"
+   ],
+   [
+    "DwOffset",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Offset",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "Size",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "GpuAddr",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_PatchResource2": [
+   [
+    "hAllocation",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "ResourceOffset",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "PatchOffset",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Write",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "HwCommand",
+    "win:UInt32",
+    "HwCommandType"
+   ],
+   [
+    "forceDwordOffset",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "patchType",
+    "win:UInt32",
+    "PatchType"
+   ]
+  ],
+  "t_NV12ToP010Exit": [
+   [
+    "Width",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Height",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_Codec_DecodeEntry": [
+   [
+    "Standard",
+    "win:UInt32",
+    "CodecStandard"
+   ],
+   [
+    "Frame",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_CodecHal_CreateEntry": [
+   [
+    "CodecFunction",
+    "win:UInt32",
+    "CodecFunction"
+   ]
+  ],
+  "t_CodecHal_ExecuteEntry": [
+   [
+    "CodecFunction",
+    "win:UInt32",
+    "CodecFunction"
+   ]
+  ],
+  "t_Mos_Batch": [
+   [
+    "Bo Handle",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "Write Flag",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Offset",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "GpuAddr",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_vaRender_info": [
+   [
+    "ContextId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Num",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Id",
+    "win:UInt32",
+    "xs:unsignedInt",
+    "Num"
+   ]
+  ],
+  "t_vaRender_start": [
+   [
+    "ContextId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "VAContext",
+    "win:UInt32",
+    "vaCtxType"
+   ],
+   [
+    "RenderTarget",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_vaRender_end": [
+   [
+    "ContextId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Status",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_BoHandle": [
+   [
+    "Handle",
+    "win:UInt32",
+    "win:HexInt32"
+   ]
+  ],
+  "t_VAId": [
+   [
+    "Id",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_vaGetImage_start": [
+   [
+    "SurfaceId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "X",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Y",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Width",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Height",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "ImageId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_VAConfig": [
+   [
+    "Profile",
+    "win:UInt32",
+    "VaProfile"
+   ],
+   [
+    "EntryPoint",
+    "win:UInt32",
+    "VaEntryPoint"
+   ],
+   [
+    "Num",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "t_VAConfigConfigs",
+    "struct",
+    "Num"
+   ]
+  ],
+  "t_VAConfigConfigs": [
+   [
+    "Type",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Value",
+    "win:UInt32",
+    "win:HexInt32"
+   ]
+  ],
+  "t_VA_CreateSurface_info": [
+   [
+    "Handle",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "Format",
+    "win:UInt32",
+    "vaDDIFormat"
+   ],
+   [
+    "Width",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Height",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Pitch",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Size",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Tile",
+    "win:UInt32",
+    "I195_tile"
+   ],
+   [
+    "CpTag",
+    "win:UInt32",
+    "win:HexInt32"
+   ],
+   [
+    "gmmFlags_Gpu",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "gmmFlags_Info",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "gmmFlags_Wa",
+    "win:UInt32",
+    "win:HexInt32"
+   ]
+  ],
+  "t_VA_CreateSurface_start": [
+   [
+    "Width",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Height",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Format",
+    "win:UInt32",
+    "vaFormat"
+   ]
+  ],
+  "t_VAIdArray": [
+   [
+    "num",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Id",
+    "win:UInt32",
+    "xs:unsignedInt",
+    "num"
+   ]
+  ],
+  "t_VA_derive_end": [
+   [
+    "SurfaceId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "ImageId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_vaMapBuf_info": [
+   [
+    "VAContext",
+    "win:UInt32",
+    "vaCtxType"
+   ],
+   [
+    "BufferType",
+    "win:UInt32",
+    "vaBufferType"
+   ]
+  ],
+  "t_vaMapBuf_start": [
+   [
+    "Id",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Flags",
+    "win:UInt32",
+    "win:HexInt32"
+   ]
+  ],
+  "t_VA_Buffer_start": [
+   [
+    "Size",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Num",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "BufferType",
+    "win:UInt32",
+    "vaBufferType"
+   ]
+  ],
+  "t_vaCreateImage_start": [
+   [
+    "Width",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Height",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "FourCC",
+    "win:UInt32",
+    "win:HexInt32"
+   ]
+  ],
+  "t_vaPutImage_start": [
+   [
+    "SurfaceId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "ImageId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "SrcX",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "SrcY",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "SrcWidth",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "SrcHeight",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "DestX",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "DestY",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "DestWidth",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "DestHeight",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_MeidaPipeExecInfo": [
+   [
+    "PacketId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_ActivatePacketInfo": [
+   [
+    "PacketId",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ],
+   [
+    "Pipe",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "Pass",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "Row",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "SubPass",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "PipeIndexForSubmit",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "SingleTaskPhaseSupported",
+    "win:UInt32",
+    "BOOL"
+   ]
+  ],
+  "t_GPUContextCreate_start": [
+   [
+    "GpuNode",
+    "win:UInt32",
+    "GpuNodeName"
+   ]
+  ],
+  "t_GPUContextCreate_end": [
+   [
+    "GpuContext",
+    "win:Pointer",
+    "win:HexInt64"
+   ],
+   [
+    "NumOfEngine",
+    "win:UInt32",
+    "xs:unsignedInt"
+   ]
+  ],
+  "t_GPUContextDestroy_start": [
+   [
+    "GpuContext",
+    "win:Pointer",
+    "win:HexInt64"
+   ]
+  ],
+  "t_PicParamAvc_info": [
+   [
+    "FrameIdx",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "MaxFrameNum",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "PocType",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "MaxPoc",
+    "win:UInt8",
+    "xs:unsignedByte"
+   ],
+   [
+    "FrameNum",
+    "win:UInt16",
+    "xs:unsignedShort"
+   ],
+   [
+    "Flags",
+    "win:UInt16",
+    "PicFlagsAVC"
+   ],
+   [
+    "FieldOrderCnt",
+    "win:UInt32",
+    "xs:unsignedInt",
+    2
+   ],
+   [
+    "RefFrameList",
+    "win:UInt8",
+    "xs:unsignedByte",
+    16
+   ]
+  ],
+  "t_RTLog0": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ]
+  ],
+  "t_RTLog1": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTLog2": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTLog3": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id3",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value3",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTLog4": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id3",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value3",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id4",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value4",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTLog5": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id3",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value3",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id4",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value4",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id5",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value5",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTLog6": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id3",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value3",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id4",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value4",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id5",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value5",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id6",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value6",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTLog7": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "LogLevel",
+    "win:UInt32",
+    "MT_LOG_LEVEL"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id3",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value3",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id4",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value4",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id5",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value5",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id6",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value6",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id7",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value7",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTError0": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ]
+  ],
+  "t_RTError1": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTError2": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ],
+  "t_RTError3": [
+   [
+    "LogId",
+    "win:UInt32",
+    "MT_LOG_ID"
+   ],
+   [
+    "Id1",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value1",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id2",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value2",
+    "win:UInt64",
+    "win:HexInt64"
+   ],
+   [
+    "Id3",
+    "win:UInt32",
+    "MT_PARAM_ID"
+   ],
+   [
+    "Value3",
+    "win:UInt64",
+    "win:HexInt64"
+   ]
+  ]
+ }
+}
