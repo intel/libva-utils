@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = mpeg2vldemo loadjpeg
+bin_PROGRAMS = mpeg2vldemo loadjpeg vacopysharedsurface
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -39,6 +39,10 @@ TEST_LIBS = \
 
 mpeg2vldemo_LDADD	= $(TEST_LIBS)
 mpeg2vldemo_SOURCES	= mpeg2vldemo.cpp
+
+vacopysharedsurface_LDADD	= $(TEST_LIBS)
+vacopysharedsurface_SOURCES	= vacopysharedsurface.cpp
+
 
 loadjpeg_LDADD		= $(TEST_LIBS)
 loadjpeg_SOURCES	= loadjpeg.c tinyjpeg.c
