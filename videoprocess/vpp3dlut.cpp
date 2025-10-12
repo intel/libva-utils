@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009-2021, Intel Corporation
+* Copyright (c) 2009-2022, Intel Corporation
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -89,6 +89,8 @@ static char g_3dlut_file_name[MAX_LEN];
 static uint16_t g_3dlut_seg_size = 65;
 static uint16_t g_3dlut_mul_size = 128;
 static uint32_t g_3dlut_channel_mapping = 1;
+
+static uint32_t g_input_full_range = 0;
 
 #if VA_CHECK_VERSION(1, 12, 0)
 
@@ -1143,6 +1145,8 @@ video_frame_process_3dlut(VASurfaceID in_surface_id,
     pipeline_param.surface_color_standard = VAProcColorStandardBT2020;
     pipeline_param.output_color_standard = VAProcColorStandardBT709;
 
+    pipeline_param.input_color_properties.color_range = (g_input_full_range) ? VA_SOURCE_RANGE_FULL : VA_SOURCE_RANGE_REDUCED;
+
     va_status = vaCreateBuffer(va_dpy,
                                context_id,
                                VAProcPipelineParameterBufferType,
@@ -1418,6 +1422,10 @@ parse_basic_parameters()
     read_value_string(g_config_file_fd, "SRC_FRAME_FORMAT", str);
     parse_fourcc_and_format(str, &g_in_fourcc, &g_in_format);
 
+    if (read_value_uint32(g_config_file_fd, "SRC_FULL_RANGE", &g_input_full_range)) {
+        printf("Read source full range failed, exit.");
+    }
+
     /* Read dst frame file information */
     read_value_string(g_config_file_fd, "DST_FILE_NAME", g_dst_file_name);
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_out_pic_width);
@@ -1546,6 +1554,13 @@ int32_t main(int32_t argc, char *argv[])
 
     vpp_context_destroy();
 
+    return 0;
+}
+
+#else
+
+int32_t main(int32_t argc, char *argv[])
+{
     return 0;
 }
 
