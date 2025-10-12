@@ -94,6 +94,11 @@ AC_ARG_ENABLE([tests],
     [], [enable_tests="no"])
 
 
+AC_ARG_ENABLE([vendor_intel],
+    [AC_HELP_STRING([--enable-vendor-intel],
+                    [build intel specific code @<:@default=no@:>@])],
+    [], [enable_vendor_intel="no"])
+
 LT_INIT
 AC_DISABLE_STATIC
 AC_PROG_CC
@@ -213,6 +218,7 @@ if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
 fi
 
 AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" = "yes")
+AM_CONDITIONAL(ENABLE_VENDOR_INTEL, test "$enable_vendor_intel" = "yes")
 
 AC_OUTPUT([
     Makefile
@@ -240,5 +246,6 @@ echo
 echo Libva VA-API version ............. : $LIBVA_API_VERSION
 echo Installation prefix .............. : $prefix
 echo Extra window systems ............. : $BACKENDS
-echo Enable Unit-tests .................... : $enable_tests
+echo Enable Unit-tests ................ : $enable_tests
+echo Enable vendor-Intel .............. : $enable_vendor_intel
 echo
