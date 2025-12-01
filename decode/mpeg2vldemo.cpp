@@ -79,8 +79,8 @@ static VAPictureParameterBufferMPEG2 pic_param = {
     .backward_reference_picture = 0xffffffff,
     .picture_coding_type = 1,
     .f_code = 0xffff,
-    {
-        {
+    .picture_coding_extension = {
+        .bits = {
             .intra_dc_precision = 0,
             .picture_structure = 3,
             .top_field_first = 0,
