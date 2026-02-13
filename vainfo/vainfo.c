@@ -330,7 +330,6 @@ static int show_config_attributes(VADisplay va_dpy, VAProfile profile, VAEntrypo
         printf("%-*sprogressive_dct_mode=%d\n", 45, "", config->bits.progressive_dct_mode);
         printf("%-*snon_interleaved_mode=%d\n", 45, "", config->bits.non_interleaved_mode);
         printf("%-*sdifferential_mode=%d\n", 45, "", config->bits.differential_mode);
-        printf("%-*sdifferential_mode=%d\n", 45, "", config->bits.differential_mode);
         printf("%-*smax_num_components=%d\n", 45, "", config->bits.max_num_components);
         printf("%-*smax_num_scans=%d\n", 45, "", config->bits.max_num_scans);
         printf("%-*smax_num_huffman_tables=%d\n", 45, "", config->bits.max_num_huffman_tables);

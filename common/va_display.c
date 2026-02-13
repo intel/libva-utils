@@ -52,7 +52,8 @@ static const VADisplayHooks *g_display_hooks_available[] = {
 #ifdef HAVE_VA_DRM
     &va_display_hooks_drm,
 #endif
-    NULL};
+    NULL
+};
 
 static const char *g_display_name;
 const char *g_device_name;
