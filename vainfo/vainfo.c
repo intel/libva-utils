@@ -258,8 +258,7 @@ static int show_config_attributes(VADisplay va_dpy, VAProfile profile, VAEntrypo
                 {VA_ENC_INTERLACED_FRAME,       "VA_ENC_INTERLACED_FRAME"},
                 {VA_ENC_INTERLACED_FIELD,       "VA_ENC_INTERLACED_FIELD"},
                 {VA_ENC_INTERLACED_MBAFF,       "VA_ENC_INTERLACED_MBAFF"},
-                {VA_ENC_INTERLACED_PAFF,        "VA_ENC_INTERLACED_PAFF"},
-                {VA_ENC_PACKED_HEADER_RAW_DATA, "VA_ENC_PACKED_HEADER_RAW_DATA"},
+                {VA_ENC_INTERLACED_PAFF,        "VA_ENC_INTERLACED_PAFF"}
             };
             for (i = 0, n = 0; i < sizeof(list) / sizeof(list[0]); i++) {
                 if (attrib_list[VAConfigAttribEncInterlaced].value & list[i].format) {
