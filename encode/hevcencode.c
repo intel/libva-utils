@@ -2029,16 +2029,19 @@ static int init_va(void)
         switch (hevc_profile) {
         case VAProfileHEVCMain:
             hevc_profile = VAProfileHEVCMain;
+            real_hevc_profile = PROFILE_IDC_MAIN;
             printf("Use profile VAProfileHEVCMain\n");
             break;
 
         case VAProfileHEVCMain10:
             hevc_profile = VAProfileHEVCMain10;
+            real_hevc_profile = PROFILE_IDC_MAIN10;
             printf("Use profile VAProfileHEVCMain10\n");
             break;
         default:
             printf("unknow profile. Set to Main");
             hevc_profile = VAProfileHEVCMain;
+            real_hevc_profile = PROFILE_IDC_MAIN;
             constraint_set_flag |= (1 << 0 | 1 << 1); /* Annex A.2.1 & A.2.2 */
             ip_period = 1;
             break;
