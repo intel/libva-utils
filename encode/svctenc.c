@@ -2544,18 +2544,18 @@ svcenc_store_coded_buffer(struct svcenc_context *ctx,
     va_status = vaMapBuffer(ctx->va_dpy, ctx->codedbuf_buf_id, (void **)(&coded_buffer_segment));
     CHECK_VASTATUS(va_status, "vaMapBuffer");
 
-    coded_mem = coded_buffer_segment->buf;
-
-    if (coded_buffer_segment->status & VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK) {
-        /* Fatal error !!! */
-        assert(0);
+    while (coded_buffer_segment != NULL) {
+        coded_mem = coded_buffer_segment->buf;
+        if (coded_buffer_segment->status & VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK) {
+            /* Fatal error !!! */
+            assert(0);
+        }
+        slice_data_length = coded_buffer_segment->size;
+        do {
+            w_items = fwrite(coded_mem, slice_data_length, 1, ctx->ofp);
+        } while (w_items != 1);
+        coded_buffer_segment = (VACodedBufferSegment *) coded_buffer_segment->next;
     }
-
-    slice_data_length = coded_buffer_segment->size;
-
-    do {
-        w_items = fwrite(coded_mem, slice_data_length, 1, ctx->ofp);
-    } while (w_items != 1);
 
     vaUnmapBuffer(ctx->va_dpy, ctx->codedbuf_buf_id);
 
