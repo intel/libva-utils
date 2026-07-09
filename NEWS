@@ -1,5 +1,11 @@
-libva-utils NEWS -- summary of changes.  2025-12-12
-Copyright (C) 2009-2025 Intel Corporation
+libva-utils NEWS -- summary of changes.  2026-07-09
+Copyright (C) 2009-2026 Intel Corporation
+
+Version 2.24.0 - 09.Jul.2026
+* avcenc: Use the appropriate size for VAEncMiscParameterHRD
+* fix: set general_profile_idc in bitstream when --profile is not specified
+* fix: remove VA_ENC_PACKED_HEADER_RAW_DATA from VAConfigAttribEncInterlaced list
+* fix: remove duplicate differential_mode output
 
 Version 2.23.0 - 12.Dec.2025
 * fix:Fixed build with -std=c++20
