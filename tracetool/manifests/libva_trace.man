@@ -1,0 +1,612 @@
+<?xml version="1.0"?>
+<instrumentationManifest xsi:schemaLocation="http://schemas.microsoft.com/win/2004/08/events eventman.xsd" xmlns="http://schemas.microsoft.com/win/2004/08/events" xmlns:win="http://manifests.microsoft.com/win/2004/08/windows/events" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:trace="http://schemas.microsoft.com/win/2004/08/events/trace">
+    <instrumentation>
+        <events>
+            <provider name="Libva" guid="{715290E3-6551-4FA4-BC27-8B07EC8C4EBD}" symbol="Libva" resourceFileName="libva" messageFileName="libva">
+                <events>
+                    <event value="1" opcode="win:Start" task="CreateConfigure" template="CreateConfig"></event>
+                    <event value="2" opcode="win:Stop" task="CreateConfigure" template="CreateConfigEnd"></event>
+                    <event value="3" opcode="win:Start" task="DestroyConfigure" template="DestroyConfig"></event>
+                    <event value="4" opcode="win:Stop" task="DestroyConfigure" template="Status"></event>
+                    <event value="5" opcode="win:Start" task="CreateContext" template="CreateContext"></event>
+                    <event value="6" opcode="win:Stop" task="CreateContext" template="CreateContextEnd"></event>
+                    <event value="7" opcode="win:Start" task="DestroyContext" template="DestroyContext"></event>
+                    <event value="8" opcode="win:Stop" task="DestroyContext" template="Status"></event>
+                    <event value="9" opcode="win:Start" task="CreateBuffer" template="CreateBuffer"></event>
+                    <event value="10" opcode="win:Stop" task="CreateBuffer" template="CreateBufferEnd"></event>
+                    <event value="11" opcode="win:Start" task="DestroyBuffer" template="DestroyBuffer"></event>
+                    <event value="12" opcode="win:Stop" task="DestroyBuffer" template="Status"></event>
+                    <event value="13" opcode="win:Start" task="CreateSurface" template="CreateSurface"></event>
+                    <event value="14" opcode="win:Stop" task="CreateSurface" template="CreateSurfaceEnd"></event>
+                    <event value="15" opcode="win:Start" task="DestroySurface" template="DestroySurface"></event>
+                    <event value="16" opcode="win:Stop" task="DestroySurface" template="Status"></event>
+                    <event value="17" opcode="win:Start" task="BeginPicture" template="BeginPicture"></event>
+                    <event value="18" opcode="win:Stop" task="BeginPicture" template="Status"></event>
+                    <event value="19" opcode="win:Start" task="RenderPicture" template="RenderPicture"></event>
+                    <event value="20" opcode="win:Stop" task="RenderPicture" template="Status"></event>
+                    <event value="21" opcode="win:Start" task="EndPicture" template="EndPicture"></event>
+                    <event value="22" opcode="win:Stop" task="EndPicture" template="Status"></event>
+                    <event value="23" opcode="win:Info" task="BufferData" template="BufferDataInfo"></event>
+                    <event value="24" opcode="win:Start" task="BufferData" template="BufferDataBegin"></event>
+                    <event value="25" opcode="win:Stop" task="BufferData" template="Empty"></event>
+                    <event value="26" opcode="win:DC_Start" task="BufferData" template="BufferData"></event>
+                    <event value="27" opcode="win:Start" task="SyncSurface" template="SyncSurface"></event>
+                    <event value="28" opcode="win:Stop" task="SyncSurface" template="Status"></event>
+                    <event value="29" opcode="win:Start" task="SyncSurface2" template="SyncSurface2"></event>
+                    <event value="30" opcode="win:Stop" task="SyncSurface2" template="Status"></event>
+                    <event value="31" opcode="win:Start" task="QuerySurfaceAttributes" template="QuerySurfaceAttributesBegin"></event>
+                    <event value="32" opcode="win:Stop" task="QuerySurfaceAttributes" template="QuerySurfaceAttributesEnd"></event>
+                </events>
+                <tasks>
+                    <task name="CreateConfigure" value="1"></task>
+                    <task name="DestroyConfigure" value="2"></task>
+                    <task name="CreateContext" value="3"></task>
+                    <task name="DestroyContext" value="4"></task>
+                    <task name="CreateBuffer" value="5"></task>
+                    <task name="DestroyBuffer" value="6"></task>
+                    <task name="CreateSurface" value="7"></task>
+                    <task name="DestroySurface" value="8"></task>
+                    <task name="BeginPicture" value="9"></task>
+                    <task name="RenderPicture" value="10"></task>
+                    <task name="EndPicture" value="11"></task>
+                    <task name="BufferData" value="12"></task>
+                    <task name="SyncSurface" value="13"></task>
+                    <task name="SyncSurface2" value="14"></task>
+                    <task name="QuerySurfaceAttributes" value="15"></task>
+                </tasks>
+                <maps>
+                    <valueMap name="vaStatus">
+                        <map value="0" message="$(string.libva.map.vaStatus.0.message)"></map>
+                        <map value="1" message="$(string.libva.map.vaStatus.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaStatus.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaStatus.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaStatus.4.message)"></map>
+                        <map value="5" message="$(string.libva.map.vaStatus.5.message)"></map>
+                        <map value="6" message="$(string.libva.map.vaStatus.6.message)"></map>
+                        <map value="7" message="$(string.libva.map.vaStatus.7.message)"></map>
+                        <map value="8" message="$(string.libva.map.vaStatus.8.message)"></map>
+                        <map value="9" message="$(string.libva.map.vaStatus.9.message)"></map>
+                        <map value="10" message="$(string.libva.map.vaStatus.10.message)"></map>
+                        <map value="11" message="$(string.libva.map.vaStatus.11.message)"></map>
+                        <map value="12" message="$(string.libva.map.vaStatus.12.message)"></map>
+                        <map value="13" message="$(string.libva.map.vaStatus.13.message)"></map>
+                        <map value="14" message="$(string.libva.map.vaStatus.14.message)"></map>
+                        <map value="15" message="$(string.libva.map.vaStatus.15.message)"></map>
+                        <map value="16" message="$(string.libva.map.vaStatus.16.message)"></map>
+                        <map value="17" message="$(string.libva.map.vaStatus.17.message)"></map>
+                        <map value="18" message="$(string.libva.map.vaStatus.18.message)"></map>
+                        <map value="19" message="$(string.libva.map.vaStatus.19.message)"></map>
+                        <map value="20" message="$(string.libva.map.vaStatus.20.message)"></map>
+                        <map value="21" message="$(string.libva.map.vaStatus.21.message)"></map>
+                        <map value="22" message="$(string.libva.map.vaStatus.22.message)"></map>
+                        <map value="23" message="$(string.libva.map.vaStatus.23.message)"></map>
+                        <map value="24" message="$(string.libva.map.vaStatus.24.message)"></map>
+                        <map value="25" message="$(string.libva.map.vaStatus.25.message)"></map>
+                        <map value="32" message="$(string.libva.map.vaStatus.32.message)"></map>
+                        <map value="33" message="$(string.libva.map.vaStatus.33.message)"></map>
+                        <map value="34" message="$(string.libva.map.vaStatus.34.message)"></map>
+                        <map value="36" message="$(string.libva.map.vaStatus.36.message)"></map>
+                        <map value="37" message="$(string.libva.map.vaStatus.37.message)"></map>
+                        <map value="38" message="$(string.libva.map.vaStatus.38.message)"></map>
+                        <map value="4294967295" message="$(string.libva.map.vaStatus.max.message)"></map>
+                    </valueMap>
+                    <valueMap name="vaProfile">
+                        <map value="0" message="$(string.libva.map.vaProfile.0.message)"></map>
+                        <map value="1" message="$(string.libva.map.vaProfile.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaProfile.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaProfile.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaProfile.4.message)"></map>
+                        <map value="5" message="$(string.libva.map.vaProfile.5.message)"></map>
+                        <map value="6" message="$(string.libva.map.vaProfile.6.message)"></map>
+                        <map value="7" message="$(string.libva.map.vaProfile.7.message)"></map>
+                        <map value="8" message="$(string.libva.map.vaProfile.8.message)"></map>
+                        <map value="9" message="$(string.libva.map.vaProfile.9.message)"></map>
+                        <map value="10" message="$(string.libva.map.vaProfile.10.message)"></map>
+                        <map value="11" message="$(string.libva.map.vaProfile.11.message)"></map>
+                        <map value="12" message="$(string.libva.map.vaProfile.12.message)"></map>
+                        <map value="13" message="$(string.libva.map.vaProfile.13.message)"></map>
+                        <map value="14" message="$(string.libva.map.vaProfile.14.message)"></map>
+                        <map value="15" message="$(string.libva.map.vaProfile.15.message)"></map>
+                        <map value="16" message="$(string.libva.map.vaProfile.16.message)"></map>
+                        <map value="17" message="$(string.libva.map.vaProfile.17.message)"></map>
+                        <map value="18" message="$(string.libva.map.vaProfile.18.message)"></map>
+                        <map value="19" message="$(string.libva.map.vaProfile.19.message)"></map>
+                        <map value="20" message="$(string.libva.map.vaProfile.20.message)"></map>
+                        <map value="21" message="$(string.libva.map.vaProfile.21.message)"></map>
+                        <map value="22" message="$(string.libva.map.vaProfile.22.message)"></map>
+                        <map value="23" message="$(string.libva.map.vaProfile.23.message)"></map>
+                        <map value="24" message="$(string.libva.map.vaProfile.24.message)"></map>
+                        <map value="25" message="$(string.libva.map.vaProfile.25.message)"></map>
+                        <map value="26" message="$(string.libva.map.vaProfile.26.message)"></map>
+                        <map value="27" message="$(string.libva.map.vaProfile.27.message)"></map>
+                        <map value="28" message="$(string.libva.map.vaProfile.28.message)"></map>
+                        <map value="29" message="$(string.libva.map.vaProfile.29.message)"></map>
+                        <map value="30" message="$(string.libva.map.vaProfile.30.message)"></map>
+                        <map value="31" message="$(string.libva.map.vaProfile.31.message)"></map>
+                        <map value="32" message="$(string.libva.map.vaProfile.32.message)"></map>
+                        <map value="33" message="$(string.libva.map.vaProfile.33.message)"></map>
+                        <map value="34" message="$(string.libva.map.vaProfile.34.message)"></map>
+                        <map value="35" message="$(string.libva.map.vaProfile.35.message)"></map>
+                    </valueMap>
+                    <valueMap name="vaEntrypoint">
+                        <map value="1" message="$(string.libva.map.vaEntrypoint.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaEntrypoint.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaEntrypoint.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaEntrypoint.4.message)"></map>
+                        <map value="5" message="$(string.libva.map.vaEntrypoint.5.message)"></map>
+                        <map value="6" message="$(string.libva.map.vaEntrypoint.6.message)"></map>
+                        <map value="7" message="$(string.libva.map.vaEntrypoint.7.message)"></map>
+                        <map value="8" message="$(string.libva.map.vaEntrypoint.8.message)"></map>
+                        <map value="10" message="$(string.libva.map.vaEntrypoint.10.message)"></map>
+                        <map value="11" message="$(string.libva.map.vaEntrypoint.11.message)"></map>
+                        <map value="12" message="$(string.libva.map.vaEntrypoint.12.message)"></map>
+                        <map value="13" message="$(string.libva.map.vaEntrypoint.13.message)"></map>
+                        <map value="14" message="$(string.libva.map.vaEntrypoint.14.message)"></map>
+                    </valueMap>
+                    <valueMap name="vaConfigAttrType">
+                        <map value="0" message="$(string.libva.map.vaConfigAttrType.0.message)"></map>
+                        <map value="1" message="$(string.libva.map.vaConfigAttrType.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaConfigAttrType.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaConfigAttrType.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaConfigAttrType.4.message)"></map>
+                        <map value="5" message="$(string.libva.map.vaConfigAttrType.5.message)"></map>
+                        <map value="6" message="$(string.libva.map.vaConfigAttrType.6.message)"></map>
+                        <map value="7" message="$(string.libva.map.vaConfigAttrType.7.message)"></map>
+                        <map value="8" message="$(string.libva.map.vaConfigAttrType.8.message)"></map>
+                        <map value="10" message="$(string.libva.map.vaConfigAttrType.10.message)"></map>
+                        <map value="11" message="$(string.libva.map.vaConfigAttrType.11.message)"></map>
+                        <map value="13" message="$(string.libva.map.vaConfigAttrType.13.message)"></map>
+                        <map value="14" message="$(string.libva.map.vaConfigAttrType.14.message)"></map>
+                        <map value="15" message="$(string.libva.map.vaConfigAttrType.15.message)"></map>
+                        <map value="16" message="$(string.libva.map.vaConfigAttrType.16.message)"></map>
+                        <map value="18" message="$(string.libva.map.vaConfigAttrType.18.message)"></map>
+                        <map value="19" message="$(string.libva.map.vaConfigAttrType.19.message)"></map>
+                        <map value="20" message="$(string.libva.map.vaConfigAttrType.20.message)"></map>
+                        <map value="21" message="$(string.libva.map.vaConfigAttrType.21.message)"></map>
+                        <map value="22" message="$(string.libva.map.vaConfigAttrType.22.message)"></map>
+                        <map value="23" message="$(string.libva.map.vaConfigAttrType.23.message)"></map>
+                        <map value="24" message="$(string.libva.map.vaConfigAttrType.24.message)"></map>
+                        <map value="25" message="$(string.libva.map.vaConfigAttrType.25.message)"></map>
+                        <map value="26" message="$(string.libva.map.vaConfigAttrType.26.message)"></map>
+                        <map value="27" message="$(string.libva.map.vaConfigAttrType.27.message)"></map>
+                        <map value="28" message="$(string.libva.map.vaConfigAttrType.28.message)"></map>
+                        <map value="29" message="$(string.libva.map.vaConfigAttrType.29.message)"></map>
+                        <map value="30" message="$(string.libva.map.vaConfigAttrType.30.message)"></map>
+                        <map value="31" message="$(string.libva.map.vaConfigAttrType.31.message)"></map>
+                        <map value="32" message="$(string.libva.map.vaConfigAttrType.32.message)"></map>
+                        <map value="33" message="$(string.libva.map.vaConfigAttrType.33.message)"></map>
+                        <map value="34" message="$(string.libva.map.vaConfigAttrType.34.message)"></map>
+                        <map value="35" message="$(string.libva.map.vaConfigAttrType.35.message)"></map>
+                        <map value="36" message="$(string.libva.map.vaConfigAttrType.36.message)"></map>
+                        <map value="37" message="$(string.libva.map.vaConfigAttrType.37.message)"></map>
+                        <map value="38" message="$(string.libva.map.vaConfigAttrType.38.message)"></map>
+                        <map value="39" message="$(string.libva.map.vaConfigAttrType.39.message)"></map>
+                        <map value="40" message="$(string.libva.map.vaConfigAttrType.40.message)"></map>
+                        <map value="41" message="$(string.libva.map.vaConfigAttrType.41.message)"></map>
+                        <map value="42" message="$(string.libva.map.vaConfigAttrType.42.message)"></map>
+                        <map value="43" message="$(string.libva.map.vaConfigAttrType.43.message)"></map>
+                        <map value="44" message="$(string.libva.map.vaConfigAttrType.44.message)"></map>
+                        <map value="45" message="$(string.libva.map.vaConfigAttrType.45.message)"></map>
+                        <map value="46" message="$(string.libva.map.vaConfigAttrType.46.message)"></map>
+                        <map value="47" message="$(string.libva.map.vaConfigAttrType.47.message)"></map>
+                        <map value="48" message="$(string.libva.map.vaConfigAttrType.48.message)"></map>
+                        <map value="49" message="$(string.libva.map.vaConfigAttrType.49.message)"></map>
+                        <map value="50" message="$(string.libva.map.vaConfigAttrType.50.message)"></map>
+                        <map value="51" message="$(string.libva.map.vaConfigAttrType.51.message)"></map>
+                    </valueMap>
+                    <bitMap name="vaRTFormat">
+                        <map value="0x1" message="$(string.libva.map.vaRTFormat.0x1.message)"></map>
+                        <map value="0x2" message="$(string.libva.map.vaRTFormat.0x2.message)"></map>
+                        <map value="0x4" message="$(string.libva.map.vaRTFormat.0x4.message)"></map>
+                        <map value="0x8" message="$(string.libva.map.vaRTFormat.0x8.message)"></map>
+                        <map value="0x10" message="$(string.libva.map.vaRTFormat.0x10.message)"></map>
+                        <map value="0x100" message="$(string.libva.map.vaRTFormat.0x100.message)"></map>
+                        <map value="0x200" message="$(string.libva.map.vaRTFormat.0x200.message)"></map>
+                        <map value="0x400" message="$(string.libva.map.vaRTFormat.0x400.message)"></map>
+                        <map value="0x1000" message="$(string.libva.map.vaRTFormat.0x1000.message)"></map>
+                        <map value="0x2000" message="$(string.libva.map.vaRTFormat.0x2000.message)"></map>
+                        <map value="0x4000" message="$(string.libva.map.vaRTFormat.0x4000.message)"></map>
+                        <map value="0x10000" message="$(string.libva.map.vaRTFormat.0x10000.message)"></map>
+                        <map value="0x20000" message="$(string.libva.map.vaRTFormat.0x20000.message)"></map>
+                        <map value="0x100000" message="$(string.libva.map.vaRTFormat.0x100000.message)"></map>
+                        <map value="0x200000" message="$(string.libva.map.vaRTFormat.0x200000.message)"></map>
+                        <map value="0x80000000" message="$(string.libva.map.vaRTFormat.0x80000000.message)"></map>
+                    </bitMap>
+                    <valueMap name="vaSurfaceAttrType">
+                        <map value="0" message="$(string.libva.map.vaSurfaceAttrType.0.message)"></map>
+                        <map value="1" message="$(string.libva.map.vaSurfaceAttrType.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaSurfaceAttrType.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaSurfaceAttrType.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaSurfaceAttrType.4.message)"></map>
+                        <map value="5" message="$(string.libva.map.vaSurfaceAttrType.5.message)"></map>
+                        <map value="6" message="$(string.libva.map.vaSurfaceAttrType.6.message)"></map>
+                        <map value="7" message="$(string.libva.map.vaSurfaceAttrType.7.message)"></map>
+                        <map value="8" message="$(string.libva.map.vaSurfaceAttrType.8.message)"></map>
+                        <map value="10" message="$(string.libva.map.vaSurfaceAttrType.10.message)"></map>
+                    </valueMap>
+                    <valueMap name="vaValueType">
+                        <map value="1" message="$(string.libva.map.vaValueType.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaValueType.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaValueType.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaValueType.4.message)"></map>
+                    </valueMap>
+                    <valueMap name="vaBufferType">
+                        <map value="0" message="$(string.libva.map.vaBufferType.0.message)"></map>
+                        <map value="1" message="$(string.libva.map.vaBufferType.1.message)"></map>
+                        <map value="2" message="$(string.libva.map.vaBufferType.2.message)"></map>
+                        <map value="3" message="$(string.libva.map.vaBufferType.3.message)"></map>
+                        <map value="4" message="$(string.libva.map.vaBufferType.4.message)"></map>
+                        <map value="5" message="$(string.libva.map.vaBufferType.5.message)"></map>
+                        <map value="6" message="$(string.libva.map.vaBufferType.6.message)"></map>
+                        <map value="7" message="$(string.libva.map.vaBufferType.7.message)"></map>
+                        <map value="8" message="$(string.libva.map.vaBufferType.8.message)"></map>
+                        <map value="9" message="$(string.libva.map.vaBufferType.9.message)"></map>
+                        <map value="10" message="$(string.libva.map.vaBufferType.10.message)"></map>
+                        <map value="11" message="$(string.libva.map.vaBufferType.11.message)"></map>
+                        <map value="12" message="$(string.libva.map.vaBufferType.12.message)"></map>
+                        <map value="13" message="$(string.libva.map.vaBufferType.13.message)"></map>
+                        <map value="21" message="$(string.libva.map.vaBufferType.21.message)"></map>
+                        <map value="22" message="$(string.libva.map.vaBufferType.22.message)"></map>
+                        <map value="23" message="$(string.libva.map.vaBufferType.23.message)"></map>
+                        <map value="24" message="$(string.libva.map.vaBufferType.24.message)"></map>
+                        <map value="25" message="$(string.libva.map.vaBufferType.25.message)"></map>
+                        <map value="26" message="$(string.libva.map.vaBufferType.26.message)"></map>
+                        <map value="27" message="$(string.libva.map.vaBufferType.27.message)"></map>
+                        <map value="28" message="$(string.libva.map.vaBufferType.28.message)"></map>
+                        <map value="29" message="$(string.libva.map.vaBufferType.29.message)"></map>
+                        <map value="30" message="$(string.libva.map.vaBufferType.30.message)"></map>
+                        <map value="41" message="$(string.libva.map.vaBufferType.41.message)"></map>
+                        <map value="42" message="$(string.libva.map.vaBufferType.42.message)"></map>
+                        <map value="43" message="$(string.libva.map.vaBufferType.43.message)"></map>
+                        <map value="44" message="$(string.libva.map.vaBufferType.44.message)"></map>
+                        <map value="45" message="$(string.libva.map.vaBufferType.45.message)"></map>
+                        <map value="46" message="$(string.libva.map.vaBufferType.46.message)"></map>
+                        <map value="47" message="$(string.libva.map.vaBufferType.47.message)"></map>
+                        <map value="48" message="$(string.libva.map.vaBufferType.48.message)"></map>
+                        <map value="49" message="$(string.libva.map.vaBufferType.49.message)"></map>
+                        <map value="50" message="$(string.libva.map.vaBufferType.50.message)"></map>
+                        <map value="51" message="$(string.libva.map.vaBufferType.51.message)"></map>
+                        <map value="52" message="$(string.libva.map.vaBufferType.52.message)"></map>
+                        <map value="53" message="$(string.libva.map.vaBufferType.53.message)"></map>
+                        <map value="54" message="$(string.libva.map.vaBufferType.54.message)"></map>
+                        <map value="55" message="$(string.libva.map.vaBufferType.55.message)"></map>
+                        <map value="56" message="$(string.libva.map.vaBufferType.56.message)"></map>
+                        <map value="57" message="$(string.libva.map.vaBufferType.57.message)"></map>
+                        <map value="58" message="$(string.libva.map.vaBufferType.58.message)"></map>
+                        <map value="59" message="$(string.libva.map.vaBufferType.59.message)"></map>
+                        <map value="60" message="$(string.libva.map.vaBufferType.60.message)"></map>
+                    </valueMap>
+                </maps>
+                <templates>
+                    <template tid="Status">
+                        <data name="status" inType="win:UInt32" map="vaStatus"></data>
+                    </template>
+                    <template tid="Empty">
+                    </template>
+                    <template tid="CreateConfig">
+                        <data name="Profile" inType="win:UInt32" map="vaProfile"></data>
+                        <data name="Entrypoint" inType="win:UInt32" map="vaEntrypoint"></data>
+                        <data name="Num" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <struct name="vaConfigAttr" count="Num">
+                            <data name="Type" inType="win:UInt32" map="vaConfigAttrType"></data>
+                            <data name="Value" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        </struct>
+                    </template>
+                    <template tid="CreateConfigEnd">
+                        <data name="ConfigId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="vaStatus" inType="win:UInt32" map="vaStatus"></data>
+                    </template>
+                    <template tid="DestroyConfig">
+                        <data name="ConfigId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="CreateSurface">
+                        <data name="Width" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Height" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Format" inType="win:UInt32" map="vaRTFormat"></data>
+                        <data name="NumAttr" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <struct name="vaSurfacesAttr" count="NumAttr">
+                            <data name="Type" inType="win:UInt32" map="vaSurfaceAttrType"></data>
+                            <data name="Flags" inType="win:UInt32" outType="win:HexInt32"></data>
+                            <data name="ValueType" inType="win:UInt32" map="vaValueType"></data>
+                            <data name="Value" inType="win:UInt64" outType="win:HexInt64"></data>
+                        </struct>
+                    </template>
+                    <template tid="CreateSurfaceEnd">
+                        <data name="vaStatus" inType="win:UInt32" map="vaStatus"></data>
+                        <data name="NumSurface" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="VASurfaceID" inType="win:UInt32" outType="xs:unsignedInt" count="NumSurface"></data>
+                    </template>
+                    <template tid="DestroySurface">
+                        <data name="NumSurface" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="VASurfaceID" inType="win:UInt32" outType="xs:unsignedInt" count="NumSurface"></data>
+                    </template>
+                    <template tid="CreateContext">
+                        <data name="ConfigId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Width" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Height" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Flag" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Num" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="RenderTarget" inType="win:UInt32" outType="xs:unsignedInt" count="Num"></data>
+                    </template>
+                    <template tid="CreateContextEnd">
+                        <data name="ContextId" inType="win:UInt32" outType="win:HexInt32"></data>
+                        <data name="vaStatus" inType="win:UInt32" map="vaStatus"></data>
+                    </template>
+                    <template tid="DestroyContext">
+                        <data name="ContextId" inType="win:UInt32" outType="win:HexInt32"></data>
+                    </template>
+                    <template tid="CreateBuffer">
+                        <data name="ContextId" inType="win:UInt32" outType="win:HexInt32"></data>
+                        <data name="BufferType" inType="win:UInt32" map="vaBufferType"></data>
+                        <data name="Size" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Num" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="CreateBufferEnd">
+                        <data name="BufferId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="vaStatus" inType="win:UInt32" map="vaStatus"></data>
+                    </template>
+                    <template tid="DestroyBuffer">
+                        <data name="BufferId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="BeginPicture">
+                        <data name="ContextId" inType="win:UInt32" outType="win:HexInt32"></data>
+                        <data name="SurfaceId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="EndPicture">
+                        <data name="ContextId" inType="win:UInt32" outType="win:HexInt32"></data>
+                    </template>
+                    <template tid="RenderPicture">
+                        <data name="ContextId" inType="win:UInt32" outType="win:HexInt32"></data>
+                        <data name="Num" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Buffers" inType="win:UInt32" outType="xs:unsignedInt" count="Num"></data>
+                    </template>
+                    <template tid="BufferDataInfo">
+                        <data name="BufferType" inType="win:UInt32" map="vaBufferType"></data>
+                        <data name="Size" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="MemSize" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="BufData" inType="win:Binary" outType="xs:hexBinary" length="MemSize"></data>
+                    </template>
+                    <template tid="BufferDataBegin">
+                        <data name="BufferType" inType="win:UInt32" map="vaBufferType"></data>
+                        <data name="Size" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="MemSize" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="BufferData">
+                        <data name="MemSize" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="BufData" inType="win:Binary" outType="xs:hexBinary" length="MemSize"></data>
+                    </template>
+                    <template tid="SyncSurface">
+                        <data name="SurfaceId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="SyncSurface2">
+                        <data name="SurfaceId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <data name="Timeout_ns" inType="win:UInt64" outType="xs:unsignedLong"></data>
+                    </template>
+                    <template tid="QuerySurfaceAttributesBegin">
+                        <data name="ConfigId" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                    </template>
+                    <template tid="QuerySurfaceAttributesEnd">
+                        <data name="Num" inType="win:UInt32" outType="xs:unsignedInt"></data>
+                        <struct name="Attributes" count="Num">
+                            <data name="Type" inType="win:UInt32" map="vaSurfaceAttrType"></data>
+                            <data name="Flags" inType="win:UInt32" outType="win:HexInt32"></data>
+                            <data name="ValueType" inType="win:UInt32" map="vaValueType"></data>
+                            <data name="Value" inType="win:Pointer" outType="win:HexInt64"></data>
+                        </struct>
+                    </template>
+                </templates>
+            </provider>
+        </events>
+    </instrumentation>
+    <localization>
+        <resources culture="en-US">
+            <stringTable>
+                <string id="libva.map.vaStatus.0.message" value="Success"></string>
+                <string id="libva.map.vaStatus.1.message" value="Error - Operation failed"></string>
+                <string id="libva.map.vaStatus.2.message" value="Error - Allocation failed"></string>
+                <string id="libva.map.vaStatus.3.message" value="Error - Invalid display"></string>
+                <string id="libva.map.vaStatus.4.message" value="Error - Invalid config"></string>
+                <string id="libva.map.vaStatus.5.message" value="Error - Invalid context"></string>
+                <string id="libva.map.vaStatus.6.message" value="Error - Invalid surface"></string>
+                <string id="libva.map.vaStatus.7.message" value="Error - Invalid buffer"></string>
+                <string id="libva.map.vaStatus.8.message" value="Error - Invalid image"></string>
+                <string id="libva.map.vaStatus.9.message" value="Error - Invalid sub picture"></string>
+                <string id="libva.map.vaStatus.10.message" value="Error - Attribute not supported"></string>
+                <string id="libva.map.vaStatus.11.message" value="Error - Max num exceeded"></string>
+                <string id="libva.map.vaStatus.12.message" value="Error - Unsupported profile"></string>
+                <string id="libva.map.vaStatus.13.message" value="Error - Unsupported entrypoint"></string>
+                <string id="libva.map.vaStatus.14.message" value="Error - Unsupported RT format"></string>
+                <string id="libva.map.vaStatus.15.message" value="Error - Unsupported buffer type"></string>
+                <string id="libva.map.vaStatus.16.message" value="Error - Surface busy"></string>
+                <string id="libva.map.vaStatus.17.message" value="Error - Flag not supported"></string>
+                <string id="libva.map.vaStatus.18.message" value="Error - Invalid parameter"></string>
+                <string id="libva.map.vaStatus.19.message" value="Error - Resolution not supported"></string>
+                <string id="libva.map.vaStatus.20.message" value="Error - Unimplemented"></string>
+                <string id="libva.map.vaStatus.21.message" value="Error - Surface in displaying"></string>
+                <string id="libva.map.vaStatus.22.message" value="Error - Invalid image format"></string>
+                <string id="libva.map.vaStatus.23.message" value="Error - Decoding error"></string>
+                <string id="libva.map.vaStatus.24.message" value="Error - Encoding error"></string>
+                <string id="libva.map.vaStatus.25.message" value="Error - Invalid value"></string>
+                <string id="libva.map.vaStatus.32.message" value="Error - Unsupported filter"></string>
+                <string id="libva.map.vaStatus.33.message" value="Error - Invalid filter chain"></string>
+                <string id="libva.map.vaStatus.34.message" value="Error - HW busy"></string>
+                <string id="libva.map.vaStatus.36.message" value="Error - Unsupported memory type"></string>
+                <string id="libva.map.vaStatus.37.message" value="Error - Not enough buffer"></string>
+                <string id="libva.map.vaStatus.38.message" value="Error - Timeout"></string>
+                <string id="libva.map.vaStatus.max.message" value="Error - Unknown"></string>
+                <string id="libva.map.vaProfile.0.message" value="MPEG2Simple"></string>
+                <string id="libva.map.vaProfile.1.message" value="MPEG2Main"></string>
+                <string id="libva.map.vaProfile.2.message" value="MPEG4Simple"></string>
+                <string id="libva.map.vaProfile.3.message" value="MPEG4AdvancedSimple"></string>
+                <string id="libva.map.vaProfile.4.message" value="MPEG4Main"></string>
+                <string id="libva.map.vaProfile.5.message" value="H264Baseline"></string>
+                <string id="libva.map.vaProfile.6.message" value="H264Main"></string>
+                <string id="libva.map.vaProfile.7.message" value="H264High"></string>
+                <string id="libva.map.vaProfile.8.message" value="VC1Simple"></string>
+                <string id="libva.map.vaProfile.9.message" value="VC1Main"></string>
+                <string id="libva.map.vaProfile.10.message" value="VC1Advanced"></string>
+                <string id="libva.map.vaProfile.11.message" value="H263Baseline"></string>
+                <string id="libva.map.vaProfile.12.message" value="JPEGBaseline"></string>
+                <string id="libva.map.vaProfile.13.message" value="H264ContrainedBaseline"></string>
+                <string id="libva.map.vaProfile.14.message" value="VP8Version0_3"></string>
+                <string id="libva.map.vaProfile.15.message" value="H264MultviewHigh"></string>
+                <string id="libva.map.vaProfile.16.message" value="H264StereoHigh"></string>
+                <string id="libva.map.vaProfile.17.message" value="HEVCMain"></string>
+                <string id="libva.map.vaProfile.18.message" value="HEVCMain10"></string>
+                <string id="libva.map.vaProfile.19.message" value="VP9Profile0"></string>
+                <string id="libva.map.vaProfile.20.message" value="VP9Profile1"></string>
+                <string id="libva.map.vaProfile.21.message" value="VP9Profile2"></string>
+                <string id="libva.map.vaProfile.22.message" value="VP9Profile3"></string>
+                <string id="libva.map.vaProfile.23.message" value="HEVCMain12"></string>
+                <string id="libva.map.vaProfile.24.message" value="HEVCMain422_10"></string>
+                <string id="libva.map.vaProfile.25.message" value="HEVCMain422_12"></string>
+                <string id="libva.map.vaProfile.26.message" value="HEVCMain444"></string>
+                <string id="libva.map.vaProfile.27.message" value="HEVCMain444_10"></string>
+                <string id="libva.map.vaProfile.28.message" value="HEVCMain444_12"></string>
+                <string id="libva.map.vaProfile.29.message" value="HEVCSccMain"></string>
+                <string id="libva.map.vaProfile.30.message" value="HEVCSccMain10"></string>
+                <string id="libva.map.vaProfile.31.message" value="HEVCSccMain444"></string>
+                <string id="libva.map.vaProfile.32.message" value="AV1Profile0"></string>
+                <string id="libva.map.vaProfile.33.message" value="AV1Profile1"></string>
+                <string id="libva.map.vaProfile.34.message" value="HEVCSccMain444_10"></string>
+                <string id="libva.map.vaProfile.35.message" value="Protected"></string>
+                <string id="libva.map.vaEntrypoint.1.message" value="VLD"></string>
+                <string id="libva.map.vaEntrypoint.2.message" value="IZZ"></string>
+                <string id="libva.map.vaEntrypoint.3.message" value="IDCT"></string>
+                <string id="libva.map.vaEntrypoint.4.message" value="MoComp"></string>
+                <string id="libva.map.vaEntrypoint.5.message" value="Deblocking"></string>
+                <string id="libva.map.vaEntrypoint.6.message" value="EncSlice"></string>
+                <string id="libva.map.vaEntrypoint.7.message" value="EncPicture"></string>
+                <string id="libva.map.vaEntrypoint.8.message" value="EncPictureLP"></string>
+                <string id="libva.map.vaEntrypoint.10.message" value="VideoProc"></string>
+                <string id="libva.map.vaEntrypoint.11.message" value="FEI"></string>
+                <string id="libva.map.vaEntrypoint.12.message" value="Stats"></string>
+                <string id="libva.map.vaEntrypoint.13.message" value="ProtectedTEEComm"></string>
+                <string id="libva.map.vaEntrypoint.14.message" value="ProtectedContent"></string>
+                <string id="libva.map.vaConfigAttrType.0.message" value="RTFormat"></string>
+                <string id="libva.map.vaConfigAttrType.1.message" value="SpatialResidual"></string>
+                <string id="libva.map.vaConfigAttrType.2.message" value="SpatialClipping"></string>
+                <string id="libva.map.vaConfigAttrType.3.message" value="IntraResidual"></string>
+                <string id="libva.map.vaConfigAttrType.4.message" value="Encryption"></string>
+                <string id="libva.map.vaConfigAttrType.5.message" value="RateControl"></string>
+                <string id="libva.map.vaConfigAttrType.6.message" value="DecsliceMode"></string>
+                <string id="libva.map.vaConfigAttrType.7.message" value="DecJPEG"></string>
+                <string id="libva.map.vaConfigAttrType.8.message" value="DecProcessing"></string>
+                <string id="libva.map.vaConfigAttrType.10.message" value="EncPackedHeaders"></string>
+                <string id="libva.map.vaConfigAttrType.11.message" value="EncInterlaced"></string>
+                <string id="libva.map.vaConfigAttrType.13.message" value="EncMaxRefFrames"></string>
+                <string id="libva.map.vaConfigAttrType.14.message" value="EncMaxSlices"></string>
+                <string id="libva.map.vaConfigAttrType.15.message" value="EncSliceStructure"></string>
+                <string id="libva.map.vaConfigAttrType.16.message" value="EncMacroblockInfo"></string>
+                <string id="libva.map.vaConfigAttrType.18.message" value="MaxPictureWidth"></string>
+                <string id="libva.map.vaConfigAttrType.19.message" value="MaxPictureWidth"></string>
+                <string id="libva.map.vaConfigAttrType.20.message" value="EncJPEG"></string>
+                <string id="libva.map.vaConfigAttrType.21.message" value="EncQualityRange"></string>
+                <string id="libva.map.vaConfigAttrType.22.message" value="EncQuantization"></string>
+                <string id="libva.map.vaConfigAttrType.23.message" value="EncIntraRefresh"></string>
+                <string id="libva.map.vaConfigAttrType.24.message" value="EncSkipFrame"></string>
+                <string id="libva.map.vaConfigAttrType.25.message" value="EncROI"></string>
+                <string id="libva.map.vaConfigAttrType.26.message" value="EncRateControlExt"></string>
+                <string id="libva.map.vaConfigAttrType.27.message" value="ProcessingRate"></string>
+                <string id="libva.map.vaConfigAttrType.28.message" value="EncDirtyRect"></string>
+                <string id="libva.map.vaConfigAttrType.29.message" value="EncParallelRateControl"></string>
+                <string id="libva.map.vaConfigAttrType.30.message" value="EncDynamicScaling"></string>
+                <string id="libva.map.vaConfigAttrType.31.message" value="FrameSizeToleranceSupport"></string>
+                <string id="libva.map.vaConfigAttrType.32.message" value="FEIFunctionType"></string>
+                <string id="libva.map.vaConfigAttrType.33.message" value="FEIMVPredictors"></string>
+                <string id="libva.map.vaConfigAttrType.34.message" value="Stats"></string>
+                <string id="libva.map.vaConfigAttrType.35.message" value="EncTileSupport"></string>
+                <string id="libva.map.vaConfigAttrType.36.message" value="CustomRoundingControl"></string>
+                <string id="libva.map.vaConfigAttrType.37.message" value="QPBlockSize"></string>
+                <string id="libva.map.vaConfigAttrType.38.message" value="MaxFrameSize"></string>
+                <string id="libva.map.vaConfigAttrType.39.message" value="PredictionDirection"></string>
+                <string id="libva.map.vaConfigAttrType.40.message" value="MultipleFrame"></string>
+                <string id="libva.map.vaConfigAttrType.41.message" value="ContextPriority"></string>
+                <string id="libva.map.vaConfigAttrType.42.message" value="DecAV1Features"></string>
+                <string id="libva.map.vaConfigAttrType.43.message" value="TEEType"></string>
+                <string id="libva.map.vaConfigAttrType.44.message" value="TEETypeClient"></string>
+                <string id="libva.map.vaConfigAttrType.45.message" value="ProtectedContentCipherAlgorithm"></string>
+                <string id="libva.map.vaConfigAttrType.46.message" value="ProtectedContentCipherBlockSize"></string>
+                <string id="libva.map.vaConfigAttrType.47.message" value="ProtectedContentCipherMode"></string>
+                <string id="libva.map.vaConfigAttrType.48.message" value="ProtectedContentCipherSampleType"></string>
+                <string id="libva.map.vaConfigAttrType.49.message" value="ProtectedContentUsage"></string>
+                <string id="libva.map.vaConfigAttrType.50.message" value="EncHEVCFeatures"></string>
+                <string id="libva.map.vaConfigAttrType.51.message" value="EncHEVCBlockSizes"></string>
+                <string id="libva.map.vaRTFormat.0x1.message" value="YUV420"></string>
+                <string id="libva.map.vaRTFormat.0x2.message" value="YUV422"></string>
+                <string id="libva.map.vaRTFormat.0x4.message" value="YUV444"></string>
+                <string id="libva.map.vaRTFormat.0x8.message" value="YUV411"></string>
+                <string id="libva.map.vaRTFormat.0x10.message" value="YUV400"></string>
+                <string id="libva.map.vaRTFormat.0x100.message" value="YUV420_10"></string>
+                <string id="libva.map.vaRTFormat.0x200.message" value="YUV422_10"></string>
+                <string id="libva.map.vaRTFormat.0x400.message" value="YUV444_10"></string>
+                <string id="libva.map.vaRTFormat.0x1000.message" value="YUV420_12"></string>
+                <string id="libva.map.vaRTFormat.0x2000.message" value="YUV422_12"></string>
+                <string id="libva.map.vaRTFormat.0x4000.message" value="YUV444_12"></string>
+                <string id="libva.map.vaRTFormat.0x10000.message" value="RGB16"></string>
+                <string id="libva.map.vaRTFormat.0x20000.message" value="RGB32"></string>
+                <string id="libva.map.vaRTFormat.0x100000.message" value="RGBP"></string>
+                <string id="libva.map.vaRTFormat.0x200000.message" value="RGB32_10"></string>
+                <string id="libva.map.vaRTFormat.0x80000000.message" value="Protected"></string>
+                <string id="libva.map.vaSurfaceAttrType.0.message" value="None"></string>
+                <string id="libva.map.vaSurfaceAttrType.1.message" value="PixelFormat"></string>
+                <string id="libva.map.vaSurfaceAttrType.2.message" value="MinWidth"></string>
+                <string id="libva.map.vaSurfaceAttrType.3.message" value="MaxWidth"></string>
+                <string id="libva.map.vaSurfaceAttrType.4.message" value="MinHeight"></string>
+                <string id="libva.map.vaSurfaceAttrType.5.message" value="MaxHeight"></string>
+                <string id="libva.map.vaSurfaceAttrType.6.message" value="MemoryType"></string>
+                <string id="libva.map.vaSurfaceAttrType.7.message" value="ExternalBufferDescriptor"></string>
+                <string id="libva.map.vaSurfaceAttrType.8.message" value="UsageHint"></string>
+                <string id="libva.map.vaSurfaceAttrType.10.message" value="DRMFormatModifiers"></string>
+                <string id="libva.map.vaValueType.1.message" value="Integer"></string>
+                <string id="libva.map.vaValueType.2.message" value="Float"></string>
+                <string id="libva.map.vaValueType.3.message" value="Pointer"></string>
+                <string id="libva.map.vaValueType.4.message" value="Function"></string>
+                <string id="libva.map.vaBufferType.0.message" value="PictureParameter"></string>
+                <string id="libva.map.vaBufferType.1.message" value="IQMatrix"></string>
+                <string id="libva.map.vaBufferType.2.message" value="BitPlane"></string>
+                <string id="libva.map.vaBufferType.3.message" value="SliceGroupMap"></string>
+                <string id="libva.map.vaBufferType.4.message" value="SliceParameter"></string>
+                <string id="libva.map.vaBufferType.5.message" value="SliceData"></string>
+                <string id="libva.map.vaBufferType.6.message" value="MacroblockParameter"></string>
+                <string id="libva.map.vaBufferType.7.message" value="ResidualData"></string>
+                <string id="libva.map.vaBufferType.8.message" value="DeblockingParameter"></string>
+                <string id="libva.map.vaBufferType.9.message" value="Image"></string>
+                <string id="libva.map.vaBufferType.10.message" value="ProtectedSliceData"></string>
+                <string id="libva.map.vaBufferType.11.message" value="QMatrix"></string>
+                <string id="libva.map.vaBufferType.12.message" value="HuffmanTable"></string>
+                <string id="libva.map.vaBufferType.13.message" value="Probability"></string>
+                <string id="libva.map.vaBufferType.21.message" value="EncCoded"></string>
+                <string id="libva.map.vaBufferType.22.message" value="EncSequenceParameter"></string>
+                <string id="libva.map.vaBufferType.23.message" value="EncPictureParameter"></string>
+                <string id="libva.map.vaBufferType.24.message" value="EncSliceParameter"></string>
+                <string id="libva.map.vaBufferType.25.message" value="EncPackedHeaderParameter"></string>
+                <string id="libva.map.vaBufferType.26.message" value="EncPackedHeaderData"></string>
+                <string id="libva.map.vaBufferType.27.message" value="EncMiscParameter"></string>
+                <string id="libva.map.vaBufferType.28.message" value="EncMacroblockParameter"></string>
+                <string id="libva.map.vaBufferType.29.message" value="EncMacroblockMap"></string>
+                <string id="libva.map.vaBufferType.30.message" value="EncQP"></string>
+                <string id="libva.map.vaBufferType.41.message" value="ProcPipelineParameter"></string>
+                <string id="libva.map.vaBufferType.42.message" value="ProcFilterParameter"></string>
+                <string id="libva.map.vaBufferType.43.message" value="EncFEIMV"></string>
+                <string id="libva.map.vaBufferType.44.message" value="EncFEIMBCodec"></string>
+                <string id="libva.map.vaBufferType.45.message" value="EncFEIDistorion"></string>
+                <string id="libva.map.vaBufferType.46.message" value="EncFEIMBControl"></string>
+                <string id="libva.map.vaBufferType.47.message" value="EncFEIMVPredictor"></string>
+                <string id="libva.map.vaBufferType.48.message" value="StatsStatisticsParameter"></string>
+                <string id="libva.map.vaBufferType.49.message" value="StatsStatistics"></string>
+                <string id="libva.map.vaBufferType.50.message" value="StatsStatisticsBottomField"></string>
+                <string id="libva.map.vaBufferType.51.message" value="StatsMV"></string>
+                <string id="libva.map.vaBufferType.52.message" value="StatsMVPredictor"></string>
+                <string id="libva.map.vaBufferType.53.message" value="EncMacroblockDisableSkipMap"></string>
+                <string id="libva.map.vaBufferType.54.message" value="EncFEICTBCmd"></string>
+                <string id="libva.map.vaBufferType.55.message" value="EncFEICURecord"></string>
+                <string id="libva.map.vaBufferType.56.message" value="DecodeStreamout"></string>
+                <string id="libva.map.vaBufferType.57.message" value="SubsetsParameter"></string>
+                <string id="libva.map.vaBufferType.58.message" value="ContextParameterUpdate"></string>
+                <string id="libva.map.vaBufferType.59.message" value="ProtectedSessionExecute"></string>
+                <string id="libva.map.vaBufferType.60.message" value="EncryptionParameter"></string>
+            </stringTable>
+        </resources>
+    </localization>
+</instrumentationManifest>
