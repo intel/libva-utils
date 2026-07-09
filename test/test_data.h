@@ -66,6 +66,10 @@ static const Profiles g_vaProfiles = {
 #if VA_CHECK_VERSION(1,18,0)
     VAProfileH264High10,
 #endif
+    VAProfileAVSJizhun,
+    VAProfileAVSGuangdian,
+    VAProfileAVS2Main,
+    VAProfileAVS2Main10,
 };
 
 static const Profiles g_vaNoneProfiles = {
@@ -118,6 +122,14 @@ static const Profiles g_vaAV1Profiles = {
 #if VA_CHECK_VERSION(1,8,0)
     VAProfileAV1Profile0, VAProfileAV1Profile1,
 #endif
+};
+
+static const Profiles g_vaAVSProfiles = {
+    VAProfileAVSJizhun, VAProfileAVSGuangdian,
+};
+
+static const Profiles g_vaAVS2Profiles = {
+    VAProfileAVS2Main, VAProfileAVS2Main10,
 };
 
 static const Entrypoints g_vaEntrypoints = {
