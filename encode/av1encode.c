@@ -900,7 +900,7 @@ static int init_va(void)
                 entryPoint = entrypoints[slice_entrypoint];
                 break;
             }
-        } else if ((entrypoints[slice_entrypoint] == requested_entrypoint)) {
+        } else if (entrypoints[slice_entrypoint] == requested_entrypoint) {
             //Select the entry point based on what was requested in cmd line option
             support_encode = 1;
             entryPoint = entrypoints[slice_entrypoint];
