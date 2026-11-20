@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = avcstreamoutdemo
+bin_PROGRAMS = avcstreamoutdemo protectedsessiondemo
 
 AM_CPPFLAGS = \
 	-Wall					\
@@ -37,6 +37,9 @@ TEST_LIBS = \
 
 avcstreamoutdemo_LDADD	= $(TEST_LIBS)
 avcstreamoutdemo_SOURCES = avcstreamoutdemo.c
+
+protectedsessiondemo_LDADD	= $(TEST_LIBS)
+protectedsessiondemo_SOURCES = protectedsessiondemo.c
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
