@@ -17,6 +17,8 @@
 #include <math.h>
 #include <va/va.h>
 #include "va_display.h"
+#include "av1encode.h"
+#include "libmebo/libmebo_interface.h"
 
 #define ALIGN16(x)  ((x+15)&~15)
 #define CHECK_VASTATUS(va_status,func)                                  \
@@ -441,43 +443,7 @@ struct BitOffsets
     uint32_t CDEFParamsSizeInBits;
 };
 
-struct Av1InputParameters
-{
-    char* srcyuv;
-    char* recyuv;
-    char* output;
-    uint32_t profile;
-    
-    uint32_t order_hint_bits;
-    uint32_t enable_cdef;
-    uint32_t width;
-    uint32_t height;
-    uint32_t LDB;
-    uint32_t frame_rate_extN;
-    uint32_t frame_rate_extD;
-    uint32_t level;
 
-    // for brc
-    uint32_t bit_rate;
-    uint8_t MinBaseQIndex;
-    uint8_t MaxBaseQIndex;
-
-    uint32_t intra_period;
-    uint32_t ip_period;
-    uint32_t RateControlMethod;
-    uint32_t BRefType;
-    int encode_syncmode;
-    int calc_psnr;
-    int frame_count;
-    int frame_width_aligned;
-    int frame_height_aligned;
-    uint32_t base_qindex;
-    int bit_depth;
-    int target_bitrate;
-    int vbr_max_bitrate;
-    int buffer_size;
-    int initial_buffer_fullness;
-};
 
 
 static  VADisplay va_dpy;
@@ -498,7 +464,7 @@ static  VAEncPictureParameterBufferAV1 pic_param;
 static  VAEncTileGroupBufferAV1 tile_group_param;
 
 // sh fh ips
-static  struct Av1InputParameters ips;
+struct Av1InputParameters ips;
 static  FH fh;
 static  SH sh;
 struct BitOffsets offsets;
@@ -629,11 +595,12 @@ static void print_help()
     printf("   --base_q_idx <number> 1-255\n");
     printf("   --normal_mode select VAEntrypointEncSlice as entrypoint\n");
     printf("   --low_power_mode select VAEntrypointEncSliceLP as entrypoint\n");
+    printf("   --enswbrc 1 or 0 , 1 enable software brc, 0 use hw brc\n");
 
     printf(" sample usage:\n");
-    printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --base_q_idx 128  -o ./out.av1 --LDB --low_power_mode\n"
-           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --target_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode\n"
-           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode VBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --vbr_max_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode\n");
+    printf("./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CQP --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --base_q_idx 128  -o ./out.av1 --LDB --low_power_mode --enswbrc 1\n"
+           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode CBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --target_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode --enswbrc 0\n"
+           "./av1encode -n 8 -f 30 --intra_period 4 --ip_period 1 --rcmode VBR --srcyuv ./input.yuv --recyuv ./rec.yuv --fourcc IYUV --level 8 --width 1920 --height 1080 --vbr_max_bitrate 3360000 -o ./out.av1 --LDB --low_power_mode --enswbrc 0\n");
 
 }
 
@@ -659,6 +626,7 @@ static void process_cmdline(int argc, char *argv[])
         {"low_power_mode",  no_argument,        NULL, 15},
         {"target_bitrate",  required_argument,  NULL, 16},
         {"vbr_max_bitrate", required_argument,  NULL, 17},
+        {"enswbrc",         required_argument,  NULL, 18},
         {NULL,              no_argument,        NULL, 0 }
     };
 
@@ -731,6 +699,10 @@ static void process_cmdline(int argc, char *argv[])
             case 'm':
             case 17:
                 ips.vbr_max_bitrate = atoi(optarg);
+                break;
+            case 18:
+                ips.enable_swbrc = atoi(optarg);
+                printf("ips.enable_swbrc = %d\n", ips.enable_swbrc);
                 break;
             case 'u':
                 ips.buffer_size = atoi(optarg) * 8000;
@@ -2311,10 +2283,19 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
 
     // //loop filter  
     // auto& lf = fh.loop_filter_params;
-    pps->filter_level[0] = (uint8_t)(fh.loop_filter_params.loop_filter_level[0]);
-    pps->filter_level[1] = (uint8_t)(fh.loop_filter_params.loop_filter_level[1]);
-    pps->filter_level_u  = (uint8_t)(fh.loop_filter_params.loop_filter_level[2]);
-    pps->filter_level_v  = (uint8_t)(fh.loop_filter_params.loop_filter_level[3]);
+    if(ips.enable_swbrc) {
+        int lfdata[4] ;
+        getLoopfilterfromRc(lfdata);
+        pps->filter_level[0] =  lfdata[0] ;
+        pps->filter_level[1] =  lfdata[1] ;
+        pps->filter_level_u  =  lfdata[2] ;
+        pps->filter_level_v  =  lfdata[3] ;
+    } else {
+        pps->filter_level[0] = (uint8_t)(fh.loop_filter_params.loop_filter_level[0]);
+        pps->filter_level[1] = (uint8_t)(fh.loop_filter_params.loop_filter_level[1]);
+        pps->filter_level_u  = (uint8_t)(fh.loop_filter_params.loop_filter_level[2]);
+        pps->filter_level_v  = (uint8_t)(fh.loop_filter_params.loop_filter_level[3]);
+    }
     pps->loop_filter_flags.bits.sharpness_level        = fh.loop_filter_params.loop_filter_sharpness;
     pps->loop_filter_flags.bits.mode_ref_delta_enabled = fh.loop_filter_params.loop_filter_delta_enabled;
     pps->loop_filter_flags.bits.mode_ref_delta_update  = fh.loop_filter_params.loop_filter_delta_update;
@@ -2575,6 +2556,9 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     }
     printf("%08lld", encode_order);
     printf("(%06d bytes coded)\n", coded_size);
+    if(ips.enable_swbrc) {
+        post_encode_update(coded_size);
+    }
 
     fflush(coded_fp);
 
@@ -2774,7 +2758,7 @@ static int encode_frames(void)
     memset(&seq_param, 0, sizeof(seq_param));
     memset(&pic_param, 0, sizeof(pic_param));
     memset(&tile_group_param, 0, sizeof(tile_group_param));
-
+    unsigned  int baseqp =45;
     if (ips.encode_syncmode == 0)
         pthread_create(&encode_thread, NULL, storage_task_thread, NULL);
 
@@ -2789,6 +2773,11 @@ static int encode_frames(void)
         }
 
         tmp = GetTickCount();
+        if(ips.enable_swbrc) {
+            baseqp = getQPfromRatectrl(current_frame_type);
+            ips.base_qindex = baseqp;
+        }
+
         va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_slot]);
         CHECK_VASTATUS(va_status, "vaBeginPicture");
         BeginPictureTicks += GetTickCount() - tmp;
@@ -2965,6 +2954,14 @@ int main(int argc, char **argv)
 
     init_va();
     setup_encode();
+    if(ips.enable_swbrc) {
+    int result  = CreateInitLibmebo(ips);
+    
+    if(result == 0)
+        printf("libs are opened correctly\n");
+    else
+        printf("there is some problem in opening libs\n");
+    }
 
     encode_frames();
 

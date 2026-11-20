@@ -17,3 +17,14 @@ option('win32',
 option('tests',
        type : 'boolean',
        value : false)
+option ('mebo', type: 'feature', value: 'enabled',
+         description: 'Enable LibMebo library support')
+
+option ('aom_av1_rc', type: 'feature', value: 'enabled',
+         description: 'Enable AV1 software BRC from AOM library')
+
+option ('brc', type: 'feature', value: 'enabled',
+         description: 'Enable brc to support libmebo library ')
+
+option ('brc_controller', type: 'feature', value: 'enabled',
+         description: 'Enable brc_controller to support libmebo')
