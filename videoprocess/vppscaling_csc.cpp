@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009-2018, Intel Corporation
+* Copyright (c) 2009-2023, Intel Corporation
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -74,6 +74,7 @@ static uint32_t g_src_file_fourcc = VA_FOURCC('I', '4', '2', '0');
 static uint32_t g_dst_file_fourcc = VA_FOURCC('Y', 'V', '1', '2');
 
 static uint32_t g_frame_count = 0;
+static uint32_t g_rotation_angle = 0;
 
 static int8_t
 read_value_string(FILE *fp, const char* field_name, char* value)
@@ -1003,6 +1004,10 @@ video_frame_process(VASurfaceID in_surface_id,
     pipeline_param.surface = in_surface_id;
     pipeline_param.surface_region = &surface_region;
     pipeline_param.output_region = &output_region;
+    if (g_rotation_angle == 1 )
+    {
+        pipeline_param.rotation_state = VA_ROTATION_90;
+    }
 
     va_status = vaCreateBuffer(va_dpy,
                                context_id,
@@ -1105,6 +1110,20 @@ vpp_context_create()
                                 1,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
+
+    VABufferID *filters = nullptr;
+    unsigned int num_filters = 0;
+    VAProcPipelineCaps pipeline_caps = {};
+    va_status = vaQueryVideoProcPipelineCaps(va_dpy,
+                                            context_id,
+                                            filters,
+                                            num_filters,
+                                            &pipeline_caps);
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcPipeineCaps");
+    if (pipeline_caps.rotation_flags & (1 << VA_ROTATION_90)) {
+        printf("Clockwise rotation by 90 degrees is supported!\n");
+    }
+
     return va_status;
 }
 
@@ -1190,6 +1209,7 @@ parse_basic_parameters()
     parse_fourcc_and_format(str, &g_dst_file_fourcc, NULL);
 
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
+    read_value_uint32(g_config_file_fd, "ROTATION", &g_rotation_angle);
 
     if (g_in_pic_width != g_out_pic_width ||
         g_in_pic_height != g_out_pic_height)
