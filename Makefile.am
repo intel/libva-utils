@@ -24,7 +24,7 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = common decode encode vainfo videoprocess vendor/intel vendor/intel/sfcsample
+SUBDIRS = common decode encode vainfo videoprocess
 
 if USE_X11
 SUBDIRS += putsurface
@@ -36,6 +36,11 @@ endif
 
 if ENABLE_TESTS
 SUBDIRS += test
+endif
+
+if ENABLE_VENDOR_INTEL
+SUBDIRS += vendor/intel
+SUBDIRS += vendor/intel/sfcsample
 endif
 
 # Extra clean files so that maintainer-clean removes *everything*
