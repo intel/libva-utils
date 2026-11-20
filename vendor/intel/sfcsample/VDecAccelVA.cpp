@@ -586,6 +586,9 @@ bool mvaccel::VDecAccelVAImpl::DecodePicture()
         fwrite(gfx_surface_buf, file_size, 1, sfc_stream);
         fclose(sfc_stream);
     }
+    else {
+	printf("Fail to open sfc_sample_176_144_argb.yuv for writing\n");
+    }
 
     //unlock surface and clear
     unlock_surface(m_sfcIDs[0]);
