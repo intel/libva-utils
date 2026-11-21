@@ -2251,7 +2251,8 @@ build_pps_buffer(VAEncPictureParameterBufferAV1* pps)
 {
     CHECK_NULL(pps);
     // InitPPS
-    memset(&(pps->reference_frames), VA_INVALID_ID, 8);
+    for (int i = 0; i < 8; i++)
+        pps->reference_frames[i] = VA_INVALID_SURFACE;
 
     //frame size
     pps->frame_height_minus_1  =(uint16_t)(fh.FrameHeight - 1);
