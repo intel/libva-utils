@@ -28,6 +28,6 @@ FRAME_SUM: 1
 3DLUT_MUL_SIZE: 128
 3DLUT_CHANNEL_MAPPING: 1
 
-#5. 3DLUT Scaling pipeline(3DLUT->Scaling: 1, Scaling->3DLUT: 0, Scaling only: 2)
-3DLUT_SCALING: 1
+#5. Pipeline Configuration(3DLUT->Scaling: 1, Scaling->3DLUT: 0, Scaling only: 2)
+PIPELINE: 1
 
