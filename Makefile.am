@@ -38,6 +38,34 @@ if ENABLE_TESTS
 SUBDIRS += test
 endif
 
+#libmebo and libaom_av1_rc support
+if ENABLE_MEBO
+MEBO_SUPPORT = yes
+endif
+
+if ENABLE_AOM_AV1_RC
+AOM_AV1_RC_SUPPORT = yes
+endif
+
+if ENABLE_BRC
+BRC_SUPPORT = yes
+endif
+
+if ENABLE_BRC_CONTROLLER
+BRC_CONTROLLER_SUPPORT = yes
+endif
+
+export DL_LIBS
+
+MEBO_LOCAL_PATH = $(abs_top_srcdir)/encode/libmebo/libs
+AOM_AV1_RC_LOCAL_PATH = $(abs_top_srcdir)/encode/aom_libs/
+SYSTEM_LIBS_DIR = /usr/local/lib/x86_64-linux-gnu/
+
+export MEBO_LOCAL_PATH
+export AOM_AV1_RC_LOCAL_PATH
+export SYSTEM_LIBS_DIR
+
+
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = \
 	aclocal.m4 compile config.guess config.sub \
