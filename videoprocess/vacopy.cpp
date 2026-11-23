@@ -49,7 +49,6 @@
   }
 using namespace std;
 static VADisplay va_dpy = NULL;
-static VAContextID context_id = 0;
 
 typedef struct _SurfInfo {
     FILE        *fd;
@@ -68,7 +67,6 @@ typedef struct _SurfInfo {
 static SurfInfo g_src;
 static SurfInfo g_dst;
 
-static VAConfigID  config_id = 0;
 static FILE* g_config_file_fd = NULL;
 static char g_config_file_name[MAX_LEN];
 
@@ -532,25 +530,15 @@ vpp_context_create()
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     assert(va_status == VA_STATUS_SUCCESS);
 
-    /* Check whether VPP is supported by driver */
-    VAEntrypoint entrypoints[5];
-    int32_t num_entrypoints;
-    num_entrypoints = vaMaxNumEntrypoints(va_dpy);
-    va_status = vaQueryConfigEntrypoints(va_dpy,
-                                         VAProfileNone,
-                                         entrypoints,
-                                         &num_entrypoints);
-    CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
-
-    for (j = 0; j < num_entrypoints; j++) {
-        if (entrypoints[j] == VAEntrypointVideoProc)
-            break;
-    }
-
-    if (j == num_entrypoints) {
-        printf("VPP is not supported by driver\n");
-        assert(0);
-    }
+    /* Check whether vaCopy is supported by driver */;
+    VADisplayAttribute va_disp_attr;
+    va_disp_attr.type = VADisplayAttribCopy;
+    va_status = vaGetDisplayAttributes(va_dpy, &va_disp_attr, 1);
+    
+    CHECK_VASTATUS(va_status, "vaGetDisplayAttrib");
+    if(va_disp_attr.value == VA_ATTRIB_NOT_SUPPORTED || va_disp_attr.value == 0)
+        return VA_STATUS_ERROR_ATTR_NOT_SUPPORTED;
+    
 
     /* Render target surface format check */
     VAConfigAttrib attrib;
@@ -573,23 +561,6 @@ vpp_context_create()
     va_status = create_surface(&g_out_surface_id, g_dst);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces for output");
 
-    va_status = vaCreateConfig(va_dpy,
-                               VAProfileNone,
-                               VAEntrypointVideoProc,
-                               &attrib,
-                               1,
-                               &config_id);
-    CHECK_VASTATUS(va_status, "vaCreateConfig");
-
-    va_status = vaCreateContext(va_dpy,
-                                config_id,
-                                g_dst.width,
-                                g_dst.height,
-                                VA_PROGRESSIVE,
-                                &g_out_surface_id,
-                                1,
-                                &context_id);
-    CHECK_VASTATUS(va_status, "vaCreateContext");
     return va_status;
 }
 
@@ -599,8 +570,6 @@ vpp_context_destroy()
     /* Release resource */
     vaDestroySurfaces(va_dpy, &g_in_surface_id, 1);
     vaDestroySurfaces(va_dpy, &g_out_surface_id, 1);
-    vaDestroyContext(va_dpy, context_id);
-    vaDestroyConfig(va_dpy, config_id);
 
     vaTerminate(va_dpy);
     va_close_display(va_dpy);
