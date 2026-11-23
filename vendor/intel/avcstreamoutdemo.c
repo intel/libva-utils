@@ -28,7 +28,8 @@
  * The bitstream and VA parameters are hardcoded into avcstreamoutdemo.cpp,
  *
  * ./avcstreamoutdemo  : only do decode
- * ./avcstreamoutdemo <any parameter >: do decode and dump mv info
+ * LIBVA_DRIVER_NAME=vdpau ./avcstreamoutdemo  : do decode and display  //test on AMD oland chip that ok,show a picture on screen;
+ * ./avcstreamoutdemo  >: do decode and display :  //test on AMD oland chip  with not full picture show;
  *
  */
 
@@ -1400,62 +1401,50 @@ int main(int argc, char **argv)
                                 2,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
-
-    for (surface_index = 0 ; surface_index < AVC_SURFACE_NUM; surface_index++) {
+    surface_index = 0 ;
+    
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                   VAPictureParameterBufferType,
-                                   sizeof(VAPictureParameterBufferH264),
-                                   1, &pic_param[surface_index],
-                                   &pic_param_buf);
+                                        VAPictureParameterBufferType,
+                                        sizeof(VAPictureParameterBufferH264),
+                                        1, &pic_param[surface_index],
+                                        &pic_param_buf);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                   VAIQMatrixBufferType,
-                                   sizeof(VAIQMatrixBufferH264),
-                                   1, &iq_matrix[surface_index],
-                                   &iqmatrix_buf);
+                                        VAIQMatrixBufferType,
+                                        sizeof(VAIQMatrixBufferH264),
+                                        1, &iq_matrix[surface_index],
+                                        &iqmatrix_buf);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-        if (surface_index == 0) {
-            va_status = vaCreateBuffer(va_dpy, context_id,
-                                       VASliceParameterBufferType,
-                                       sizeof(VASliceParameterBufferH264),
-                                       4,
-                                       &slice_param_surface0[0], &slice_param_buf);
-        } else {
-            va_status = vaCreateBuffer(va_dpy, context_id,
-                                       VASliceParameterBufferType,
-                                       sizeof(VASliceParameterBufferH264),
-                                       2,
-                                       &slice_param_surface1[0], &slice_param_buf);
-        }
+
+                va_status = vaCreateBuffer(va_dpy, context_id,
+                                        VASliceParameterBufferType,
+                                        sizeof(VASliceParameterBufferH264),
+                                        4,
+                                        &slice_param_surface0[0], &slice_param_buf);
+        
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                   VASliceDataBufferType,
-                                   surface_index == 0 ? sizeof(avc_clip) : sizeof(avc_clip1),
-                                   1,
-                                   surface_index == 0 ? avc_clip : avc_clip1,
-                                   &slice_data_buf);
-        CHECK_VASTATUS(va_status, "vaCreateBuffer");
-
-        /* Create StreamOut va buffer */
-        va_status = vaCreateBuffer(va_dpy, context_id,
-                                   VADecodeStreamoutBufferType,
-                                   streamout_buffsize,
-                                   1, NULL, &streamout_buf);
+                                        VASliceDataBufferType,
+                                        surface_index == 0 ? sizeof(avc_clip) : sizeof(avc_clip1),
+                                        1,
+                                        surface_index == 0 ? avc_clip : avc_clip1,
+                                        &slice_data_buf);
         CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
         tmp_buff_ids[0] = pic_param_buf;
         tmp_buff_ids[1] = iqmatrix_buf;
         tmp_buff_ids[2] = slice_param_buf;
         tmp_buff_ids[3] = slice_data_buf;
-        tmp_buff_ids[4] = streamout_buf;
+        // tmp_buff_ids[4] = streamout_buf;
 
         va_status = vaBeginPicture(va_dpy, context_id, surface_ids[surface_index]);
         CHECK_VASTATUS(va_status, "vaBeginPicture");
 
-        va_status = vaRenderPicture(va_dpy, context_id, tmp_buff_ids, 5);
+        // va_status = vaRenderPicture(va_dpy, context_id, tmp_buff_ids, 5);
+        va_status = vaRenderPicture(va_dpy, context_id, tmp_buff_ids, 4);
         CHECK_VASTATUS(va_status, "vaRenderPicture");
 
         va_status = vaEndPicture(va_dpy, context_id);
@@ -1467,31 +1456,26 @@ int main(int argc, char **argv)
         va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[surface_index], &surface_status);//to check surface_status if needed
         CHECK_VASTATUS(va_status, "vaQuerySurfaceStatus");
 
-        /*map streamout buffer to dump*/
-        VADecStreamOutData *dec_streamout_buf = (VADecStreamOutData *)malloc(streamout_buffsize);
-        if (NULL == dec_streamout_buf) {
-            printf("Failed to malloc for dec streamout buf.\n");
-            assert(0);
-        }
-        va_status = vaMapBuffer(va_dpy, streamout_buf, (void **)(&pbuf));
-        CHECK_VASTATUS(va_status, "vaMapBuffer");
-        memcpy(dec_streamout_buf, pbuf, streamout_buffsize);// to check streamout data for usage
-        va_status = vaUnmapBuffer(va_dpy, streamout_buf);
-        CHECK_VASTATUS(va_status, "vaUnmapBuffer");
+                
+                /*putsurface*/
+        #define WIN_WIDTH  (CLIP_WIDTH)
+        #define WIN_HEIGHT (CLIP_HEIGHT)
 
-        if (is_dump_streamout && surface_index != 0) {
-            //dump streamout buffer to local file
-            VADecStreamOutData *temp_dec_streamout_buf = dec_streamout_buf;
-            unsigned int i;
-            for (i = 0; i < mb_counts && temp_dec_streamout_buf != NULL; i++) {
-                dumpMvs(temp_dec_streamout_buf++, i);
-            }
-        }
+        VARectangle src_rect, dst_rect;
 
-        if (dec_streamout_buf) {
-            free(dec_streamout_buf);
-        }
-    }
+        src_rect.x      = 0;
+        src_rect.y      = 0;
+        src_rect.width  = CLIP_WIDTH;
+        src_rect.height = CLIP_HEIGHT;
+
+        dst_rect.x      = 0;
+        dst_rect.y      = 0;
+        dst_rect.width  = WIN_WIDTH;
+        dst_rect.height = WIN_HEIGHT;
+
+        va_status = va_put_surface(va_dpy, surface_ids[surface_index], &src_rect, &dst_rect);
+        CHECK_VASTATUS(va_status, "vaPutSurface");
+   
 
     printf("press any key to exit\n");
     getchar();
